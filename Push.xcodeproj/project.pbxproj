@@ -14,6 +14,7 @@
 		5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A27A2FF1B6DA0011F860 /* PushTests.swift */; };
 		5217A2852FF1B6DA0011F860 /* PushUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2842FF1B6DA0011F860 /* PushUITests.swift */; };
 		5217A2872FF1B6DA0011F860 /* PushUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2862FF1B6DA0011F860 /* PushUITestsLaunchTests.swift */; };
+		5217A2932FF1B6DA0011F860 /* PushColorPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2942FF1B6DA0011F860 /* PushColorPalette.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,6 +45,7 @@
 		5217A2802FF1B6DA0011F860 /* PushUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PushUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5217A2842FF1B6DA0011F860 /* PushUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushUITests.swift; sourceTree = "<group>"; };
 		5217A2862FF1B6DA0011F860 /* PushUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		5217A2942FF1B6DA0011F860 /* PushColorPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushColorPalette.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -96,6 +98,7 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				5217A2942FF1B6DA0011F860 /* PushColorPalette.swift */,
 				5217A26D2FF1B6DA0011F860 /* Assets.xcassets */,
 				5217A26F2FF1B6DA0011F860 /* Preview Content */,
 			);
@@ -259,6 +262,7 @@
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
 				5217A26A2FF1B6D90011F860 /* PushApp.swift in Sources */,
+				5217A2932FF1B6DA0011F860 /* PushColorPalette.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

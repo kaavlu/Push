@@ -10,27 +10,45 @@ import XCTest
 
 final class PushTests: XCTestCase {
 
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+    func testBottomNavigationItemsExposePlaceholderTabs() throws {
+        let items = BottomNavigationItem.allCases
+
+        XCTAssertEqual(items.map(\.title), ["Map", "Group", "+", "Feed", "Plans"])
+        XCTAssertEqual(items.map(\.systemImageName), [
+            "map.fill",
+            "person.2.fill",
+            "plus",
+            "list.bullet",
+            "calendar"
+        ])
+        XCTAssertEqual(items.filter(\.isPrimaryAction), [.create])
     }
 
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+    func testFriendGroupFiltersExposeMockDropdownOptions() throws {
+        XCTAssertEqual(FriendGroupFilter.allCases.map(\.title), [
+            "All Friends",
+            "College Friends",
+            "Gym Crew",
+            "Roommates",
+            "NYC Friends"
+        ])
     }
 
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
+    func testGlassStyleTokensExposeConsistentMaterialValues() throws {
+        XCTAssertEqual(PushGlassStyle.materialPresenceOpacity, 0.72)
+        XCTAssertEqual(PushGlassStyle.tintOpacity, 0.24)
+        XCTAssertEqual(PushGlassStyle.strokeOpacity, 0.62)
+        XCTAssertEqual(PushGlassStyle.strokeWidth, 0.8)
+        XCTAssertEqual(PushGlassStyle.shadowOpacity, 0.24)
+        XCTAssertEqual(PushGlassStyle.shadowRadius, 26)
+        XCTAssertEqual(PushGlassStyle.shadowYOffset, 12)
     }
 
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
+    func testControlStyleTokensExposeSharedAccentBehavior() throws {
+        XCTAssertEqual(PushControlStyle.activeFillOpacity, 1)
+        XCTAssertEqual(PushControlStyle.inactiveForegroundOpacity, 0.7)
+        XCTAssertEqual(PushControlStyle.primaryStrokeOpacity, 0.72)
+        XCTAssertEqual(PushControlStyle.primaryGlowOpacity, 0.34)
     }
 
 }
