@@ -89,6 +89,12 @@ Read: `CLAUDE.md` → `tasks/lessons.md` → `tasks/todo.md` → `git log --onel
 
 Do not ask the user to re-explain context that is in these files.
 
+### Documentation Sync
+
+- A `post-commit` hook runs the documentation-updater skill after each commit.
+- Auto-generated doc commits must include `[skip ci]` in the message to avoid hook recursion.
+- Update context files only for durable facts; prefer no update over bloat. Skill: `.cursor/skills/documentation-updater/SKILL.md`.
+
 ---
 
 ## Status Language

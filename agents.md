@@ -60,6 +60,8 @@ This is a **high-fidelity prototype** that can become production later.
 
 **Avoid:** Generic map app feel, surveillance dashboard feel, chat app feel, social media clone feel, enterprise dashboard feel.
 
+**Glass + accents:** Brand colors live in `Push/PushColorPalette.swift` — walnut for foreground/text, sunbeam for active fills. Reuse `PushGlassStyle`, `PushControlColors`, and `PushControlStyle` for all glass controls; do not one-off material values. Prefer native `glassEffect` on iOS 26+; iOS 17 uses the shared material fallback in `pushGlassBackground`.
+
 ---
 
 ## Coding Standards
