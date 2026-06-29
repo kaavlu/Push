@@ -389,6 +389,16 @@ final class PushTests: XCTestCase {
         )
     }
 
+    func testMainMapRoutesFeedAndPlansExposeMetadata() throws {
+        XCTAssertEqual(MainMapRoute.feed.id, "feed")
+        XCTAssertEqual(MainMapRoute.feed.accessibilityLabel, "Feed")
+        XCTAssertEqual(MainMapRoute.feed.systemImageName, "list.bullet")
+
+        XCTAssertEqual(MainMapRoute.plans.id, "plans")
+        XCTAssertEqual(MainMapRoute.plans.accessibilityLabel, "Plans")
+        XCTAssertEqual(MainMapRoute.plans.systemImageName, "calendar")
+    }
+
     func testMainMapRoutesExposeStableProfileMetadata() throws {
         XCTAssertEqual(MainMapRoute.groups.id, "groups")
         XCTAssertEqual(MainMapRoute.groups.accessibilityLabel, "Groups")

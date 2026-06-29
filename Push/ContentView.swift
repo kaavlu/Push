@@ -84,6 +84,18 @@ struct ContentView: View {
             return
         }
 
+        if item == .feed {
+            selectedNavigationItem = .map
+            presentedRoute = .feed
+            return
+        }
+
+        if item == .plans {
+            selectedNavigationItem = .map
+            presentedRoute = .plans
+            return
+        }
+
         selectedNavigationItem = item
     }
 
@@ -104,6 +116,18 @@ struct ContentView: View {
             CreatePlaceholderView(
                 title: "Add Friend",
                 subtitle: "Invite someone to Push.",
+                symbolName: route.systemImageName
+            )
+        case .feed:
+            CreatePlaceholderView(
+                title: "Feed",
+                subtitle: "What's happening with your friends.",
+                symbolName: route.systemImageName
+            )
+        case .plans:
+            CreatePlaceholderView(
+                title: "Plans",
+                subtitle: "Shared plans with your people.",
                 symbolName: route.systemImageName
             )
         }
