@@ -11,19 +11,42 @@ import MapKit
 struct ContentView: View {
     @State private var selectedNavigationItem: BottomNavigationItem = .map
     @State private var selectedFriendGroup: FriendGroupFilter = .allFriends
+    @State private var presentedRoute: MainMapRoute?
+    @State private var isCreateMenuPresented = false
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            StyledMapView(region: MapDefaults.region)
+            StyledMapView(region: MapDefaults.region, pucks: MapPuckMockData.pucks)
                 .ignoresSafeArea()
 
-            BottomNavigationBar(selectedItem: $selectedNavigationItem)
+            if isCreateMenuPresented {
+                createMenuBackdrop
+                    .transition(.opacity)
+
+                CreateActionMenuView(action: selectCreateAction)
+                    .padding(.bottom, CreateActionMenuLayout.cardBottomPadding)
+                    .transition(
+                        .move(edge: .bottom)
+                            .combined(with: .opacity)
+                            .combined(with: .scale(scale: CreateActionMenuLayout.transitionScale, anchor: .bottom))
+                    )
+            }
+
+            BottomNavigationBar(
+                selectedItem: $selectedNavigationItem,
+                action: selectNavigationItem
+            )
                 .padding(.horizontal, BottomNavigationLayout.horizontalMargin)
                 .padding(.bottom, BottomNavigationLayout.bottomMargin)
         }
+        .animation(
+            .spring(response: CreateActionMenuLayout.animationResponse, dampingFraction: CreateActionMenuLayout.animationDamping),
+            value: isCreateMenuPresented
+        )
         .overlay(alignment: .top) {
             HStack(alignment: .center, spacing: 0) {
-                TopIconButton(systemImageName: "bell.fill", accessibilityLabel: "Notifications")
+                TopIconButton(systemImageName: "bell.fill", accessibilityLabel: "Notifications") {
+                }
 
                 Spacer(minLength: 0)
 
@@ -32,80 +55,74 @@ struct ContentView: View {
 
                 Spacer(minLength: 0)
 
-                TopIconButton(systemImageName: "person.crop.circle.fill", accessibilityLabel: "Profile")
+                TopIconButton(
+                    systemImageName: MainMapRoute.profile.systemImageName,
+                    accessibilityLabel: MainMapRoute.profile.accessibilityLabel
+                ) {
+                    presentedRoute = .profile
+                }
             }
             .padding(.horizontal, TopControlLayout.horizontalMargin)
             .padding(.top, TopControlLayout.topMargin)
         }
-    }
-}
-
-enum FriendGroupFilter: String, CaseIterable, Identifiable {
-    case allFriends
-    case collegeFriends
-    case gymCrew
-    case roommates
-    case nycFriends
-
-    var id: Self { self }
-
-    var title: String {
-        switch self {
-        case .allFriends:
-            return "All Friends"
-        case .collegeFriends:
-            return "College Friends"
-        case .gymCrew:
-            return "Gym Crew"
-        case .roommates:
-            return "Roommates"
-        case .nycFriends:
-            return "NYC Friends"
-        }
-    }
-}
-
-enum BottomNavigationItem: String, CaseIterable, Identifiable {
-    case map
-    case group
-    case create
-    case feed
-    case plans
-
-    var id: Self { self }
-
-    var title: String {
-        switch self {
-        case .map:
-            return "Map"
-        case .group:
-            return "Group"
-        case .create:
-            return "+"
-        case .feed:
-            return "Feed"
-        case .plans:
-            return "Plans"
+        .fullScreenCover(item: $presentedRoute) { route in
+            destination(for: route)
         }
     }
 
-    var systemImageName: String {
-        switch self {
-        case .map:
-            return "map.fill"
-        case .group:
-            return "person.2.fill"
-        case .create:
-            return "plus"
-        case .feed:
-            return "list.bullet"
-        case .plans:
-            return "calendar"
+    private func selectNavigationItem(_ item: BottomNavigationItem) {
+        if item == .create {
+            isCreateMenuPresented.toggle()
+            return
+        }
+
+        isCreateMenuPresented = false
+
+        if item == .group {
+            selectedNavigationItem = .map
+            presentedRoute = .groups
+            return
+        }
+
+        selectedNavigationItem = item
+    }
+
+    @ViewBuilder
+    private func destination(for route: MainMapRoute) -> some View {
+        switch route {
+        case .groups:
+            GroupsView()
+        case .profile:
+            ProfileView()
+        case .startPlan:
+            CreatePlaceholderView(
+                title: "Start Plan",
+                subtitle: "Create a plan with friends.",
+                symbolName: route.systemImageName
+            )
+        case .addFriend:
+            CreatePlaceholderView(
+                title: "Add Friend",
+                subtitle: "Invite someone to Bump.",
+                symbolName: route.systemImageName
+            )
         }
     }
 
-    var isPrimaryAction: Bool {
-        self == .create
+    private var createMenuBackdrop: some View {
+        Color.black
+            .opacity(CreateActionMenuLayout.backdropOpacity)
+            .ignoresSafeArea()
+            .contentShape(Rectangle())
+            .onTapGesture {
+                isCreateMenuPresented = false
+            }
+    }
+
+    private func selectCreateAction(_ item: CreateActionMenuItem) {
+        isCreateMenuPresented = false
+        selectedNavigationItem = .map
+        presentedRoute = item.route
     }
 }
 
@@ -216,10 +233,10 @@ private struct FriendGroupDropdownRow: View {
 private struct TopIconButton: View {
     let systemImageName: String
     let accessibilityLabel: String
+    let action: () -> Void
 
     var body: some View {
-        Button {
-        } label: {
+        Button(action: action) {
             Image(systemName: systemImageName)
                 .font(.system(size: TopControlLayout.iconSize, weight: .semibold))
                 .foregroundStyle(PushControlColors.activeForeground)
@@ -231,188 +248,6 @@ private struct TopIconButton: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(accessibilityLabel)
-    }
-}
-
-private struct BottomNavigationBar: View {
-    @Binding var selectedItem: BottomNavigationItem
-
-    var body: some View {
-        PushGlass {
-            HStack(spacing: BottomNavigationLayout.itemSpacing) {
-                ForEach(BottomNavigationItem.allCases) { item in
-                    Button {
-                        selectedItem = item
-                    } label: {
-                        if item.isPrimaryAction {
-                            PrimaryNavigationButtonLabel(isSelected: selectedItem == item)
-                        } else {
-                            BottomNavigationButtonLabel(
-                                item: item,
-                                isSelected: selectedItem == item
-                            )
-                        }
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(item.title)
-                    .accessibilityValue(selectedItem == item ? "Selected" : "Not selected")
-                }
-            }
-        }
-    }
-}
-
-private struct BottomNavigationButtonLabel: View {
-    let item: BottomNavigationItem
-    let isSelected: Bool
-
-    var body: some View {
-        VStack(spacing: BottomNavigationLayout.labelSpacing) {
-            Image(systemName: item.systemImageName)
-                .font(.system(size: BottomNavigationLayout.iconSize, weight: .semibold))
-
-            Text(item.title)
-                .font(.caption2.weight(.semibold))
-        }
-        .frame(maxWidth: .infinity)
-        .foregroundStyle(isSelected ? PushControlColors.activeForeground : PushControlColors.inactiveForeground)
-        .padding(.vertical, BottomNavigationLayout.itemVerticalPadding)
-        .padding(.horizontal, BottomNavigationLayout.itemHorizontalPadding)
-        .background(selectionBackground)
-    }
-
-    @ViewBuilder
-    private var selectionBackground: some View {
-        if isSelected {
-            Capsule()
-                .fill(PushControlColors.activeFill)
-        }
-    }
-}
-
-private struct PrimaryNavigationButtonLabel: View {
-    let isSelected: Bool
-
-    var body: some View {
-        Image(systemName: BottomNavigationItem.create.systemImageName)
-            .font(.system(size: BottomNavigationLayout.primaryIconSize, weight: .bold))
-            .foregroundStyle(PushControlColors.activeForeground)
-            .frame(
-                width: BottomNavigationLayout.primaryButtonSize,
-                height: BottomNavigationLayout.primaryButtonSize
-            )
-            .background(primaryBackground)
-            .overlay {
-                Circle()
-                    .stroke(
-                        PushControlColors.activeForeground.opacity(PushControlStyle.primaryStrokeOpacity),
-                        lineWidth: BottomNavigationLayout.primaryStrokeWidth
-                    )
-            }
-            .shadow(
-                color: PushControlColors.activeForeground.opacity(PushControlStyle.primaryGlowOpacity),
-                radius: BottomNavigationLayout.primaryGlowRadius,
-                y: BottomNavigationLayout.primaryGlowYOffset
-            )
-            .scaleEffect(isSelected ? BottomNavigationLayout.selectedPrimaryScale : 1)
-    }
-
-    private var primaryBackground: some View {
-        Circle()
-            .fill(.ultraThinMaterial)
-            .background {
-                Circle()
-                    .fill(.white.opacity(PushGlassStyle.tintOpacity))
-            }
-    }
-}
-
-private struct PushGlass<Content: View>: View {
-    private let content: Content
-
-    init(@ViewBuilder content: () -> Content) {
-        self.content = content()
-    }
-
-    var body: some View {
-        content
-            .padding(BottomNavigationLayout.containerPadding)
-            .pushGlassBackground(cornerRadius: BottomNavigationLayout.containerCornerRadius)
-    }
-}
-
-private extension View {
-    @ViewBuilder
-    func pushGlassBackground(cornerRadius: CGFloat) -> some View {
-        #if compiler(>=6.2)
-        if #available(iOS 26.0, *) {
-            self.glassEffect(
-                .regular,
-                in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-            )
-        } else {
-            pushMaterialBackground(cornerRadius: cornerRadius)
-        }
-        #else
-        pushMaterialBackground(cornerRadius: cornerRadius)
-        #endif
-    }
-
-    func pushMaterialBackground(cornerRadius: CGFloat) -> some View {
-        background(
-            .ultraThinMaterial,
-            in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-        )
-        .background(
-            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                .fill(.regularMaterial.opacity(PushGlassStyle.materialPresenceOpacity))
-        )
-        .background(
-            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                .fill(.white.opacity(PushGlassStyle.tintOpacity))
-        )
-        .overlay {
-            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                .stroke(
-                    .white.opacity(PushGlassStyle.strokeOpacity),
-                    lineWidth: PushGlassStyle.strokeWidth
-                )
-        }
-        .shadow(
-            color: .black.opacity(PushGlassStyle.shadowOpacity),
-            radius: PushGlassStyle.shadowRadius,
-            y: PushGlassStyle.shadowYOffset
-        )
-    }
-}
-
-private struct StyledMapView: UIViewRepresentable {
-    let region: MKCoordinateRegion
-
-    func makeUIView(context: Context) -> MKMapView {
-        let mapView = MKMapView()
-        mapView.setRegion(region, animated: false)
-        applyStyle(to: mapView)
-        return mapView
-    }
-
-    func updateUIView(_ mapView: MKMapView, context: Context) {
-        applyStyle(to: mapView)
-    }
-
-    private func applyStyle(to mapView: MKMapView) {
-        mapView.pointOfInterestFilter = .excludingAll
-        mapView.showsTraffic = false
-
-        if #available(iOS 16.0, *) {
-            let configuration = MKStandardMapConfiguration(elevationStyle: .realistic)
-            configuration.emphasisStyle = .muted
-            configuration.pointOfInterestFilter = .excludingAll
-            configuration.showsTraffic = false
-            mapView.preferredConfiguration = configuration
-        } else {
-            mapView.mapType = .mutedStandard
-        }
     }
 }
 
@@ -432,47 +267,6 @@ private enum MapDefaults {
     private static let longitude = -122.4194
     private static let latitudeDelta = 0.08
     private static let longitudeDelta = 0.08
-}
-
-private enum BottomNavigationLayout {
-    static let horizontalMargin: CGFloat = 20
-    static let bottomMargin: CGFloat = 18
-    static let containerPadding: CGFloat = 8
-    static let containerCornerRadius: CGFloat = 32
-    static let itemSpacing: CGFloat = 6
-    static let labelSpacing: CGFloat = 4
-    static let iconSize: CGFloat = 17
-    static let itemVerticalPadding: CGFloat = 10
-    static let itemHorizontalPadding: CGFloat = 2
-    static let primaryButtonSize: CGFloat = 50
-    static let primaryIconSize: CGFloat = 21
-    static let selectedPrimaryScale = 1.04
-    static let primaryStrokeWidth: CGFloat = 1
-    static let primaryGlowRadius: CGFloat = 10
-    static let primaryGlowYOffset: CGFloat = 3
-}
-
-enum PushGlassStyle {
-    static let materialPresenceOpacity = 0.72
-    static let tintOpacity = 0.24
-    static let strokeOpacity = 0.62
-    static let strokeWidth: CGFloat = 0.8
-    static let shadowOpacity = 0.24
-    static let shadowRadius: CGFloat = 26
-    static let shadowYOffset: CGFloat = 12
-}
-
-enum PushControlStyle {
-    static let activeFillOpacity = 1.0
-    static let inactiveForegroundOpacity = 0.7
-    static let primaryStrokeOpacity = 0.72
-    static let primaryGlowOpacity = 0.34
-}
-
-enum PushControlColors {
-    static let activeForeground = PushColorPalette.Accent.walnut
-    static let inactiveForeground = PushColorPalette.Accent.walnut.opacity(PushControlStyle.inactiveForegroundOpacity)
-    static let activeFill = PushColorPalette.Accent.sunbeam.opacity(PushControlStyle.activeFillOpacity)
 }
 
 private enum TopDropdownLayout {

@@ -12,9 +12,34 @@
 		5217A26E2FF1B6DA0011F860 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5217A26D2FF1B6DA0011F860 /* Assets.xcassets */; };
 		5217A2712FF1B6DA0011F860 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5217A2702FF1B6DA0011F860 /* Preview Assets.xcassets */; };
 		5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A27A2FF1B6DA0011F860 /* PushTests.swift */; };
+		5217A2BA2FF2FB000011F860 /* GroupsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2B92FF2FB000011F860 /* GroupsTests.swift */; };
 		5217A2852FF1B6DA0011F860 /* PushUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2842FF1B6DA0011F860 /* PushUITests.swift */; };
 		5217A2872FF1B6DA0011F860 /* PushUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2862FF1B6DA0011F860 /* PushUITestsLaunchTests.swift */; };
 		5217A2932FF1B6DA0011F860 /* PushColorPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2942FF1B6DA0011F860 /* PushColorPalette.swift */; };
+		5217A2BC2FF2FC000011F860 /* PushImageAssets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2BB2FF2FC000011F860 /* PushImageAssets.swift */; };
+		5217A2982FF1B7000011F860 /* PuckModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2952FF1B7000011F860 /* PuckModels.swift */; };
+		5217A2992FF1B7000011F860 /* FriendPuck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2962FF1B7000011F860 /* FriendPuck.swift */; };
+		5217A29A2FF1B7000011F860 /* PuckLabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2972FF1B7000011F860 /* PuckLabView.swift */; };
+		5217A29E2FF1B8A00011F860 /* MapPuckModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A29D2FF1B8A00011F860 /* MapPuckModels.swift */; };
+		5217A2A02FF1B8A00011F860 /* StyledMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A29F2FF1B8A00011F860 /* StyledMapView.swift */; };
+		5217A2AA2FF2F1000011F860 /* ProfileModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2A92FF2F1000011F860 /* ProfileModels.swift */; };
+		5217A2AC2FF2F1000011F860 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2AB2FF2F1000011F860 /* ProfileView.swift */; };
+		5217A2C62FF310000011F860 /* ProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2C52FF310000011F860 /* ProfileViewModel.swift */; };
+		5217A2C82FF310000011F860 /* ProfileMockData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2C72FF310000011F860 /* ProfileMockData.swift */; };
+		5217A2CA2FF310000011F860 /* ProfileComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2C92FF310000011F860 /* ProfileComponents.swift */; };
+		5217A2CC2FF310000011F860 /* ProfileDestinationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2CB2FF310000011F860 /* ProfileDestinationView.swift */; };
+		5217A2AE2FF2F1000011F860 /* PushGlassStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2AD2FF2F1000011F860 /* PushGlassStyle.swift */; };
+		5217A2B02FF2F1000011F860 /* MainMapModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2AF2FF2F1000011F860 /* MainMapModels.swift */; };
+		5217A2B22FF2F2000011F860 /* ProfileStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2B12FF2F2000011F860 /* ProfileStyle.swift */; };
+		5217A2B42FF2F8000011F860 /* GroupsModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2B32FF2F8000011F860 /* GroupsModels.swift */; };
+		5217A2B62FF2F8000011F860 /* GroupsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2B52FF2F8000011F860 /* GroupsView.swift */; };
+		5217A2B82FF2FA000011F860 /* GroupDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2B72FF2FA000011F860 /* GroupDetailView.swift */; };
+		5217A2BE2FF300000011F860 /* CreateActionModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2BD2FF300000011F860 /* CreateActionModels.swift */; };
+		5217A2C02FF300000011F860 /* CreateActionMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2BF2FF300000011F860 /* CreateActionMenuView.swift */; };
+		5217A2C22FF300000011F860 /* CreatePlaceholderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2C12FF300000011F860 /* CreatePlaceholderView.swift */; };
+		5217A2C42FF300000011F860 /* BottomNavigationBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2C32FF300000011F860 /* BottomNavigationBar.swift */; };
+		5217A2D02FF320000011F860 /* assets in Resources */ = {isa = PBXBuildFile; fileRef = 5217A2CF2FF320000011F860 /* assets */; };
+		5217A2D22FF320000011F860 /* RealWorldMockData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2D12FF320000011F860 /* RealWorldMockData.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -42,10 +67,35 @@
 		5217A2702FF1B6DA0011F860 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		5217A2762FF1B6DA0011F860 /* PushTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PushTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5217A27A2FF1B6DA0011F860 /* PushTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushTests.swift; sourceTree = "<group>"; };
+		5217A2B92FF2FB000011F860 /* GroupsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupsTests.swift; sourceTree = "<group>"; };
 		5217A2802FF1B6DA0011F860 /* PushUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PushUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5217A2842FF1B6DA0011F860 /* PushUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushUITests.swift; sourceTree = "<group>"; };
 		5217A2862FF1B6DA0011F860 /* PushUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		5217A2942FF1B6DA0011F860 /* PushColorPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushColorPalette.swift; sourceTree = "<group>"; };
+		5217A2BB2FF2FC000011F860 /* PushImageAssets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushImageAssets.swift; sourceTree = "<group>"; };
+		5217A2952FF1B7000011F860 /* PuckModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PuckModels.swift; sourceTree = "<group>"; };
+		5217A2962FF1B7000011F860 /* FriendPuck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendPuck.swift; sourceTree = "<group>"; };
+		5217A2972FF1B7000011F860 /* PuckLabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PuckLabView.swift; sourceTree = "<group>"; };
+		5217A29D2FF1B8A00011F860 /* MapPuckModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapPuckModels.swift; sourceTree = "<group>"; };
+		5217A29F2FF1B8A00011F860 /* StyledMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StyledMapView.swift; sourceTree = "<group>"; };
+		5217A2A92FF2F1000011F860 /* ProfileModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileModels.swift; sourceTree = "<group>"; };
+		5217A2AB2FF2F1000011F860 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		5217A2C52FF310000011F860 /* ProfileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModel.swift; sourceTree = "<group>"; };
+		5217A2C72FF310000011F860 /* ProfileMockData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileMockData.swift; sourceTree = "<group>"; };
+		5217A2C92FF310000011F860 /* ProfileComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileComponents.swift; sourceTree = "<group>"; };
+		5217A2CB2FF310000011F860 /* ProfileDestinationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileDestinationView.swift; sourceTree = "<group>"; };
+		5217A2AD2FF2F1000011F860 /* PushGlassStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushGlassStyle.swift; sourceTree = "<group>"; };
+		5217A2AF2FF2F1000011F860 /* MainMapModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMapModels.swift; sourceTree = "<group>"; };
+		5217A2B12FF2F2000011F860 /* ProfileStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileStyle.swift; sourceTree = "<group>"; };
+		5217A2B32FF2F8000011F860 /* GroupsModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupsModels.swift; sourceTree = "<group>"; };
+		5217A2B52FF2F8000011F860 /* GroupsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupsView.swift; sourceTree = "<group>"; };
+		5217A2B72FF2FA000011F860 /* GroupDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupDetailView.swift; sourceTree = "<group>"; };
+		5217A2BD2FF300000011F860 /* CreateActionModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateActionModels.swift; sourceTree = "<group>"; };
+		5217A2BF2FF300000011F860 /* CreateActionMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateActionMenuView.swift; sourceTree = "<group>"; };
+		5217A2C12FF300000011F860 /* CreatePlaceholderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatePlaceholderView.swift; sourceTree = "<group>"; };
+		5217A2C32FF300000011F860 /* BottomNavigationBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomNavigationBar.swift; sourceTree = "<group>"; };
+		5217A2CF2FF320000011F860 /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; path = assets; sourceTree = "<group>"; };
+		5217A2D12FF320000011F860 /* RealWorldMockData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealWorldMockData.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,6 +129,7 @@
 				5217A2682FF1B6D90011F860 /* Push */,
 				5217A2792FF1B6DA0011F860 /* PushTests */,
 				5217A2832FF1B6DA0011F860 /* PushUITests */,
+				5217A2CF2FF320000011F860 /* assets */,
 				5217A2672FF1B6D90011F860 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -98,7 +149,30 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				5217A2C32FF300000011F860 /* BottomNavigationBar.swift */,
 				5217A2942FF1B6DA0011F860 /* PushColorPalette.swift */,
+				5217A2BB2FF2FC000011F860 /* PushImageAssets.swift */,
+				5217A2AD2FF2F1000011F860 /* PushGlassStyle.swift */,
+				5217A2AF2FF2F1000011F860 /* MainMapModels.swift */,
+				5217A2BD2FF300000011F860 /* CreateActionModels.swift */,
+				5217A2BF2FF300000011F860 /* CreateActionMenuView.swift */,
+				5217A2C12FF300000011F860 /* CreatePlaceholderView.swift */,
+				5217A2D12FF320000011F860 /* RealWorldMockData.swift */,
+				5217A2B32FF2F8000011F860 /* GroupsModels.swift */,
+				5217A2B52FF2F8000011F860 /* GroupsView.swift */,
+				5217A2B72FF2FA000011F860 /* GroupDetailView.swift */,
+				5217A2A92FF2F1000011F860 /* ProfileModels.swift */,
+				5217A2C52FF310000011F860 /* ProfileViewModel.swift */,
+				5217A2C72FF310000011F860 /* ProfileMockData.swift */,
+				5217A2B12FF2F2000011F860 /* ProfileStyle.swift */,
+				5217A2C92FF310000011F860 /* ProfileComponents.swift */,
+				5217A2AB2FF2F1000011F860 /* ProfileView.swift */,
+				5217A2CB2FF310000011F860 /* ProfileDestinationView.swift */,
+				5217A2952FF1B7000011F860 /* PuckModels.swift */,
+				5217A2962FF1B7000011F860 /* FriendPuck.swift */,
+				5217A29D2FF1B8A00011F860 /* MapPuckModels.swift */,
+				5217A29F2FF1B8A00011F860 /* StyledMapView.swift */,
+				5217A2972FF1B7000011F860 /* PuckLabView.swift */,
 				5217A26D2FF1B6DA0011F860 /* Assets.xcassets */,
 				5217A26F2FF1B6DA0011F860 /* Preview Content */,
 			);
@@ -117,6 +191,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				5217A2B92FF2FB000011F860 /* GroupsTests.swift */,
 			);
 			path = PushTests;
 			sourceTree = "<group>";
@@ -234,6 +309,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5217A2D02FF320000011F860 /* assets in Resources */,
 				5217A2712FF1B6DA0011F860 /* Preview Assets.xcassets in Resources */,
 				5217A26E2FF1B6DA0011F860 /* Assets.xcassets in Resources */,
 			);
@@ -261,8 +337,31 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				5217A2C42FF300000011F860 /* BottomNavigationBar.swift in Sources */,
 				5217A26A2FF1B6D90011F860 /* PushApp.swift in Sources */,
+				5217A2A02FF1B8A00011F860 /* StyledMapView.swift in Sources */,
 				5217A2932FF1B6DA0011F860 /* PushColorPalette.swift in Sources */,
+				5217A2BC2FF2FC000011F860 /* PushImageAssets.swift in Sources */,
+				5217A2AE2FF2F1000011F860 /* PushGlassStyle.swift in Sources */,
+				5217A2B02FF2F1000011F860 /* MainMapModels.swift in Sources */,
+				5217A2BE2FF300000011F860 /* CreateActionModels.swift in Sources */,
+				5217A2C02FF300000011F860 /* CreateActionMenuView.swift in Sources */,
+				5217A2C22FF300000011F860 /* CreatePlaceholderView.swift in Sources */,
+				5217A2D22FF320000011F860 /* RealWorldMockData.swift in Sources */,
+				5217A2B42FF2F8000011F860 /* GroupsModels.swift in Sources */,
+				5217A2B62FF2F8000011F860 /* GroupsView.swift in Sources */,
+				5217A2B82FF2FA000011F860 /* GroupDetailView.swift in Sources */,
+				5217A2AA2FF2F1000011F860 /* ProfileModels.swift in Sources */,
+				5217A2C62FF310000011F860 /* ProfileViewModel.swift in Sources */,
+				5217A2C82FF310000011F860 /* ProfileMockData.swift in Sources */,
+				5217A2B22FF2F2000011F860 /* ProfileStyle.swift in Sources */,
+				5217A2CA2FF310000011F860 /* ProfileComponents.swift in Sources */,
+				5217A2AC2FF2F1000011F860 /* ProfileView.swift in Sources */,
+				5217A2CC2FF310000011F860 /* ProfileDestinationView.swift in Sources */,
+				5217A2982FF1B7000011F860 /* PuckModels.swift in Sources */,
+				5217A29E2FF1B8A00011F860 /* MapPuckModels.swift in Sources */,
+				5217A2992FF1B7000011F860 /* FriendPuck.swift in Sources */,
+				5217A29A2FF1B7000011F860 /* PuckLabView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -271,6 +370,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				5217A2BA2FF2FB000011F860 /* GroupsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

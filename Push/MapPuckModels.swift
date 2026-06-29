@@ -1,0 +1,185 @@
+//
+//  MapPuckModels.swift
+//  Push
+//
+//  Created by Manav Khanvilkar on 6/28/26.
+//
+
+import CoreLocation
+import Foundation
+
+enum MapPuckKind: Equatable {
+    case individual
+    case hangout
+    case cluster
+    case friendGroup
+}
+
+struct MapPuckData: Identifiable, Equatable {
+    let id: String
+    let kind: MapPuckKind
+    let people: [FriendPuckData]
+    let activity: String
+    let availability: FriendAvailabilityState
+    let venueStatusText: String
+    let coordinate: CLLocationCoordinate2D
+
+    static func == (lhs: MapPuckData, rhs: MapPuckData) -> Bool {
+        lhs.id == rhs.id
+            && lhs.kind == rhs.kind
+            && lhs.people == rhs.people
+            && lhs.activity == rhs.activity
+            && lhs.availability == rhs.availability
+            && lhs.venueStatusText == rhs.venueStatusText
+            && lhs.coordinate.latitude == rhs.coordinate.latitude
+            && lhs.coordinate.longitude == rhs.coordinate.longitude
+    }
+}
+
+enum MapPuckMockData {
+    static let pucks: [MapPuckData] = [
+        MapPuckData(
+            id: "chitty-blue-bottle",
+            kind: .individual,
+            people: [
+                RealWorldMockData.friendPuck(
+                    "chitty",
+                    activity: "Coffee",
+                    symbolName: "cup.and.saucer.fill",
+                    displayText: "Blue Bottle",
+                    availability: .freeNow,
+                    venueStatusText: "At Blue Bottle"
+                )
+            ],
+            activity: "Coffee",
+            availability: .freeNow,
+            venueStatusText: "At Blue Bottle",
+            coordinate: CLLocationCoordinate2D(latitude: 37.7812, longitude: -122.4078)
+        ),
+        MapPuckData(
+            id: "nitin-dolores",
+            kind: .individual,
+            people: [
+                RealWorldMockData.friendPuck(
+                    "nitin",
+                    activity: "Park",
+                    symbolName: "leaf.fill",
+                    displayText: "Dolores",
+                    availability: .maybeDown,
+                    venueStatusText: "Near Dolores"
+                )
+            ],
+            activity: "Park",
+            availability: .maybeDown,
+            venueStatusText: "Near Dolores",
+            coordinate: CLLocationCoordinate2D(latitude: 37.7596, longitude: -122.4269)
+        ),
+        MapPuckData(
+            id: "ishan-viplove-souvla",
+            kind: .hangout,
+            people: [
+                RealWorldMockData.friendPuck(
+                    "ishan",
+                    activity: "Lunch",
+                    symbolName: "fork.knife",
+                    displayText: "Souvla",
+                    availability: .joinable,
+                    venueStatusText: "At Souvla"
+                ),
+                RealWorldMockData.friendPuck(
+                    "viplove",
+                    activity: "Lunch",
+                    symbolName: "fork.knife",
+                    displayText: "Souvla",
+                    availability: .joinable,
+                    venueStatusText: "With Ishan"
+                )
+            ],
+            activity: "Lunch",
+            availability: .joinable,
+            venueStatusText: "At Souvla",
+            coordinate: CLLocationCoordinate2D(latitude: 37.7765, longitude: -122.4231)
+        ),
+        MapPuckData(
+            id: "michigan-cluster",
+            kind: .cluster,
+            people: [
+                RealWorldMockData.friendPuck(
+                    "ram",
+                    activity: "Park",
+                    symbolName: "leaf.fill",
+                    displayText: "Dolores",
+                    availability: .joinable,
+                    venueStatusText: "Already there"
+                ),
+                RealWorldMockData.friendPuck(
+                    "rohan",
+                    activity: "Park",
+                    symbolName: "leaf.fill",
+                    displayText: "Dolores",
+                    availability: .joinable,
+                    venueStatusText: "Walking over"
+                ),
+                RealWorldMockData.friendPuck(
+                    "ryan",
+                    activity: "Park",
+                    symbolName: "leaf.fill",
+                    displayText: "Dolores",
+                    availability: .joinable,
+                    venueStatusText: "Free in 20"
+                ),
+                RealWorldMockData.friendPuck(
+                    "pranay",
+                    activity: "Park",
+                    symbolName: "leaf.fill",
+                    displayText: "Dolores",
+                    availability: .joinable,
+                    venueStatusText: "Maybe pulling up"
+                )
+            ],
+            activity: "Park",
+            availability: .joinable,
+            venueStatusText: "Group forming near Dolores",
+            coordinate: CLLocationCoordinate2D(latitude: 37.7673, longitude: -122.4358)
+        ),
+        MapPuckData(
+            id: "exec-crunch",
+            kind: .friendGroup,
+            people: [
+                RealWorldMockData.groupPuck(
+                    "exec",
+                    activity: "Gym",
+                    displayText: "Crunch"
+                ),
+                RealWorldMockData.friendPuck(
+                    "ram",
+                    activity: "Gym",
+                    symbolName: "dumbbell.fill",
+                    displayText: "Crunch",
+                    availability: .joinable,
+                    venueStatusText: "Wrapping up"
+                ),
+                RealWorldMockData.friendPuck(
+                    "ohm",
+                    activity: "Gym",
+                    symbolName: "dumbbell.fill",
+                    displayText: "Crunch",
+                    availability: .joinable,
+                    venueStatusText: "With the crew"
+                ),
+                RealWorldMockData.friendPuck(
+                    "roh",
+                    activity: "Gym",
+                    symbolName: "dumbbell.fill",
+                    displayText: "Crunch",
+                    availability: .joinable,
+                    venueStatusText: "Joining soon"
+                )
+            ],
+            activity: "Gym",
+            availability: .joinable,
+            venueStatusText: "Exec at Crunch",
+            coordinate: CLLocationCoordinate2D(latitude: 37.7898, longitude: -122.4210)
+        )
+    ]
+}
