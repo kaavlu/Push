@@ -40,6 +40,10 @@
 		5217A2C42FF300000011F860 /* BottomNavigationBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2C32FF300000011F860 /* BottomNavigationBar.swift */; };
 		5217A2D02FF320000011F860 /* assets in Resources */ = {isa = PBXBuildFile; fileRef = 5217A2CF2FF320000011F860 /* assets */; };
 		5217A2D22FF320000011F860 /* RealWorldMockData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2D12FF320000011F860 /* RealWorldMockData.swift */; };
+		5217A2D42FF330000011F860 /* FriendPuckStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2D32FF330000011F860 /* FriendPuckStyle.swift */; };
+		5217A2D62FF330000011F860 /* ActivityBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2D52FF330000011F860 /* ActivityBadge.swift */; };
+		5217A2D82FF330000011F860 /* AvatarStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2D72FF330000011F860 /* AvatarStack.swift */; };
+		5217A2DA2FF330000011F860 /* FriendClusterPuck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2D92FF330000011F860 /* FriendClusterPuck.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -96,6 +100,10 @@
 		5217A2C32FF300000011F860 /* BottomNavigationBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomNavigationBar.swift; sourceTree = "<group>"; };
 		5217A2CF2FF320000011F860 /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; path = assets; sourceTree = "<group>"; };
 		5217A2D12FF320000011F860 /* RealWorldMockData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealWorldMockData.swift; sourceTree = "<group>"; };
+		5217A2D32FF330000011F860 /* FriendPuckStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendPuckStyle.swift; sourceTree = "<group>"; };
+		5217A2D52FF330000011F860 /* ActivityBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityBadge.swift; sourceTree = "<group>"; };
+		5217A2D72FF330000011F860 /* AvatarStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvatarStack.swift; sourceTree = "<group>"; };
+		5217A2D92FF330000011F860 /* FriendClusterPuck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendClusterPuck.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -170,6 +178,10 @@
 				5217A2CB2FF310000011F860 /* ProfileDestinationView.swift */,
 				5217A2952FF1B7000011F860 /* PuckModels.swift */,
 				5217A2962FF1B7000011F860 /* FriendPuck.swift */,
+				5217A2D32FF330000011F860 /* FriendPuckStyle.swift */,
+				5217A2D52FF330000011F860 /* ActivityBadge.swift */,
+				5217A2D72FF330000011F860 /* AvatarStack.swift */,
+				5217A2D92FF330000011F860 /* FriendClusterPuck.swift */,
 				5217A29D2FF1B8A00011F860 /* MapPuckModels.swift */,
 				5217A29F2FF1B8A00011F860 /* StyledMapView.swift */,
 				5217A2972FF1B7000011F860 /* PuckLabView.swift */,
@@ -361,6 +373,10 @@
 				5217A2982FF1B7000011F860 /* PuckModels.swift in Sources */,
 				5217A29E2FF1B8A00011F860 /* MapPuckModels.swift in Sources */,
 				5217A2992FF1B7000011F860 /* FriendPuck.swift in Sources */,
+				5217A2D42FF330000011F860 /* FriendPuckStyle.swift in Sources */,
+				5217A2D62FF330000011F860 /* ActivityBadge.swift in Sources */,
+				5217A2D82FF330000011F860 /* AvatarStack.swift in Sources */,
+				5217A2DA2FF330000011F860 /* FriendClusterPuck.swift in Sources */,
 				5217A29A2FF1B7000011F860 /* PuckLabView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
