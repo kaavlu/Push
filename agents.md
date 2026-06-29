@@ -70,6 +70,9 @@ See `coding-standards.md` for the full reference. Key rules for this project:
 
 - **MVVM strictly.** ViewModels own state and logic; Views are dumb.
 - **Mock everything.** No real network calls, no real location. All data is injected via mock services.
+- **Mock images:** Store under `assets/friends/`, `assets/groups/`, `assets/profile/`; reference as path strings (e.g. `"assets/friends/chitty.png"`) and load via `PushImageAssets.image(named:)`.
+- **Mock fixtures:** Central friend/group data lives in `RealWorldMockData.swift`; feature-specific lists use `*MockData` enums (e.g. `MapPuckMockData`).
+- **Feature files:** Flat under `Push/` — split by suffix: `*Models`, `*MockData`, `*View`, `*ViewModel`, `*Style`.
 - **Files ≤ 400 lines.** Split by responsibility.
 - **Functions ≤ 40 lines, single responsibility.**
 - **No magic numbers.** Named constants only.
