@@ -27,7 +27,7 @@ enum CreateActionMenuItem: String, CaseIterable, Identifiable, Equatable {
         case .startPlan:
             return "Create a plan with friends"
         case .addFriend:
-            return "Invite someone to Bump"
+            return "Invite someone to Push"
         }
     }
 

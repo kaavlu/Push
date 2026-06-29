@@ -103,7 +103,7 @@ struct ContentView: View {
         case .addFriend:
             CreatePlaceholderView(
                 title: "Add Friend",
-                subtitle: "Invite someone to Bump.",
+                subtitle: "Invite someone to Push.",
                 symbolName: route.systemImageName
             )
         }

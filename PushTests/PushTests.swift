@@ -33,7 +33,7 @@ final class PushTests: XCTestCase {
         ])
         XCTAssertEqual(items.map(\.subtitle), [
             "Create a plan with friends",
-            "Invite someone to Bump"
+            "Invite someone to Push"
         ])
         XCTAssertEqual(items.map(\.symbolName), [
             "calendar.badge.plus",
