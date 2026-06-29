@@ -5,6 +5,7 @@
 //  Created by Manav Khanvilkar on 6/28/26.
 //
 
+#if DEBUG
 import SwiftUI
 
 struct PuckLabView: View {
@@ -177,3 +178,4 @@ struct PuckLabView_Previews: PreviewProvider {
         PuckLabView()
     }
 }
+#endif
