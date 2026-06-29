@@ -31,7 +31,7 @@ struct ProfilePhotoAvatar: View {
     }
 }
 
-struct PulsingAvailabilityGlow: ViewModifier {
+private struct PulsingAvailabilityGlow: ViewModifier {
     let color: Color
     let lineWidth: CGFloat
     @State private var isPulsing = false
@@ -101,17 +101,6 @@ extension FriendAvailabilityState {
         case .unavailable:
             return PuckColorTokens.unavailable
         }
-    }
-
-    var avatarGradient: LinearGradient {
-        LinearGradient(
-            colors: [
-                accentColor.opacity(PuckColorTokens.avatarGradientHighOpacity),
-                PuckColorTokens.avatarGradientBase
-            ],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
     }
 }
 
