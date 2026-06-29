@@ -23,6 +23,7 @@ struct MapPuckData: Identifiable, Equatable {
     let availability: FriendAvailabilityState
     let venueStatusText: String
     let coordinate: CLLocationCoordinate2D
+    let groups: [FriendGroupFilter]
 
     static func == (lhs: MapPuckData, rhs: MapPuckData) -> Bool {
         lhs.id == rhs.id
@@ -33,6 +34,7 @@ struct MapPuckData: Identifiable, Equatable {
             && lhs.venueStatusText == rhs.venueStatusText
             && lhs.coordinate.latitude == rhs.coordinate.latitude
             && lhs.coordinate.longitude == rhs.coordinate.longitude
+            && lhs.groups == rhs.groups
     }
 }
 
@@ -54,7 +56,8 @@ enum MapPuckMockData {
             activity: "Coffee",
             availability: .freeNow,
             venueStatusText: "At Blue Bottle",
-            coordinate: CLLocationCoordinate2D(latitude: 37.7812, longitude: -122.4078)
+            coordinate: CLLocationCoordinate2D(latitude: 37.7812, longitude: -122.4078),
+            groups: [.india]
         ),
         MapPuckData(
             id: "nitin-dolores",
@@ -72,7 +75,8 @@ enum MapPuckMockData {
             activity: "Park",
             availability: .maybeDown,
             venueStatusText: "Near Dolores",
-            coordinate: CLLocationCoordinate2D(latitude: 37.7596, longitude: -122.4269)
+            coordinate: CLLocationCoordinate2D(latitude: 37.7596, longitude: -122.4269),
+            groups: [.india]
         ),
         MapPuckData(
             id: "ishan-viplove-souvla",
@@ -98,7 +102,8 @@ enum MapPuckMockData {
             activity: "Lunch",
             availability: .joinable,
             venueStatusText: "At Souvla",
-            coordinate: CLLocationCoordinate2D(latitude: 37.7765, longitude: -122.4231)
+            coordinate: CLLocationCoordinate2D(latitude: 37.7765, longitude: -122.4231),
+            groups: [.india]
         ),
         MapPuckData(
             id: "michigan-cluster",
@@ -140,7 +145,8 @@ enum MapPuckMockData {
             activity: "Park",
             availability: .joinable,
             venueStatusText: "Group forming near Dolores",
-            coordinate: CLLocationCoordinate2D(latitude: 37.7673, longitude: -122.4358)
+            coordinate: CLLocationCoordinate2D(latitude: 37.7673, longitude: -122.4358),
+            groups: [.michigan]
         ),
         MapPuckData(
             id: "exec-crunch",
@@ -179,7 +185,8 @@ enum MapPuckMockData {
             activity: "Gym",
             availability: .joinable,
             venueStatusText: "Exec at Crunch",
-            coordinate: CLLocationCoordinate2D(latitude: 37.7898, longitude: -122.4210)
+            coordinate: CLLocationCoordinate2D(latitude: 37.7898, longitude: -122.4210),
+            groups: [.exec]
         )
     ]
 }

@@ -389,6 +389,32 @@ final class PushTests: XCTestCase {
         )
     }
 
+    func testMapPuckMockDataExposesGroupTags() throws {
+        let pucks = MapPuckMockData.pucks
+
+        XCTAssertEqual(pucks.filter { $0.groups.contains(.india) }.count, 3)
+        XCTAssertEqual(pucks.filter { $0.groups.contains(.michigan) }.count, 1)
+        XCTAssertEqual(pucks.filter { $0.groups.contains(.exec) }.count, 1)
+        XCTAssertTrue(pucks.allSatisfy { !$0.groups.isEmpty })
+    }
+
+    func testGroupFilterReturnsPucksForSelectedGroup() throws {
+        let allPucks = MapPuckMockData.pucks
+
+        let indiaPucks = allPucks.filter { $0.groups.contains(.india) }
+        XCTAssertEqual(indiaPucks.count, 3)
+        XCTAssertTrue(indiaPucks.allSatisfy { $0.groups.contains(.india) })
+
+        let michiganPucks = allPucks.filter { $0.groups.contains(.michigan) }
+        XCTAssertEqual(michiganPucks.count, 1)
+
+        let execPucks = allPucks.filter { $0.groups.contains(.exec) }
+        XCTAssertEqual(execPucks.count, 1)
+
+        // allFriends returns everything
+        XCTAssertEqual(allPucks.count, 5)
+    }
+
     func testMainMapRoutesFeedAndPlansExposeMetadata() throws {
         XCTAssertEqual(MainMapRoute.feed.id, "feed")
         XCTAssertEqual(MainMapRoute.feed.accessibilityLabel, "Feed")

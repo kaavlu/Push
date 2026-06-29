@@ -14,9 +14,16 @@ struct ContentView: View {
     @State private var presentedRoute: MainMapRoute?
     @State private var isCreateMenuPresented = false
 
+    private var filteredPucks: [MapPuckData] {
+        guard selectedFriendGroup != .allFriends else {
+            return MapPuckMockData.pucks
+        }
+        return MapPuckMockData.pucks.filter { $0.groups.contains(selectedFriendGroup) }
+    }
+
     var body: some View {
         ZStack(alignment: .bottom) {
-            StyledMapView(region: MapDefaults.region, pucks: MapPuckMockData.pucks)
+            StyledMapView(region: MapDefaults.region, pucks: filteredPucks)
                 .ignoresSafeArea()
 
             if isCreateMenuPresented {
