@@ -45,17 +45,22 @@ struct FriendDetailSheet: View {
     let puck: MapPuckData
     @State private var toastMessage: String?
 
+    private var isHangout: Bool {
+        puck.kind == .hangout || puck.kind == .cluster
+    }
+
+    private var detents: Set<PresentationDetent> {
+        switch puck.kind {
+        case .individual:
+            return [.height(FriendDetailSheetLayout.individualSheetHeight)]
+        case .hangout, .cluster, .friendGroup:
+            return [.height(FriendDetailSheetLayout.hangoutSheetHeight)]
+        }
+    }
+
     var body: some View {
         ZStack(alignment: .top) {
-            if puck.kind == .individual, let friend = puck.people.first {
-                individualContent(friend: friend)
-            } else {
-                ScrollView {
-                    VStack(spacing: 0) {
-                        groupContent
-                    }
-                }
-            }
+            sheetContent
 
             if let message = toastMessage {
                 Text(message)
@@ -68,16 +73,7 @@ struct FriendDetailSheet: View {
                     .padding(.top, FriendDetailSheetLayout.toastTopPadding)
             }
         }
-        .overlay(alignment: .top) {
-            Rectangle()
-                .fill(PushColorPalette.Accent.walnut.opacity(0.18))
-                .frame(height: 0.8)
-        }
-        .presentationDetents(
-            puck.kind == .individual
-                ? [.height(FriendDetailSheetLayout.individualSheetHeight)]
-                : [.medium]
-        )
+        .presentationDetents(detents)
         .presentationDragIndicator(.visible)
         .presentationBackground {
             ZStack {
@@ -98,6 +94,17 @@ struct FriendDetailSheet: View {
         .presentationCornerRadius(FriendDetailSheetLayout.sheetCornerRadius)
     }
 
+    @ViewBuilder
+    private var sheetContent: some View {
+        if puck.kind == .individual, let friend = puck.people.first {
+            individualContent(friend: friend)
+        } else if isHangout {
+            hangoutContent(people: puck.people)
+        } else if puck.kind == .friendGroup {
+            friendGroupContent()
+        }
+    }
+
     // MARK: - Individual Layout
 
     private func individualContent(friend: FriendPuckData) -> some View {
@@ -108,6 +115,43 @@ struct FriendDetailSheet: View {
             FriendDetailActionCards(
                 onDirections: { triggerToast("Opening in Maps…") },
                 onStartPlan:  { triggerToast("Plan started") }
+            )
+        }
+        .padding(.horizontal, FriendDetailSheetLayout.contentHorizontalPadding)
+        .padding(.top, FriendDetailSheetLayout.heroTopPadding)
+        .padding(.bottom, FriendDetailSheetLayout.actionBottomPadding)
+    }
+
+    // MARK: - Hangout Layout (pair + small group)
+
+    private func hangoutContent(people: [FriendPuckData]) -> some View {
+        VStack(spacing: FriendDetailSheetLayout.sectionSpacing) {
+            HangoutMomentHeader(puck: puck)
+            HangoutMemberRow(people: people)
+            PairSharedActivityCard(puck: puck)
+            PairActionRow(
+                onDirections: { triggerToast("Opening in Maps…") },
+                onAskToJoin: { triggerToast("Request sent") },
+                onStartPlan: { triggerToast("Plan started") }
+            )
+        }
+        .padding(.horizontal, FriendDetailSheetLayout.contentHorizontalPadding)
+        .padding(.top, FriendDetailSheetLayout.heroTopPadding)
+        .padding(.bottom, FriendDetailSheetLayout.actionBottomPadding)
+    }
+
+    // MARK: - Friend Group Layout
+
+    private func friendGroupContent() -> some View {
+        let members = Array(puck.people.dropFirst())
+        return VStack(spacing: FriendDetailSheetLayout.sectionSpacing) {
+            FriendGroupHeader(puck: puck)
+            HangoutMemberRow(people: members)
+            PairSharedActivityCard(puck: puck)
+            PairActionRow(
+                onDirections: { triggerToast("Opening in Maps…") },
+                onAskToJoin: { triggerToast("Request sent") },
+                onStartPlan: { triggerToast("Plan started") }
             )
         }
         .padding(.horizontal, FriendDetailSheetLayout.contentHorizontalPadding)
@@ -126,69 +170,6 @@ struct FriendDetailSheet: View {
         }
     }
 
-    // MARK: - Group Layout (unchanged)
-
-    private var groupContent: some View {
-        VStack(spacing: 0) {
-            groupHero
-            groupInfo
-            Divider()
-                .padding(.vertical, FriendDetailSheetLayout.dividerVerticalPadding)
-            actionsRow(availability: puck.availability, isGroup: true)
-        }
-    }
-
-    private var groupHero: some View {
-        VStack(spacing: FriendDetailSheetLayout.heroNameSpacing) {
-            AvatarStack(friends: puck.people, size: FriendDetailSheetLayout.heroGroupSize)
-                .frame(
-                    width: FriendDetailSheetLayout.heroGroupSize,
-                    height: FriendDetailSheetLayout.heroGroupSize
-                )
-
-            VStack(spacing: FriendDetailSheetLayout.heroInnerSpacing) {
-                Text(FriendDetailSheetContent.groupHeadline(for: puck.people))
-                    .font(.title2.weight(.bold))
-                    .foregroundStyle(PushControlColors.activeForeground)
-
-                ActivityBadge(
-                    text: puck.activity,
-                    symbolName: puck.people.first?.activitySymbolName ?? "person.3.fill",
-                    availability: puck.availability
-                )
-            }
-        }
-        .padding(.top, FriendDetailSheetLayout.heroTopPadding)
-        .padding(.bottom, FriendDetailSheetLayout.heroBottomPadding)
-    }
-
-    private var groupInfo: some View {
-        VStack(spacing: 0) {
-            DetailInfoRow(
-                symbolName: puck.people.first?.activitySymbolName ?? "mappin",
-                text: puck.venueStatusText
-            )
-            DetailInfoRow(
-                symbolName: "clock",
-                text: puck.people.first?.lastUpdated ?? "Recently",
-                isSecondary: true
-            )
-        }
-        .padding(.horizontal, FriendDetailSheetLayout.infoHorizontalPadding)
-    }
-
-    private func actionsRow(availability: FriendAvailabilityState, isGroup: Bool) -> some View {
-        HStack(spacing: FriendDetailSheetLayout.actionSpacing) {
-            DetailActionButton(label: isGroup ? "Ping all" : "Ping", symbolName: "bolt.fill")
-            DetailActionButton(label: "Start plan", symbolName: "calendar.badge.plus")
-            if availability == .joinable {
-                DetailActionButton(label: "Pull Up?", symbolName: "figure.wave", isPrimary: true)
-            }
-            DetailActionButton(label: "Hide", symbolName: "eye.slash.fill")
-        }
-        .padding(.horizontal, FriendDetailSheetLayout.actionHorizontalPadding)
-        .padding(.bottom, FriendDetailSheetLayout.actionBottomPadding)
-    }
 }
 
 // MARK: - Individual: Header
@@ -346,61 +327,241 @@ private struct PrimaryActionCard: View {
     }
 }
 
-// MARK: - Group Sub-components (unchanged)
+// MARK: - Hangout: Shared Moment Header
 
-private struct DetailInfoRow: View {
-    let symbolName: String
-    let text: String
-    var isSecondary: Bool = false
+private struct HangoutMomentHeader: View {
+    let puck: MapPuckData
 
-    var body: some View {
-        HStack(spacing: FriendDetailSheetLayout.infoIconSpacing) {
-            Image(systemName: symbolName)
-                .font(.system(size: FriendDetailSheetLayout.infoIconSize, weight: .semibold))
-                .foregroundStyle(isSecondary ? Color.secondary : PushControlColors.activeForeground)
-                .frame(width: FriendDetailSheetLayout.infoIconFrameWidth)
+    private var accentColor: Color { puck.availability.accentColor }
 
-            Text(text)
-                .font(.subheadline)
-                .foregroundStyle(isSecondary ? Color.secondary : PushControlColors.activeForeground)
-
-            Spacer()
-        }
-        .padding(.vertical, FriendDetailSheetLayout.infoRowVerticalPadding)
+    private var title: String {
+        puck.people.count == 2
+            ? FriendDetailSheetContent.pairTitle(for: puck.people)
+            : FriendDetailSheetContent.hangoutHeadline(for: puck.people)
     }
-}
-
-private struct DetailActionButton: View {
-    let label: String
-    let symbolName: String
-    var isPrimary: Bool = false
 
     var body: some View {
-        Button(action: {}) {
-            VStack(spacing: FriendDetailSheetLayout.actionLabelSpacing) {
-                Image(systemName: symbolName)
-                    .font(.system(size: FriendDetailSheetLayout.actionIconSize, weight: .semibold))
+        HStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: FriendDetailSheetLayout.hangoutMomentHeaderSpacing) {
+                Text(title)
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(PushControlColors.textEspresso)
 
-                Text(label)
-                    .font(.caption.weight(.semibold))
-                    .lineLimit(1)
-                    .minimumScaleFactor(FriendDetailSheetLayout.actionMinimumScaleFactor)
+                Text(puck.people.first?.locationLabel ?? puck.venueStatusText)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(PushControlColors.textSecondary)
             }
-            .foregroundStyle(PushControlColors.activeForeground)
-            .frame(maxWidth: .infinity)
-            .frame(height: FriendDetailSheetLayout.actionHeight)
-            .pushGlassBackground(cornerRadius: FriendDetailSheetLayout.actionCornerRadius)
-            .overlay {
-                if isPrimary {
-                    RoundedRectangle(
-                        cornerRadius: FriendDetailSheetLayout.actionCornerRadius,
-                        style: .continuous
-                    )
-                    .fill(PushColorPalette.Accent.sunbeam.opacity(FriendDetailSheetLayout.primaryTintOpacity))
+
+            Spacer(minLength: 0)
+
+            VStack(alignment: .center, spacing: 6) {
+                Text(puck.availability.title)
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(puck.availability.chipTextColor)
+                    .padding(.horizontal, FriendDetailSheetLayout.headerChipHorizontalPadding)
+                    .padding(.vertical, FriendDetailSheetLayout.headerChipVerticalPadding)
+                    .background(puck.availability.chipFillColor, in: Capsule())
+                    .overlay(Capsule().stroke(Color.white.opacity(0.30), lineWidth: 0.5))
+
+                HStack(spacing: 4) {
+                    Circle()
+                        .fill(accentColor)
+                        .frame(
+                            width: FriendDetailSheetLayout.headerLiveIndicatorSize,
+                            height: FriendDetailSheetLayout.headerLiveIndicatorSize
+                        )
+                    Text(puck.people.first?.lastUpdated ?? "Just now")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(PushControlColors.textEspresso)
                 }
             }
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel(label)
+    }
+}
+
+// MARK: - Hangout: Identity Member Row
+
+private struct HangoutMemberRow: View {
+    let people: [FriendPuckData]
+
+    private var avatarSize: CGFloat {
+        people.count == 2
+            ? FriendDetailSheetLayout.pairMemberTileAvatarSize
+            : FriendDetailSheetLayout.groupMemberTileAvatarSize
+    }
+
+    private var tileSpacing: CGFloat {
+        people.count == 2
+            ? FriendDetailSheetLayout.pairMemberTileSpacing
+            : FriendDetailSheetLayout.groupMemberTileSpacing
+    }
+
+    var body: some View {
+        HStack(spacing: tileSpacing) {
+            Spacer(minLength: 0)
+            ForEach(people) { person in
+                HangoutMemberTile(person: person, avatarSize: avatarSize)
+            }
+            Spacer(minLength: 0)
+        }
+    }
+}
+
+private struct HangoutMemberTile: View {
+    let person: FriendPuckData
+    let avatarSize: CGFloat
+
+    var body: some View {
+        VStack(spacing: FriendDetailSheetLayout.hangoutMemberTileNameSpacing) {
+            ProfilePhotoAvatar(
+                imageAssetName: person.profileImageAssetName,
+                fallbackInitials: person.avatarPlaceholder
+            )
+            .frame(width: avatarSize, height: avatarSize)
+            .availabilityPulse(
+                color: person.availability.accentColor,
+                lineWidth: FriendPuckLayout.statusRingWidth
+            )
+
+            Text(person.isCurrentUser ? "You" : FriendDetailSheetContent.firstName(person))
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(PushControlColors.textEspresso)
+        }
+    }
+}
+
+// MARK: - Pair Hangout: Shared Activity Card
+
+private struct PairSharedActivityCard: View {
+    let puck: MapPuckData
+
+    private var accentColor: Color { puck.availability.accentColor }
+    private var activitySymbol: String { puck.people.first?.activitySymbolName ?? "mappin" }
+    private var activityLine: String {
+        FriendDetailSheetContent.hangoutActivityLine(
+            activity: puck.activity,
+            venueStatusText: puck.venueStatusText
+        )
+    }
+    var body: some View {
+        HStack(alignment: .center, spacing: FriendDetailSheetLayout.statusCardIconSpacing) {
+            ZStack {
+                Circle()
+                    .fill(accentColor.opacity(FriendDetailSheetLayout.statusCardIconCircleOpacity))
+                    .frame(
+                        width: FriendDetailSheetLayout.statusCardIconCircleSize,
+                        height: FriendDetailSheetLayout.statusCardIconCircleSize
+                    )
+
+                Image(systemName: activitySymbol)
+                    .font(.system(size: FriendDetailSheetLayout.statusCardIconSize, weight: .semibold))
+                    .foregroundStyle(accentColor)
+            }
+
+            Text(activityLine)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(PushControlColors.textPrimary)
+
+            Spacer(minLength: 0)
+        }
+        .padding(FriendDetailSheetLayout.statusCardPadding)
+        .pushGlassBackground(cornerRadius: FriendDetailSheetLayout.statusCardCornerRadius)
+        .overlay {
+            RoundedRectangle(
+                cornerRadius: FriendDetailSheetLayout.statusCardCornerRadius,
+                style: .continuous
+            )
+            .fill(accentColor.opacity(FriendDetailSheetLayout.statusCardAccentTintOpacity))
+        }
+        .overlay {
+            RoundedRectangle(
+                cornerRadius: FriendDetailSheetLayout.statusCardCornerRadius,
+                style: .continuous
+            )
+            .stroke(
+                accentColor.opacity(FriendDetailSheetLayout.statusCardAccentStrokeOpacity),
+                lineWidth: FriendDetailSheetLayout.statusCardStrokeWidth
+            )
+        }
+    }
+}
+
+// MARK: - Pair Hangout: Actions
+
+private struct PairActionRow: View {
+    let onDirections: () -> Void
+    let onAskToJoin: () -> Void
+    let onStartPlan: () -> Void
+
+    var body: some View {
+        HStack(spacing: FriendDetailSheetLayout.actionSpacing) {
+            PrimaryActionCard(
+                label: "Directions",
+                symbolName: "arrow.triangle.turn.up.right.circle.fill",
+                action: onDirections
+            )
+            PrimaryActionCard(label: "Ask to join", symbolName: "figure.wave", action: onAskToJoin)
+            PrimaryActionCard(label: "Start plan", symbolName: "calendar.badge.plus", action: onStartPlan)
+        }
+    }
+}
+
+// MARK: - Friend Group: Header
+
+private struct FriendGroupHeader: View {
+    let puck: MapPuckData
+
+    private var groupPuck: FriendPuckData? { puck.people.first }
+    private var accentColor: Color { puck.availability.accentColor }
+
+    var body: some View {
+        HStack(alignment: .center, spacing: FriendDetailSheetLayout.headerSpacing) {
+            ProfilePhotoAvatar(
+                imageAssetName: groupPuck?.profileImageAssetName,
+                fallbackInitials: groupPuck?.avatarPlaceholder ?? "GR"
+            )
+            .frame(
+                width: FriendDetailSheetLayout.headerAvatarSize,
+                height: FriendDetailSheetLayout.headerAvatarSize
+            )
+            .availabilityPulse(
+                color: accentColor,
+                lineWidth: FriendPuckLayout.statusRingWidth
+            )
+
+            VStack(alignment: .leading, spacing: FriendDetailSheetLayout.headerTextSpacing) {
+                Text(groupPuck?.name ?? "Group")
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(PushControlColors.textEspresso)
+
+                Text(groupPuck?.locationLabel ?? puck.venueStatusText)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(PushControlColors.textSecondary)
+            }
+
+            Spacer(minLength: 0)
+
+            VStack(alignment: .center, spacing: 6) {
+                Text(puck.availability.title)
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(puck.availability.chipTextColor)
+                    .padding(.horizontal, FriendDetailSheetLayout.headerChipHorizontalPadding)
+                    .padding(.vertical, FriendDetailSheetLayout.headerChipVerticalPadding)
+                    .background(puck.availability.chipFillColor, in: Capsule())
+                    .overlay(Capsule().stroke(Color.white.opacity(0.30), lineWidth: 0.5))
+
+                HStack(spacing: 4) {
+                    Circle()
+                        .fill(accentColor)
+                        .frame(
+                            width: FriendDetailSheetLayout.headerLiveIndicatorSize,
+                            height: FriendDetailSheetLayout.headerLiveIndicatorSize
+                        )
+                    Text(groupPuck?.lastUpdated ?? "Just now")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(PushControlColors.textEspresso)
+                }
+            }
+        }
     }
 }

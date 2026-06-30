@@ -13,6 +13,10 @@ struct StyledMapView: UIViewRepresentable {
     let pucks: [MapPuckData]
     let onPuckSelected: (MapPuckData) -> Void
 
+    private var isUserInGroup: Bool {
+        pucks.contains { $0.includesCurrentUser }
+    }
+
     func makeCoordinator() -> Coordinator {
         Coordinator(onPuckSelected: onPuckSelected)
     }
@@ -23,12 +27,19 @@ struct StyledMapView: UIViewRepresentable {
         mapView.setRegion(region, animated: false)
         applyStyle(to: mapView)
         syncAnnotations(on: mapView)
+        let userAnnotation = UserLocationAnnotation(isInGroup: isUserInGroup)
+        context.coordinator.userLocationAnnotation = userAnnotation
+        mapView.addAnnotation(userAnnotation)
         return mapView
     }
 
     func updateUIView(_ mapView: MKMapView, context: Context) {
         applyStyle(to: mapView)
         syncAnnotations(on: mapView)
+        if let annotation = context.coordinator.userLocationAnnotation,
+           let view = mapView.view(for: annotation) as? UserLocationAnnotationView {
+            view.configure(isInGroup: isUserInGroup)
+        }
     }
 
     private func applyStyle(to mapView: MKMapView) {
@@ -48,12 +59,20 @@ struct StyledMapView: UIViewRepresentable {
 
 final class Coordinator: NSObject, MKMapViewDelegate {
     private let onPuckSelected: (MapPuckData) -> Void
+    var userLocationAnnotation: UserLocationAnnotation?
 
     init(onPuckSelected: @escaping (MapPuckData) -> Void) {
         self.onPuckSelected = onPuckSelected
     }
 
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        if let userAnnotation = annotation as? UserLocationAnnotation {
+            let view = mapView.dequeueReusableAnnotationView(withIdentifier: UserLocationAnnotationView.reuseIdentifier) as? UserLocationAnnotationView
+                ?? UserLocationAnnotationView(annotation: userAnnotation, reuseIdentifier: UserLocationAnnotationView.reuseIdentifier)
+            view.configure(isInGroup: userAnnotation.isInGroup)
+            return view
+        }
+
         guard let puckAnnotation = annotation as? MapPuckAnnotation else {
             return nil
         }
@@ -167,4 +186,54 @@ private enum MapPuckAnnotationLayout {
     static let shadowOpacity = 0.28
     static let shadowRadius: CGFloat = 16
     static let shadowYOffset: CGFloat = 8
+}
+
+// MARK: - User Location
+
+final class UserLocationAnnotation: NSObject, MKAnnotation {
+    let coordinate = CLLocationCoordinate2D(latitude: 37.7750, longitude: -122.4150)
+    var isInGroup: Bool
+
+    init(isInGroup: Bool = false) {
+        self.isInGroup = isInGroup
+    }
+}
+
+final class UserLocationAnnotationView: MKAnnotationView {
+    static let reuseIdentifier = "UserLocationAnnotationView"
+
+    override init(annotation: MKAnnotation?, reuseIdentifier: String?) {
+        super.init(annotation: annotation, reuseIdentifier: reuseIdentifier)
+        let size = UserLocationLayout.frameSize
+        bounds = CGRect(origin: .zero, size: size)
+        centerOffset = .zero
+        canShowCallout = false
+        isUserInteractionEnabled = false
+
+        let hosting = UIHostingController(rootView: UserLocationDot())
+        hosting.view.backgroundColor = .clear
+        hosting.view.frame = bounds
+        addSubview(hosting.view)
+    }
+
+    required init?(coder: NSCoder) { nil }
+
+    func configure(isInGroup: Bool) {
+        isHidden = isInGroup
+    }
+}
+
+private struct UserLocationDot: View {
+    var body: some View {
+        Image("UserLocationPin")
+            .resizable()
+            .scaledToFit()
+            .frame(width: UserLocationLayout.pinSize, height: UserLocationLayout.pinSize)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+private enum UserLocationLayout {
+    static let pinSize: CGFloat = 52
+    static let frameSize = CGSize(width: 68, height: 68)
 }

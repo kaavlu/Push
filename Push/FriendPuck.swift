@@ -51,6 +51,10 @@ struct FriendGroupPuck: View {
             .min { $0.priority < $1.priority } ?? .busy
     }
 
+    private var groupPulseColor: Color {
+        friends.contains { $0.isCurrentUser } ? PuckColorTokens.maybeDown : leadAvailability.accentColor
+    }
+
     private var groupAvatarInitials: String {
         friends.first?.avatarPlaceholder ?? FriendGroupLayout.fallbackInitials
     }
@@ -72,7 +76,8 @@ struct FriendGroupPuck: View {
                 .frame(width: size, height: size)
                 .puckGlassBackground(cornerRadius: size / FriendPuckLayout.cornerDivisor)
                 .availabilityPulse(
-                    color: leadAvailability.accentColor,
+                    ringColor: leadAvailability.accentColor,
+                    pulseColor: groupPulseColor,
                     lineWidth: FriendPuckLayout.statusRingWidth
                 )
 

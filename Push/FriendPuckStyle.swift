@@ -32,7 +32,8 @@ struct ProfilePhotoAvatar: View {
 }
 
 private struct PulsingAvailabilityGlow: ViewModifier {
-    let color: Color
+    let ringColor: Color
+    let pulseColor: Color
     let lineWidth: CGFloat
     @State private var isPulsing = false
 
@@ -40,16 +41,16 @@ private struct PulsingAvailabilityGlow: ViewModifier {
         content
             .overlay {
                 Circle()
-                    .stroke(color.opacity(FriendPuckLayout.pulseStrokeOpacity), lineWidth: lineWidth)
+                    .stroke(pulseColor.opacity(FriendPuckLayout.pulseStrokeOpacity), lineWidth: lineWidth)
                     .scaleEffect(isPulsing ? FriendPuckLayout.pulseMaxScale : FriendPuckLayout.pulseMinScale)
                     .opacity(isPulsing ? FriendPuckLayout.pulseLowOpacity : FriendPuckLayout.pulseHighOpacity)
             }
             .overlay {
                 Circle()
-                    .stroke(color, lineWidth: lineWidth)
+                    .stroke(ringColor, lineWidth: lineWidth)
             }
             .shadow(
-                color: color.opacity(FriendPuckLayout.statusGlowOpacity),
+                color: ringColor.opacity(FriendPuckLayout.statusGlowOpacity),
                 radius: isPulsing ? FriendPuckLayout.statusGlowExpandedRadius : FriendPuckLayout.statusGlowRadius,
                 y: FriendPuckLayout.statusGlowYOffset
             )
@@ -66,7 +67,11 @@ private struct PulsingAvailabilityGlow: ViewModifier {
 
 extension View {
     func availabilityPulse(color: Color, lineWidth: CGFloat) -> some View {
-        modifier(PulsingAvailabilityGlow(color: color, lineWidth: lineWidth))
+        modifier(PulsingAvailabilityGlow(ringColor: color, pulseColor: color, lineWidth: lineWidth))
+    }
+
+    func availabilityPulse(ringColor: Color, pulseColor: Color, lineWidth: CGFloat) -> some View {
+        modifier(PulsingAvailabilityGlow(ringColor: ringColor, pulseColor: pulseColor, lineWidth: lineWidth))
     }
 
     func puckGlassBackground(cornerRadius: CGFloat) -> some View {

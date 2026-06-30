@@ -105,6 +105,7 @@ struct FriendPuckData: Identifiable, Equatable {
     let withWhom: [String]?
     let locationLabel: String?
     let placeName: String?
+    let isCurrentUser: Bool
 
     init(
         id: UUID = UUID(),
@@ -119,7 +120,8 @@ struct FriendPuckData: Identifiable, Equatable {
         lastUpdated: String = "Just now",
         withWhom: [String]? = nil,
         locationLabel: String? = nil,
-        placeName: String? = nil
+        placeName: String? = nil,
+        isCurrentUser: Bool = false
     ) {
         self.id = id
         self.name = name
@@ -134,6 +136,7 @@ struct FriendPuckData: Identifiable, Equatable {
         self.withWhom = withWhom
         self.locationLabel = locationLabel
         self.placeName = placeName
+        self.isCurrentUser = isCurrentUser
     }
 }
 

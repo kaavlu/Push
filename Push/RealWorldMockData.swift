@@ -62,7 +62,7 @@ enum RealWorldMockData {
         RealGroupSeed(
             id: "exec",
             name: "Exec",
-            memberIDs: ["ram", "ohm"],
+            memberIDs: ["ram", "ohm", "manav"],
             imageAssetName: "assets/groups/Exec/ram.png",
             status: .nearby,
             activeNowCount: 1,
@@ -118,7 +118,8 @@ enum RealWorldMockData {
         _ groupID: String,
         activity: String,
         displayText: String,
-        lastUpdated: String = "Just now"
+        lastUpdated: String = "Just now",
+        locationLabel: String? = nil
     ) -> FriendPuckData {
         let group = groups.first { $0.id == groupID }
         return FriendPuckData(
@@ -131,7 +132,34 @@ enum RealWorldMockData {
             availability: .joinable,
             venueStatusText: "\(group?.name ?? "Group") is together",
             lastUpdated: lastUpdated,
-            withWhom: nil
+            withWhom: nil,
+            locationLabel: locationLabel
+        )
+    }
+
+    static func userPuck(
+        activity: String,
+        symbolName: String,
+        displayText: String,
+        availability: FriendAvailabilityState,
+        venueStatusText: String,
+        lastUpdated: String = "Just now",
+        withWhom: [String]? = nil,
+        locationLabel: String? = nil
+    ) -> FriendPuckData {
+        FriendPuckData(
+            name: "Manav",
+            avatarPlaceholder: "MK",
+            profileImageAssetName: profileImageAssetName,
+            activity: activity,
+            activitySymbolName: symbolName,
+            activityDisplayText: displayText,
+            availability: availability,
+            venueStatusText: venueStatusText,
+            lastUpdated: lastUpdated,
+            withWhom: withWhom,
+            locationLabel: locationLabel,
+            isCurrentUser: true
         )
     }
 

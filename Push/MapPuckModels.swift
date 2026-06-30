@@ -25,6 +25,10 @@ struct MapPuckData: Identifiable, Equatable {
     let coordinate: CLLocationCoordinate2D
     let groups: [FriendGroupFilter]
 
+    var includesCurrentUser: Bool {
+        people.contains { $0.isCurrentUser }
+    }
+
     static func == (lhs: MapPuckData, rhs: MapPuckData) -> Bool {
         lhs.id == rhs.id
             && lhs.kind == rhs.kind
@@ -98,7 +102,8 @@ enum MapPuckMockData {
                     availability: .joinable,
                     venueStatusText: "At Souvla",
                     lastUpdated: "Just now",
-                    withWhom: ["Viplove"]
+                    withWhom: ["Viplove"],
+                    locationLabel: "517 Hayes St"
                 ),
                 RealWorldMockData.friendPuck(
                     "viplove",
@@ -108,7 +113,8 @@ enum MapPuckMockData {
                     availability: .joinable,
                     venueStatusText: "With Ishan",
                     lastUpdated: "Just now",
-                    withWhom: ["Ishan"]
+                    withWhom: ["Ishan"],
+                    locationLabel: "517 Hayes St"
                 )
             ],
             activity: "Lunch",
@@ -129,7 +135,8 @@ enum MapPuckMockData {
                     availability: .joinable,
                     venueStatusText: "Already there",
                     lastUpdated: "5 min ago",
-                    withWhom: ["Rohan", "Ryan", "Pranay"]
+                    withWhom: ["Rohan", "Ryan", "Pranay"],
+                    locationLabel: "Dolores Park, 19th St"
                 ),
                 RealWorldMockData.friendPuck(
                     "rohan",
@@ -176,7 +183,8 @@ enum MapPuckMockData {
                     "exec",
                     activity: "Gym",
                     displayText: "Crunch",
-                    lastUpdated: "12 min ago"
+                    lastUpdated: "12 min ago",
+                    locationLabel: "350 Bay St"
                 ),
                 RealWorldMockData.friendPuck(
                     "ram",
@@ -186,7 +194,7 @@ enum MapPuckMockData {
                     availability: .joinable,
                     venueStatusText: "Wrapping up",
                     lastUpdated: "12 min ago",
-                    withWhom: ["Ohm", "Roh"]
+                    withWhom: ["Ohm"]
                 ),
                 RealWorldMockData.friendPuck(
                     "ohm",
@@ -194,24 +202,24 @@ enum MapPuckMockData {
                     symbolName: "dumbbell.fill",
                     displayText: "Crunch",
                     availability: .joinable,
-                    venueStatusText: "With the crew",
+                    venueStatusText: "With Ram",
                     lastUpdated: "12 min ago",
-                    withWhom: ["Ram", "Roh"]
+                    withWhom: ["Ram"]
                 ),
-                RealWorldMockData.friendPuck(
-                    "roh",
+                RealWorldMockData.userPuck(
                     activity: "Gym",
                     symbolName: "dumbbell.fill",
                     displayText: "Crunch",
                     availability: .joinable,
-                    venueStatusText: "Joining soon",
-                    lastUpdated: "12 min ago",
-                    withWhom: ["Ram", "Ohm"]
+                    venueStatusText: "With Ram & Ohm",
+                    lastUpdated: "Now",
+                    withWhom: ["Ram", "Ohm"],
+                    locationLabel: "350 Bay St"
                 )
             ],
             activity: "Gym",
             availability: .joinable,
-            venueStatusText: "Exec at Crunch",
+            venueStatusText: "At Crunch",
             coordinate: CLLocationCoordinate2D(latitude: 37.7898, longitude: -122.4210),
             groups: [.exec]
         )

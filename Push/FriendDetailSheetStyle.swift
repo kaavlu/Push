@@ -85,6 +85,21 @@ enum FriendDetailSheetLayout {
     static let actionCardIconSize: CGFloat = 18
     static let actionCardLabelSpacing: CGFloat = 5
 
+    // MARK: - Hangout (pair + small group)
+
+    static let hangoutSheetHeight: CGFloat = 336
+    static let hangoutMomentHeaderSpacing: CGFloat = 4
+    static let pairMemberTileAvatarSize: CGFloat = 72
+    static let pairMemberTileSpacing: CGFloat = 20
+    static let groupMemberTileAvatarSize: CGFloat = 56
+    static let groupMemberTileSpacing: CGFloat = 16
+    static let hangoutMemberTileNameSpacing: CGFloat = 6
+
+    // MARK: - Small Group Hangout
+
+    static let memberRowAvatarSize: CGFloat = 36
+    static let memberRowVerticalPadding: CGFloat = 9
+
     // MARK: - Toast
 
     static let toastHorizontalPadding: CGFloat = 18
@@ -100,5 +115,52 @@ enum FriendDetailSheetContent {
             return "\(people[0].name) + \(people[1].name)"
         }
         return "\(people.count) people"
+    }
+
+    static func hangoutHeadline(for people: [FriendPuckData]) -> String {
+        guard !people.isEmpty else { return "Group" }
+        let first = firstName(people[0])
+        if people.count == 3 {
+            return "\(first), \(firstName(people[1])) & \(firstName(people[2]))"
+        }
+        return "\(first) + \(people.count - 1) others"
+    }
+
+    static func pairTitle(for people: [FriendPuckData]) -> String {
+        guard people.count >= 2 else { return "Together" }
+        return "\(firstName(people[0])) and \(firstName(people[1]))"
+    }
+
+    static func pairMetadata(for people: [FriendPuckData]) -> String {
+        let count = people.count
+        let noun = count == 1 ? "friend" : "friends"
+        return "\(count) \(noun) together"
+    }
+
+    static func hangoutActivityLine(activity: String, venueStatusText: String) -> String {
+        let venueName = strippedVenueName(from: venueStatusText)
+        let prefix: String
+        switch activity.lowercased() {
+        case "coffee":          prefix = "Coffee at"
+        case "lunch", "food":   prefix = "Lunch at"
+        case "dinner":          prefix = "Dinner at"
+        case "park":            prefix = "Hanging at"
+        case "gym":             prefix = "Working out at"
+        case "work":            prefix = "Working at"
+        case "driving":         prefix = "Driving to"
+        default:                prefix = "At"
+        }
+        return "\(prefix) \(venueName)"
+    }
+
+    private static func strippedVenueName(from text: String) -> String {
+        for prefix in ["Eating at ", "At the ", "At ", "Near ", "Group forming near "] {
+            if text.hasPrefix(prefix) { return String(text.dropFirst(prefix.count)) }
+        }
+        return text
+    }
+
+    static func firstName(_ person: FriendPuckData) -> String {
+        person.name.components(separatedBy: " ").first ?? person.name
     }
 }
