@@ -17,7 +17,7 @@ Push is **not** a tracking app, not a generic map app, and not a chat app. It sh
 - **Target:** iOS 17+
 - **Architecture:** MVVM
 - **Data:** Mock data and mock services only (no backend)
-- **Maps:** MapKit
+- **Maps:** MapKit — live map base layer is satellite imagery (`MKImageryMapConfiguration`), not muted standard
 
 This is a **high-fidelity prototype** that can become production later.
 
@@ -60,7 +60,7 @@ This is a **high-fidelity prototype** that can become production later.
 
 **Avoid:** Generic map app feel, surveillance dashboard feel, chat app feel, social media clone feel, enterprise dashboard feel.
 
-**Glass + accents:** Brand colors live in `Push/PushColorPalette.swift` — walnut for foreground/text, sunbeam for active fills. Reuse `PushGlassStyle`, `PushControlColors`, and `PushControlStyle` for all glass controls; do not one-off material values. Prefer native `glassEffect` on iOS 26+; iOS 17 uses the shared material fallback in `pushGlassBackground`.
+**Glass + accents:** Brand colors live in `Push/PushColorPalette.swift` — walnut for foreground/text, sunbeam for active fills. Use `PushControlColors` text hierarchy (`textEspresso`, `textPrimary`, `textSecondary`, `textTertiary`); do not use black or system primary. Reuse `PushGlassStyle`, `PushControlColors`, and `PushControlStyle` for all glass controls; do not one-off material values. Prefer native `glassEffect` on iOS 26+; iOS 17 uses the shared material fallback in `pushGlassBackground`.
 
 ---
 
