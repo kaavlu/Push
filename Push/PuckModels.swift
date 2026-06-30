@@ -101,6 +101,8 @@ struct FriendPuckData: Identifiable, Equatable {
     let activityDisplayText: String
     let availability: FriendAvailabilityState
     let venueStatusText: String
+    let lastUpdated: String
+    let withWhom: [String]?
 
     init(
         id: UUID = UUID(),
@@ -111,7 +113,9 @@ struct FriendPuckData: Identifiable, Equatable {
         activitySymbolName: String,
         activityDisplayText: String,
         availability: FriendAvailabilityState,
-        venueStatusText: String
+        venueStatusText: String,
+        lastUpdated: String = "Just now",
+        withWhom: [String]? = nil
     ) {
         self.id = id
         self.name = name
@@ -122,6 +126,8 @@ struct FriendPuckData: Identifiable, Equatable {
         self.activityDisplayText = activityDisplayText
         self.availability = availability
         self.venueStatusText = venueStatusText
+        self.lastUpdated = lastUpdated
+        self.withWhom = withWhom
     }
 }
 

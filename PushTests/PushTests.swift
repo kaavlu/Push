@@ -443,4 +443,70 @@ final class PushTests: XCTestCase {
         XCTAssertEqual(MainMapRoute.addFriend.systemImageName, "person.badge.plus")
     }
 
+    func testFriendPuckDataStoresLastUpdatedAndWithWhom() throws {
+        let puck = FriendPuckData(
+            name: "Ishan",
+            avatarPlaceholder: "IS",
+            profileImageAssetName: "assets/friends/ishan.png",
+            activity: "Lunch",
+            activitySymbolName: "fork.knife",
+            activityDisplayText: "Souvla",
+            availability: .joinable,
+            venueStatusText: "At Souvla",
+            lastUpdated: "Just now",
+            withWhom: ["Viplove"]
+        )
+
+        XCTAssertEqual(puck.lastUpdated, "Just now")
+        XCTAssertEqual(puck.withWhom, ["Viplove"])
+    }
+
+    func testFriendPuckDataDefaultsToJustNowAndNilWithWhom() throws {
+        let puck = FriendPuckData(
+            name: "Chitty",
+            avatarPlaceholder: "CH",
+            activity: "Coffee",
+            activitySymbolName: "cup.and.saucer.fill",
+            activityDisplayText: "Blue Bottle",
+            availability: .freeNow,
+            venueStatusText: "At Blue Bottle"
+        )
+
+        XCTAssertEqual(puck.lastUpdated, "Just now")
+        XCTAssertNil(puck.withWhom)
+    }
+
+    func testGroupHeadlineForTwoPeopleJoinsWithPlus() throws {
+        let people: [FriendPuckData] = [
+            FriendPuckData(
+                name: "Ishan", avatarPlaceholder: "IS", activity: "Lunch",
+                activitySymbolName: "fork.knife", activityDisplayText: "Souvla",
+                availability: .joinable, venueStatusText: "At Souvla"
+            ),
+            FriendPuckData(
+                name: "Viplove", avatarPlaceholder: "VI", activity: "Lunch",
+                activitySymbolName: "fork.knife", activityDisplayText: "Souvla",
+                availability: .joinable, venueStatusText: "With Ishan"
+            )
+        ]
+
+        XCTAssertEqual(FriendDetailSheetContent.groupHeadline(for: people), "Ishan + Viplove")
+    }
+
+    func testGroupHeadlineForThreeOrMorePeopleUsesCount() throws {
+        let people: [FriendPuckData] = (0..<4).map { i in
+            FriendPuckData(
+                name: "Person \(i)", avatarPlaceholder: "P\(i)", activity: "Park",
+                activitySymbolName: "leaf.fill", activityDisplayText: "Dolores",
+                availability: .joinable, venueStatusText: "At Dolores"
+            )
+        }
+
+        XCTAssertEqual(FriendDetailSheetContent.groupHeadline(for: people), "4 people")
+    }
+
+    func testGroupHeadlineForEmptyPeopleFallsBack() throws {
+        XCTAssertEqual(FriendDetailSheetContent.groupHeadline(for: []), "Group")
+    }
+
 }

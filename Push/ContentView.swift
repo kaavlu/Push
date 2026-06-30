@@ -13,6 +13,7 @@ struct ContentView: View {
     @State private var selectedFriendGroup: FriendGroupFilter = .allFriends
     @State private var presentedRoute: MainMapRoute?
     @State private var isCreateMenuPresented = false
+    @State private var selectedPuck: MapPuckData?
 
     private var filteredPucks: [MapPuckData] {
         guard selectedFriendGroup != .allFriends else {
@@ -23,8 +24,10 @@ struct ContentView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            StyledMapView(region: MapDefaults.region, pucks: filteredPucks)
-                .ignoresSafeArea()
+            StyledMapView(region: MapDefaults.region, pucks: filteredPucks) { puck in
+                selectedPuck = puck
+            }
+            .ignoresSafeArea()
 
             if isCreateMenuPresented {
                 createMenuBackdrop
@@ -74,6 +77,9 @@ struct ContentView: View {
         }
         .fullScreenCover(item: $presentedRoute) { route in
             destination(for: route)
+        }
+        .sheet(item: $selectedPuck) { puck in
+            FriendDetailSheet(puck: puck)
         }
     }
 

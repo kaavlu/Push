@@ -11,9 +11,10 @@ import SwiftUI
 struct StyledMapView: UIViewRepresentable {
     let region: MKCoordinateRegion
     let pucks: [MapPuckData]
+    let onPuckSelected: (MapPuckData) -> Void
 
     func makeCoordinator() -> Coordinator {
-        Coordinator()
+        Coordinator(onPuckSelected: onPuckSelected)
     }
 
     func makeUIView(context: Context) -> MKMapView {
@@ -53,6 +54,12 @@ struct StyledMapView: UIViewRepresentable {
 }
 
 final class Coordinator: NSObject, MKMapViewDelegate {
+    private let onPuckSelected: (MapPuckData) -> Void
+
+    init(onPuckSelected: @escaping (MapPuckData) -> Void) {
+        self.onPuckSelected = onPuckSelected
+    }
+
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         guard let puckAnnotation = annotation as? MapPuckAnnotation else {
             return nil
@@ -66,6 +73,12 @@ final class Coordinator: NSObject, MKMapViewDelegate {
         )
         annotationView.configure(with: puckAnnotation.puck)
         return annotationView
+    }
+
+    func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+        guard let annotation = view.annotation as? MapPuckAnnotation else { return }
+        mapView.deselectAnnotation(annotation, animated: false)
+        onPuckSelected(annotation.puck)
     }
 }
 
