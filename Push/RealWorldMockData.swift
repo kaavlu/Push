@@ -91,7 +91,9 @@ enum RealWorldMockData {
         symbolName: String,
         displayText: String,
         availability: FriendAvailabilityState,
-        venueStatusText: String
+        venueStatusText: String,
+        lastUpdated: String = "Just now",
+        withWhom: [String]? = nil
     ) -> FriendPuckData {
         let seed = friend(withID: id)
         return FriendPuckData(
@@ -102,11 +104,18 @@ enum RealWorldMockData {
             activitySymbolName: symbolName,
             activityDisplayText: displayText,
             availability: availability,
-            venueStatusText: venueStatusText
+            venueStatusText: venueStatusText,
+            lastUpdated: lastUpdated,
+            withWhom: withWhom
         )
     }
 
-    static func groupPuck(_ groupID: String, activity: String, displayText: String) -> FriendPuckData {
+    static func groupPuck(
+        _ groupID: String,
+        activity: String,
+        displayText: String,
+        lastUpdated: String = "Just now"
+    ) -> FriendPuckData {
         let group = groups.first { $0.id == groupID }
         return FriendPuckData(
             name: group?.name ?? groupID,
@@ -116,7 +125,9 @@ enum RealWorldMockData {
             activitySymbolName: "person.3.fill",
             activityDisplayText: displayText,
             availability: .joinable,
-            venueStatusText: "\(group?.name ?? "Group") is together"
+            venueStatusText: "\(group?.name ?? "Group") is together",
+            lastUpdated: lastUpdated,
+            withWhom: nil
         )
     }
 

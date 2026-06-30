@@ -443,4 +443,37 @@ final class PushTests: XCTestCase {
         XCTAssertEqual(MainMapRoute.addFriend.systemImageName, "person.badge.plus")
     }
 
+    func testFriendPuckDataStoresLastUpdatedAndWithWhom() throws {
+        let puck = FriendPuckData(
+            name: "Ishan",
+            avatarPlaceholder: "IS",
+            profileImageAssetName: "assets/friends/ishan.png",
+            activity: "Lunch",
+            activitySymbolName: "fork.knife",
+            activityDisplayText: "Souvla",
+            availability: .joinable,
+            venueStatusText: "At Souvla",
+            lastUpdated: "Just now",
+            withWhom: ["Viplove"]
+        )
+
+        XCTAssertEqual(puck.lastUpdated, "Just now")
+        XCTAssertEqual(puck.withWhom, ["Viplove"])
+    }
+
+    func testFriendPuckDataDefaultsToJustNowAndNilWithWhom() throws {
+        let puck = FriendPuckData(
+            name: "Chitty",
+            avatarPlaceholder: "CH",
+            activity: "Coffee",
+            activitySymbolName: "cup.and.saucer.fill",
+            activityDisplayText: "Blue Bottle",
+            availability: .freeNow,
+            venueStatusText: "At Blue Bottle"
+        )
+
+        XCTAssertEqual(puck.lastUpdated, "Just now")
+        XCTAssertNil(puck.withWhom)
+    }
+
 }
