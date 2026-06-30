@@ -476,4 +476,37 @@ final class PushTests: XCTestCase {
         XCTAssertNil(puck.withWhom)
     }
 
+    func testGroupHeadlineForTwoPeopleJoinsWithPlus() throws {
+        let people: [FriendPuckData] = [
+            FriendPuckData(
+                name: "Ishan", avatarPlaceholder: "IS", activity: "Lunch",
+                activitySymbolName: "fork.knife", activityDisplayText: "Souvla",
+                availability: .joinable, venueStatusText: "At Souvla"
+            ),
+            FriendPuckData(
+                name: "Viplove", avatarPlaceholder: "VI", activity: "Lunch",
+                activitySymbolName: "fork.knife", activityDisplayText: "Souvla",
+                availability: .joinable, venueStatusText: "With Ishan"
+            )
+        ]
+
+        XCTAssertEqual(FriendDetailSheetContent.groupHeadline(for: people), "Ishan + Viplove")
+    }
+
+    func testGroupHeadlineForThreeOrMorePeopleUsesCount() throws {
+        let people: [FriendPuckData] = (0..<4).map { i in
+            FriendPuckData(
+                name: "Person \(i)", avatarPlaceholder: "P\(i)", activity: "Park",
+                activitySymbolName: "leaf.fill", activityDisplayText: "Dolores",
+                availability: .joinable, venueStatusText: "At Dolores"
+            )
+        }
+
+        XCTAssertEqual(FriendDetailSheetContent.groupHeadline(for: people), "4 people")
+    }
+
+    func testGroupHeadlineForEmptyPeopleFallsBack() throws {
+        XCTAssertEqual(FriendDetailSheetContent.groupHeadline(for: []), "Group")
+    }
+
 }
