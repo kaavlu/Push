@@ -103,6 +103,8 @@ struct FriendPuckData: Identifiable, Equatable {
     let venueStatusText: String
     let lastUpdated: String
     let withWhom: [String]?
+    let locationLabel: String?
+    let placeName: String?
 
     init(
         id: UUID = UUID(),
@@ -115,7 +117,9 @@ struct FriendPuckData: Identifiable, Equatable {
         availability: FriendAvailabilityState,
         venueStatusText: String,
         lastUpdated: String = "Just now",
-        withWhom: [String]? = nil
+        withWhom: [String]? = nil,
+        locationLabel: String? = nil,
+        placeName: String? = nil
     ) {
         self.id = id
         self.name = name
@@ -128,6 +132,8 @@ struct FriendPuckData: Identifiable, Equatable {
         self.venueStatusText = venueStatusText
         self.lastUpdated = lastUpdated
         self.withWhom = withWhom
+        self.locationLabel = locationLabel
+        self.placeName = placeName
     }
 }
 

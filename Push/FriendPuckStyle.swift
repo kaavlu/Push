@@ -102,6 +102,30 @@ extension FriendAvailabilityState {
             return PuckColorTokens.unavailable
         }
     }
+
+    var chipFillColor: Color {
+        switch self {
+        case .freeNow:     return PuckColorTokens.freeNow.opacity(0.88)
+        case .freeSoon:    return PuckColorTokens.maybeDown.opacity(0.82)
+        case .maybeDown:   return PushColorPalette.Accent.sunbeam.opacity(0.90)
+        case .busy:        return PuckColorTokens.busy.opacity(0.82)
+        case .joinable:    return PuckColorTokens.joinable.opacity(0.88)
+        case .driving:     return PuckColorTokens.driving.opacity(0.82)
+        case .unavailable: return PuckColorTokens.unavailable.opacity(0.55)
+        }
+    }
+
+    var chipTextColor: Color {
+        switch self {
+        case .freeNow:     return Color(red: 0.04, green: 0.30, blue: 0.16)
+        case .freeSoon:    return PushColorPalette.Accent.walnut
+        case .maybeDown:   return PushColorPalette.Accent.walnut
+        case .busy:        return Color(red: 0.52, green: 0.15, blue: 0.02)
+        case .joinable:    return Color.white
+        case .driving:     return Color(red: 0.02, green: 0.30, blue: 0.42)
+        case .unavailable: return Color(red: 0.22, green: 0.24, blue: 0.28)
+        }
+    }
 }
 
 enum PuckColorTokens {

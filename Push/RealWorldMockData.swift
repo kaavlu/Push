@@ -93,7 +93,9 @@ enum RealWorldMockData {
         availability: FriendAvailabilityState,
         venueStatusText: String,
         lastUpdated: String = "Just now",
-        withWhom: [String]? = nil
+        withWhom: [String]? = nil,
+        locationLabel: String? = nil,
+        placeName: String? = nil
     ) -> FriendPuckData {
         let seed = friend(withID: id)
         return FriendPuckData(
@@ -106,7 +108,9 @@ enum RealWorldMockData {
             availability: availability,
             venueStatusText: venueStatusText,
             lastUpdated: lastUpdated,
-            withWhom: withWhom
+            withWhom: withWhom,
+            locationLabel: locationLabel,
+            placeName: placeName
         )
     }
 

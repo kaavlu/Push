@@ -8,13 +8,18 @@
 import SwiftUI
 
 enum PushGlassStyle {
-    static let materialPresenceOpacity = 0.72
-    static let tintOpacity = 0.24
-    static let strokeOpacity = 0.62
+    static let materialPresenceOpacity = 0.68
+    // Warm cream tint instead of neutral white
+    static let warmTint = Color(red: 1.0, green: 0.95, blue: 0.84)
+    static let tintOpacity = 0.22
+    // Stroke: keep white but slightly softer
+    static let strokeOpacity = 0.52
     static let strokeWidth: CGFloat = 0.8
-    static let shadowOpacity = 0.24
-    static let shadowRadius: CGFloat = 26
-    static let shadowYOffset: CGFloat = 12
+    // Walnut-amber shadow instead of black
+    static let shadowColor = Color(red: 0.55, green: 0.36, blue: 0.16)
+    static let shadowOpacity = 0.18
+    static let shadowRadius: CGFloat = 24
+    static let shadowYOffset: CGFloat = 10
 }
 
 enum PushControlStyle {
@@ -28,6 +33,12 @@ enum PushControlColors {
     static let activeForeground = PushColorPalette.Accent.walnut
     static let inactiveForeground = PushColorPalette.Accent.walnut.opacity(PushControlStyle.inactiveForegroundOpacity)
     static let activeFill = PushColorPalette.Accent.sunbeam.opacity(PushControlStyle.activeFillOpacity)
+
+    // Text hierarchy — walnut-based, no black
+    static let textEspresso = Color(red: 0.22, green: 0.12, blue: 0.05) // deep warm dark for names/titles
+    static let textPrimary = PushColorPalette.Accent.walnut
+    static let textSecondary = PushColorPalette.Accent.walnut.opacity(0.70)
+    static let textTertiary = PushColorPalette.Accent.walnut.opacity(0.52)
 }
 
 extension View {
@@ -58,7 +69,7 @@ extension View {
         )
         .background(
             RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                .fill(.white.opacity(PushGlassStyle.tintOpacity))
+                .fill(PushGlassStyle.warmTint.opacity(PushGlassStyle.tintOpacity))
         )
         .overlay {
             RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
@@ -68,7 +79,7 @@ extension View {
                 )
         }
         .shadow(
-            color: .black.opacity(PushGlassStyle.shadowOpacity),
+            color: PushGlassStyle.shadowColor.opacity(PushGlassStyle.shadowOpacity),
             radius: PushGlassStyle.shadowRadius,
             y: PushGlassStyle.shadowYOffset
         )

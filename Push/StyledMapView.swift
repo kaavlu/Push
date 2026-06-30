@@ -32,17 +32,10 @@ struct StyledMapView: UIViewRepresentable {
     }
 
     private func applyStyle(to mapView: MKMapView) {
-        mapView.pointOfInterestFilter = .excludingAll
-        mapView.showsTraffic = false
-
         if #available(iOS 16.0, *) {
-            let configuration = MKStandardMapConfiguration(elevationStyle: .realistic)
-            configuration.emphasisStyle = .muted
-            configuration.pointOfInterestFilter = .excludingAll
-            configuration.showsTraffic = false
-            mapView.preferredConfiguration = configuration
+            mapView.preferredConfiguration = MKImageryMapConfiguration(elevationStyle: .realistic)
         } else {
-            mapView.mapType = .mutedStandard
+            mapView.mapType = .hybrid
         }
     }
 

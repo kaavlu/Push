@@ -52,7 +52,9 @@ enum MapPuckMockData {
                     availability: .freeNow,
                     venueStatusText: "At Blue Bottle",
                     lastUpdated: "3 min ago",
-                    withWhom: nil
+                    withWhom: nil,
+                    locationLabel: "315 Linden St",
+                    placeName: "Blue Bottle"
                 )
             ],
             activity: "Coffee",
@@ -73,7 +75,9 @@ enum MapPuckMockData {
                     availability: .maybeDown,
                     venueStatusText: "Near Dolores",
                     lastUpdated: "8 min ago",
-                    withWhom: nil
+                    withWhom: nil,
+                    locationLabel: "19th St & Dolores St",
+                    placeName: "Dolores Park"
                 )
             ],
             activity: "Park",
