@@ -50,7 +50,9 @@ enum MapPuckMockData {
                     symbolName: "cup.and.saucer.fill",
                     displayText: "Blue Bottle",
                     availability: .freeNow,
-                    venueStatusText: "At Blue Bottle"
+                    venueStatusText: "At Blue Bottle",
+                    lastUpdated: "3 min ago",
+                    withWhom: nil
                 )
             ],
             activity: "Coffee",
@@ -69,7 +71,9 @@ enum MapPuckMockData {
                     symbolName: "leaf.fill",
                     displayText: "Dolores",
                     availability: .maybeDown,
-                    venueStatusText: "Near Dolores"
+                    venueStatusText: "Near Dolores",
+                    lastUpdated: "8 min ago",
+                    withWhom: nil
                 )
             ],
             activity: "Park",
@@ -88,7 +92,9 @@ enum MapPuckMockData {
                     symbolName: "fork.knife",
                     displayText: "Souvla",
                     availability: .joinable,
-                    venueStatusText: "At Souvla"
+                    venueStatusText: "At Souvla",
+                    lastUpdated: "Just now",
+                    withWhom: ["Viplove"]
                 ),
                 RealWorldMockData.friendPuck(
                     "viplove",
@@ -96,7 +102,9 @@ enum MapPuckMockData {
                     symbolName: "fork.knife",
                     displayText: "Souvla",
                     availability: .joinable,
-                    venueStatusText: "With Ishan"
+                    venueStatusText: "With Ishan",
+                    lastUpdated: "Just now",
+                    withWhom: ["Ishan"]
                 )
             ],
             activity: "Lunch",
@@ -115,7 +123,9 @@ enum MapPuckMockData {
                     symbolName: "leaf.fill",
                     displayText: "Dolores",
                     availability: .joinable,
-                    venueStatusText: "Already there"
+                    venueStatusText: "Already there",
+                    lastUpdated: "5 min ago",
+                    withWhom: ["Rohan", "Ryan", "Pranay"]
                 ),
                 RealWorldMockData.friendPuck(
                     "rohan",
@@ -123,7 +133,9 @@ enum MapPuckMockData {
                     symbolName: "leaf.fill",
                     displayText: "Dolores",
                     availability: .joinable,
-                    venueStatusText: "Walking over"
+                    venueStatusText: "Walking over",
+                    lastUpdated: "5 min ago",
+                    withWhom: ["Ram", "Ryan", "Pranay"]
                 ),
                 RealWorldMockData.friendPuck(
                     "ryan",
@@ -131,7 +143,9 @@ enum MapPuckMockData {
                     symbolName: "leaf.fill",
                     displayText: "Dolores",
                     availability: .joinable,
-                    venueStatusText: "Free in 20"
+                    venueStatusText: "Free in 20",
+                    lastUpdated: "5 min ago",
+                    withWhom: ["Ram", "Rohan", "Pranay"]
                 ),
                 RealWorldMockData.friendPuck(
                     "pranay",
@@ -139,7 +153,9 @@ enum MapPuckMockData {
                     symbolName: "leaf.fill",
                     displayText: "Dolores",
                     availability: .joinable,
-                    venueStatusText: "Maybe pulling up"
+                    venueStatusText: "Maybe pulling up",
+                    lastUpdated: "5 min ago",
+                    withWhom: ["Ram", "Rohan", "Ryan"]
                 )
             ],
             activity: "Park",
@@ -155,7 +171,8 @@ enum MapPuckMockData {
                 RealWorldMockData.groupPuck(
                     "exec",
                     activity: "Gym",
-                    displayText: "Crunch"
+                    displayText: "Crunch",
+                    lastUpdated: "12 min ago"
                 ),
                 RealWorldMockData.friendPuck(
                     "ram",
@@ -163,7 +180,9 @@ enum MapPuckMockData {
                     symbolName: "dumbbell.fill",
                     displayText: "Crunch",
                     availability: .joinable,
-                    venueStatusText: "Wrapping up"
+                    venueStatusText: "Wrapping up",
+                    lastUpdated: "12 min ago",
+                    withWhom: ["Ohm", "Roh"]
                 ),
                 RealWorldMockData.friendPuck(
                     "ohm",
@@ -171,7 +190,9 @@ enum MapPuckMockData {
                     symbolName: "dumbbell.fill",
                     displayText: "Crunch",
                     availability: .joinable,
-                    venueStatusText: "With the crew"
+                    venueStatusText: "With the crew",
+                    lastUpdated: "12 min ago",
+                    withWhom: ["Ram", "Roh"]
                 ),
                 RealWorldMockData.friendPuck(
                     "roh",
@@ -179,7 +200,9 @@ enum MapPuckMockData {
                     symbolName: "dumbbell.fill",
                     displayText: "Crunch",
                     availability: .joinable,
-                    venueStatusText: "Joining soon"
+                    venueStatusText: "Joining soon",
+                    lastUpdated: "12 min ago",
+                    withWhom: ["Ram", "Ohm"]
                 )
             ],
             activity: "Gym",
