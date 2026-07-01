@@ -53,7 +53,7 @@ struct PlanStatusPill: View {
     private var foregroundColor: Color {
         switch status {
         case .pending:   return PushColorPalette.Accent.walnut
-        case .joined:    return Color(red: 0.18, green: 0.48, blue: 0.28)
+        case .joined:    return PushColorPalette.Accent.sageGreen
         case .open:      return PushControlColors.textSecondary
         case .waiting:   return PushControlColors.textTertiary
         case .locked:    return PushColorPalette.Accent.walnut
@@ -64,7 +64,7 @@ struct PlanStatusPill: View {
     private var backgroundColor: Color {
         switch status {
         case .pending:   return PushColorPalette.Accent.sunbeam.opacity(0.7)
-        case .joined:    return Color(red: 0.78, green: 0.94, blue: 0.84)
+        case .joined:    return PushColorPalette.Accent.mintFoam
         case .open:      return PushColorPalette.Accent.walnut.opacity(0.10)
         case .waiting:   return PushColorPalette.Accent.walnut.opacity(0.06)
         case .locked:    return PushColorPalette.Accent.sunbeam

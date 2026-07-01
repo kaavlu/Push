@@ -11,6 +11,8 @@ enum PushColorPalette {
     enum Accent {
         static let sunbeam = Color(hex: 0xFFEE8C)
         static let walnut = Color(hex: 0x8B5B29)
+        static let sageGreen = Color(hex: 0x2E7A47)
+        static let mintFoam = Color(hex: 0xC7F0D6)
     }
 }
 
