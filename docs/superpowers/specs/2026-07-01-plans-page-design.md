@@ -226,7 +226,7 @@ After last card: empty state — `"You're all caught up"` with a secondary line 
 
 ### State
 
-`@State private var deckIndex: Int` — local to `ReviewPushesView`, starts at 0, increments on each swipe.
+`@State private var deckIndex: Int` — local to `ReviewPushesView`, starts at 0, increments on each swipe. Always guard `deckIndex < viewModel.plansNeedingResponse.count` before subscripting — the array shrinks as the user swipes and VM mutates statuses.
 `@State private var dragOffset: CGSize` — drives card transform during drag.
 
 ---
