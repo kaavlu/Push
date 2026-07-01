@@ -87,7 +87,8 @@ See `coding-standards.md` for the full reference. Key rules for this project:
 | File | Purpose |
 |---|---|
 | `tasks/todo.md` | Current plan and progress tracking |
-| `tasks/spec.md` | Feature spec (write before implementation) |
+| `tasks/spec.md` | Active feature spec (write before implementation) |
+| `docs/superpowers/specs/*.md` | Dated design specs per feature; read the relevant file before implementing |
 | `tasks/lessons.md` | Project-specific learnings and gotchas |
 
 ### Session Resume Protocol

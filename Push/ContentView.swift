@@ -138,11 +138,7 @@ struct ContentView: View {
                 symbolName: route.systemImageName
             )
         case .plans:
-            CreatePlaceholderView(
-                title: "Plans",
-                subtitle: "Shared plans with your people.",
-                symbolName: route.systemImageName
-            )
+            PlansView()
         }
     }
 
