@@ -47,6 +47,8 @@
 		BCC119D11C854837A2152A34 /* FriendDetailSheetStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 974E64FEDDA048D6A78E27C9 /* FriendDetailSheetStyle.swift */; };
 		E21E6EA528F84E30B20C18CB /* FriendDetailSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4812B3A122C423CB13A3484 /* FriendDetailSheet.swift */; };
 		5217A2DC2FF330000011F860 /* PlansModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2DB2FF330000011F860 /* PlansModels.swift */; };
+		5217A2DE2FF340000011F860 /* PlansViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2DD2FF340000011F860 /* PlansViewModel.swift */; };
+		5217A2E02FF340000011F860 /* PlansViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2DF2FF340000011F860 /* PlansViewModelTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -110,6 +112,8 @@
 		974E64FEDDA048D6A78E27C9 /* FriendDetailSheetStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendDetailSheetStyle.swift; sourceTree = "<group>"; };
 		B4812B3A122C423CB13A3484 /* FriendDetailSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendDetailSheet.swift; sourceTree = "<group>"; };
 		5217A2DB2FF330000011F860 /* PlansModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlansModels.swift; sourceTree = "<group>"; };
+		5217A2DD2FF340000011F860 /* PlansViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlansViewModel.swift; sourceTree = "<group>"; };
+		5217A2DF2FF340000011F860 /* PlansViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlansViewModelTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -176,6 +180,7 @@
 				5217A2B52FF2F8000011F860 /* GroupsView.swift */,
 				5217A2B72FF2FA000011F860 /* GroupDetailView.swift */,
 				5217A2DB2FF330000011F860 /* PlansModels.swift */,
+				5217A2DD2FF340000011F860 /* PlansViewModel.swift */,
 				5217A2A92FF2F1000011F860 /* ProfileModels.swift */,
 				5217A2C52FF310000011F860 /* ProfileViewModel.swift */,
 				5217A2C72FF310000011F860 /* ProfileMockData.swift */,
@@ -213,6 +218,7 @@
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
 				5217A2B92FF2FB000011F860 /* GroupsTests.swift */,
+				5217A2DF2FF340000011F860 /* PlansViewModelTests.swift */,
 			);
 			path = PushTests;
 			sourceTree = "<group>";
@@ -373,6 +379,7 @@
 				5217A2B62FF2F8000011F860 /* GroupsView.swift in Sources */,
 				5217A2B82FF2FA000011F860 /* GroupDetailView.swift in Sources */,
 				5217A2DC2FF330000011F860 /* PlansModels.swift in Sources */,
+				5217A2DE2FF340000011F860 /* PlansViewModel.swift in Sources */,
 				5217A2AA2FF2F1000011F860 /* ProfileModels.swift in Sources */,
 				5217A2C62FF310000011F860 /* ProfileViewModel.swift in Sources */,
 				5217A2C82FF310000011F860 /* ProfileMockData.swift in Sources */,
@@ -399,6 +406,7 @@
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
 				5217A2BA2FF2FB000011F860 /* GroupsTests.swift in Sources */,
+				5217A2E02FF340000011F860 /* PlansViewModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
