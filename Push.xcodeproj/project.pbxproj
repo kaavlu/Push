@@ -49,6 +49,7 @@
 		5217A2DC2FF330000011F860 /* PlansModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2DB2FF330000011F860 /* PlansModels.swift */; };
 		5217A2DE2FF340000011F860 /* PlansViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2DD2FF340000011F860 /* PlansViewModel.swift */; };
 		5217A2E02FF340000011F860 /* PlansViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2DF2FF340000011F860 /* PlansViewModelTests.swift */; };
+		5217A2E22FF350000011F860 /* PlansStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2E12FF350000011F860 /* PlansStyle.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -114,6 +115,7 @@
 		5217A2DB2FF330000011F860 /* PlansModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlansModels.swift; sourceTree = "<group>"; };
 		5217A2DD2FF340000011F860 /* PlansViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlansViewModel.swift; sourceTree = "<group>"; };
 		5217A2DF2FF340000011F860 /* PlansViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlansViewModelTests.swift; sourceTree = "<group>"; };
+		5217A2E12FF350000011F860 /* PlansStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlansStyle.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -181,6 +183,7 @@
 				5217A2B72FF2FA000011F860 /* GroupDetailView.swift */,
 				5217A2DB2FF330000011F860 /* PlansModels.swift */,
 				5217A2DD2FF340000011F860 /* PlansViewModel.swift */,
+				5217A2E12FF350000011F860 /* PlansStyle.swift */,
 				5217A2A92FF2F1000011F860 /* ProfileModels.swift */,
 				5217A2C52FF310000011F860 /* ProfileViewModel.swift */,
 				5217A2C72FF310000011F860 /* ProfileMockData.swift */,
@@ -380,6 +383,7 @@
 				5217A2B82FF2FA000011F860 /* GroupDetailView.swift in Sources */,
 				5217A2DC2FF330000011F860 /* PlansModels.swift in Sources */,
 				5217A2DE2FF340000011F860 /* PlansViewModel.swift in Sources */,
+				5217A2E22FF350000011F860 /* PlansStyle.swift in Sources */,
 				5217A2AA2FF2F1000011F860 /* ProfileModels.swift in Sources */,
 				5217A2C62FF310000011F860 /* ProfileViewModel.swift in Sources */,
 				5217A2C82FF310000011F860 /* ProfileMockData.swift in Sources */,
