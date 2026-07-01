@@ -23,8 +23,7 @@ struct PlansView: View {
             }
         }
         .fullScreenCover(isPresented: $viewModel.isReviewDeckPresented) {
-            // ReviewPushesView placeholder — wired in Task 7
-            Text("Review Pushes").onTapGesture { viewModel.isReviewDeckPresented = false }
+            ReviewPushesView(viewModel: viewModel)
         }
     }
 

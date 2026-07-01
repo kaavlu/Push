@@ -53,6 +53,7 @@
 		5217A2E42FF350000011F860 /* ActivePlanCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2E32FF350000011F860 /* ActivePlanCard.swift */; };
 		5217A2E62FF360000011F860 /* PlansCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2E52FF360000011F860 /* PlansCalendarView.swift */; };
 		5217A2E82FF370000011F860 /* PlansView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2E72FF370000011F860 /* PlansView.swift */; };
+		5217A2EA2FF380000011F860 /* ReviewPushesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2E92FF380000011F860 /* ReviewPushesView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -122,6 +123,7 @@
 		5217A2E32FF350000011F860 /* ActivePlanCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivePlanCard.swift; sourceTree = "<group>"; };
 		5217A2E52FF360000011F860 /* PlansCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlansCalendarView.swift; sourceTree = "<group>"; };
 		5217A2E72FF370000011F860 /* PlansView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlansView.swift; sourceTree = "<group>"; };
+		5217A2E92FF380000011F860 /* ReviewPushesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewPushesView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -193,6 +195,7 @@
 				5217A2E32FF350000011F860 /* ActivePlanCard.swift */,
 				5217A2E52FF360000011F860 /* PlansCalendarView.swift */,
 				5217A2E72FF370000011F860 /* PlansView.swift */,
+				5217A2E92FF380000011F860 /* ReviewPushesView.swift */,
 				5217A2A92FF2F1000011F860 /* ProfileModels.swift */,
 				5217A2C52FF310000011F860 /* ProfileViewModel.swift */,
 				5217A2C72FF310000011F860 /* ProfileMockData.swift */,
@@ -396,6 +399,7 @@
 				5217A2E42FF350000011F860 /* ActivePlanCard.swift in Sources */,
 				5217A2E62FF360000011F860 /* PlansCalendarView.swift in Sources */,
 				5217A2E82FF370000011F860 /* PlansView.swift in Sources */,
+				5217A2EA2FF380000011F860 /* ReviewPushesView.swift in Sources */,
 				5217A2AA2FF2F1000011F860 /* ProfileModels.swift in Sources */,
 				5217A2C62FF310000011F860 /* ProfileViewModel.swift in Sources */,
 				5217A2C82FF310000011F860 /* ProfileMockData.swift in Sources */,
