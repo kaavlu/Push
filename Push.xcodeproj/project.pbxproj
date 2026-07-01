@@ -46,6 +46,7 @@
 		5217A2DA2FF330000011F860 /* FriendClusterPuck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2D92FF330000011F860 /* FriendClusterPuck.swift */; };
 		BCC119D11C854837A2152A34 /* FriendDetailSheetStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 974E64FEDDA048D6A78E27C9 /* FriendDetailSheetStyle.swift */; };
 		E21E6EA528F84E30B20C18CB /* FriendDetailSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4812B3A122C423CB13A3484 /* FriendDetailSheet.swift */; };
+		5217A2DC2FF330000011F860 /* PlansModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2DB2FF330000011F860 /* PlansModels.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -108,6 +109,7 @@
 		5217A2D92FF330000011F860 /* FriendClusterPuck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendClusterPuck.swift; sourceTree = "<group>"; };
 		974E64FEDDA048D6A78E27C9 /* FriendDetailSheetStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendDetailSheetStyle.swift; sourceTree = "<group>"; };
 		B4812B3A122C423CB13A3484 /* FriendDetailSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendDetailSheet.swift; sourceTree = "<group>"; };
+		5217A2DB2FF330000011F860 /* PlansModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlansModels.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -173,6 +175,7 @@
 				5217A2B32FF2F8000011F860 /* GroupsModels.swift */,
 				5217A2B52FF2F8000011F860 /* GroupsView.swift */,
 				5217A2B72FF2FA000011F860 /* GroupDetailView.swift */,
+				5217A2DB2FF330000011F860 /* PlansModels.swift */,
 				5217A2A92FF2F1000011F860 /* ProfileModels.swift */,
 				5217A2C52FF310000011F860 /* ProfileViewModel.swift */,
 				5217A2C72FF310000011F860 /* ProfileMockData.swift */,
@@ -369,6 +372,7 @@
 				5217A2B42FF2F8000011F860 /* GroupsModels.swift in Sources */,
 				5217A2B62FF2F8000011F860 /* GroupsView.swift in Sources */,
 				5217A2B82FF2FA000011F860 /* GroupDetailView.swift in Sources */,
+				5217A2DC2FF330000011F860 /* PlansModels.swift in Sources */,
 				5217A2AA2FF2F1000011F860 /* ProfileModels.swift in Sources */,
 				5217A2C62FF310000011F860 /* ProfileViewModel.swift in Sources */,
 				5217A2C82FF310000011F860 /* ProfileMockData.swift in Sources */,
