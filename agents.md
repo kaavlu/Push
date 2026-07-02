@@ -30,7 +30,7 @@ This is a **high-fidelity prototype** that can become production later.
 3. **Friend Detail** — tap a friend to see more; lightweight, not a full profile
 4. **Feed** — real-life social activity (arrivals, availability shifts, groups forming)
 5. **Who's Down** — quick answer to "is anything happening right now?"
-6. **Pull Up** — low-pressure signal of social intent (faster than starting a group chat)
+6. **Pull Up** — low-pressure signal of social intent (faster than starting a group chat); creation UX is the 4-step **Start Push** flow (`StartPushFlowView`, create menu → `MainMapRoute.startPush`).
 7. **Friend Groups** — real-world circles with member statuses, activity, plans
 8. **Plan Cards** — shared coordination objects (not chat threads)
 9. **Privacy Controls** — simple visibility settings per activity
@@ -74,7 +74,7 @@ See `coding-standards.md` for the full reference. Key rules for this project:
 - **Mock fixtures:** Central friend/group data lives in `RealWorldMockData.swift`; feature-specific lists use `*MockData` enums (e.g. `MapPuckMockData`).
 - **Map pucks:** `MapPuckKind` (`individual`, `hangout`, `cluster`, `friendGroup`) drives annotation rendering and `FriendDetailSheet` layout/detents; fixtures live in `MapPuckMockData`.
 - **Current user on map:** Place the user inside group pucks via `RealWorldMockData.userPuck()` (`isCurrentUser: true`); the standalone `UserLocationPin` hides when any puck has `includesCurrentUser`.
-- **Feature files:** Flat under `Push/` — split by suffix: `*Models`, `*MockData`, `*View`, `*ViewModel`, `*Style`.
+- **Feature files:** Flat under `Push/` — split by suffix: `*Models`, `*MockData`, `*View`, `*ViewModel`, `*Style`. Multi-step flows add `*FlowView` (container), `*StepNView`, and shared `*Style`; register on `MainMapRoute`.
 - **Files ≤ 400 lines.** Split by responsibility.
 - **Functions ≤ 40 lines, single responsibility.**
 - **No magic numbers.** Named constants only.
