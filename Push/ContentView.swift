@@ -59,8 +59,12 @@ struct ContentView: View {
         )
         .overlay(alignment: .top) {
             HStack(alignment: .center, spacing: 0) {
-                Color.clear
-                    .frame(width: TopControlLayout.rightGroupWidth, height: TopControlLayout.iconButtonSize)
+                TopIconButton(
+                    systemImageName: MainMapRoute.profile.systemImageName,
+                    accessibilityLabel: MainMapRoute.profile.accessibilityLabel
+                ) {
+                    presentedRoute = .profile
+                }
 
                 Spacer(minLength: 0)
 
@@ -69,15 +73,9 @@ struct ContentView: View {
 
                 Spacer(minLength: 0)
 
-                HStack(spacing: TopControlLayout.iconButtonGroupSpacing) {
-                    TopIconButton(systemImageName: "bell.fill", accessibilityLabel: "Notifications") {}
-                    TopIconButton(
-                        systemImageName: MainMapRoute.profile.systemImageName,
-                        accessibilityLabel: MainMapRoute.profile.accessibilityLabel
-                    ) {
-                        presentedRoute = .profile
-                    }
-                }
+                // Mirror placeholder keeps dropdown centered
+                Color.clear
+                    .frame(width: TopControlLayout.iconButtonSize, height: TopControlLayout.iconButtonSize)
             }
             .padding(.horizontal, TopControlLayout.horizontalMargin)
             .padding(.top, TopControlLayout.topMargin)
@@ -337,24 +335,21 @@ private enum TopControlLayout {
     static let dropdownWidth: CGFloat = 139.4
     static let dropdownHeight: CGFloat = 46
     static let iconButtonSize: CGFloat = 44
-    static let iconButtonGroupSpacing: CGFloat = 8
-    static let rightGroupWidth: CGFloat = iconButtonSize * 2 + iconButtonGroupSpacing
     static let cornerRadius: CGFloat = iconButtonSize / 2
     static let iconSize: CGFloat = 17
     static let minimumTextScale = 0.78
 }
 
 private enum MapAttributionLayout {
-    // Insets tell MapKit where to place legal text, Apple logo, and compass
-    // so they don't hide under Push UI elements. Values include estimated
-    // device safe-area insets since the map fills the full screen.
+    // Insets tell MapKit where to place the Apple logo and legal text.
+    // Compass is now a manually placed MKCompassButton — not driven by these margins.
+    // top: 120 pushes attribution below the top controls; bottom: 130 keeps it above the nav bar.
     static let top: CGFloat = 120
     static let bottom: CGFloat = 130
     static let left: CGFloat = 16
-    static let right: CGFloat = 116
 
     static var edgeInsets: UIEdgeInsets {
-        UIEdgeInsets(top: top, left: left, bottom: bottom, right: right)
+        UIEdgeInsets(top: top, left: left, bottom: bottom, right: 0)
     }
 }
 

@@ -9,6 +9,7 @@ struct PlanData: Identifiable {
     let socialProof: String
     let locationHint: String
     var status: PlanStatus
+    let isOwner: Bool
 }
 
 enum PlanStatus: String, Equatable {
@@ -51,7 +52,8 @@ enum PlansMockData {
             timeSignal: "8:00 PM",
             socialProof: "3 in · 2 maybe",
             locationHint: "Suggested: North Park",
-            status: .pending
+            status: .pending,
+            isOwner: false
         ),
         PlanData(
             id: "gym-later",
@@ -60,7 +62,8 @@ enum PlansMockData {
             timeSignal: "around 7:45 PM",
             socialProof: "4 going",
             locationHint: "Crunch Fitness",
-            status: .joined
+            status: .joined,
+            isOwner: true
         ),
         PlanData(
             id: "coffee",
@@ -69,7 +72,8 @@ enum PlansMockData {
             timeSignal: "now",
             socialProof: "Chitty is there · Ishan maybe",
             locationHint: "Blue Bottle",
-            status: .open
+            status: .open,
+            isOwner: false
         ),
         PlanData(
             id: "drinks-friday",
@@ -78,7 +82,8 @@ enum PlansMockData {
             timeSignal: "Friday, 9:00 PM",
             socialProof: "2 in · 1 maybe",
             locationHint: "Suggested: Little Italy",
-            status: .pending
+            status: .pending,
+            isOwner: true
         ),
         PlanData(
             id: "poker-night",
@@ -87,7 +92,8 @@ enum PlansMockData {
             timeSignal: "Saturday",
             socialProof: "Ram in · Ohm maybe",
             locationHint: "Ram's place",
-            status: .waiting
+            status: .waiting,
+            isOwner: false
         )
     ]
 

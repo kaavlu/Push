@@ -24,12 +24,16 @@ struct PlansView: View {
         .fullScreenCover(isPresented: $viewModel.isStartPushPresented) {
             StartPushFlowView()
         }
+        .fullScreenCover(isPresented: $viewModel.isYourPushesPresented) {
+            YourPushesListView(viewModel: viewModel)
+        }
     }
 
     private var pageContent: some View {
         VStack(alignment: .leading, spacing: PlansLayout.sectionSpacing) {
             PlansCalendarView(viewModel: viewModel)
-            CurrentPushesModule(viewModel: viewModel)
+            YourPushesModule(viewModel: viewModel)
+            ActivePushesModule(viewModel: viewModel)
             Spacer(minLength: 0)
             StartPlanButton { viewModel.isStartPushPresented = true }
                 .padding(.horizontal, PlansLayout.startPlanButtonHorizontalPadding)
@@ -63,41 +67,28 @@ private struct PlansPageHeader: View {
     }
 }
 
-private struct CurrentPushesModule: View {
+private struct YourPushesModule: View {
     @ObservedObject var viewModel: PlansViewModel
 
     var body: some View {
         VStack(alignment: .leading, spacing: PlansLayout.currentPushesSpacing) {
-            summaryRow
-            ForEach(previewPlans) { plan in
-                ActivePlanCard(plan: plan)
-            }
-            if viewModel.activeCount > CurrentPushesConstants.previewLimit {
-                reviewAllButton
-            }
-        }
-    }
-
-    private var summaryRow: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text("Current Pushes")
+            Text("Your Pushes")
                 .font(.headline.weight(.bold))
                 .foregroundStyle(PushControlColors.textEspresso)
-            Text("\(viewModel.activeCount) active · \(viewModel.needsResponseCount) need you")
-                .font(.footnote)
-                .foregroundStyle(PushControlColors.textSecondary)
+            if let first = viewModel.yourPushes.first {
+                ActivePlanCard(plan: first)
+            }
+            if viewModel.yourPushes.count > 1 {
+                seeAllButton
+            }
         }
     }
 
-    private var previewPlans: [PlanData] {
-        Array(viewModel.sortedPlans.prefix(CurrentPushesConstants.previewLimit))
-    }
-
-    private var reviewAllButton: some View {
+    private var seeAllButton: some View {
         Button {
-            viewModel.isReviewDeckPresented = true
+            viewModel.isYourPushesPresented = true
         } label: {
-            Text("Review all \(viewModel.activeCount) →")
+            Text("See all \(viewModel.yourPushes.count) →")
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(PushControlColors.textPrimary)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -107,8 +98,69 @@ private struct CurrentPushesModule: View {
     }
 }
 
-private enum CurrentPushesConstants {
-    static let previewLimit = 2
+private struct ActivePushesModule: View {
+    @ObservedObject var viewModel: PlansViewModel
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: PlansLayout.currentPushesSpacing) {
+            Text("Active Pushes")
+                .font(.headline.weight(.bold))
+                .foregroundStyle(PushControlColors.textEspresso)
+            if let first = viewModel.activePushes.first {
+                ActivePlanCard(plan: first)
+            }
+            if viewModel.activePushes.count > 1 {
+                reviewAllButton
+            }
+        }
+    }
+
+    private var reviewAllButton: some View {
+        Button {
+            viewModel.isReviewDeckPresented = true
+        } label: {
+            Text("Review all \(viewModel.activePushes.count) →")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(PushControlColors.textPrimary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .buttonStyle(.plain)
+        .padding(.top, PlansLayout.reviewAllButtonTopPadding)
+    }
+}
+
+struct YourPushesListView: View {
+    @ObservedObject var viewModel: PlansViewModel
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        ZStack {
+            PushModalBackground()
+            VStack(alignment: .leading, spacing: 0) {
+                Text("Your Pushes")
+                    .font(.largeTitle.weight(.bold))
+                    .foregroundStyle(PushControlColors.activeForeground)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.top, PlansLayout.headerTopPadding)
+                    .padding(.horizontal, PlansLayout.horizontalPadding)
+                ScrollView {
+                    VStack(spacing: PlansLayout.currentPushesSpacing) {
+                        ForEach(viewModel.yourPushes) { plan in
+                            ActivePlanCard(plan: plan)
+                        }
+                    }
+                    .padding(.horizontal, PlansLayout.horizontalPadding)
+                    .padding(.top, PlansLayout.sectionSpacing)
+                    .padding(.bottom, PlansLayout.bottomPadding)
+                }
+            }
+        }
+        .overlay(alignment: .top) {
+            PushModalCloseButtonBar(accessibilityLabel: "Close your pushes") {
+                dismiss()
+            }
+        }
+    }
 }
 
 private struct StartPlanButton: View {

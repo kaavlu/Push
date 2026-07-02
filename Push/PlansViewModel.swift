@@ -11,6 +11,7 @@ final class PlansViewModel: ObservableObject {
     @Published var selectedDay: CalendarDayData?
     @Published var isReviewDeckPresented: Bool = false
     @Published var isStartPushPresented: Bool = false
+    @Published var isYourPushesPresented: Bool = false
 
     init(plans: [PlanData] = PlansMockData.plans, referenceDate: Date = Date()) {
         self.plans = plans
@@ -21,12 +22,20 @@ final class PlansViewModel: ObservableObject {
         self.mostActiveGroup = PlansMockData.mostActiveGroup
     }
 
-    var activeCount: Int { plans.count }
+    var yourPushes: [PlanData] {
+        plans.filter { $0.isOwner }
+    }
+
+    var activePushes: [PlanData] {
+        plans.filter { !$0.isOwner }.sorted { priority($0) < priority($1) }
+    }
+
+    var activeCount: Int { activePushes.count }
 
     var needsResponseCount: Int { plansNeedingResponse.count }
 
     var plansNeedingResponse: [PlanData] {
-        sortedPlans.filter { $0.status == .pending || $0.status == .open }
+        activePushes.filter { $0.status == .pending || $0.status == .open }
     }
 
     var sortedPlans: [PlanData] {

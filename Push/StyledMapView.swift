@@ -32,7 +32,26 @@ struct StyledMapView: UIViewRepresentable {
         let userAnnotation = UserLocationAnnotation(isInGroup: isUserInGroup)
         context.coordinator.userLocationAnnotation = userAnnotation
         mapView.addAnnotation(userAnnotation)
+        placeCompass(on: mapView)
         return mapView
+    }
+
+    private func placeCompass(on mapView: MKMapView) {
+        mapView.showsCompass = false
+        let compass = MKCompassButton(mapView: mapView)
+        compass.compassVisibility = .visible
+        compass.translatesAutoresizingMaskIntoConstraints = false
+        mapView.addSubview(compass)
+        NSLayoutConstraint.activate([
+            compass.trailingAnchor.constraint(
+                equalTo: mapView.safeAreaLayoutGuide.trailingAnchor,
+                constant: -CompassLayout.trailingMargin
+            ),
+            compass.topAnchor.constraint(
+                equalTo: mapView.safeAreaLayoutGuide.topAnchor,
+                constant: CompassLayout.topMargin
+            )
+        ])
     }
 
     func updateUIView(_ mapView: MKMapView, context: Context) {
@@ -47,8 +66,10 @@ struct StyledMapView: UIViewRepresentable {
 
     private func applyStyle(to mapView: MKMapView) {
         if #available(iOS 16.0, *) {
+            guard !(mapView.preferredConfiguration is MKImageryMapConfiguration) else { return }
             mapView.preferredConfiguration = MKImageryMapConfiguration(elevationStyle: .realistic)
         } else {
+            guard mapView.mapType != .hybrid else { return }
             mapView.mapType = .hybrid
         }
     }
@@ -239,4 +260,9 @@ private struct UserLocationDot: View {
 private enum UserLocationLayout {
     static let pinSize: CGFloat = 52
     static let frameSize = CGSize(width: 68, height: 68)
+}
+
+private enum CompassLayout {
+    static let trailingMargin: CGFloat = 16
+    static let topMargin: CGFloat = 10
 }

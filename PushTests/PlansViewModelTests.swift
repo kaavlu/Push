@@ -7,9 +7,9 @@ final class PlansViewModelTests: XCTestCase {
     func testSortedPlans_pendingBeforeJoined() {
         let plans = [
             PlanData(id: "a", title: "A", group: "G", timeSignal: "now",
-                     socialProof: "1 in", locationHint: "here", status: .joined),
+                     socialProof: "1 in", locationHint: "here", status: .joined, isOwner: false),
             PlanData(id: "b", title: "B", group: "G", timeSignal: "now",
-                     socialProof: "1 in", locationHint: "here", status: .pending)
+                     socialProof: "1 in", locationHint: "here", status: .pending, isOwner: false)
         ]
         let vm = PlansViewModel(plans: plans)
         XCTAssertEqual(vm.sortedPlans.first?.id, "b")
@@ -19,9 +19,9 @@ final class PlansViewModelTests: XCTestCase {
     func testSortedPlans_openBeforeJoined() {
         let plans = [
             PlanData(id: "a", title: "A", group: "G", timeSignal: "now",
-                     socialProof: "", locationHint: "", status: .joined),
+                     socialProof: "", locationHint: "", status: .joined, isOwner: false),
             PlanData(id: "b", title: "B", group: "G", timeSignal: "now",
-                     socialProof: "", locationHint: "", status: .open)
+                     socialProof: "", locationHint: "", status: .open, isOwner: false)
         ]
         let vm = PlansViewModel(plans: plans)
         XCTAssertEqual(vm.sortedPlans.first?.id, "b")
@@ -30,11 +30,11 @@ final class PlansViewModelTests: XCTestCase {
     func testPlansNeedingResponse_includesPendingAndOpen() {
         let plans = [
             PlanData(id: "a", title: "A", group: "G", timeSignal: "now",
-                     socialProof: "", locationHint: "", status: .pending),
+                     socialProof: "", locationHint: "", status: .pending, isOwner: false),
             PlanData(id: "b", title: "B", group: "G", timeSignal: "now",
-                     socialProof: "", locationHint: "", status: .joined),
+                     socialProof: "", locationHint: "", status: .joined, isOwner: false),
             PlanData(id: "c", title: "C", group: "G", timeSignal: "now",
-                     socialProof: "", locationHint: "", status: .open)
+                     socialProof: "", locationHint: "", status: .open, isOwner: false)
         ]
         let vm = PlansViewModel(plans: plans)
         let ids = vm.plansNeedingResponse.map(\.id)
@@ -46,24 +46,25 @@ final class PlansViewModelTests: XCTestCase {
     func testNeedsResponseCount_matchesPendingAndOpen() {
         let plans = [
             PlanData(id: "a", title: "A", group: "G", timeSignal: "now",
-                     socialProof: "", locationHint: "", status: .pending),
+                     socialProof: "", locationHint: "", status: .pending, isOwner: false),
             PlanData(id: "b", title: "B", group: "G", timeSignal: "now",
-                     socialProof: "", locationHint: "", status: .open),
+                     socialProof: "", locationHint: "", status: .open, isOwner: false),
             PlanData(id: "c", title: "C", group: "G", timeSignal: "now",
-                     socialProof: "", locationHint: "", status: .joined)
+                     socialProof: "", locationHint: "", status: .joined, isOwner: false)
         ]
         let vm = PlansViewModel(plans: plans)
         XCTAssertEqual(vm.needsResponseCount, 2)
     }
 
-    func testActiveCount_matchesTotalPlans() {
+    func testActiveCount_matchesInvitedPlans() {
         let vm = PlansViewModel(plans: PlansMockData.plans)
-        XCTAssertEqual(vm.activeCount, PlansMockData.plans.count)
+        let expectedCount = PlansMockData.plans.filter { !$0.isOwner }.count
+        XCTAssertEqual(vm.activeCount, expectedCount)
     }
 
     func testRespond_rightSwipe_setsJoined() {
         let plan = PlanData(id: "x", title: "X", group: "G", timeSignal: "now",
-                            socialProof: "", locationHint: "", status: .pending)
+                            socialProof: "", locationHint: "", status: .pending, isOwner: false)
         let vm = PlansViewModel(plans: [plan])
         vm.respond(to: plan, with: .right)
         XCTAssertEqual(vm.plans.first?.status, .joined)
@@ -71,7 +72,7 @@ final class PlansViewModelTests: XCTestCase {
 
     func testRespond_leftSwipe_setsWaiting() {
         let plan = PlanData(id: "x", title: "X", group: "G", timeSignal: "now",
-                            socialProof: "", locationHint: "", status: .pending)
+                            socialProof: "", locationHint: "", status: .pending, isOwner: false)
         let vm = PlansViewModel(plans: [plan])
         vm.respond(to: plan, with: .left)
         XCTAssertEqual(vm.plans.first?.status, .waiting)
@@ -79,7 +80,7 @@ final class PlansViewModelTests: XCTestCase {
 
     func testRespond_upSwipe_setsOpen() {
         let plan = PlanData(id: "x", title: "X", group: "G", timeSignal: "now",
-                            socialProof: "", locationHint: "", status: .pending)
+                            socialProof: "", locationHint: "", status: .pending, isOwner: false)
         let vm = PlansViewModel(plans: [plan])
         vm.respond(to: plan, with: .up)
         XCTAssertEqual(vm.plans.first?.status, .open)
@@ -87,9 +88,9 @@ final class PlansViewModelTests: XCTestCase {
 
     func testRespond_unknownPlan_doesNotCrash() {
         let plan = PlanData(id: "x", title: "X", group: "G", timeSignal: "now",
-                            socialProof: "", locationHint: "", status: .pending)
+                            socialProof: "", locationHint: "", status: .pending, isOwner: false)
         let other = PlanData(id: "y", title: "Y", group: "G", timeSignal: "now",
-                             socialProof: "", locationHint: "", status: .pending)
+                             socialProof: "", locationHint: "", status: .pending, isOwner: false)
         let vm = PlansViewModel(plans: [plan])
         vm.respond(to: other, with: .right)
         XCTAssertEqual(vm.plans.first?.status, .pending)
