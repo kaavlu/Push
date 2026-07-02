@@ -31,8 +31,8 @@ This is a **high-fidelity prototype** that can become production later.
 4. **Feed** — real-life social activity (arrivals, availability shifts, groups forming)
 5. **Who's Down** — quick answer to "is anything happening right now?"
 6. **Pull Up** — low-pressure signal of social intent (faster than starting a group chat)
-7. **Friend Groups** — real-world circles with member statuses, activity, plans
-8. **Plan Cards** — shared coordination objects (not chat threads)
+7. **Friend Groups** — real-world circles with member statuses, activity, pushes
+8. **Push Cards** — shared coordination objects (not chat threads)
 9. **Privacy Controls** — simple visibility settings per activity
 
 ### Availability States
