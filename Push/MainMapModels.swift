@@ -84,6 +84,7 @@ enum MainMapRoute: String, Identifiable, Equatable {
     case addFriend
     case feed
     case plans
+    case startPush
 
     var id: String { rawValue }
 
@@ -101,6 +102,8 @@ enum MainMapRoute: String, Identifiable, Equatable {
             return "Feed"
         case .plans:
             return "Plans"
+        case .startPush:
+            return "Start Push"
         }
     }
 
@@ -118,6 +121,8 @@ enum MainMapRoute: String, Identifiable, Equatable {
             return "list.bullet"
         case .plans:
             return "calendar"
+        case .startPush:
+            return "bolt.fill"
         }
     }
 }
