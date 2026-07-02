@@ -7,40 +7,6 @@
 
 import Foundation
 
-enum PushTiming: CaseIterable, Equatable {
-    case now, tonight, tomorrow
-
-    var title: String {
-        switch self {
-        case .now: return "Now"
-        case .tonight: return "Tonight"
-        case .tomorrow: return "Tomorrow"
-        }
-    }
-}
-
-enum PushVibe: CaseIterable, Equatable {
-    case casual, downIfJoin, definitelyGoing
-
-    var title: String {
-        switch self {
-        case .casual: return "Casual / No pressure"
-        case .downIfJoin: return "Down if people join"
-        case .definitelyGoing: return "Definitely going"
-        }
-    }
-}
-
-enum PushInviteSize: CaseIterable, Equatable {
-    case openToAnyone, inviteOnly
-
-    var title: String {
-        switch self {
-        case .openToAnyone: return "Open to anyone / Anyone can join"
-        case .inviteOnly: return "Specific group / Invite only"
-        }
-    }
-}
 
 struct PushRecipientItem: Identifiable, Equatable {
     let id: String
@@ -65,10 +31,9 @@ final class StartPushViewModel: ObservableObject {
             }
         }
     }
-    @Published var timing: PushTiming = .now
+    @Published var selectedTime: Date = Date()
     @Published var location: String = ""
-    @Published var vibe: PushVibe = .casual
-    @Published var inviteSize: PushInviteSize = .openToAnyone
+    @Published var notes: String = ""
     @Published var searchText: String = ""
 
     let groups: [PushRecipientItem]

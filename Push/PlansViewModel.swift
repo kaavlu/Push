@@ -10,6 +10,7 @@ final class PlansViewModel: ObservableObject {
     @Published private(set) var mostActiveGroup: String
     @Published var selectedDay: CalendarDayData?
     @Published var isReviewDeckPresented: Bool = false
+    @Published var isStartPushPresented: Bool = false
 
     init(plans: [PlanData] = PlansMockData.plans, referenceDate: Date = Date()) {
         self.plans = plans

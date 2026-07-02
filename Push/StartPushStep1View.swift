@@ -12,42 +12,50 @@ struct StartPushStep1View: View {
     let onNext: () -> Void
 
     var body: some View {
-        VStack(spacing: 0) {
-            ScrollView {
-                VStack(spacing: StartPushLayout.sectionSpacing) {
-                    StartPushHeader(
-                        title: "Who's this for?",
-                        subtitle: "Choose groups or friends to send this push to."
-                    )
-                    StartPushSearchBar(text: $viewModel.searchText, placeholder: "Search people or groups")
-                    groupSection
-                    friendSection
-                }
-                .padding(.horizontal, StartPushLayout.horizontalPadding)
-                .padding(.bottom, StartPushLayout.contentTopSpacing)
+        ScrollView {
+            VStack(spacing: StartPushLayout.sectionSpacing) {
+                StartPushHeader(
+                    title: "Who's this for?",
+                    subtitle: "Choose groups or friends to send this push to."
+                )
+                StartPushSearchBar(text: $viewModel.searchText, placeholder: "Search people or groups")
+                groupSection
+                friendSection
             }
-
+            .padding(.horizontal, StartPushLayout.horizontalPadding)
+            .padding(.bottom, StartPushLayout.contentTopSpacing)
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
             bottomBar
                 .padding(.horizontal, StartPushLayout.horizontalPadding)
                 .padding(.bottom, StartPushLayout.bottomPadding)
+                .background(bottomBarBackground)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var bottomBarBackground: some View {
+        LinearGradient(
+            colors: [.clear, .white.opacity(0.92)],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+        .ignoresSafeArea()
     }
 
     private var groupSection: some View {
         VStack(alignment: .leading, spacing: StartPushLayout.sectionLabelSpacing) {
             StartPushSectionLabel(title: "Groups")
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: StartPushLayout.groupCardSpacing) {
-                    ForEach(viewModel.filteredGroups) { group in
-                        GroupSelectCard(
-                            item: group,
-                            isSelected: viewModel.isSelected(group.id),
-                            action: { viewModel.toggleRecipient(group.id) }
-                        )
-                    }
+            HStack(spacing: StartPushLayout.groupCardSpacing) {
+                ForEach(viewModel.filteredGroups) { group in
+                    GroupSelectCard(
+                        item: group,
+                        isSelected: viewModel.isSelected(group.id),
+                        action: { viewModel.toggleRecipient(group.id) }
+                    )
                 }
-                .padding(.horizontal, 2)
             }
+            .frame(maxWidth: .infinity)
         }
     }
 
@@ -76,12 +84,21 @@ struct StartPushStep1View: View {
     }
 
     private var selectedChips: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
+        let all = viewModel.selectedRecipients
+        let hasOverflow = all.count > StartPushLayout.maxVisibleChips
+        let visibleCount = hasOverflow ? StartPushLayout.maxVisibleChipsWithOverflow : all.count
+        let visible = Array(all.prefix(visibleCount))
+        let overflow = all.count - visible.count
+
+        return ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                ForEach(viewModel.selectedRecipients) { recipient in
+                ForEach(visible) { recipient in
                     SelectedRecipientChip(item: recipient) {
                         viewModel.toggleRecipient(recipient.id)
                     }
+                }
+                if overflow > 0 {
+                    OverflowChip(count: overflow)
                 }
             }
             .padding(.horizontal, 2)
@@ -217,5 +234,18 @@ private struct SelectedRecipientChip: View {
         .padding(.horizontal, StartPushLayout.chipHorizontalPadding)
         .padding(.vertical, StartPushLayout.chipVerticalPadding)
         .background(Capsule().fill(PushControlColors.activeFill))
+    }
+}
+
+private struct OverflowChip: View {
+    let count: Int
+
+    var body: some View {
+        Text("+\(count) more")
+            .font(.caption.weight(.bold))
+            .foregroundStyle(PushControlColors.activeForeground.opacity(0.7))
+            .padding(.horizontal, StartPushLayout.chipHorizontalPadding)
+            .padding(.vertical, StartPushLayout.chipVerticalPadding)
+            .background(Capsule().fill(.white.opacity(StartPushColor.rowFillOpacity)))
     }
 }

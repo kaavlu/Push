@@ -16,7 +16,7 @@ enum StartPushLayout {
     static let dotSpacing: CGFloat = 10
     static let headerSpacing: CGFloat = 6
     static let sectionSpacing: CGFloat = 22
-    static let cardCornerRadius: CGFloat = 22
+    static let cardCornerRadius: CGFloat = 26
     static let cardPadding: CGFloat = 16
     static let chipHorizontalPadding: CGFloat = 14
     static let chipVerticalPadding: CGFloat = 7
@@ -48,7 +48,7 @@ enum StartPushLayout {
     static let friendRowAvatarSize: CGFloat = 40
     static let memberCountIconSize: CGFloat = 10
     static let sectionLabelSpacing: CGFloat = 12
-    static let groupCardSpacing: CGFloat = 10
+    static let groupCardSpacing: CGFloat = 7
     static let groupCheckmarkSize: CGFloat = 16
     static let groupCardCheckOffset: CGFloat = 3
     static let rowHorizontalPadding: CGFloat = 14
@@ -57,12 +57,24 @@ enum StartPushLayout {
     static let selectionCircleSize: CGFloat = 20
     static let chipAvatarSize: CGFloat = 22
     static let chipIconSize: CGFloat = 9
+    static let maxVisibleChips: Int = 3
+    static let maxVisibleChipsWithOverflow: Int = 2
     static let charCounterSpacing: CGFloat = 8
     static let responseDividerHeight: CGFloat = 40
     static let responseGroupSpacing: CGFloat = 6
     static let responseCardSpacing: CGFloat = 12
     static let pillStrokeWidth: CGFloat = 1.2
     static let actionButtonSpacing: CGFloat = 12
+    static let notesMinHeight: CGFloat = 90
+    // Calendar
+    static let calDayCellSize: CGFloat = 36
+    static let calDayCircle: CGFloat = 34
+    // Time clicker
+    static let timeColumnWidth: CGFloat = 64
+    static let timeValueHeight: CGFloat = 44
+    static let timeChevronWidth: CGFloat = 52
+    static let timeChevronHeight: CGFloat = 32
+    static let amPmPillWidth: CGFloat = 76
 }
 
 enum StartPushColor {

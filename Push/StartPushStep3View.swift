@@ -19,10 +19,9 @@ struct StartPushStep3View: View {
                         title: "Add quick details.",
                         subtitle: "A few details help your friends respond."
                     )
-                    timingSection
+                    whenSection
                     locationSection
-                    vibeSection
-                    inviteSizeSection
+                    notesSection
                 }
                 .padding(.horizontal, StartPushLayout.horizontalPadding)
                 .padding(.bottom, StartPushLayout.contentTopSpacing)
@@ -34,18 +33,11 @@ struct StartPushStep3View: View {
         }
     }
 
-    private var timingSection: some View {
+    private var whenSection: some View {
         VStack(alignment: .leading, spacing: StartPushLayout.sectionLabelSpacing) {
             StartPushSectionLabel(title: "When?")
-            HStack(spacing: 8) {
-                ForEach(PushTiming.allCases, id: \.self) { option in
-                    PillOptionButton(
-                        title: option.title,
-                        isSelected: viewModel.timing == option,
-                        action: { viewModel.timing = option }
-                    )
-                }
-            }
+            PushDatePicker(selectedDate: $viewModel.selectedTime)
+            PushTimeClicker(selectedTime: $viewModel.selectedTime)
         }
     }
 
@@ -70,68 +62,33 @@ struct StartPushStep3View: View {
         }
     }
 
-    private var vibeSection: some View {
+    private var notesSection: some View {
         VStack(alignment: .leading, spacing: StartPushLayout.sectionLabelSpacing) {
-            StartPushSectionLabel(title: "Vibe / Commitment")
-            VStack(spacing: 8) {
-                ForEach(PushVibe.allCases, id: \.self) { option in
-                    PillOptionButton(
-                        title: option.title,
-                        isSelected: viewModel.vibe == option,
-                        fullWidth: true,
-                        action: { viewModel.vibe = option }
-                    )
+            StartPushSectionLabel(title: "Notes (optional)")
+            ZStack(alignment: .topLeading) {
+                if viewModel.notes.isEmpty {
+                    Text("Dress code, what to bring, parking info...")
+                        .font(.body.weight(.medium))
+                        .foregroundStyle(PushControlColors.textTertiary)
+                        .padding(.top, 8)
+                        .padding(.leading, 4)
                 }
+                TextEditor(text: $viewModel.notes)
+                    .font(.body.weight(.medium))
+                    .foregroundStyle(PushControlColors.textEspresso)
+                    .tint(PushControlColors.activeForeground)
+                    .scrollContentBackground(.hidden)
+                    .frame(minHeight: StartPushLayout.notesMinHeight)
             }
+            .padding(StartPushLayout.cardPadding)
+            .background(
+                RoundedRectangle(cornerRadius: StartPushLayout.cardCornerRadius, style: .continuous)
+                    .fill(.white.opacity(StartPushColor.textEditorFill))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: StartPushLayout.cardCornerRadius, style: .continuous)
+                    .stroke(PushColorPalette.Accent.walnut.opacity(StartPushColor.textEditorStrokeOpacity), lineWidth: 1)
+            )
         }
-    }
-
-    private var inviteSizeSection: some View {
-        VStack(alignment: .leading, spacing: StartPushLayout.sectionLabelSpacing) {
-            StartPushSectionLabel(title: "Invite size")
-            VStack(spacing: 8) {
-                ForEach(PushInviteSize.allCases, id: \.self) { option in
-                    PillOptionButton(
-                        title: option.title,
-                        isSelected: viewModel.inviteSize == option,
-                        fullWidth: true,
-                        action: { viewModel.inviteSize = option }
-                    )
-                }
-            }
-        }
-    }
-}
-
-private struct PillOptionButton: View {
-    let title: String
-    let isSelected: Bool
-    var fullWidth: Bool = false
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(isSelected ? PushControlColors.activeForeground : PushControlColors.textSecondary)
-                .padding(.horizontal, StartPushLayout.pillHorizontalPadding)
-                .padding(.vertical, StartPushLayout.pillVerticalPadding)
-                .frame(maxWidth: fullWidth ? .infinity : nil)
-                .background(
-                    Capsule().fill(isSelected
-                                   ? PushControlColors.activeFill
-                                   : .white.opacity(StartPushColor.rowFillOpacity))
-                )
-                .overlay(
-                    Capsule().stroke(
-                        isSelected ? PushColorPalette.Accent.walnut.opacity(StartPushColor.pillSelectedStrokeOpacity) : .clear,
-                        lineWidth: StartPushLayout.pillStrokeWidth
-                    )
-                )
-        }
-        .buttonStyle(.plain)
-        .animation(.spring(response: 0.22, dampingFraction: 0.82), value: isSelected)
-        .accessibilityLabel(title)
-        .accessibilityValue(isSelected ? "Selected" : "Not selected")
     }
 }

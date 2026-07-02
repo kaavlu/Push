@@ -70,15 +70,15 @@ struct StartPushStep2View: View {
     private var suggestionSection: some View {
         VStack(alignment: .leading, spacing: StartPushLayout.sectionLabelSpacing) {
             StartPushSectionLabel(title: "Quick ideas")
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: StartPushLayout.suggestionChipSpacing) {
-                    ForEach(pushSuggestions, id: \.self) { suggestion in
-                        SuggestionChip(text: suggestion) {
-                            applySuggestion(suggestion)
-                        }
+            LazyVGrid(
+                columns: [GridItem(.flexible()), GridItem(.flexible())],
+                spacing: StartPushLayout.suggestionChipSpacing
+            ) {
+                ForEach(pushSuggestions, id: \.self) { suggestion in
+                    SuggestionChip(text: suggestion) {
+                        applySuggestion(suggestion)
                     }
                 }
-                .padding(.horizontal, 2)
             }
         }
     }
@@ -103,7 +103,7 @@ private struct SuggestionChip: View {
             Text(text)
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(PushControlColors.activeForeground)
-                .padding(.horizontal, StartPushLayout.pillHorizontalPadding)
+                .frame(maxWidth: .infinity)
                 .padding(.vertical, StartPushLayout.pillVerticalPadding)
                 .background(Capsule().fill(PushControlColors.activeFill))
         }

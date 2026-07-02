@@ -21,6 +21,9 @@ struct PlansView: View {
         .fullScreenCover(isPresented: $viewModel.isReviewDeckPresented) {
             ReviewPushesView(viewModel: viewModel)
         }
+        .fullScreenCover(isPresented: $viewModel.isStartPushPresented) {
+            StartPushFlowView()
+        }
     }
 
     private var pageContent: some View {
@@ -28,7 +31,7 @@ struct PlansView: View {
             PlansCalendarView(viewModel: viewModel)
             CurrentPushesModule(viewModel: viewModel)
             Spacer(minLength: 0)
-            StartPlanButton()
+            StartPlanButton { viewModel.isStartPushPresented = true }
                 .padding(.horizontal, PlansLayout.startPlanButtonHorizontalPadding)
         }
         .padding(.horizontal, PlansLayout.horizontalPadding)
@@ -109,10 +112,10 @@ private enum CurrentPushesConstants {
 }
 
 private struct StartPlanButton: View {
+    let action: () -> Void
+
     var body: some View {
-        Button {
-            // start plan flow — deferred to future issue
-        } label: {
+        Button(action: action) {
             Text("+ Start Push")
                 .font(.headline.weight(.semibold))
                 .foregroundStyle(PushControlColors.textEspresso)

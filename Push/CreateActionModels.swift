@@ -9,7 +9,6 @@ import Foundation
 
 enum CreateActionMenuItem: String, CaseIterable, Identifiable, Equatable {
     case startPush
-    case startPlan
     case addFriend
 
     var id: String { rawValue }
@@ -17,8 +16,6 @@ enum CreateActionMenuItem: String, CaseIterable, Identifiable, Equatable {
     var title: String {
         switch self {
         case .startPush:
-            return "Start push"
-        case .startPlan:
             return "Start push"
         case .addFriend:
             return "Add friend"
@@ -29,8 +26,6 @@ enum CreateActionMenuItem: String, CaseIterable, Identifiable, Equatable {
         switch self {
         case .startPush:
             return "Send a social signal to your crew"
-        case .startPlan:
-            return "Create a push with friends"
         case .addFriend:
             return "Invite someone to Push"
         }
@@ -40,8 +35,6 @@ enum CreateActionMenuItem: String, CaseIterable, Identifiable, Equatable {
         switch self {
         case .startPush:
             return "bolt.fill"
-        case .startPlan:
-            return "calendar.badge.plus"
         case .addFriend:
             return "person.badge.plus"
         }
@@ -51,8 +44,6 @@ enum CreateActionMenuItem: String, CaseIterable, Identifiable, Equatable {
         switch self {
         case .startPush:
             return .startPush
-        case .startPlan:
-            return .startPlan
         case .addFriend:
             return .addFriend
         }

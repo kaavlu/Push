@@ -60,6 +60,7 @@
 		32E97CC31667BAF165D33764 /* StartPushStep1View.swift in Sources */ = {isa = PBXBuildFile; fileRef = 638B34FA781359331A3ED13A /* StartPushStep1View.swift */; };
 		8B24F98B098D2F129A31E399 /* StartPushStep2View.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E7D80FDFED273606F4C76FF /* StartPushStep2View.swift */; };
 		DB9FA0D4AF211849B3A47ED1 /* StartPushStep3View.swift in Sources */ = {isa = PBXBuildFile; fileRef = 698E3B36A45C17FF134EEE52 /* StartPushStep3View.swift */; };
+		C9D4E825B367F148A70293EC /* StartPushTimingPickers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E3F912C458A03D62819F4A /* StartPushTimingPickers.swift */; };
 		31CE692EDFCE0B5ECDC4C1DD /* StartPushStep4View.swift in Sources */ = {isa = PBXBuildFile; fileRef = 640CA4B8601EE8D9224ECDE3 /* StartPushStep4View.swift */; };
 /* End PBXBuildFile section */
 
@@ -137,6 +138,7 @@
 		638B34FA781359331A3ED13A /* StartPushStep1View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartPushStep1View.swift; sourceTree = "<group>"; };
 		3E7D80FDFED273606F4C76FF /* StartPushStep2View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartPushStep2View.swift; sourceTree = "<group>"; };
 		698E3B36A45C17FF134EEE52 /* StartPushStep3View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartPushStep3View.swift; sourceTree = "<group>"; };
+		B7E3F912C458A03D62819F4A /* StartPushTimingPickers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartPushTimingPickers.swift; sourceTree = "<group>"; };
 		640CA4B8601EE8D9224ECDE3 /* StartPushStep4View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartPushStep4View.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -216,6 +218,7 @@
 				638B34FA781359331A3ED13A /* StartPushStep1View.swift */,
 				3E7D80FDFED273606F4C76FF /* StartPushStep2View.swift */,
 				698E3B36A45C17FF134EEE52 /* StartPushStep3View.swift */,
+				B7E3F912C458A03D62819F4A /* StartPushTimingPickers.swift */,
 				640CA4B8601EE8D9224ECDE3 /* StartPushStep4View.swift */,
 				5217A2A92FF2F1000011F860 /* ProfileModels.swift */,
 				5217A2C52FF310000011F860 /* ProfileViewModel.swift */,
@@ -427,6 +430,7 @@
 				32E97CC31667BAF165D33764 /* StartPushStep1View.swift in Sources */,
 				8B24F98B098D2F129A31E399 /* StartPushStep2View.swift in Sources */,
 				DB9FA0D4AF211849B3A47ED1 /* StartPushStep3View.swift in Sources */,
+				C9D4E825B367F148A70293EC /* StartPushTimingPickers.swift in Sources */,
 				31CE692EDFCE0B5ECDC4C1DD /* StartPushStep4View.swift in Sources */,
 				5217A2AA2FF2F1000011F860 /* ProfileModels.swift in Sources */,
 				5217A2C62FF310000011F860 /* ProfileViewModel.swift in Sources */,
