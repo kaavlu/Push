@@ -54,6 +54,13 @@
 		5217A2E62FF360000011F860 /* PlansCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2E52FF360000011F860 /* PlansCalendarView.swift */; };
 		5217A2E82FF370000011F860 /* PlansView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2E72FF370000011F860 /* PlansView.swift */; };
 		5217A2EA2FF380000011F860 /* ReviewPushesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2E92FF380000011F860 /* ReviewPushesView.swift */; };
+		F511D9CB8F68D9D9B0341314 /* StartPushModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A043BAE1603803A839C0CB52 /* StartPushModels.swift */; };
+		E5A6E743849E63F8101AC616 /* StartPushStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5534EA92B26FA8ADC30543F /* StartPushStyle.swift */; };
+		C8C8050EED40EF171CC2784D /* StartPushFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8FD0BA84A167FE482ED4A92 /* StartPushFlowView.swift */; };
+		32E97CC31667BAF165D33764 /* StartPushStep1View.swift in Sources */ = {isa = PBXBuildFile; fileRef = 638B34FA781359331A3ED13A /* StartPushStep1View.swift */; };
+		8B24F98B098D2F129A31E399 /* StartPushStep2View.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E7D80FDFED273606F4C76FF /* StartPushStep2View.swift */; };
+		DB9FA0D4AF211849B3A47ED1 /* StartPushStep3View.swift in Sources */ = {isa = PBXBuildFile; fileRef = 698E3B36A45C17FF134EEE52 /* StartPushStep3View.swift */; };
+		31CE692EDFCE0B5ECDC4C1DD /* StartPushStep4View.swift in Sources */ = {isa = PBXBuildFile; fileRef = 640CA4B8601EE8D9224ECDE3 /* StartPushStep4View.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -124,6 +131,13 @@
 		5217A2E52FF360000011F860 /* PlansCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlansCalendarView.swift; sourceTree = "<group>"; };
 		5217A2E72FF370000011F860 /* PlansView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlansView.swift; sourceTree = "<group>"; };
 		5217A2E92FF380000011F860 /* ReviewPushesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewPushesView.swift; sourceTree = "<group>"; };
+		A043BAE1603803A839C0CB52 /* StartPushModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartPushModels.swift; sourceTree = "<group>"; };
+		A5534EA92B26FA8ADC30543F /* StartPushStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartPushStyle.swift; sourceTree = "<group>"; };
+		F8FD0BA84A167FE482ED4A92 /* StartPushFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartPushFlowView.swift; sourceTree = "<group>"; };
+		638B34FA781359331A3ED13A /* StartPushStep1View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartPushStep1View.swift; sourceTree = "<group>"; };
+		3E7D80FDFED273606F4C76FF /* StartPushStep2View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartPushStep2View.swift; sourceTree = "<group>"; };
+		698E3B36A45C17FF134EEE52 /* StartPushStep3View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartPushStep3View.swift; sourceTree = "<group>"; };
+		640CA4B8601EE8D9224ECDE3 /* StartPushStep4View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartPushStep4View.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -196,6 +210,13 @@
 				5217A2E52FF360000011F860 /* PlansCalendarView.swift */,
 				5217A2E72FF370000011F860 /* PlansView.swift */,
 				5217A2E92FF380000011F860 /* ReviewPushesView.swift */,
+				A043BAE1603803A839C0CB52 /* StartPushModels.swift */,
+				A5534EA92B26FA8ADC30543F /* StartPushStyle.swift */,
+				F8FD0BA84A167FE482ED4A92 /* StartPushFlowView.swift */,
+				638B34FA781359331A3ED13A /* StartPushStep1View.swift */,
+				3E7D80FDFED273606F4C76FF /* StartPushStep2View.swift */,
+				698E3B36A45C17FF134EEE52 /* StartPushStep3View.swift */,
+				640CA4B8601EE8D9224ECDE3 /* StartPushStep4View.swift */,
 				5217A2A92FF2F1000011F860 /* ProfileModels.swift */,
 				5217A2C52FF310000011F860 /* ProfileViewModel.swift */,
 				5217A2C72FF310000011F860 /* ProfileMockData.swift */,
@@ -400,6 +421,13 @@
 				5217A2E62FF360000011F860 /* PlansCalendarView.swift in Sources */,
 				5217A2E82FF370000011F860 /* PlansView.swift in Sources */,
 				5217A2EA2FF380000011F860 /* ReviewPushesView.swift in Sources */,
+				F511D9CB8F68D9D9B0341314 /* StartPushModels.swift in Sources */,
+				E5A6E743849E63F8101AC616 /* StartPushStyle.swift in Sources */,
+				C8C8050EED40EF171CC2784D /* StartPushFlowView.swift in Sources */,
+				32E97CC31667BAF165D33764 /* StartPushStep1View.swift in Sources */,
+				8B24F98B098D2F129A31E399 /* StartPushStep2View.swift in Sources */,
+				DB9FA0D4AF211849B3A47ED1 /* StartPushStep3View.swift in Sources */,
+				31CE692EDFCE0B5ECDC4C1DD /* StartPushStep4View.swift in Sources */,
 				5217A2AA2FF2F1000011F860 /* ProfileModels.swift in Sources */,
 				5217A2C62FF310000011F860 /* ProfileViewModel.swift in Sources */,
 				5217A2C82FF310000011F860 /* ProfileMockData.swift in Sources */,

@@ -139,6 +139,8 @@ struct ContentView: View {
             )
         case .plans:
             PlansView()
+        case .startPush:
+            StartPushFlowView()
         }
     }
 
