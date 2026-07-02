@@ -25,11 +25,11 @@ enum PlansLayout {
     static let statusPillVerticalPadding: CGFloat = 5
     static let currentPushesSpacing: CGFloat = 12
     static let reviewAllButtonTopPadding: CGFloat = 4
-    static let startPlanButtonHeight: CGFloat = 56
-    static let startPlanButtonCornerRadius: CGFloat = 28
+    static let startPlanButtonHeight: CGFloat = 46
+    static let startPlanButtonCornerRadius: CGFloat = 23
     static let startPlanButtonBottomPadding: CGFloat = 32
     static let startPlanButtonHorizontalPadding: CGFloat = 48
-    static let headerTopPadding: CGFloat = 8
+    static let headerTopPadding: CGFloat = 18
     static let deckCardPadding: CGFloat = 24
     static let swipeThreshold: CGFloat = 100
     static let swipeUpThreshold: CGFloat = -80

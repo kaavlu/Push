@@ -10,43 +10,53 @@ struct PlansView: View {
     }
 
     var body: some View {
-        ZStack(alignment: .bottom) {
+        ZStack {
             PushModalBackground()
-            scrollContent
-            StartPlanButton()
-                .padding(.horizontal, PlansLayout.startPlanButtonHorizontalPadding)
-                .padding(.bottom, PlansLayout.startPlanButtonBottomPadding)
+            pageContent
         }
-        .overlay(alignment: .top) {
-            PushModalCloseButtonBar(accessibilityLabel: "Close plans") {
-                dismiss()
-            }
+        .safeAreaInset(edge: .top, spacing: 0) {
+            PlansPageHeader(dismissAction: { dismiss() })
+                .padding(.horizontal, PlansLayout.horizontalPadding)
         }
         .fullScreenCover(isPresented: $viewModel.isReviewDeckPresented) {
             ReviewPushesView(viewModel: viewModel)
         }
     }
 
-    private var scrollContent: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: PlansLayout.sectionSpacing) {
-                PlansPageHeader()
-                PlansCalendarView(viewModel: viewModel)
-                CurrentPushesModule(viewModel: viewModel)
-            }
-            .padding(.horizontal, PlansLayout.horizontalPadding)
-            .padding(.top, PlansLayout.topPadding)
-            .padding(.bottom, PlansLayout.bottomPadding)
+    private var pageContent: some View {
+        VStack(alignment: .leading, spacing: PlansLayout.sectionSpacing) {
+            PlansCalendarView(viewModel: viewModel)
+            CurrentPushesModule(viewModel: viewModel)
+            Spacer(minLength: 0)
+            StartPlanButton()
+                .padding(.horizontal, PlansLayout.startPlanButtonHorizontalPadding)
         }
+        .padding(.horizontal, PlansLayout.horizontalPadding)
+        .padding(.top, PlansLayout.topPadding)
+        .padding(.bottom, PlansLayout.startPlanButtonBottomPadding)
     }
 }
 
 private struct PlansPageHeader: View {
+    let dismissAction: () -> Void
+
     var body: some View {
-        Text("Plans")
-            .font(.largeTitle.weight(.bold))
-            .foregroundStyle(PushControlColors.activeForeground)
-            .padding(.top, PlansLayout.headerTopPadding)
+        HStack(alignment: .center) {
+            Text("Pushes")
+                .font(.largeTitle.weight(.bold))
+                .foregroundStyle(PushControlColors.activeForeground)
+            Spacer()
+            Button(action: dismissAction) {
+                Image(systemName: "xmark")
+                    .font(.system(size: ProfileLayout.closeIconSize, weight: .bold))
+                    .foregroundStyle(PushControlColors.activeForeground)
+                    .frame(width: ProfileLayout.closeButtonSize, height: ProfileLayout.closeButtonSize)
+                    .pushGlassBackground(cornerRadius: ProfileLayout.closeButtonSize / 2)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Close pushes")
+        }
+        .padding(.top, PlansLayout.headerTopPadding)
     }
 }
 
@@ -103,7 +113,7 @@ private struct StartPlanButton: View {
         Button {
             // start plan flow — deferred to future issue
         } label: {
-            Text("+ Start Plan")
+            Text("+ Start Push")
                 .font(.headline.weight(.semibold))
                 .foregroundStyle(PushControlColors.textEspresso)
                 .frame(maxWidth: .infinity)
@@ -113,6 +123,6 @@ private struct StartPlanButton: View {
                 )
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Start a new plan")
+        .accessibilityLabel("Start a new push")
     }
 }

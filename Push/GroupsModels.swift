@@ -25,7 +25,7 @@ struct PushGroupData: Identifiable, Equatable {
 enum PushGroupStatus: String, Equatable {
     case activeNow = "Active now"
     case quiet = "Quiet"
-    case planLive = "Plan live"
+    case planLive = "Push live"
     case nearby = "Nearby"
     case freeSoon = "Free soon"
 
@@ -60,7 +60,7 @@ final class GroupsViewModel: ObservableObject {
         [
             PushGroupStat(id: "active-now", value: group.activeNowCount, label: "Active now"),
             PushGroupStat(id: "nearby", value: group.nearbyCount, label: "Nearby"),
-            PushGroupStat(id: "plans", value: group.planCount, label: "Plans")
+            PushGroupStat(id: "plans", value: group.planCount, label: "Pushes")
         ]
     }
 

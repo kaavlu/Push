@@ -151,7 +151,7 @@ private struct GroupDetailFallbackTile: View {
 private struct GroupDetailActions: View {
     var body: some View {
         HStack(spacing: GroupDetailLayout.actionSpacing) {
-            GroupDetailActionButton(title: "Start plan", symbolName: "calendar.badge.plus", isPrimary: true)
+            GroupDetailActionButton(title: "Start push", symbolName: "calendar.badge.plus", isPrimary: true)
             GroupDetailActionButton(title: "Ping group", symbolName: "paperplane.fill", isPrimary: false)
         }
     }

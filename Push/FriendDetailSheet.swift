@@ -114,7 +114,7 @@ struct FriendDetailSheet: View {
             FriendActivityStatusCard(viewData: viewData)
             FriendDetailActionCards(
                 onDirections: { triggerToast("Opening in Maps…") },
-                onStartPlan:  { triggerToast("Plan started") }
+                onStartPlan:  { triggerToast("Push started") }
             )
         }
         .padding(.horizontal, FriendDetailSheetLayout.contentHorizontalPadding)
@@ -132,7 +132,7 @@ struct FriendDetailSheet: View {
             PairActionRow(
                 onDirections: { triggerToast("Opening in Maps…") },
                 onAskToJoin: { triggerToast("Request sent") },
-                onStartPlan: { triggerToast("Plan started") }
+                onStartPlan: { triggerToast("Push started") }
             )
         }
         .padding(.horizontal, FriendDetailSheetLayout.contentHorizontalPadding)
@@ -151,7 +151,7 @@ struct FriendDetailSheet: View {
             PairActionRow(
                 onDirections: { triggerToast("Opening in Maps…") },
                 onAskToJoin: { triggerToast("Request sent") },
-                onStartPlan: { triggerToast("Plan started") }
+                onStartPlan: { triggerToast("Push started") }
             )
         }
         .padding(.horizontal, FriendDetailSheetLayout.contentHorizontalPadding)
@@ -296,7 +296,7 @@ private struct FriendDetailActionCards: View {
                 action: onDirections
             )
             PrimaryActionCard(
-                label: "Start plan",
+                label: "Start push",
                 symbolName: "calendar.badge.plus",
                 action: onStartPlan
             )
@@ -501,7 +501,7 @@ private struct PairActionRow: View {
                 action: onDirections
             )
             PrimaryActionCard(label: "Ask to join", symbolName: "figure.wave", action: onAskToJoin)
-            PrimaryActionCard(label: "Start plan", symbolName: "calendar.badge.plus", action: onStartPlan)
+            PrimaryActionCard(label: "Start push", symbolName: "calendar.badge.plus", action: onStartPlan)
         }
     }
 }

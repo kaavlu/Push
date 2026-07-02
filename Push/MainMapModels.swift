@@ -49,7 +49,7 @@ enum BottomNavigationItem: String, CaseIterable, Identifiable {
         case .feed:
             return "Feed"
         case .plans:
-            return "Plans"
+            return "Pushes"
         }
     }
 
@@ -94,13 +94,13 @@ enum MainMapRoute: String, Identifiable, Equatable {
         case .profile:
             return "Profile"
         case .startPlan:
-            return "Start Plan"
+            return "Start Push"
         case .addFriend:
             return "Add Friend"
         case .feed:
             return "Feed"
         case .plans:
-            return "Plans"
+            return "Pushes"
         }
     }
 

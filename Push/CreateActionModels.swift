@@ -16,7 +16,7 @@ enum CreateActionMenuItem: String, CaseIterable, Identifiable, Equatable {
     var title: String {
         switch self {
         case .startPlan:
-            return "Start plan"
+            return "Start push"
         case .addFriend:
             return "Add friend"
         }
@@ -25,7 +25,7 @@ enum CreateActionMenuItem: String, CaseIterable, Identifiable, Equatable {
     var subtitle: String {
         switch self {
         case .startPlan:
-            return "Create a plan with friends"
+            return "Create a push with friends"
         case .addFriend:
             return "Invite someone to Push"
         }

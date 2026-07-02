@@ -121,8 +121,8 @@ struct ContentView: View {
             ProfileView()
         case .startPlan:
             CreatePlaceholderView(
-                title: "Start Plan",
-                subtitle: "Create a plan with friends.",
+                title: "Start Push",
+                subtitle: "Create a push with friends.",
                 symbolName: route.systemImageName
             )
         case .addFriend:

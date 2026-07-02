@@ -51,8 +51,8 @@ struct FriendGroupPuck: View {
             .min { $0.priority < $1.priority } ?? .busy
     }
 
-    private var groupPulseColor: Color {
-        friends.contains { $0.isCurrentUser } ? PuckColorTokens.maybeDown : leadAvailability.accentColor
+    private var includesCurrentUser: Bool {
+        friends.contains { $0.isCurrentUser }
     }
 
     private var groupAvatarInitials: String {
@@ -76,10 +76,14 @@ struct FriendGroupPuck: View {
                 .frame(width: size, height: size)
                 .puckGlassBackground(cornerRadius: size / FriendPuckLayout.cornerDivisor)
                 .availabilityPulse(
-                    ringColor: leadAvailability.accentColor,
-                    pulseColor: groupPulseColor,
+                    color: leadAvailability.accentColor,
                     lineWidth: FriendPuckLayout.statusRingWidth
                 )
+                .overlay {
+                    if includesCurrentUser {
+                        YellowGroupPulse(size: size)
+                    }
+                }
 
             groupCount
                 .offset(
@@ -124,4 +128,32 @@ private enum FriendGroupLayout {
     static let fallbackInitials = "FG"
     static let countXOffset: CGFloat = 6.8
     static let countYOffset: CGFloat = -70
+}
+
+private struct YellowGroupPulse: View {
+    let size: CGFloat
+    @State private var isExpanded = false
+
+    var body: some View {
+        Circle()
+            .stroke(PuckColorTokens.maybeDown, lineWidth: YellowPulseLayout.lineWidth)
+            .frame(width: size, height: size)
+            .scaleEffect(isExpanded ? YellowPulseLayout.maxScale : 1.0)
+            .opacity(isExpanded ? 0.0 : YellowPulseLayout.startOpacity)
+            .onAppear {
+                withAnimation(
+                    .easeOut(duration: YellowPulseLayout.duration)
+                    .repeatForever(autoreverses: false)
+                ) {
+                    isExpanded = true
+                }
+            }
+    }
+}
+
+private enum YellowPulseLayout {
+    static let lineWidth: CGFloat = 2.5
+    static let maxScale: CGFloat = 1.55
+    static let startOpacity: CGFloat = 0.78
+    static let duration: Double = 1.6
 }
