@@ -117,7 +117,7 @@ private struct PushGlass<Content: View>: View {
 
 enum BottomNavigationLayout {
     static let horizontalMargin: CGFloat = 20
-    static let bottomMargin: CGFloat = 18
+    static let bottomMargin: CGFloat = 22
     static let containerPadding: CGFloat = 8
     static let containerCornerRadius: CGFloat = 32
     static let itemSpacing: CGFloat = 6

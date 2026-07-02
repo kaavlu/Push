@@ -12,6 +12,7 @@ struct StyledMapView: UIViewRepresentable {
     let region: MKCoordinateRegion
     let pucks: [MapPuckData]
     let onPuckSelected: (MapPuckData) -> Void
+    var mapLayoutMargins: UIEdgeInsets = .zero
 
     private var isUserInGroup: Bool {
         pucks.contains { $0.includesCurrentUser }
@@ -25,6 +26,7 @@ struct StyledMapView: UIViewRepresentable {
         let mapView = MKMapView()
         mapView.delegate = context.coordinator
         mapView.setRegion(region, animated: false)
+        mapView.layoutMargins = mapLayoutMargins
         applyStyle(to: mapView)
         syncAnnotations(on: mapView)
         let userAnnotation = UserLocationAnnotation(isInGroup: isUserInGroup)
@@ -34,6 +36,7 @@ struct StyledMapView: UIViewRepresentable {
     }
 
     func updateUIView(_ mapView: MKMapView, context: Context) {
+        mapView.layoutMargins = mapLayoutMargins
         applyStyle(to: mapView)
         syncAnnotations(on: mapView)
         if let annotation = context.coordinator.userLocationAnnotation,
