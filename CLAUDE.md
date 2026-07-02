@@ -30,7 +30,7 @@ This is a **high-fidelity prototype** that can become production later.
 3. **Friend Detail** — tap a friend to see more; lightweight, not a full profile
 4. **Feed** — real-life social activity (arrivals, availability shifts, groups forming)
 5. **Who's Down** — quick answer to "is anything happening right now?"
-6. **Pull Up** — low-pressure signal of social intent (faster than starting a group chat)
+6. **Pull Up** — low-pressure signal of social intent (faster than starting a group chat); creation UX is the 4-step **Start Push** flow (`StartPushFlowView`, create menu → `MainMapRoute.startPush`).
 7. **Friend Groups** — real-world circles with member statuses, activity, pushes
 8. **Push Cards** — shared coordination objects (not chat threads)
 9. **Privacy Controls** — simple visibility settings per activity
@@ -100,3 +100,5 @@ Do not ask the user to re-explain context that is in these files.
 ## Status Language
 
 Status copy should feel **natural, casual, and socially safe.** When confidence is high, be specific. When confidence is lower, soften the wording. Never make it feel like surveillance.
+
+User-facing coordination copy uses **Push/Pushes** (not Plan/Plans). Internal types and files may still use `Plan*`/`Plans*` prefixes until refactored.
