@@ -9,8 +9,9 @@ struct YourPushCard: View {
         VStack(alignment: .leading, spacing: PlansLayout.cardRowSpacing) {
             headerRow
             groupLocationRow
-            Divider()
-                .background(PushColorPalette.Accent.walnut.opacity(0.12))
+            Rectangle()
+                .fill(PushColorPalette.Accent.walnut.opacity(0.12))
+                .frame(height: 1)
             joinedSection
             footerRow
         }
@@ -24,7 +25,7 @@ struct YourPushCard: View {
                 .font(.headline.weight(.semibold))
                 .foregroundStyle(PushControlColors.textEspresso)
                 .lineLimit(1)
-            Spacer(minLength: 8)
+            Spacer(minLength: YourPushCardLayout.headerSpacerMinLength)
             YourPushTimeChip(timeSignal: plan.timeSignal)
         }
     }
@@ -75,7 +76,7 @@ private struct YourPushTimeChip: View {
                 Capsule()
                     .stroke(
                         PushColorPalette.Accent.walnut.opacity(YourPushCardLayout.timeChipStrokeOpacity),
-                        lineWidth: 1
+                        lineWidth: YourPushCardLayout.timeChipStrokeWidth
                     )
             }
     }
@@ -106,7 +107,7 @@ private struct YourPushAvatarRow: View {
                 .overlay {
                     Circle()
                         .stroke(
-                            .white.opacity(0.86),
+                            .white.opacity(YourPushCardLayout.avatarRingOpacity),
                             lineWidth: YourPushCardLayout.avatarStrokeWidth
                         )
                 }
@@ -123,7 +124,7 @@ private struct YourPushOverflowBubble: View {
 
     var body: some View {
         Text("+\(count)")
-            .font(.system(size: 11, weight: .semibold, design: .rounded))
+            .font(.system(size: YourPushCardLayout.overflowFontSize, weight: .semibold, design: .rounded))
             .foregroundStyle(PushControlColors.textPrimary)
             .frame(
                 width: YourPushCardLayout.overflowAvatarSize,

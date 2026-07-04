@@ -84,4 +84,8 @@ enum YourPushCardLayout {
     static let timeChipStrokeOpacity: Double = 0.40
     static let joinedLabelSpacing: CGFloat = 6
     static let footerTopPadding: CGFloat = 4
+    static let overflowFontSize: CGFloat = 11
+    static let headerSpacerMinLength: CGFloat = 8
+    static let timeChipStrokeWidth: CGFloat = 1.0
+    static let avatarRingOpacity: Double = 0.86
 }
