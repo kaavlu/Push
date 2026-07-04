@@ -10,8 +10,8 @@ struct YourPushCard: View {
             headerRow
             groupLocationRow
             Rectangle()
-                .fill(PushColorPalette.Accent.walnut.opacity(0.12))
-                .frame(height: 1)
+                .fill(PushColorPalette.Accent.walnut.opacity(YourPushCardLayout.dividerOpacity))
+                .frame(height: YourPushCardLayout.dividerHeight)
             joinedSection
             footerRow
         }
