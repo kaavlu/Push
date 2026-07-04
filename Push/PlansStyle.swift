@@ -72,3 +72,16 @@ struct PlanStatusPill: View {
         }
     }
 }
+
+enum YourPushCardLayout {
+    static let avatarSize: CGFloat = 28
+    static let avatarSpacing: CGFloat = 6
+    static let avatarStrokeWidth: CGFloat = 0.8
+    static let overflowAvatarSize: CGFloat = 28
+    static let maxVisibleAvatars: Int = 4
+    static let timeChipHorizontalPadding: CGFloat = 8
+    static let timeChipVerticalPadding: CGFloat = 4
+    static let timeChipStrokeOpacity: Double = 0.40
+    static let joinedLabelSpacing: CGFloat = 6
+    static let footerTopPadding: CGFloat = 4
+}
