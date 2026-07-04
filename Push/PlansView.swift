@@ -91,7 +91,7 @@ private struct YourPushesModule: View {
             Text("See all \(viewModel.yourPushes.count) →")
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(PushControlColors.textPrimary)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(maxWidth: .infinity, alignment: .trailing)
         }
         .buttonStyle(.plain)
         .padding(.top, PlansLayout.reviewAllButtonTopPadding)
@@ -122,7 +122,7 @@ private struct ActivePushesModule: View {
             Text("Review all \(viewModel.activePushes.count) →")
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(PushControlColors.textPrimary)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(maxWidth: .infinity, alignment: .trailing)
         }
         .buttonStyle(.plain)
         .padding(.top, PlansLayout.reviewAllButtonTopPadding)
