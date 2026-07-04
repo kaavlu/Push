@@ -12,6 +12,8 @@ final class PlansViewModel: ObservableObject {
     @Published var isReviewDeckPresented: Bool = false
     @Published var isStartPushPresented: Bool = false
     @Published var isYourPushesPresented: Bool = false
+    @Published var isManagePushPresented: Bool = false
+    @Published var managedPlan: PlanData? = nil
 
     init(plans: [PlanData] = PlansMockData.plans, referenceDate: Date = Date()) {
         self.plans = plans

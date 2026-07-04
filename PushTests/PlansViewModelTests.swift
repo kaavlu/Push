@@ -124,4 +124,10 @@ final class PlansViewModelTests: XCTestCase {
         XCTAssertTrue(owned.allSatisfy { !$0.participants.isEmpty },
                       "Each owned push should have at least one participant")
     }
+
+    func testIsManagePushPresented_defaultsFalse() {
+        let vm = PlansViewModel()
+        XCTAssertFalse(vm.isManagePushPresented)
+        XCTAssertNil(vm.managedPlan)
+    }
 }

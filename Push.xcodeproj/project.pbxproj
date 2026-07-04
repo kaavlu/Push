@@ -62,6 +62,8 @@
 		DB9FA0D4AF211849B3A47ED1 /* StartPushStep3View.swift in Sources */ = {isa = PBXBuildFile; fileRef = 698E3B36A45C17FF134EEE52 /* StartPushStep3View.swift */; };
 		C9D4E825B367F148A70293EC /* StartPushTimingPickers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E3F912C458A03D62819F4A /* StartPushTimingPickers.swift */; };
 		31CE692EDFCE0B5ECDC4C1DD /* StartPushStep4View.swift in Sources */ = {isa = PBXBuildFile; fileRef = 640CA4B8601EE8D9224ECDE3 /* StartPushStep4View.swift */; };
+		AA01000100000000AA010001 /* YourPushCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA01000200000000AA010002 /* YourPushCard.swift */; };
+		AA01000300000000AA010003 /* ManagePushView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA01000400000000AA010004 /* ManagePushView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -140,6 +142,8 @@
 		698E3B36A45C17FF134EEE52 /* StartPushStep3View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartPushStep3View.swift; sourceTree = "<group>"; };
 		B7E3F912C458A03D62819F4A /* StartPushTimingPickers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartPushTimingPickers.swift; sourceTree = "<group>"; };
 		640CA4B8601EE8D9224ECDE3 /* StartPushStep4View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartPushStep4View.swift; sourceTree = "<group>"; };
+		AA01000200000000AA010002 /* YourPushCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YourPushCard.swift; sourceTree = "<group>"; };
+		AA01000400000000AA010004 /* ManagePushView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManagePushView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -212,6 +216,8 @@
 				5217A2E52FF360000011F860 /* PlansCalendarView.swift */,
 				5217A2E72FF370000011F860 /* PlansView.swift */,
 				5217A2E92FF380000011F860 /* ReviewPushesView.swift */,
+				AA01000200000000AA010002 /* YourPushCard.swift */,
+				AA01000400000000AA010004 /* ManagePushView.swift */,
 				A043BAE1603803A839C0CB52 /* StartPushModels.swift */,
 				A5534EA92B26FA8ADC30543F /* StartPushStyle.swift */,
 				F8FD0BA84A167FE482ED4A92 /* StartPushFlowView.swift */,
@@ -424,6 +430,8 @@
 				5217A2E62FF360000011F860 /* PlansCalendarView.swift in Sources */,
 				5217A2E82FF370000011F860 /* PlansView.swift in Sources */,
 				5217A2EA2FF380000011F860 /* ReviewPushesView.swift in Sources */,
+				AA01000100000000AA010001 /* YourPushCard.swift in Sources */,
+				AA01000300000000AA010003 /* ManagePushView.swift in Sources */,
 				F511D9CB8F68D9D9B0341314 /* StartPushModels.swift in Sources */,
 				E5A6E743849E63F8101AC616 /* StartPushStyle.swift in Sources */,
 				C8C8050EED40EF171CC2784D /* StartPushFlowView.swift in Sources */,

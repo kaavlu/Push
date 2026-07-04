@@ -27,6 +27,13 @@ struct PlansView: View {
         .fullScreenCover(isPresented: $viewModel.isYourPushesPresented) {
             YourPushesListView(viewModel: viewModel)
         }
+        .fullScreenCover(isPresented: $viewModel.isManagePushPresented) {
+            if let plan = viewModel.managedPlan {
+                ManagePushView(plan: plan) {
+                    viewModel.isManagePushPresented = false
+                }
+            }
+        }
     }
 
     private var pageContent: some View {
@@ -76,7 +83,10 @@ private struct YourPushesModule: View {
                 .font(.headline.weight(.bold))
                 .foregroundStyle(PushControlColors.textEspresso)
             if let first = viewModel.yourPushes.first {
-                ActivePlanCard(plan: first)
+                YourPushCard(plan: first) {
+                    viewModel.managedPlan = first
+                    viewModel.isManagePushPresented = true
+                }
             }
             if viewModel.yourPushes.count > 1 {
                 seeAllButton
