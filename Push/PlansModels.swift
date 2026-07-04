@@ -10,6 +10,29 @@ struct PlanData: Identifiable {
     let locationHint: String
     var status: PlanStatus
     let isOwner: Bool
+    let participants: [HangoutPerson]
+
+    init(
+        id: String,
+        title: String,
+        group: String,
+        timeSignal: String,
+        socialProof: String,
+        locationHint: String,
+        status: PlanStatus,
+        isOwner: Bool,
+        participants: [HangoutPerson] = []
+    ) {
+        self.id = id
+        self.title = title
+        self.group = group
+        self.timeSignal = timeSignal
+        self.socialProof = socialProof
+        self.locationHint = locationHint
+        self.status = status
+        self.isOwner = isOwner
+        self.participants = participants
+    }
 }
 
 enum PlanStatus: String, Equatable {
@@ -59,11 +82,17 @@ enum PlansMockData {
             id: "gym-later",
             title: "Gym later",
             group: "Exec",
-            timeSignal: "around 7:45 PM",
+            timeSignal: "~7:45 PM",
             socialProof: "4 going",
             locationHint: "Crunch Fitness",
             status: .joined,
-            isOwner: true
+            isOwner: true,
+            participants: [
+                HangoutPerson(id: "chitty",  name: "Chitty",  imageAssetName: "assets/friends/chitty.png",  initials: "CH"),
+                HangoutPerson(id: "ishan",   name: "Ishan",   imageAssetName: "assets/friends/ishan.png",   initials: "IS"),
+                HangoutPerson(id: "viplove", name: "Viplove", imageAssetName: "assets/friends/viplove.png", initials: "VI"),
+                HangoutPerson(id: "ram",     name: "Ram",     imageAssetName: "assets/friends/ram.png",     initials: "RA")
+            ]
         ),
         PlanData(
             id: "coffee",
@@ -83,7 +112,11 @@ enum PlansMockData {
             socialProof: "2 in · 1 maybe",
             locationHint: "Suggested: Little Italy",
             status: .pending,
-            isOwner: true
+            isOwner: true,
+            participants: [
+                HangoutPerson(id: "rohan", name: "Rohan", imageAssetName: "assets/friends/rohan.png", initials: "RO"),
+                HangoutPerson(id: "ryan",  name: "Ryan",  imageAssetName: "assets/friends/ryan.png",  initials: "RY")
+            ]
         ),
         PlanData(
             id: "poker-night",

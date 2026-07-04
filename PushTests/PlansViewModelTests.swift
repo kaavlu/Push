@@ -117,4 +117,11 @@ final class PlansViewModelTests: XCTestCase {
         let expected = vm.calendarDays.reduce(0) { $0 + $1.pushCount }
         XCTAssertEqual(vm.totalPushesThisMonth, expected)
     }
+
+    func testYourPushes_ownedPlansHaveParticipants() {
+        let vm = PlansViewModel(plans: PlansMockData.plans)
+        let owned = vm.yourPushes
+        XCTAssertTrue(owned.allSatisfy { !$0.participants.isEmpty },
+                      "Each owned push should have at least one participant")
+    }
 }
