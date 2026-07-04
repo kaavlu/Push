@@ -31,6 +31,7 @@ struct PlansView: View {
             if let plan = viewModel.managedPlan {
                 ManagePushView(plan: plan) {
                     viewModel.isManagePushPresented = false
+                    viewModel.managedPlan = nil
                 }
             }
         }
