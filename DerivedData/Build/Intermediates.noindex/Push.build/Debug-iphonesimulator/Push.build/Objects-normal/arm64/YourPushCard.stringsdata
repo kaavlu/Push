@@ -1,0 +1,24 @@
+{
+  "source": "/Users/manavkhanvilkar/Desktop/Push/Push/YourPushCard.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "%@ · %@"
+      },
+      {
+        "comment": "",
+        "key": "Joined:"
+      },
+      {
+        "comment": "",
+        "key": "Manage →"
+      },
+      {
+        "comment": "",
+        "key": "+%lld"
+      }
+    ]
+  },
+  "version": 1
+}

@@ -1,0 +1,20 @@
+{
+  "source": "/Users/manavkhanvilkar/Desktop/Push/Push/GroupDetailView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Back to groups"
+      },
+      {
+        "comment": "",
+        "key": "%lld members"
+      },
+      {
+        "comment": "",
+        "key": "Members"
+      }
+    ]
+  },
+  "version": 1
+}

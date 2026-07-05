@@ -1,0 +1,8 @@
+2026-07-05 15:37:22.241 xcodebuild[60113:918650] DVTCoreDeviceEnabledState: DVTCoreDeviceEnabledState_Disabled set via user default (DVTEnableCoreDevice=disabled)
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:iOS Simulator, id:4260E009-3345-4F22-ACEE-6FF58E200102, OS:16.4, name:iPhone 14 Pro Max }
+{ platform:iOS Simulator, id:4260E009-3345-4F22-ACEE-6FF58E200102, OS:16.4, name:iPhone 14 Pro Max }
+2026-07-05 15:39:01.091 xcodebuild[61080:923064] DVTCoreDeviceEnabledState: DVTCoreDeviceEnabledState_Disabled set via user default (DVTEnableCoreDevice=disabled)
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:iOS Simulator, id:4260E009-3345-4F22-ACEE-6FF58E200102, OS:16.4, name:iPhone 14 Pro Max }
+{ platform:iOS Simulator, id:4260E009-3345-4F22-ACEE-6FF58E200102, OS:16.4, name:iPhone 14 Pro Max }

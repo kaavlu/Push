@@ -12,7 +12,6 @@ final class PlansViewModel: ObservableObject {
     @Published var isReviewDeckPresented: Bool = false
     @Published var isStartPushPresented: Bool = false
     @Published var isYourPushesPresented: Bool = false
-    @Published var isManagePushPresented: Bool = false
     @Published var managedPlan: PlanData? = nil
 
     init(plans: [PlanData] = PlansMockData.plans, referenceDate: Date = Date()) {
@@ -42,6 +41,10 @@ final class PlansViewModel: ObservableObject {
 
     var sortedPlans: [PlanData] {
         plans.sorted { priority($0) < priority($1) }
+    }
+
+    func openManage(plan: PlanData) {
+        managedPlan = plan
     }
 
     func respond(to plan: PlanData, with direction: SwipeDirection) {

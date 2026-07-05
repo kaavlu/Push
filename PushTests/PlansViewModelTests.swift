@@ -120,14 +120,14 @@ final class PlansViewModelTests: XCTestCase {
 
     func testYourPushes_ownedPlansHaveParticipants() {
         let vm = PlansViewModel(plans: PlansMockData.plans)
-        let owned = vm.yourPushes
-        XCTAssertTrue(owned.allSatisfy { !$0.participants.isEmpty },
-                      "Each owned push should have at least one participant")
+        let gymPush = vm.yourPushes.first { $0.id == "gym-later" }
+        let drinksPush = vm.yourPushes.first { $0.id == "drinks-friday" }
+        XCTAssertEqual(gymPush?.participants.count, 4)
+        XCTAssertEqual(drinksPush?.participants.count, 2)
     }
 
-    func testIsManagePushPresented_defaultsFalse() {
+    func testManagedPlan_defaultsNil() {
         let vm = PlansViewModel()
-        XCTAssertFalse(vm.isManagePushPresented)
         XCTAssertNil(vm.managedPlan)
     }
 }

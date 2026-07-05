@@ -1,0 +1,16 @@
+{
+  "source": "/Users/manavkhanvilkar/Desktop/Push/Push/BottomNavigationBar.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Selected"
+      },
+      {
+        "comment": "",
+        "key": "Not selected"
+      }
+    ]
+  },
+  "version": 1
+}

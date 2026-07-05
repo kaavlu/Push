@@ -173,18 +173,17 @@ private struct FriendGroupDropdown: View {
     var body: some View {
         dropdownButton
             .overlay(alignment: .top) {
-            if isExpanded {
-                dropdownPanel
-                    .padding(.top, TopControlLayout.dropdownHeight + TopDropdownLayout.panelSpacing)
-                    .transition(
-                        .move(edge: .top)
-                            .combined(with: .opacity)
-                            .combined(with: .scale(scale: TopDropdownLayout.panelTransitionScale, anchor: .top))
-                    )
+                if isExpanded {
+                    dropdownPanel
+                        .padding(.top, TopControlLayout.dropdownHeight + TopDropdownLayout.panelSpacing)
+                        .transition(
+                            .opacity
+                                .combined(with: .scale(scale: TopDropdownLayout.panelTransitionScale, anchor: .top))
+                        )
+                }
             }
-        }
-        .animation(.spring(response: TopDropdownLayout.animationResponse, dampingFraction: TopDropdownLayout.animationDamping), value: isExpanded)
-        .zIndex(TopDropdownLayout.expandedZIndex)
+            .animation(.spring(response: TopDropdownLayout.animationResponse, dampingFraction: TopDropdownLayout.animationDamping), value: isExpanded)
+            .zIndex(TopDropdownLayout.expandedZIndex)
     }
 
     private var dropdownButton: some View {

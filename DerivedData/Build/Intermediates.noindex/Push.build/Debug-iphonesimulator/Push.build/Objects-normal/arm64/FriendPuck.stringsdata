@@ -1,0 +1,20 @@
+{
+  "source": "/Users/manavkhanvilkar/Desktop/Push/Push/FriendPuck.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "%@, %@, %@, %@"
+      },
+      {
+        "comment": "",
+        "key": "%lld person friend group, %@, %@"
+      },
+      {
+        "comment": "",
+        "key": "%lld"
+      }
+    ]
+  },
+  "version": 1
+}

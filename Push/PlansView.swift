@@ -27,12 +27,9 @@ struct PlansView: View {
         .fullScreenCover(isPresented: $viewModel.isYourPushesPresented) {
             YourPushesListView(viewModel: viewModel)
         }
-        .fullScreenCover(isPresented: $viewModel.isManagePushPresented) {
-            if let plan = viewModel.managedPlan {
-                ManagePushView(plan: plan) {
-                    viewModel.isManagePushPresented = false
-                    viewModel.managedPlan = nil
-                }
+        .fullScreenCover(item: $viewModel.managedPlan) { plan in
+            ManagePushView(plan: plan) {
+                viewModel.managedPlan = nil
             }
         }
     }
@@ -85,8 +82,7 @@ private struct YourPushesModule: View {
                 .foregroundStyle(PushControlColors.textEspresso)
             if let first = viewModel.yourPushes.first {
                 YourPushCard(plan: first) {
-                    viewModel.managedPlan = first
-                    viewModel.isManagePushPresented = true
+                    viewModel.openManage(plan: first)
                 }
             }
             if viewModel.yourPushes.count > 1 {
@@ -157,7 +153,9 @@ struct YourPushesListView: View {
                 ScrollView {
                     VStack(spacing: PlansLayout.currentPushesSpacing) {
                         ForEach(viewModel.yourPushes) { plan in
-                            ActivePlanCard(plan: plan)
+                            YourPushCard(plan: plan) {
+                                viewModel.openManage(plan: plan)
+                            }
                         }
                     }
                     .padding(.horizontal, PlansLayout.horizontalPadding)

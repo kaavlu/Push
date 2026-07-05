@@ -1,0 +1,40 @@
+{
+  "source": "/Users/manavkhanvilkar/Desktop/Push/Push/ReviewPushesView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Review Pushes"
+      },
+      {
+        "comment": "",
+        "key": "%lld left"
+      },
+      {
+        "comment": "",
+        "key": ""
+      },
+      {
+        "comment": "",
+        "key": "You're all caught up"
+      },
+      {
+        "comment": "",
+        "key": "Check back later"
+      },
+      {
+        "comment": "",
+        "key": "← Pass"
+      },
+      {
+        "comment": "",
+        "key": "Maybe ↑"
+      },
+      {
+        "comment": "",
+        "key": "Join →"
+      }
+    ]
+  },
+  "version": 1
+}

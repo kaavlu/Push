@@ -1,0 +1,40 @@
+{
+  "source": "/Users/manavkhanvilkar/Desktop/Push/Push/StartPushStep4View.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Sent to %@"
+      },
+      {
+        "comment": "",
+        "key": "Just now"
+      },
+      {
+        "comment": "",
+        "key": "Who might be down"
+      },
+      {
+        "comment": "",
+        "key": "%lld %@"
+      },
+      {
+        "comment": "",
+        "key": "We'll notify you as people respond."
+      },
+      {
+        "comment": "",
+        "key": "Push is live"
+      },
+      {
+        "comment": "",
+        "key": "Live"
+      },
+      {
+        "comment": "",
+        "key": "Edit push"
+      }
+    ]
+  },
+  "version": 1
+}

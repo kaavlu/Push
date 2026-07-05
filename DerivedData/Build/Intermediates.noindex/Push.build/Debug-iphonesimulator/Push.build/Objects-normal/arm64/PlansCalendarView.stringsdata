@@ -1,0 +1,36 @@
+{
+  "source": "/Users/manavkhanvilkar/Desktop/Push/Push/PlansCalendarView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "History ›"
+      },
+      {
+        "comment": "",
+        "key": "%lld Pushes this month"
+      },
+      {
+        "comment": "",
+        "key": "Most active: %@"
+      },
+      {
+        "comment": "",
+        "key": "%lld"
+      },
+      {
+        "comment": "",
+        "key": "Almost happened"
+      },
+      {
+        "comment": "",
+        "key": "Nothing happened"
+      },
+      {
+        "comment": "",
+        "key": "%lld %@"
+      }
+    ]
+  },
+  "version": 1
+}

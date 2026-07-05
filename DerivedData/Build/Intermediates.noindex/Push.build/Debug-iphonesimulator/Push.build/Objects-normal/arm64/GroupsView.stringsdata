@@ -1,0 +1,20 @@
+{
+  "source": "/Users/manavkhanvilkar/Desktop/Push/Push/GroupsView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Groups"
+      },
+      {
+        "comment": "",
+        "key": "Your circles"
+      },
+      {
+        "comment": "",
+        "key": "%lld"
+      }
+    ]
+  },
+  "version": 1
+}

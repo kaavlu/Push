@@ -1,0 +1,16 @@
+{
+  "source": "/Users/manavkhanvilkar/Desktop/Push/Push/PuckLabView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Puck Lab"
+      },
+      {
+        "comment": "",
+        "key": "Single-friend puck states first, with clusters still available for comparison."
+      }
+    ]
+  },
+  "version": 1
+}

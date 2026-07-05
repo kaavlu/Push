@@ -1,0 +1,48 @@
+{
+  "source": "/Users/manavkhanvilkar/Desktop/Push/Push/StartPushTimingPickers.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Previous month"
+      },
+      {
+        "comment": "",
+        "key": "Next month"
+      },
+      {
+        "comment": "",
+        "key": "Day %lld"
+      },
+      {
+        "comment": "",
+        "key": "Selected"
+      },
+      {
+        "comment": "",
+        "key": ""
+      },
+      {
+        "comment": "",
+        "key": "%lld"
+      },
+      {
+        "comment": "",
+        "key": ":"
+      },
+      {
+        "comment": "",
+        "key": "Increase"
+      },
+      {
+        "comment": "",
+        "key": "Decrease"
+      },
+      {
+        "comment": "",
+        "key": "Not selected"
+      }
+    ]
+  },
+  "version": 1
+}

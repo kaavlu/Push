@@ -1,0 +1,16 @@
+{
+  "source": "/Users/manavkhanvilkar/Desktop/Push/Push/StartPushFlowView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Back"
+      },
+      {
+        "comment": "",
+        "key": "Close"
+      }
+    ]
+  },
+  "version": 1
+}

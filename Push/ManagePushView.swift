@@ -8,7 +8,7 @@ struct ManagePushView: View {
     var body: some View {
         ZStack {
             PushModalBackground()
-            VStack(spacing: 16) {
+            VStack(spacing: PlansLayout.sectionSpacing) {
                 Text(plan.title)
                     .font(.largeTitle.weight(.bold))
                     .foregroundStyle(PushControlColors.activeForeground)

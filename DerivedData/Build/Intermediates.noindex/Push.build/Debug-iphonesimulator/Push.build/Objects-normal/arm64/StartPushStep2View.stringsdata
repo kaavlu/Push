@@ -1,0 +1,16 @@
+{
+  "source": "/Users/manavkhanvilkar/Desktop/Push/Push/StartPushStep2View.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "%lld/%lld"
+      },
+      {
+        "comment": "",
+        "key": "e.g. \"Grab coffee?\" or \"Late dinner in 30?\""
+      }
+    ]
+  },
+  "version": 1
+}
