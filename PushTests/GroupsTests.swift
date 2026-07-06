@@ -2,84 +2,60 @@
 //  GroupsTests.swift
 //  PushTests
 //
-//  Created by Manav Khanvilkar on 6/29/26.
-//
 
 import XCTest
 @testable import Push
 
+@MainActor
 final class GroupsTests: XCTestCase {
 
-    func testGroupMockDataExposesRequestedGroups() throws {
-        let groups = GroupsMockData.groups
-
-        XCTAssertEqual(groups.map(\.name), [
-            "India",
-            "Exec",
-            "Michigan"
-        ])
-        XCTAssertEqual(groups.map(\.memberCount), [5, 3, 5])
-        XCTAssertEqual(groups.map(\.status), [
-            .activeNow,
-            .nearby,
-            .planLive
-        ])
+    private func loadedViewModel() async -> GroupsViewModel {
+        let viewModel = GroupsViewModel(container: AppDataContainer(seed: .standard()))
+        await viewModel.load()
+        return viewModel
     }
 
-    func testGroupMockDataExposesRequestedStats() throws {
-        let groups = GroupsMockData.groups
-
-        XCTAssertEqual(groups.map(\.activeNowCount), [3, 1, 2])
-        XCTAssertEqual(groups.map(\.nearbyCount), [2, 1, 1])
-        XCTAssertEqual(groups.map(\.planCount), [1, 0, 1])
-        XCTAssertEqual(groups.map(\.imageAssetName), [
+    func testGroupCardsDeriveFromCanonicalData() async throws {
+        let viewModel = await loadedViewModel()
+        XCTAssertEqual(viewModel.groups.map(\.name), ["India", "Exec", "Michigan"])
+        XCTAssertEqual(viewModel.groups.map(\.memberCount), [5, 3, 5])
+        XCTAssertEqual(viewModel.groups.map(\.status), [.activeNow, .activeNow, .planLive])
+        XCTAssertEqual(viewModel.groups.map(\.activeNowCount), [2, 3, 5])
+        XCTAssertEqual(viewModel.groups.map(\.nearbyCount), [2, 0, 0])
+        XCTAssertEqual(viewModel.groups.map(\.planCount), [1, 2, 2])
+        XCTAssertEqual(viewModel.groups.map(\.imageAssetName), [
             "assets/groups/India/chitty.png",
             "assets/groups/Exec/ram.png",
             "assets/groups/Michigan/ram.png"
         ])
     }
 
-    func testGroupMockDataUsesExtensibleMemberIDs() throws {
-        let india = try XCTUnwrap(GroupsMockData.groups.first)
-
-        XCTAssertEqual(india.id, "india")
-        XCTAssertEqual(india.memberIDs, ["chitty", "nitin", "ishan", "viplove", "roh"])
-    }
-
-    func testGroupMembersResolveFromSeededFriendData() throws {
-        let india = try XCTUnwrap(GroupsMockData.groups.first)
-        let viewModel = GroupsViewModel()
+    func testGroupMembersResolveWithCanonicalAvailability() async throws {
+        let viewModel = await loadedViewModel()
+        let india = try XCTUnwrap(viewModel.groups.first)
         let members = viewModel.members(for: india)
-
-        XCTAssertEqual(members.map(\.name), [
-            "Chitty",
-            "Nitin",
-            "Ishan",
-            "Viplove",
-            "Roh"
-        ])
+        XCTAssertEqual(members.map(\.name), ["Chitty", "Nitin", "Ishan", "Viplove", "Roh"])
         XCTAssertEqual(members.first?.profileImageAssetName, "assets/friends/chitty.png")
+        XCTAssertEqual(members.first { $0.id == "nitin" }?.availability, .maybeDown)
     }
 
-    func testGroupsViewModelUpdatesSelectedGroupLocally() throws {
-        let groups = GroupsMockData.groups
-        let viewModel = GroupsViewModel(groups: groups)
-        let michigan = try XCTUnwrap(groups.last)
+    func testGroupsViewModelUpdatesSelectedGroupLocally() async throws {
+        let viewModel = await loadedViewModel()
+        let michigan = try XCTUnwrap(viewModel.groups.last)
 
         XCTAssertEqual(viewModel.selectedGroupID, "india")
-        XCTAssertTrue(viewModel.isSelected(groups[0]))
+        XCTAssertTrue(viewModel.isSelected(viewModel.groups[0]))
 
         viewModel.select(michigan)
 
         XCTAssertEqual(viewModel.selectedGroupID, "michigan")
         XCTAssertTrue(viewModel.isSelected(michigan))
-        XCTAssertFalse(viewModel.isSelected(groups[0]))
+        XCTAssertFalse(viewModel.isSelected(viewModel.groups[0]))
     }
 
-    func testGroupsViewModelPresentsAndClosesDetailLocally() throws {
-        let groups = GroupsMockData.groups
-        let viewModel = GroupsViewModel(groups: groups)
-        let exec = try XCTUnwrap(groups.first { $0.id == "exec" })
+    func testGroupsViewModelPresentsAndClosesDetailLocally() async throws {
+        let viewModel = await loadedViewModel()
+        let exec = try XCTUnwrap(viewModel.groups.first { $0.id == "exec" })
 
         XCTAssertNil(viewModel.presentedGroupID)
 
@@ -92,5 +68,17 @@ final class GroupsTests: XCTestCase {
         viewModel.closeDetail()
 
         XCTAssertNil(viewModel.presentedGroupID)
+    }
+
+    func testSeamInitServesInjectedGroups() {
+        let fixture = PushGroupData(
+            id: "fixture", name: "Fixture", memberCount: 1, memberIDs: ["chitty"],
+            status: .quiet, activeNowCount: 0, nearbyCount: 0, planCount: 0,
+            imageAssetName: nil, fallbackSymbol: "F", fallbackInitials: "F"
+        )
+        let viewModel = GroupsViewModel(groups: [fixture])
+        XCTAssertEqual(viewModel.groups, [fixture])
+        XCTAssertEqual(viewModel.selectedGroupID, "fixture")
+        XCTAssertTrue(viewModel.members(for: fixture).isEmpty)
     }
 }

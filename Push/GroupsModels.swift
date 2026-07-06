@@ -46,14 +46,70 @@ struct PushGroupMemberData: Identifiable, Equatable {
     let availability: FriendAvailabilityState?
 }
 
+@MainActor
 final class GroupsViewModel: ObservableObject {
-    @Published private(set) var groups: [PushGroupData]
+    @Published private(set) var groups: [PushGroupData] = []
     @Published private(set) var selectedGroupID: String?
     @Published private(set) var presentedGroupID: String?
+    @Published private(set) var loadState: LoadState<[PushGroupData]> = .idle
 
-    init(groups: [PushGroupData] = GroupsMockData.groups) {
+    private let container: AppDataContainer?
+    private var membersByGroupID: [String: [PushGroupMemberData]] = [:]
+
+    init(container: AppDataContainer = .shared) {
+        self.container = container
+        Task { await load() }
+    }
+
+    /// Preview/test seam: serve injected cards without touching repositories.
+    init(groups: [PushGroupData]) {
+        container = nil
         self.groups = groups
-        self.selectedGroupID = groups.first?.id
+        selectedGroupID = groups.first?.id
+        loadState = .loaded(groups)
+    }
+
+    func load() async {
+        guard let container else { return }
+        loadState = .loading
+        do {
+            let groupList = try await container.groups.groups()
+            let memberships = try await container.groups.memberships()
+            let statuses = try await container.friends.presenceStatuses()
+            let plans = try await container.pushes.activePlans()
+            let friendList = try await container.friends.friends()
+            let user = try await container.friends.currentUser()
+
+            let statusesByPersonID = Dictionary(
+                uniqueKeysWithValues: statuses.map { ($0.personID, $0) }
+            )
+            let peopleByID = Dictionary(
+                uniqueKeysWithValues: (friendList + [user]).map { ($0.id, $0) }
+            )
+            let cards = GroupContentBuilder.groupCards(
+                groups: groupList,
+                memberships: memberships,
+                statuses: statusesByPersonID,
+                plans: plans,
+                now: Date()
+            )
+            membersByGroupID = Dictionary(uniqueKeysWithValues: groupList.map { group in
+                (
+                    group.id,
+                    GroupContentBuilder.members(
+                        groupID: group.id,
+                        memberships: memberships,
+                        people: peopleByID,
+                        statuses: statusesByPersonID
+                    )
+                )
+            })
+            groups = cards
+            if selectedGroupID == nil { selectedGroupID = cards.first?.id }
+            loadState = .loaded(cards)
+        } catch {
+            loadState = .failed(error)
+        }
     }
 
     func stats(for group: PushGroupData) -> [PushGroupStat] {
@@ -86,7 +142,7 @@ final class GroupsViewModel: ObservableObject {
     }
 
     func members(for group: PushGroupData) -> [PushGroupMemberData] {
-        SeededGroupFriends.members(for: group.memberIDs)
+        membersByGroupID[group.id] ?? []
     }
 }
 

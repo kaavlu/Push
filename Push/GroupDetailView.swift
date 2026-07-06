@@ -323,8 +323,35 @@ private enum GroupDetailColor {
 struct GroupDetailView_Previews: PreviewProvider {
     static var previews: some View {
         GroupDetailView(
-            group: GroupsMockData.groups[0],
-            members: SeededGroupFriends.members(for: GroupsMockData.groups[0].memberIDs)
+            group: PushGroupData(
+                id: "india",
+                name: "India",
+                memberCount: 2,
+                memberIDs: ["chitty", "nitin"],
+                status: .activeNow,
+                activeNowCount: 2,
+                nearbyCount: 1,
+                planCount: 1,
+                imageAssetName: "assets/groups/India/chitty.png",
+                fallbackSymbol: "I",
+                fallbackInitials: "I"
+            ),
+            members: [
+                PushGroupMemberData(
+                    id: "chitty",
+                    name: "Chitty",
+                    avatarPlaceholder: "CH",
+                    profileImageAssetName: "assets/friends/chitty.png",
+                    availability: .freeNow
+                ),
+                PushGroupMemberData(
+                    id: "nitin",
+                    name: "Nitin",
+                    avatarPlaceholder: "NI",
+                    profileImageAssetName: "assets/friends/nitin.png",
+                    availability: .maybeDown
+                )
+            ]
         ) {
         }
     }
