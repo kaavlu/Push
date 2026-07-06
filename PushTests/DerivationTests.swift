@@ -238,6 +238,48 @@ final class DerivationTests: XCTestCase {
         XCTAssertNil(nitin.withWhom)
     }
 
+    // MARK: - Group cards
+
+    private func seedGroupCards(now: Date = Date()) -> [PushGroupData] {
+        let seed = SeedData.standard(now: now)
+        return GroupContentBuilder.groupCards(
+            groups: seed.groups,
+            memberships: seed.memberships,
+            statuses: Dictionary(uniqueKeysWithValues: seed.statuses.map { ($0.personID, $0) }),
+            plans: seed.plans,
+            now: now
+        )
+    }
+
+    func testGroupCardsDeriveCountsAndStats() {
+        let cards = seedGroupCards()
+        XCTAssertEqual(cards.map(\.name), ["India", "Exec", "Michigan"])
+        XCTAssertEqual(cards.map(\.memberCount), [5, 3, 5])
+        XCTAssertEqual(cards.map(\.activeNowCount), [2, 3, 5])
+        XCTAssertEqual(cards.map(\.nearbyCount), [2, 0, 0])
+        XCTAssertEqual(cards.map(\.planCount), [1, 2, 2])
+    }
+
+    func testGroupBadgesDeriveWithPlanLivePriority() {
+        let cards = seedGroupCards()
+        XCTAssertEqual(cards.map(\.status), [.activeNow, .activeNow, .planLive])
+    }
+
+    func testGroupMembersUseCanonicalAvailability() throws {
+        let seed = SeedData.standard()
+        let members = GroupContentBuilder.members(
+            groupID: "india",
+            memberships: seed.memberships,
+            people: Dictionary(uniqueKeysWithValues: seed.people.map { ($0.id, $0) }),
+            statuses: Dictionary(uniqueKeysWithValues: seed.statuses.map { ($0.personID, $0) })
+        )
+        XCTAssertEqual(members.map(\.name), ["Chitty", "Nitin", "Ishan", "Viplove", "Roh"])
+        // Canonical value wins: the old groups table said nitin was joinable
+        // while the map showed maybeDown — map wins.
+        XCTAssertEqual(members.first { $0.id == "nitin" }?.availability, .maybeDown)
+        XCTAssertEqual(members.first { $0.id == "roh" }?.availability, .unavailable)
+    }
+
     func testMemberPuckFieldsDeriveFromPlaceAndStatus() throws {
         let bluBottle = try XCTUnwrap(seedPucks().first { $0.id == "puck-blue-bottle" })
         let chitty = try XCTUnwrap(bluBottle.people.first)
