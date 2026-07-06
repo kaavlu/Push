@@ -40,10 +40,11 @@ def add_file(content: str, rel_path: str, target: str) -> str:
         f"\t\t{build} /* {name} in Sources */ = "
         f"{{isa = PBXBuildFile; fileRef = {file_ref} /* {name} */; }};\n",
     )
+    # Always quote name/path: characters like "+" are invalid unquoted in pbxproj.
     if "/" in rel_path:
-        path_attr = f'name = {name}; path = "{rel_path}"; '
+        path_attr = f'name = "{name}"; path = "{rel_path}"; '
     else:
-        path_attr = f"path = {name}; "
+        path_attr = f'path = "{name}"; '
     content = insert_after(
         content,
         r"^/\* Begin PBXFileReference section \*/$",
