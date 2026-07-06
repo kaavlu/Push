@@ -45,15 +45,6 @@ final class PushTests: XCTestCase {
         ])
     }
 
-    func testFriendGroupFiltersExposeMockDropdownOptions() throws {
-        XCTAssertEqual(FriendGroupFilter.allCases.map(\.title), [
-            "All Friends",
-            "India",
-            "Exec",
-            "Michigan"
-        ])
-    }
-
     func testGlassStyleTokensExposeConsistentMaterialValues() throws {
         XCTAssertEqual(PushGlassStyle.materialPresenceOpacity, 0.68)
         XCTAssertEqual(PushGlassStyle.tintOpacity, 0.22)
@@ -189,41 +180,6 @@ final class PushTests: XCTestCase {
         XCTAssertEqual(friend.profileImageAssetName, "assets/friends/chitty.png")
     }
 
-    func testMapPuckMockDataContainsRequiredPuckMix() throws {
-        let pucks = MapPuckMockData.pucks
-
-        XCTAssertEqual(pucks.count, 5)
-        XCTAssertEqual(pucks.filter { $0.kind == .individual }.count, 2)
-        XCTAssertEqual(pucks.filter { $0.kind == .hangout }.count, 1)
-        XCTAssertEqual(pucks.filter { $0.kind == .cluster }.count, 1)
-        XCTAssertEqual(pucks.filter { $0.kind == .friendGroup }.count, 1)
-        XCTAssertTrue(pucks.allSatisfy { !$0.people.isEmpty })
-        XCTAssertTrue(pucks.allSatisfy { $0.coordinate.latitude != 0 && $0.coordinate.longitude != 0 })
-    }
-
-    func testMapPuckMockDataUsesAvailableAssetNames() throws {
-        let pucks = MapPuckMockData.pucks
-        let assetNames = Set(pucks.flatMap { $0.people.compactMap(\.profileImageAssetName) })
-
-        XCTAssertTrue(assetNames.isSubset(of: [
-            "assets/friends/chitty.png",
-            "assets/friends/nitin.png",
-            "assets/friends/ishan.png",
-            "assets/friends/viplove.png",
-            "assets/friends/ram.png",
-            "assets/friends/rohan.png",
-            "assets/friends/ryan.png",
-            "assets/friends/pranay.png",
-            "assets/friends/ohm.png",
-            "assets/friends/roh.png",
-            "assets/groups/Exec/ram.png",
-            "assets/profile/manav.jpeg"
-        ]))
-        XCTAssertTrue(assetNames.contains("assets/friends/chitty.png"))
-        XCTAssertTrue(assetNames.contains("assets/friends/nitin.png"))
-        XCTAssertTrue(assetNames.contains("assets/friends/ishan.png"))
-        XCTAssertTrue(assetNames.contains("assets/groups/Exec/ram.png"))
-    }
 
     @MainActor
     private func loadedProfileViewModel() async -> ProfileViewModel {
@@ -409,32 +365,6 @@ final class PushTests: XCTestCase {
             viewModel.connectorAlert?.message,
             "This prototype does not start Google sign-in yet. The connector is modeled for availability-only access."
         )
-    }
-
-    func testMapPuckMockDataExposesGroupTags() throws {
-        let pucks = MapPuckMockData.pucks
-
-        XCTAssertEqual(pucks.filter { $0.groups.contains(.india) }.count, 3)
-        XCTAssertEqual(pucks.filter { $0.groups.contains(.michigan) }.count, 1)
-        XCTAssertEqual(pucks.filter { $0.groups.contains(.exec) }.count, 1)
-        XCTAssertTrue(pucks.allSatisfy { !$0.groups.isEmpty })
-    }
-
-    func testGroupFilterReturnsPucksForSelectedGroup() throws {
-        let allPucks = MapPuckMockData.pucks
-
-        let indiaPucks = allPucks.filter { $0.groups.contains(.india) }
-        XCTAssertEqual(indiaPucks.count, 3)
-        XCTAssertTrue(indiaPucks.allSatisfy { $0.groups.contains(.india) })
-
-        let michiganPucks = allPucks.filter { $0.groups.contains(.michigan) }
-        XCTAssertEqual(michiganPucks.count, 1)
-
-        let execPucks = allPucks.filter { $0.groups.contains(.exec) }
-        XCTAssertEqual(execPucks.count, 1)
-
-        // allFriends returns everything
-        XCTAssertEqual(allPucks.count, 5)
     }
 
     func testMainMapRoutesFeedAndPlansExposeMetadata() throws {

@@ -7,28 +7,6 @@
 
 import Foundation
 
-enum FriendGroupFilter: String, CaseIterable, Identifiable {
-    case allFriends
-    case india
-    case exec
-    case michigan
-
-    var id: Self { self }
-
-    var title: String {
-        switch self {
-        case .allFriends:
-            return "All Friends"
-        case .india:
-            return "India"
-        case .exec:
-            return "Exec"
-        case .michigan:
-            return "Michigan"
-        }
-    }
-}
-
 enum BottomNavigationItem: String, CaseIterable, Identifiable {
     case map
     case group

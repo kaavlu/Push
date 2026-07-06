@@ -55,7 +55,6 @@
 		5217A2AA2FF2F1000011F860 /* ProfileModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2A92FF2F1000011F860 /* ProfileModels.swift */; };
 		5217A2AC2FF2F1000011F860 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2AB2FF2F1000011F860 /* ProfileView.swift */; };
 		5217A2C62FF310000011F860 /* ProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2C52FF310000011F860 /* ProfileViewModel.swift */; };
-		5217A2C82FF310000011F860 /* ProfileMockData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2C72FF310000011F860 /* ProfileMockData.swift */; };
 		5217A2CA2FF310000011F860 /* ProfileComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2C92FF310000011F860 /* ProfileComponents.swift */; };
 		5217A2CC2FF310000011F860 /* ProfileDestinationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2CB2FF310000011F860 /* ProfileDestinationView.swift */; };
 		5217A2AE2FF2F1000011F860 /* PushGlassStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2AD2FF2F1000011F860 /* PushGlassStyle.swift */; };
@@ -69,7 +68,6 @@
 		5217A2C22FF300000011F860 /* CreatePlaceholderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2C12FF300000011F860 /* CreatePlaceholderView.swift */; };
 		5217A2C42FF300000011F860 /* BottomNavigationBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2C32FF300000011F860 /* BottomNavigationBar.swift */; };
 		5217A2D02FF320000011F860 /* assets in Resources */ = {isa = PBXBuildFile; fileRef = 5217A2CF2FF320000011F860 /* assets */; };
-		5217A2D22FF320000011F860 /* RealWorldMockData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2D12FF320000011F860 /* RealWorldMockData.swift */; };
 		5217A2D42FF330000011F860 /* FriendPuckStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2D32FF330000011F860 /* FriendPuckStyle.swift */; };
 		5217A2D62FF330000011F860 /* ActivityBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2D52FF330000011F860 /* ActivityBadge.swift */; };
 		5217A2D82FF330000011F860 /* AvatarStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2D72FF330000011F860 /* AvatarStack.swift */; };
@@ -165,7 +163,6 @@
 		5217A2A92FF2F1000011F860 /* ProfileModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileModels.swift; sourceTree = "<group>"; };
 		5217A2AB2FF2F1000011F860 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		5217A2C52FF310000011F860 /* ProfileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModel.swift; sourceTree = "<group>"; };
-		5217A2C72FF310000011F860 /* ProfileMockData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileMockData.swift; sourceTree = "<group>"; };
 		5217A2C92FF310000011F860 /* ProfileComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileComponents.swift; sourceTree = "<group>"; };
 		5217A2CB2FF310000011F860 /* ProfileDestinationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileDestinationView.swift; sourceTree = "<group>"; };
 		5217A2AD2FF2F1000011F860 /* PushGlassStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushGlassStyle.swift; sourceTree = "<group>"; };
@@ -179,7 +176,6 @@
 		5217A2C12FF300000011F860 /* CreatePlaceholderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatePlaceholderView.swift; sourceTree = "<group>"; };
 		5217A2C32FF300000011F860 /* BottomNavigationBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomNavigationBar.swift; sourceTree = "<group>"; };
 		5217A2CF2FF320000011F860 /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; path = assets; sourceTree = "<group>"; };
-		5217A2D12FF320000011F860 /* RealWorldMockData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealWorldMockData.swift; sourceTree = "<group>"; };
 		5217A2D32FF330000011F860 /* FriendPuckStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendPuckStyle.swift; sourceTree = "<group>"; };
 		5217A2D52FF330000011F860 /* ActivityBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityBadge.swift; sourceTree = "<group>"; };
 		5217A2D72FF330000011F860 /* AvatarStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvatarStack.swift; sourceTree = "<group>"; };
@@ -293,7 +289,6 @@
 				5217A2BD2FF300000011F860 /* CreateActionModels.swift */,
 				5217A2BF2FF300000011F860 /* CreateActionMenuView.swift */,
 				5217A2C12FF300000011F860 /* CreatePlaceholderView.swift */,
-				5217A2D12FF320000011F860 /* RealWorldMockData.swift */,
 				5217A2B32FF2F8000011F860 /* GroupsModels.swift */,
 				5217A2B52FF2F8000011F860 /* GroupsView.swift */,
 				5217A2B72FF2FA000011F860 /* GroupDetailView.swift */,
@@ -316,7 +311,6 @@
 				640CA4B8601EE8D9224ECDE3 /* StartPushStep4View.swift */,
 				5217A2A92FF2F1000011F860 /* ProfileModels.swift */,
 				5217A2C52FF310000011F860 /* ProfileViewModel.swift */,
-				5217A2C72FF310000011F860 /* ProfileMockData.swift */,
 				5217A2B12FF2F2000011F860 /* ProfileStyle.swift */,
 				5217A2C92FF310000011F860 /* ProfileComponents.swift */,
 				5217A2AB2FF2F1000011F860 /* ProfileView.swift */,
@@ -537,7 +531,6 @@
 				5217A2BE2FF300000011F860 /* CreateActionModels.swift in Sources */,
 				5217A2C02FF300000011F860 /* CreateActionMenuView.swift in Sources */,
 				5217A2C22FF300000011F860 /* CreatePlaceholderView.swift in Sources */,
-				5217A2D22FF320000011F860 /* RealWorldMockData.swift in Sources */,
 				5217A2B42FF2F8000011F860 /* GroupsModels.swift in Sources */,
 				5217A2B62FF2F8000011F860 /* GroupsView.swift in Sources */,
 				5217A2B82FF2FA000011F860 /* GroupDetailView.swift in Sources */,
@@ -560,7 +553,6 @@
 				31CE692EDFCE0B5ECDC4C1DD /* StartPushStep4View.swift in Sources */,
 				5217A2AA2FF2F1000011F860 /* ProfileModels.swift in Sources */,
 				5217A2C62FF310000011F860 /* ProfileViewModel.swift in Sources */,
-				5217A2C82FF310000011F860 /* ProfileMockData.swift in Sources */,
 				5217A2B22FF2F2000011F860 /* ProfileStyle.swift in Sources */,
 				5217A2CA2FF310000011F860 /* ProfileComponents.swift in Sources */,
 				5217A2AC2FF2F1000011F860 /* ProfileView.swift in Sources */,

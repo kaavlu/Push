@@ -369,6 +369,17 @@ final class DerivationTests: XCTestCase {
         XCTAssertEqual(day18.hadPlan, false)
     }
 
+    func testSeedImageAssetPathsMatchBundledAssets() {
+        let seed = SeedData.standard()
+        let expected = Set(
+            seed.people.compactMap(\.imageAssetPath) + seed.groups.compactMap(\.imageAssetPath)
+        )
+        XCTAssertTrue(expected.contains("assets/friends/chitty.png"))
+        XCTAssertTrue(expected.contains("assets/profile/manav.jpeg"))
+        XCTAssertTrue(expected.contains("assets/groups/Exec/ram.png"))
+        XCTAssertTrue(expected.allSatisfy { $0.hasPrefix("assets/") })
+    }
+
     func testMostActiveGroupDerivesFromHangouts() {
         let seed = SeedData.standard(now: wednesdayNoon)
         let name = PlansContentBuilder.mostActiveGroup(
