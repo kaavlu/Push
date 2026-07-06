@@ -2,15 +2,15 @@
 
 **Issue:** [#15](https://github.com/kaavlu/Push/issues/15)
 **Date:** 2026-07-05
-**Status:** Approved
+**Status:** Approved (rev 2 — incorporates owner review feedback)
 
 ## Goal
 
 Replace the six scattered mock-data enums with a single local data layer that behaves
 like a mock backend: centralized normalized seed data, an in-memory store, async
-repository protocols, and view models that derive screen-specific presentation models.
-The UI keeps its current content and visuals. No backend, no Supabase yet — but the
-repository seam is where Supabase plugs in later without touching UI or view models.
+throwing repository protocols, and view models that derive screen-specific presentation
+models. The UI keeps its current content and visuals. No backend, no Supabase yet — but
+the repository seam is where Supabase plugs in later without touching UI or view models.
 
 ## Audit findings (current state)
 
@@ -46,12 +46,24 @@ Problems:
 
 ## Decisions (user-approved)
 
-- **Architecture:** in-memory store + async repository protocols (not SwiftData, not Combine).
-- **Model scope:** everything current screens render, plus `FeedEvent` and `PushResponse`
-  models with seed data (no speculative UI).
+- **Architecture:** in-memory store + async throwing repository protocols
+  (not SwiftData, not Combine).
+- **Model scope:** everything current screens render, plus `FeedEvent`, `PushResponse`,
+  `SharingPolicy`, and `GroupMembership` models with seed data (no speculative UI).
 - **PuckLab:** keeps hand-crafted fixtures; renamed to make clear they are design
   fixtures, not app data.
 - **Conflicts:** map values win; other screens re-derive from canonical status.
+- **Failure modes now, not later:** repositories are `async throws` and view models
+  carry loading/error state even though the local implementation never fails.
+- **Privacy is modeled canonically:** sharing policy and viewer-scoped visible
+  presence exist from day one; UI never consumes raw presence directly.
+
+## Identity
+
+All entities use **stable opaque `String` IDs**. Seed IDs may be readable slugs
+(`"chitty"`, `"michigan"`) for convenience, but production IDs will be opaque
+UUID/ULID/database IDs. Nothing in the code may couple identity to display names:
+no parsing IDs for display, no deriving IDs from names outside the seed file.
 
 ## Canonical domain models
 
@@ -60,27 +72,48 @@ in `Push/Data/Domain/`.
 
 | Entity | Stored fields | Notes |
 |---|---|---|
-| `Person` | `id` (slug, e.g. `"chitty"`), `firstName`, `imageAssetPath` | `displayName`, `initials` computed once here |
-| `FriendGroup` | `id`, `name`, `memberIDs: [Person.ID]`, `imageAssetPath` | counts/stats/status all derived |
+| `Person` | `id`, `firstName`, `imageAssetPath` | `displayName`, `initials` computed once here |
+| `FriendGroup` | `id`, `name`, `imageAssetPath` | member lists/counts derived from `GroupMembership`; stats/status derived |
+| `GroupMembership` | `id`, `personID`, `groupID`, `role: owner/member`, `sharingLevel`, `membershipStatus: active/invited/left`, `joinedAt` | replaces stored `memberIDs` arrays |
 | `Place` | `id`, `name`, `shortLabel`, `coordinate` | ~7 seeded places |
-| `PresenceStatus` | `personID`, `availability: FriendAvailabilityState`, `activity` (name + SF symbol), `placeID?`, `statusNote?`, `updatedAt: Date` | exactly one per person; `FriendAvailabilityState` stays canonical |
-| `PushPlan` | `id`, `title`, `groupID`, `creatorID`, `timing` (Date-based), `placeID`, `placeIsSuggested: Bool`, `state: .collecting/.locked/.happening` | all current location hints map to seeded places; "Suggested:" prefix derived from the flag |
-| `PushResponse` | `pushID`, `personID`, `response: .in/.maybe/.out/.pending` | social proof derived from these |
+| `PresenceStatus` | `personID`, `availability: FriendAvailabilityState`, `activity` (name + SF symbol), `placeID?`, `statusNote?`, `confidence: high/medium/low`, `observedAt`, `updatedAt`, `expiresAt?`, `source: seed/location/manualOverride/inference` | canonical **internal** state; exactly one per person; never consumed by UI directly |
+| `SharingPolicy` | `id`, `ownerPersonID`, `audienceType: friend/group/globalDefault`, `audienceID?`, `locationVisibility: exact/vague/hidden`, `activityVisibility: full/vague/hidden`, `availabilityVisibility: full/hidden`, `expiresAt?` | answers "what does A share with B in context C" |
+| `PushPlan` | `id`, `title`, `groupID`, `creatorID`, `createdAt`, `updatedAt`, `startsAt`, `expiresAt`, `cancelledAt?`, `placeID`, `placeIsSuggested: Bool`, `state: .collecting/.locked/.happening`, `audience: group/inviteesOnly` | who can see the push — defaults to `.group` (all group members); timing labels ("now", "Friday, 9:00 PM") derived from `startsAt`; "Suggested:" prefix derived from the flag |
+| `PushResponse` | `pushID`, `personID`, `response: .in/.maybe/.out/.pending`, `respondedAt`, `readyState: readyNow/readyLater/needsRide/notReady/unknown` | `readyState` shapes future ready-up mechanics; MVP UI uses `response` only |
 | `PastHangout` | `id`, `date: Date`, `participantIDs`, `note`, `timeRange`, `cameFromPush`, `didHappen` | calendar aggregates derived |
-| `UserProfile` | current user personID, handle, visibility note, availability options, toggle groups, connectors | today's `ProfileMockData` content |
-| `FeedEvent` | `id`, `kind: .arrived/.becameFree/.groupForming/.pushCreated`, `actorIDs`, `placeID?`, `groupID?`, `timestamp` | seeded, no UI yet |
+| `UserProfile` | current user personID, handle, visibility note, availability options, toggle groups, connectors | privacy toggles are backed by the current user's `SharingPolicy` rows where they overlap |
+| `FeedEvent` | `id`, `kind: .arrived/.becameFree/.groupForming/.pushCreated`, `actorIDs`, `placeID?`, `groupID?`, `timestamp` | a **materialized read model** generated from canonical facts (presence, plans, responses); seeded manually for now, generated later; no UI yet |
+
+### Raw presence vs visible presence
+
+`PresenceStatus` is what Push knows internally. **`VisiblePresence`** is a derived
+(never stored) view of that status for a specific viewer, produced by applying the
+owner's most specific `SharingPolicy` (friend-specific → group → globalDefault):
+
+- `locationVisibility`: exact → place name/coordinate; vague → neighborhood-level
+  label; hidden → no place.
+- `activityVisibility`: full → activity + note; vague → softened copy; hidden → none.
+- `availabilityVisibility`: full → availability state; hidden → not on the board.
+
+All screen builders (map pucks, group member rows, friend detail) consume
+`VisiblePresence` for the current user as viewer — never raw `PresenceStatus`.
+Seeded policies are all full-visibility global defaults so today's screens render
+unchanged; the vague/hidden paths are exercised by unit tests constructing
+non-default policies.
 
 ### Stored vs derived
 
 Derived, never stored:
 
+- `VisiblePresence` — raw presence after sharing-policy resolution.
+- Group member lists and counts — from `GroupMembership` rows.
 - `withWhom` — other people whose status shares the same `placeID`.
 - Map pucks and kind — people sharing a place form one puck; 1 person = `.individual`,
   2 = `.hangout`, 3+ = `.cluster`, all members of a group co-located = `.friendGroup`.
 - Group stats (`activeNowCount`, `nearbyCount`, `planCount`) and status badge.
 - Social proof ("3 in · 2 maybe") from `PushResponse` rows.
 - Relative time labels ("8 min ago") from `updatedAt`; push timing labels
-  ("Friday, 9:00 PM", "now") from `timing` Dates.
+  ("Friday, 9:00 PM", "now") from `startsAt`.
 - `mostActiveGroup`, calendar day aggregates (push count = hangouts that day,
   had-plan = any `cameFromPush`, almost-happened = any `!didHappen`).
 - Group filter chips (replaces the hardcoded `FriendGroupFilter` enum).
@@ -96,16 +129,26 @@ Push/Data/
   Domain/            entity structs (one file per entity)
   Seed/              SeedData — the single home for all app content
   Store/             InMemoryDatabase (@MainActor, [ID: Entity] tables)
-  Repositories/      protocols (async funcs) + Local* implementations
+  Repositories/      protocols (async throws) + Local* implementations
   AppDataContainer.swift   composition root
 ```
 
-- Repository protocols: `FriendRepository`, `GroupRepository`, `PushRepository`,
-  `ProfileRepository`, `FeedRepository`. Async APIs (`func friends() async -> [Person]`
-  style) so a Supabase implementation is a drop-in.
+- Repository protocols: `FriendRepository` (people + presence), `GroupRepository`
+  (groups + memberships), `PushRepository` (plans + responses + past hangouts),
+  `ProfileRepository`, `SharingRepository` (policies), `FeedRepository`.
+- All protocol methods are **`async throws`**
+  (e.g. `func friends() async throws -> [Person]`,
+  `func activePlans(groupID: FriendGroup.ID?) async throws -> [PushPlan]`).
+  The local implementations simply never throw; the seam already supports failure
+  so Supabase implementations are drop-in.
 - `AppDataContainer` owns the store and repositories; injected at app root. View models
   take repositories via init with defaults from the shared container so previews and
   tests keep working.
+- View models expose a lightweight
+  `enum LoadState<Value> { case idle, loading, loaded(Value), failed(Error) }`
+  for their primary content. Screens handle loading/failed minimally (transient with
+  local data — no visual redesign), so the Supabase migration doesn't retrofit
+  loading UX onto every screen.
 - View models build the **existing presentation structs** (`FriendPuckData`,
   `MapPuckData`, `PushGroupData`, `PlanData`, `HangoutPerson`, `PushRecipientItem`,
   `ProfileData`) via selector/builder functions, so views need minimal changes.
@@ -115,10 +158,11 @@ Push/Data/
 
 ## Seed migration + documented content changes
 
-Seed reproduces today's screens: 10 friends + current user, 3 groups, ~7 places,
-one status per person, 5 pushes with responses matching current social-proof counts,
-past hangouts matching the current calendar pattern, profile settings, ~5 feed events
-consistent with statuses.
+Seed reproduces today's screens: 10 friends + current user, 3 groups with membership
+rows, ~7 places, one presence status per person (`source: .seed`, `confidence: .high`),
+full-visibility global-default sharing policies for everyone, 5 pushes with response
+rows matching current social-proof counts, past hangouts matching the current calendar
+pattern, profile settings, ~5 feed events consistent with statuses.
 
 Documented content corrections (canonical version chosen per "map wins"):
 
@@ -136,10 +180,13 @@ PuckLab fixtures remain, renamed (e.g. `PuckLabFixtures`).
 
 ## Error handling
 
-The local layer cannot fail at runtime, but the seed can be wrong at build time:
-seed referential integrity (every referenced ID resolves, every asset path exists,
-exactly one status per person) is enforced by unit tests rather than runtime checks.
-Repository APIs return values (no throws) until a real backend introduces failure modes.
+- Repository protocols are `async throws`; local implementations never throw.
+- View models catch into `LoadState.failed(Error)`; screens render a lightweight
+  failure state. With local data this path is reachable only in tests, by injecting
+  a throwing repository fake.
+- Seed correctness (every referenced ID resolves, every asset path exists, exactly
+  one status per person, memberships reference real people/groups) is enforced by
+  unit tests rather than runtime checks.
 
 ## Testing
 
@@ -147,14 +194,17 @@ Repository APIs return values (no throws) until a real backend introduces failur
   repositories/builders.
 - New tests: seed referential integrity; single-status-per-person; derivations
   (withWhom, puck grouping/kind, group stats, social proof, calendar aggregates);
-  swipe-deck response mapping.
+  swipe-deck response mapping; sharing-policy resolution (specificity order and
+  exact/vague/hidden output for each visibility axis); `LoadState` transitions
+  including the failure path via a throwing repository fake.
 - Xcode previews continue to work through the shared container.
 
 ## Documentation
 
-`docs/data-architecture.md`: how to add a user, group, push, place, status, or feed
-event; how derivations work; the Supabase swap path (implement the repository
-protocols, convert seed to SQL seed/migrations).
+`docs/data-architecture.md`: how to add a user, group, membership, push, place,
+status, sharing policy, or feed event; how derivations and visible-presence
+resolution work; the Supabase swap path (implement the repository protocols,
+convert seed to SQL seed/migrations).
 
 ## Risky areas
 
@@ -162,8 +212,11 @@ protocols, convert seed to SQL seed/migrations).
 - Derived time labels replace stored strings; seed dates chosen so today's copy renders.
 - Puck derivation must reproduce the current map exactly, apart from the Ram fix.
 - `FriendPuckData.id` type change (`UUID` → `String`) ripples through views and tests.
+- The visible-presence pipeline adds a derivation hop to every people-rendering
+  screen; with full-visibility seed policies it must be behavior-neutral.
 
 ## Out of scope
 
 Backend, auth, Supabase, networking, persistence across launches, new product behavior,
-visual redesign, Feed/Who's Down UI.
+visual redesign, Feed/Who's Down UI, Ghost Mode UI (the sharing model supports
+hidden states, but no ghost-mode surface is built).
