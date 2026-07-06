@@ -110,4 +110,43 @@ final class DataLayerTests: XCTestCase {
         let mine = responses.first { $0.pushID == "food-tonight" && $0.personID == "manav" }
         XCTAssertEqual(mine?.response, .in)
     }
+
+    // MARK: - MapViewModel
+
+    @MainActor
+    func testMapViewModelLoadsPucksAndFilters() async throws {
+        let viewModel = MapViewModel(container: AppDataContainer(seed: .standard()))
+        await viewModel.load()
+        XCTAssertEqual(viewModel.loadState.value?.count, 5)
+        XCTAssertEqual(viewModel.filters.map(\.title), ["All Friends", "India", "Exec", "Michigan"])
+        XCTAssertEqual(viewModel.filteredPucks.count, 5)
+
+        viewModel.selectedFilterID = "india"
+        XCTAssertEqual(viewModel.filteredPucks.count, 3)
+        viewModel.selectedFilterID = "michigan"
+        XCTAssertEqual(viewModel.filteredPucks.count, 1)
+    }
+
+    @MainActor
+    func testMapViewModelSurfacesRepositoryFailure() async throws {
+        let container = AppDataContainer(seed: .standard())
+        let viewModel = MapViewModel(
+            friends: ThrowingFriendRepository(),
+            groups: container.groups,
+            sharing: container.sharing,
+            pushes: container.pushes
+        )
+        await viewModel.load()
+        if case .failed = viewModel.loadState {} else {
+            XCTFail("expected .failed, got \(viewModel.loadState)")
+        }
+        XCTAssertTrue(viewModel.filteredPucks.isEmpty)
+    }
+}
+
+/// Proves the async-throws seam carries failures into LoadState.
+struct ThrowingFriendRepository: FriendRepository {
+    func friends() async throws -> [Person] { throw URLError(.badServerResponse) }
+    func currentUser() async throws -> Person { throw URLError(.badServerResponse) }
+    func presenceStatuses() async throws -> [PresenceStatus] { throw URLError(.badServerResponse) }
 }
