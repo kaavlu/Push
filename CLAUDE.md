@@ -16,7 +16,7 @@ Push is **not** a tracking app, not a generic map app, and not a chat app. It sh
 - **Framework:** SwiftUI
 - **Target:** iOS 17+
 - **Architecture:** MVVM
-- **Data:** Mock data and mock services only (no backend)
+- **Data:** Local in-memory store + async repository protocols (mock backend; Supabase plugs in at repo layer later). See `AGENTS.md` and `docs/superpowers/specs/2026-07-05-data-architecture-design.md`.
 - **Maps:** MapKit
 
 This is a **high-fidelity prototype** that can become production later.
