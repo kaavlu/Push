@@ -78,6 +78,7 @@ See `coding-standards.md` for the full reference. Key rules for this project:
 - **Map attribution:** Set `MKMapView.layoutMargins` via `StyledMapView.mapLayoutMargins` (`MapAttributionLayout` in `ContentView`) for Apple logo and legal text only; compass is a manually placed `MKCompassButton` in `StyledMapView` (`CompassLayout`). Update insets when top/bottom UI changes.
 - **Pushes tab:** `PlansView` splits owned vs invited pushes — `PlanData.isOwner`; `PlansViewModel.yourPushes` / `activePushes`. Owned preview uses `YourPushCard` ("Manage →" opens `ManagePushView` via `isManagePushPresented` / `managedPlan`); invited pushes use `ActivePlanCard` (review deck). `PlanData.participants` is `[HangoutPerson]` (default `[]`) for owned-push avatar rows.
 - **Feature files:** Flat under `Push/` — split by suffix: `*Models`, `*MockData`, `*View`, `*ViewModel`, `*Style`. Multi-step flows add `*FlowView` (container), `*StepNView`, and shared `*Style`; register on `MainMapRoute`.
+- **Xcode registration:** Register every new Swift file in `Push.xcodeproj` via `python3 scripts/pbxproj_add.py <path>` (paths relative to `Push/`; `--target tests` for `PushTests/`). Idempotent — safe to re-run.
 - **Files ≤ 400 lines.** Split by responsibility.
 - **Functions ≤ 40 lines, single responsibility.**
 - **No magic numbers.** Named constants only.
