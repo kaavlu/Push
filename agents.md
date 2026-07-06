@@ -16,7 +16,7 @@ Push is **not** a tracking app, not a generic map app, and not a chat app. It sh
 - **Framework:** SwiftUI
 - **Target:** iOS 17+
 - **Architecture:** MVVM
-- **Data:** Local in-memory store + async throwing repository protocols (mock backend seam for Supabase later; no networking yet). Layout: `Push/Data/` — Domain, Seed, Store, Repositories, `AppDataContainer`. Spec: `docs/superpowers/specs/2026-07-05-data-architecture-design.md`.
+- **Data:** Local in-memory store + async throwing repository protocols (mock backend seam for Supabase later; no networking yet). Layout: `Push/Data/` — Domain, Seed, Store, Repositories, Derived, `AppDataContainer`. Spec: `docs/superpowers/specs/2026-07-05-data-architecture-design.md`.
 - **Maps:** MapKit — live map base layer is satellite imagery (`MKImageryMapConfiguration`), not muted standard
 
 This is a **high-fidelity prototype** that can become production later.
@@ -73,7 +73,7 @@ See `coding-standards.md` for the full reference. Key rules for this project:
 - **Mock images:** Store under `assets/friends/`, `assets/groups/`, `assets/profile/`; reference as path strings (e.g. `"assets/friends/chitty.png"`) and load via `PushImageAssets.image(named:)`.
 - **Seed data:** Single canonical source in `Push/Data/Seed/SeedData` (replaces scattered `*MockData` enums and `RealWorldMockData`). Opaque `String` IDs (seed may use readable slugs; never couple identity to display names). Group membership via `GroupMembership` rows, not stored `memberIDs`. Stats, social proof, relative-time labels, and map pucks are **derived** — never stored in seed. PuckLab keeps isolated design fixtures (`PuckLabFixtures`), not app data.
 - **Repositories:** All protocols are `async throws` (local impls never throw); ViewModels take repos via init (default from shared `AppDataContainer`) and expose primary content via `LoadState<Value>`. Builders produce existing presentation structs (`FriendPuckData`, `MapPuckData`, `PlanData`, etc.) from **`VisiblePresence`** (sharing-policy–filtered), never raw `PresenceStatus`. Views must not read mock enums or seed directly.
-- **Map pucks:** `MapPuckKind` (`individual`, `hangout`, `cluster`, `friendGroup`) drives annotation rendering and `FriendDetailSheet` layout/detents; pucks derive from people sharing a place (via visible presence).
+- **Map pucks:** `MapContentBuilder` (`Push/Data/Derived/`) groups `VisiblePresence` by exact place into `MapPuckData`. `MapPuckKind` (`individual`, `hangout`, `cluster`, `friendGroup`) drives annotation rendering and `FriendDetailSheet` layout/detents; multi-person pucks use `.joinable` availability. Prefer `groupIDs` over legacy `groups` for filtering; `FriendPuckData.id` is `String`.
 - **Current user on map:** Place the user inside group pucks (`isCurrentUser: true`); the standalone `UserLocationPin` hides when any puck has `includesCurrentUser`.
 - **Map attribution:** Set `MKMapView.layoutMargins` via `StyledMapView.mapLayoutMargins` (`MapAttributionLayout` in `ContentView`) for Apple logo and legal text only; compass is a manually placed `MKCompassButton` in `StyledMapView` (`CompassLayout`). Update insets when top/bottom UI changes.
 - **Pushes tab:** `PlansView` splits owned vs invited pushes — `PlanData.isOwner`; `PlansViewModel.yourPushes` / `activePushes`. Owned preview uses `YourPushCard` ("Manage →" opens `ManagePushView` via `isManagePushPresented` / `managedPlan`); invited pushes use `ActivePlanCard` (review deck). `PlanData.participants` is `[HangoutPerson]` (default `[]`) for owned-push avatar rows.
