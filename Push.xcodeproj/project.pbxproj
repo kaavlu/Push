@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		38747D64198854C45CF41A0B /* DerivationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6ACB1600225E732F2793781 /* DerivationTests.swift */; };
+		D49EA4CF9A719681EE19BA97 /* VisiblePresence.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC17E754F3D961895F1CE4BB /* VisiblePresence.swift */; };
 		C12A5396FF48C4ED513E6548 /* AppDataContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B4FADB44245BA63FB30360F /* AppDataContainer.swift */; };
 		4D4261F6ED1CD237CF1A8755 /* LocalRepositories.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2074F3C1B8AC44081173369 /* LocalRepositories.swift */; };
 		26F2C6792B7A7B95A4CAA07A /* Repositories.swift in Sources */ = {isa = PBXBuildFile; fileRef = 044B9089C6312A67778760DF /* Repositories.swift */; };
@@ -105,6 +107,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A6ACB1600225E732F2793781 /* DerivationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DerivationTests.swift"; sourceTree = "<group>"; };
+		DC17E754F3D961895F1CE4BB /* VisiblePresence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "VisiblePresence.swift"; path = "Data/Derived/VisiblePresence.swift"; sourceTree = "<group>"; };
 		3B4FADB44245BA63FB30360F /* AppDataContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "AppDataContainer.swift"; path = "Data/AppDataContainer.swift"; sourceTree = "<group>"; };
 		D2074F3C1B8AC44081173369 /* LocalRepositories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "LocalRepositories.swift"; path = "Data/Repositories/LocalRepositories.swift"; sourceTree = "<group>"; };
 		044B9089C6312A67778760DF /* Repositories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Repositories.swift"; path = "Data/Repositories/Repositories.swift"; sourceTree = "<group>"; };
@@ -239,6 +243,7 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				DC17E754F3D961895F1CE4BB /* VisiblePresence.swift */,
 				3B4FADB44245BA63FB30360F /* AppDataContainer.swift */,
 				D2074F3C1B8AC44081173369 /* LocalRepositories.swift */,
 				044B9089C6312A67778760DF /* Repositories.swift */,
@@ -324,6 +329,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				A6ACB1600225E732F2793781 /* DerivationTests.swift */,
 				B7F75D239D47EF653BF50EE2 /* DataLayerTests.swift */,
 				5217A2B92FF2FB000011F860 /* GroupsTests.swift */,
 				5217A2DF2FF340000011F860 /* PlansViewModelTests.swift */,
@@ -472,6 +478,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				D49EA4CF9A719681EE19BA97 /* VisiblePresence.swift in Sources */,
 				C12A5396FF48C4ED513E6548 /* AppDataContainer.swift in Sources */,
 				4D4261F6ED1CD237CF1A8755 /* LocalRepositories.swift in Sources */,
 				26F2C6792B7A7B95A4CAA07A /* Repositories.swift in Sources */,
@@ -548,6 +555,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				38747D64198854C45CF41A0B /* DerivationTests.swift in Sources */,
 				83766FC6C4041622450C6A58 /* DataLayerTests.swift in Sources */,
 				5217A2BA2FF2FB000011F860 /* GroupsTests.swift in Sources */,
 				5217A2E02FF340000011F860 /* PlansViewModelTests.swift in Sources */,
