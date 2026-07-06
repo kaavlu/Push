@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum FriendAvailabilityState: CaseIterable, Equatable {
+enum FriendAvailabilityState: String, Codable, CaseIterable, Equatable {
     case freeNow
     case freeSoon
     case maybeDown

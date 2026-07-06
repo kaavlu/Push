@@ -7,6 +7,19 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C6768F930D7166A99E866C46 /* LoadState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B85798B38F67EAF4C22237E /* LoadState.swift */; };
+		D642E0D9C307A375E2423708 /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCECEAB47EF3323EDA9E7492 /* UserProfile.swift */; };
+		C10DAC9AD63231AF60856CE9 /* FeedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A962D470EE624F36A81FF00C /* FeedEvent.swift */; };
+		5832A8E65BEF217D0AF20729 /* PastHangout.swift in Sources */ = {isa = PBXBuildFile; fileRef = E17BCE6943C0DADBEBC6BCCF /* PastHangout.swift */; };
+		BE0221D205EB99CA4B9E67F2 /* PushResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1E927A34AC1E14429AD5EE1 /* PushResponse.swift */; };
+		C242767ADD6A17C1CF45626E /* PushPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEB9FD6D4DD970167DDE3AB7 /* PushPlan.swift */; };
+		17E084FB8111E5757B1B6782 /* SharingPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 012ABAE9166C1203561D8EAE /* SharingPolicy.swift */; };
+		C86B55F39FE78AA31356A72F /* PresenceStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EECC3948A4D7D87D23CDAE1 /* PresenceStatus.swift */; };
+		C97701628E21246732612AE0 /* Place.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F699123CB2E4B2A4695C6A9 /* Place.swift */; };
+		FB98C34CF1D94CC11F90FCA0 /* GroupMembership.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E1A4DE60C164481FC0E40F2 /* GroupMembership.swift */; };
+		4B7804E99F6382146782A5F8 /* FriendGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FB32820B27783CB5B9CC843 /* FriendGroup.swift */; };
+		FF84B8903A2AB11A70726C16 /* Person.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1594FA5AF8B7B866F27C2BAF /* Person.swift */; };
+		83766FC6C4041622450C6A58 /* DataLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F75D239D47EF653BF50EE2 /* DataLayerTests.swift */; };
 		5217A26A2FF1B6D90011F860 /* PushApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2692FF1B6D90011F860 /* PushApp.swift */; };
 		5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A26B2FF1B6D90011F860 /* ContentView.swift */; };
 		5217A26E2FF1B6DA0011F860 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5217A26D2FF1B6DA0011F860 /* Assets.xcassets */; };
@@ -84,6 +97,19 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		6B85798B38F67EAF4C22237E /* LoadState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LoadState.swift; path = "Data/LoadState.swift"; sourceTree = "<group>"; };
+		CCECEAB47EF3323EDA9E7492 /* UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UserProfile.swift; path = "Data/Domain/UserProfile.swift"; sourceTree = "<group>"; };
+		A962D470EE624F36A81FF00C /* FeedEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FeedEvent.swift; path = "Data/Domain/FeedEvent.swift"; sourceTree = "<group>"; };
+		E17BCE6943C0DADBEBC6BCCF /* PastHangout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PastHangout.swift; path = "Data/Domain/PastHangout.swift"; sourceTree = "<group>"; };
+		C1E927A34AC1E14429AD5EE1 /* PushResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PushResponse.swift; path = "Data/Domain/PushResponse.swift"; sourceTree = "<group>"; };
+		FEB9FD6D4DD970167DDE3AB7 /* PushPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PushPlan.swift; path = "Data/Domain/PushPlan.swift"; sourceTree = "<group>"; };
+		012ABAE9166C1203561D8EAE /* SharingPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SharingPolicy.swift; path = "Data/Domain/SharingPolicy.swift"; sourceTree = "<group>"; };
+		4EECC3948A4D7D87D23CDAE1 /* PresenceStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PresenceStatus.swift; path = "Data/Domain/PresenceStatus.swift"; sourceTree = "<group>"; };
+		1F699123CB2E4B2A4695C6A9 /* Place.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Place.swift; path = "Data/Domain/Place.swift"; sourceTree = "<group>"; };
+		6E1A4DE60C164481FC0E40F2 /* GroupMembership.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GroupMembership.swift; path = "Data/Domain/GroupMembership.swift"; sourceTree = "<group>"; };
+		9FB32820B27783CB5B9CC843 /* FriendGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FriendGroup.swift; path = "Data/Domain/FriendGroup.swift"; sourceTree = "<group>"; };
+		1594FA5AF8B7B866F27C2BAF /* Person.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Person.swift; path = "Data/Domain/Person.swift"; sourceTree = "<group>"; };
+		B7F75D239D47EF653BF50EE2 /* DataLayerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayerTests.swift; sourceTree = "<group>"; };
 		5217A2662FF1B6D90011F860 /* Push.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Push.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5217A2692FF1B6D90011F860 /* PushApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushApp.swift; sourceTree = "<group>"; };
 		5217A26B2FF1B6D90011F860 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -197,6 +223,18 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				6B85798B38F67EAF4C22237E /* LoadState.swift */,
+				CCECEAB47EF3323EDA9E7492 /* UserProfile.swift */,
+				A962D470EE624F36A81FF00C /* FeedEvent.swift */,
+				E17BCE6943C0DADBEBC6BCCF /* PastHangout.swift */,
+				C1E927A34AC1E14429AD5EE1 /* PushResponse.swift */,
+				FEB9FD6D4DD970167DDE3AB7 /* PushPlan.swift */,
+				012ABAE9166C1203561D8EAE /* SharingPolicy.swift */,
+				4EECC3948A4D7D87D23CDAE1 /* PresenceStatus.swift */,
+				1F699123CB2E4B2A4695C6A9 /* Place.swift */,
+				6E1A4DE60C164481FC0E40F2 /* GroupMembership.swift */,
+				9FB32820B27783CB5B9CC843 /* FriendGroup.swift */,
+				1594FA5AF8B7B866F27C2BAF /* Person.swift */,
 				5217A2C32FF300000011F860 /* BottomNavigationBar.swift */,
 				5217A2942FF1B6DA0011F860 /* PushColorPalette.swift */,
 				5217A2BB2FF2FC000011F860 /* PushImageAssets.swift */,
@@ -262,6 +300,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				B7F75D239D47EF653BF50EE2 /* DataLayerTests.swift */,
 				5217A2B92FF2FB000011F860 /* GroupsTests.swift */,
 				5217A2DF2FF340000011F860 /* PlansViewModelTests.swift */,
 			);
@@ -409,6 +448,18 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				C6768F930D7166A99E866C46 /* LoadState.swift in Sources */,
+				D642E0D9C307A375E2423708 /* UserProfile.swift in Sources */,
+				C10DAC9AD63231AF60856CE9 /* FeedEvent.swift in Sources */,
+				5832A8E65BEF217D0AF20729 /* PastHangout.swift in Sources */,
+				BE0221D205EB99CA4B9E67F2 /* PushResponse.swift in Sources */,
+				C242767ADD6A17C1CF45626E /* PushPlan.swift in Sources */,
+				17E084FB8111E5757B1B6782 /* SharingPolicy.swift in Sources */,
+				C86B55F39FE78AA31356A72F /* PresenceStatus.swift in Sources */,
+				C97701628E21246732612AE0 /* Place.swift in Sources */,
+				FB98C34CF1D94CC11F90FCA0 /* GroupMembership.swift in Sources */,
+				4B7804E99F6382146782A5F8 /* FriendGroup.swift in Sources */,
+				FF84B8903A2AB11A70726C16 /* Person.swift in Sources */,
 				5217A2C42FF300000011F860 /* BottomNavigationBar.swift in Sources */,
 				5217A26A2FF1B6D90011F860 /* PushApp.swift in Sources */,
 				5217A2A02FF1B8A00011F860 /* StyledMapView.swift in Sources */,
@@ -465,6 +516,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				83766FC6C4041622450C6A58 /* DataLayerTests.swift in Sources */,
 				5217A2BA2FF2FB000011F860 /* GroupsTests.swift in Sources */,
 				5217A2E02FF340000011F860 /* PlansViewModelTests.swift in Sources */,
 			);

@@ -19,7 +19,7 @@ struct ProfileData: Equatable {
     let availabilityOptions: [ProfileAvailabilityOption]
 }
 
-struct ProfileAvailabilityOption: Identifiable, Equatable {
+struct ProfileAvailabilityOption: Identifiable, Equatable, Codable {
     let availability: FriendAvailabilityState
     let subtitle: String
 
@@ -142,7 +142,7 @@ enum ProfileRoute: String, CaseIterable, Identifiable, Equatable {
     }
 }
 
-struct ProfileToggleItem: Identifiable, Equatable {
+struct ProfileToggleItem: Identifiable, Equatable, Codable {
     let id: String
     let title: String
     let subtitle: String
@@ -150,7 +150,7 @@ struct ProfileToggleItem: Identifiable, Equatable {
     var isEnabled: Bool
 }
 
-struct ProfileConnector: Identifiable, Equatable {
+struct ProfileConnector: Identifiable, Equatable, Codable {
     let id: String
     let title: String
     let subtitle: String
