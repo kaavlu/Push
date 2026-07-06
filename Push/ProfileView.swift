@@ -12,7 +12,12 @@ struct ProfileView: View {
     @StateObject private var viewModel: ProfileViewModel
     @State private var navigationPath: [ProfileRoute] = []
 
-    init(viewModel: ProfileViewModel = ProfileViewModel()) {
+    @MainActor
+    init() {
+        _viewModel = StateObject(wrappedValue: ProfileViewModel())
+    }
+
+    init(viewModel: ProfileViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
     }
 

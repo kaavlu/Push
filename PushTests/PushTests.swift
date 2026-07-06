@@ -225,22 +225,34 @@ final class PushTests: XCTestCase {
         XCTAssertTrue(assetNames.contains("assets/groups/Exec/ram.png"))
     }
 
-    func testProfileMockDataExposesCurrentUserIdentity() throws {
-        let profile = ProfileMockData.currentUser
+    @MainActor
+    private func loadedProfileViewModel() async -> ProfileViewModel {
+        let viewModel = ProfileViewModel(container: AppDataContainer(seed: .standard()))
+        await viewModel.load()
+        return viewModel
+    }
+
+    @MainActor
+    func testProfileDataDerivesFromCanonicalUser() async throws {
+        let viewModel = await loadedProfileViewModel()
+        let profile = viewModel.profile
 
         XCTAssertEqual(profile.name, "Manav")
-        XCTAssertEqual(profile.initials, "MK")
+        // Firstname-derived initials, consistent with all friends (documented change from "MK").
+        XCTAssertEqual(profile.initials, "MA")
         XCTAssertEqual(profile.handle, "@manav")
         XCTAssertEqual(profile.imageAssetName, "assets/profile/manav.jpeg")
         XCTAssertEqual(profile.availability, .maybeDown)
         XCTAssertEqual(profile.activityTitle, "Maybe down")
-        XCTAssertEqual(profile.placeTitle, "Near Hayes Valley")
+        // Soft-place neighborhood for Crunch (documented change from "Near Hayes Valley").
+        XCTAssertEqual(profile.placeTitle, "Near North Beach")
         XCTAssertEqual(profile.visibilityNote, "Visible to close friends for the next few hours.")
     }
 
-    func testProfileMockDataExposesAvailabilityOptions() throws {
-        let profile = ProfileMockData.currentUser
-        let viewModel = ProfileViewModel(profile: profile)
+    @MainActor
+    func testProfileExposesAvailabilityOptions() async throws {
+        let viewModel = await loadedProfileViewModel()
+        let profile = viewModel.profile
 
         XCTAssertEqual(profile.availabilityOptions.map(\.availability), [
             .freeNow,
@@ -261,10 +273,10 @@ final class PushTests: XCTestCase {
         XCTAssertTrue(viewModel.isSelected(profile.availabilityOptions[1]))
     }
 
-    func testProfileViewModelUpdatesSelectedAvailabilityLocally() throws {
-        let profile = ProfileMockData.currentUser
-        let viewModel = ProfileViewModel(profile: profile)
-        let freeNow = try XCTUnwrap(profile.availabilityOptions.first)
+    @MainActor
+    func testProfileViewModelUpdatesSelectedAvailabilityLocally() async throws {
+        let viewModel = await loadedProfileViewModel()
+        let freeNow = try XCTUnwrap(viewModel.profile.availabilityOptions.first)
 
         XCTAssertEqual(viewModel.selectedAvailability, .maybeDown)
 
@@ -272,11 +284,12 @@ final class PushTests: XCTestCase {
 
         XCTAssertEqual(viewModel.selectedAvailability, .freeNow)
         XCTAssertTrue(viewModel.isSelected(freeNow))
-        XCTAssertFalse(viewModel.isSelected(profile.availabilityOptions[1]))
+        XCTAssertFalse(viewModel.isSelected(viewModel.profile.availabilityOptions[1]))
     }
 
-    func testProfileViewModelExposesPhotoEditingPlaceholder() throws {
-        let viewModel = ProfileViewModel()
+    @MainActor
+    func testProfileViewModelExposesPhotoEditingPlaceholder() async throws {
+        let viewModel = await loadedProfileViewModel()
 
         XCTAssertFalse(viewModel.isPhotoEditorPresented)
 
@@ -285,15 +298,17 @@ final class PushTests: XCTestCase {
         XCTAssertTrue(viewModel.isPhotoEditorPresented)
     }
 
-    func testProfileViewModelDefaultsGhostModeOff() throws {
-        let viewModel = ProfileViewModel()
+    @MainActor
+    func testProfileViewModelDefaultsGhostModeOff() async throws {
+        let viewModel = await loadedProfileViewModel()
 
         XCTAssertFalse(viewModel.isGhostModeEnabled)
         XCTAssertEqual(viewModel.visibilitySummary, "Visible to close friends for the next few hours.")
     }
 
-    func testProfileViewModelSelectsGhostModeExclusively() throws {
-        let viewModel = ProfileViewModel()
+    @MainActor
+    func testProfileViewModelSelectsGhostModeExclusively() async throws {
+        let viewModel = await loadedProfileViewModel()
         let freeNow = try XCTUnwrap(viewModel.profile.availabilityOptions.first)
 
         viewModel.select(.ghostMode)
@@ -313,8 +328,9 @@ final class PushTests: XCTestCase {
         XCTAssertEqual(viewModel.selectedAvailability, .freeNow)
     }
 
-    func testProfileRoutesExposeSettingsAndPrivacyMetadata() throws {
-        let viewModel = ProfileViewModel()
+    @MainActor
+    func testProfileRoutesExposeSettingsAndPrivacyMetadata() async throws {
+        let viewModel = await loadedProfileViewModel()
 
         XCTAssertEqual(viewModel.settingsRoutes.map(\.id), [
             "edit-profile",
@@ -345,8 +361,9 @@ final class PushTests: XCTestCase {
         XCTAssertEqual(viewModel.privacyRoutes.map(\.section), Array(repeating: .privacy, count: 1))
     }
 
-    func testProfileViewModelEditsProfileBasicsLocally() throws {
-        let viewModel = ProfileViewModel()
+    @MainActor
+    func testProfileViewModelEditsProfileBasicsLocally() async throws {
+        let viewModel = await loadedProfileViewModel()
 
         viewModel.setProfileBasics(name: "Manny", handle: "@manny", initials: "MN")
 
@@ -355,8 +372,9 @@ final class PushTests: XCTestCase {
         XCTAssertEqual(viewModel.initials, "MN")
     }
 
-    func testProfileViewModelTogglesActivityVisibilityLocally() throws {
-        let viewModel = ProfileViewModel()
+    @MainActor
+    func testProfileViewModelTogglesActivityVisibilityLocally() async throws {
+        let viewModel = await loadedProfileViewModel()
 
         XCTAssertTrue(try XCTUnwrap(viewModel.activityVisibility.first { $0.id == "place" }).isEnabled)
 
@@ -365,8 +383,10 @@ final class PushTests: XCTestCase {
         XCTAssertFalse(try XCTUnwrap(viewModel.activityVisibility.first { $0.id == "place" }).isEnabled)
     }
 
-    func testProfileConnectSectionExposesGSuiteCalendarFirst() throws {
-        let connector = try XCTUnwrap(ProfileViewModel().connectors.first)
+    @MainActor
+    func testProfileConnectSectionExposesGSuiteCalendarFirst() async throws {
+        let viewModel = await loadedProfileViewModel()
+        let connector = try XCTUnwrap(viewModel.connectors.first)
 
         XCTAssertEqual(connector.id, "gsuite-calendar")
         XCTAssertEqual(connector.title, "GSuite Calendar")
@@ -376,8 +396,9 @@ final class PushTests: XCTestCase {
         XCTAssertTrue(connector.permissionCopy.contains("Event titles"))
     }
 
-    func testProfileConnectAlertUsesAvailabilityOnlyCopy() throws {
-        let viewModel = ProfileViewModel()
+    @MainActor
+    func testProfileConnectAlertUsesAvailabilityOnlyCopy() async throws {
+        let viewModel = await loadedProfileViewModel()
         let connector = try XCTUnwrap(viewModel.connectors.first)
 
         viewModel.connect(connector)
