@@ -290,4 +290,93 @@ final class DerivationTests: XCTestCase {
         XCTAssertEqual(chitty.locationLabel, "315 Linden St")
         XCTAssertEqual(chitty.placeName, "Blue Bottle")
     }
+
+    // MARK: - Push cards + calendar
+
+    /// Wednesday noon: keeps "today"-relative timing labels deterministic.
+    private var wednesdayNoon: Date {
+        Calendar.current.date(
+            from: DateComponents(year: 2026, month: 7, day: 8, hour: 12)
+        ) ?? Date()
+    }
+
+    private func seedPlanData(now: Date) -> [PlanData] {
+        let seed = SeedData.standard(now: now)
+        return PlansContentBuilder.planData(
+            plans: seed.plans,
+            responses: seed.responses,
+            groupsByID: Dictionary(uniqueKeysWithValues: seed.groups.map { ($0.id, $0) }),
+            placesByID: Dictionary(uniqueKeysWithValues: seed.places.map { ($0.id, $0) }),
+            peopleByID: Dictionary(uniqueKeysWithValues: seed.people.map { ($0.id, $0) }),
+            currentUserID: seed.currentUserID,
+            now: now
+        )
+    }
+
+    func testPlanTimingLabelsMatchToday() {
+        let plans = seedPlanData(now: wednesdayNoon)
+        XCTAssertEqual(plans.map(\.timeSignal), [
+            "8:00 PM", "~7:45 PM", "now", "Friday, 9:00 PM", "Saturday"
+        ])
+    }
+
+    func testPlanSocialProofMatchesToday() {
+        let plans = seedPlanData(now: wednesdayNoon)
+        XCTAssertEqual(plans.map(\.socialProof), [
+            "3 in · 2 maybe",
+            "4 going",
+            "Chitty is there · Ishan maybe",
+            "2 in · 1 maybe",
+            "Ram in · Ohm maybe"
+        ])
+    }
+
+    func testPlanPillsOwnersAndParticipants() {
+        let plans = seedPlanData(now: wednesdayNoon)
+        XCTAssertEqual(plans.map(\.status), [.pending, .joined, .open, .pending, .waiting])
+        XCTAssertEqual(plans.filter(\.isOwner).map(\.id), ["gym-later", "drinks-friday"])
+        XCTAssertEqual(plans.first { $0.id == "gym-later" }?.participants.count, 4)
+        XCTAssertEqual(plans.first { $0.id == "drinks-friday" }?.participants.count, 2)
+        XCTAssertEqual(plans.map(\.group), ["Michigan", "Exec", "India", "Michigan", "Exec"])
+        XCTAssertEqual(plans.map(\.locationHint), [
+            "Suggested: North Park", "Crunch Fitness", "Blue Bottle",
+            "Suggested: Little Italy", "Ram's place"
+        ])
+    }
+
+    func testCalendarDerivesFromHangouts() {
+        let seed = SeedData.standard(now: wednesdayNoon)
+        let peopleByID = Dictionary(uniqueKeysWithValues: seed.people.map { ($0.id, $0) })
+        let days = PlansContentBuilder.calendarDays(
+            hangouts: seed.hangouts, peopleByID: peopleByID, month: wednesdayNoon
+        )
+        XCTAssertEqual(days.count, 31)
+        XCTAssertEqual(days.reduce(0) { $0 + $1.pushCount }, 19)
+
+        let day5 = days[4]
+        XCTAssertEqual(day5.pushCount, 3)
+        XCTAssertEqual(day5.hadPlan, true)
+        XCTAssertEqual(day5.hangouts.count, 3)
+        XCTAssertEqual(day5.hangouts.first?.activityNote, "Pre-dinner drinks")
+
+        let day14 = days[13]
+        XCTAssertEqual(day14.pushCount, 0)
+        XCTAssertEqual(day14.almostHappened, true)
+        XCTAssertEqual(day14.hangouts.count, 0)
+
+        let day18 = days[17]
+        XCTAssertEqual(day18.pushCount, 2)
+        XCTAssertEqual(day18.hadPlan, false)
+    }
+
+    func testMostActiveGroupDerivesFromHangouts() {
+        let seed = SeedData.standard(now: wednesdayNoon)
+        let name = PlansContentBuilder.mostActiveGroup(
+            hangouts: seed.hangouts,
+            memberships: seed.memberships,
+            groupsByID: Dictionary(uniqueKeysWithValues: seed.groups.map { ($0.id, $0) }),
+            groupOrder: seed.groups.map(\.id)
+        )
+        XCTAssertEqual(name, "Michigan")
+    }
 }
