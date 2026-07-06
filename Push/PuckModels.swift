@@ -92,7 +92,7 @@ enum FriendAvailabilityState: String, Codable, CaseIterable, Equatable {
 }
 
 struct FriendPuckData: Identifiable, Equatable {
-    let id: UUID
+    let id: String
     let name: String
     let avatarPlaceholder: String
     let profileImageAssetName: String?
@@ -108,7 +108,7 @@ struct FriendPuckData: Identifiable, Equatable {
     let isCurrentUser: Bool
 
     init(
-        id: UUID = UUID(),
+        id: String = UUID().uuidString,
         name: String,
         avatarPlaceholder: String,
         profileImageAssetName: String? = nil,

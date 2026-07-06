@@ -24,6 +24,31 @@ struct MapPuckData: Identifiable, Equatable {
     let venueStatusText: String
     let coordinate: CLLocationCoordinate2D
     let groups: [FriendGroupFilter]
+    /// Canonical group IDs used for map filtering. Replaces the legacy
+    /// `groups` enum field, which goes away with the old mock layer.
+    let groupIDs: [String]
+
+    init(
+        id: String,
+        kind: MapPuckKind,
+        people: [FriendPuckData],
+        activity: String,
+        availability: FriendAvailabilityState,
+        venueStatusText: String,
+        coordinate: CLLocationCoordinate2D,
+        groups: [FriendGroupFilter] = [],
+        groupIDs: [String] = []
+    ) {
+        self.id = id
+        self.kind = kind
+        self.people = people
+        self.activity = activity
+        self.availability = availability
+        self.venueStatusText = venueStatusText
+        self.coordinate = coordinate
+        self.groups = groups
+        self.groupIDs = groupIDs
+    }
 
     var includesCurrentUser: Bool {
         people.contains { $0.isCurrentUser }
@@ -39,6 +64,7 @@ struct MapPuckData: Identifiable, Equatable {
             && lhs.coordinate.latitude == rhs.coordinate.latitude
             && lhs.coordinate.longitude == rhs.coordinate.longitude
             && lhs.groups == rhs.groups
+            && lhs.groupIDs == rhs.groupIDs
     }
 }
 
