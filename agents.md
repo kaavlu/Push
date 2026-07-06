@@ -62,6 +62,8 @@ This is a **high-fidelity prototype** that can become production later.
 
 **Glass + accents:** Brand colors live in `Push/PushColorPalette.swift` — walnut for foreground/text, sunbeam for active fills. Use `PushControlColors` text hierarchy (`textEspresso`, `textPrimary`, `textSecondary`, `textTertiary`); do not use black or system primary. Reuse `PushGlassStyle`, `PushControlColors`, and `PushControlStyle` for all glass controls; do not one-off material values. Prefer native `glassEffect` on iOS 26+; iOS 17 uses the shared material fallback in `pushGlassBackground`.
 
+**Design reference (`Design/`):** Handoff bundle for visual work — `PushDesignBrief.md`, `PushThemeAudit.md`, verbatim snapshots in `CoreDesignFiles/`, copied imagery in `Assets/`. Read-only references; implement changes in `Push/`, not in `Design/`.
+
 ---
 
 ## Coding Standards
