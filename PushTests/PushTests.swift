@@ -13,7 +13,7 @@ final class PushTests: XCTestCase {
     func testBottomNavigationItemsExposePlaceholderTabs() throws {
         let items = BottomNavigationItem.allCases
 
-        XCTAssertEqual(items.map(\.title), ["Map", "Group", "+", "Feed", "Plans"])
+        XCTAssertEqual(items.map(\.title), ["Map", "Group", "+", "Feed", "Pushes"])
         XCTAssertEqual(items.map(\.systemImageName), [
             "map.fill",
             "person.2.fill",
@@ -28,19 +28,19 @@ final class PushTests: XCTestCase {
         let items = CreateActionMenuItem.allCases
 
         XCTAssertEqual(items.map(\.title), [
-            "Start plan",
+            "Start push",
             "Add friend"
         ])
         XCTAssertEqual(items.map(\.subtitle), [
-            "Create a plan with friends",
+            "Send a social signal to your crew",
             "Invite someone to Push"
         ])
         XCTAssertEqual(items.map(\.symbolName), [
-            "calendar.badge.plus",
+            "bolt.fill",
             "person.badge.plus"
         ])
         XCTAssertEqual(items.map(\.route), [
-            .startPlan,
+            .startPush,
             .addFriend
         ])
     }
@@ -55,13 +55,13 @@ final class PushTests: XCTestCase {
     }
 
     func testGlassStyleTokensExposeConsistentMaterialValues() throws {
-        XCTAssertEqual(PushGlassStyle.materialPresenceOpacity, 0.72)
-        XCTAssertEqual(PushGlassStyle.tintOpacity, 0.24)
-        XCTAssertEqual(PushGlassStyle.strokeOpacity, 0.62)
+        XCTAssertEqual(PushGlassStyle.materialPresenceOpacity, 0.68)
+        XCTAssertEqual(PushGlassStyle.tintOpacity, 0.22)
+        XCTAssertEqual(PushGlassStyle.strokeOpacity, 0.52)
         XCTAssertEqual(PushGlassStyle.strokeWidth, 0.8)
-        XCTAssertEqual(PushGlassStyle.shadowOpacity, 0.24)
-        XCTAssertEqual(PushGlassStyle.shadowRadius, 26)
-        XCTAssertEqual(PushGlassStyle.shadowYOffset, 12)
+        XCTAssertEqual(PushGlassStyle.shadowOpacity, 0.18)
+        XCTAssertEqual(PushGlassStyle.shadowRadius, 24)
+        XCTAssertEqual(PushGlassStyle.shadowYOffset, 10)
     }
 
     func testControlStyleTokensExposeSharedAccentBehavior() throws {
@@ -216,7 +216,8 @@ final class PushTests: XCTestCase {
             "assets/friends/pranay.png",
             "assets/friends/ohm.png",
             "assets/friends/roh.png",
-            "assets/groups/Exec/ram.png"
+            "assets/groups/Exec/ram.png",
+            "assets/profile/manav.jpeg"
         ]))
         XCTAssertTrue(assetNames.contains("assets/friends/chitty.png"))
         XCTAssertTrue(assetNames.contains("assets/friends/nitin.png"))
@@ -421,7 +422,7 @@ final class PushTests: XCTestCase {
         XCTAssertEqual(MainMapRoute.feed.systemImageName, "list.bullet")
 
         XCTAssertEqual(MainMapRoute.plans.id, "plans")
-        XCTAssertEqual(MainMapRoute.plans.accessibilityLabel, "Plans")
+        XCTAssertEqual(MainMapRoute.plans.accessibilityLabel, "Pushes")
         XCTAssertEqual(MainMapRoute.plans.systemImageName, "calendar")
     }
 
@@ -435,7 +436,7 @@ final class PushTests: XCTestCase {
         XCTAssertEqual(MainMapRoute.profile.systemImageName, "person.crop.circle.fill")
 
         XCTAssertEqual(MainMapRoute.startPlan.id, "startPlan")
-        XCTAssertEqual(MainMapRoute.startPlan.accessibilityLabel, "Start Plan")
+        XCTAssertEqual(MainMapRoute.startPlan.accessibilityLabel, "Start Push")
         XCTAssertEqual(MainMapRoute.startPlan.systemImageName, "calendar.badge.plus")
 
         XCTAssertEqual(MainMapRoute.addFriend.id, "addFriend")

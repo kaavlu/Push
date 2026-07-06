@@ -18,7 +18,7 @@ final class GroupsTests: XCTestCase {
             "Exec",
             "Michigan"
         ])
-        XCTAssertEqual(groups.map(\.memberCount), [5, 2, 5])
+        XCTAssertEqual(groups.map(\.memberCount), [5, 3, 5])
         XCTAssertEqual(groups.map(\.status), [
             .activeNow,
             .nearby,
