@@ -16,7 +16,7 @@ Push is **not** a tracking app, not a generic map app, and not a chat app. It sh
 - **Framework:** SwiftUI
 - **Target:** iOS 17+
 - **Architecture:** MVVM
-- **Data:** Mock data and mock services only (no backend)
+- **Data:** Local in-memory store + async throwing repository protocols (mock backend seam for Supabase later; no networking yet). Layout: `Push/Data/` — Domain, Seed, Store, Repositories, Derived, `AppDataContainer`. Guides: `docs/data-architecture.md` (seed workflow, derivations, tests), `docs/superpowers/specs/2026-07-05-data-architecture-design.md`.
 - **Maps:** MapKit — live map base layer is satellite imagery (`MKImageryMapConfiguration`), not muted standard
 
 This is a **high-fidelity prototype** that can become production later.
@@ -71,12 +71,19 @@ See `coding-standards.md` for the full reference. Key rules for this project:
 - **MVVM strictly.** ViewModels own state and logic; Views are dumb.
 - **Mock everything.** No real network calls, no real location. All data is injected via mock services.
 - **Mock images:** Store under `assets/friends/`, `assets/groups/`, `assets/profile/`; reference as path strings (e.g. `"assets/friends/chitty.png"`) and load via `PushImageAssets.image(named:)`.
-- **Mock fixtures:** Central friend/group data lives in `RealWorldMockData.swift`; feature-specific lists use `*MockData` enums (e.g. `MapPuckMockData`).
-- **Map pucks:** `MapPuckKind` (`individual`, `hangout`, `cluster`, `friendGroup`) drives annotation rendering and `FriendDetailSheet` layout/detents; fixtures live in `MapPuckMockData`.
-- **Current user on map:** Place the user inside group pucks via `RealWorldMockData.userPuck()` (`isCurrentUser: true`); the standalone `UserLocationPin` hides when any puck has `includesCurrentUser`.
+- **Seed data:** Single canonical source in `Push/Data/Seed/SeedData` (scattered `*MockData` / `RealWorldMockData` deleted — do not recreate for app screens). Opaque `String` IDs (seed may use readable slugs; never couple identity to display names). Group membership via `GroupMembership` rows, not stored `memberIDs`. Stats, social proof, timing labels, calendar rows, and map pucks are **derived** — never stored in seed. PuckLab keeps isolated design fixtures (`PuckLabFixtures`), not app data.
+- **Repositories:** All protocols are `async throws` (local impls never throw); ViewModels take repos via init (default from shared `AppDataContainer`) and expose primary content via `LoadState<Value>`. Derived builders produce presentation structs from canonical domain data — presence builders use **`VisiblePresence`** (sharing-policy–filtered), never raw `PresenceStatus`. Views must not read mock enums or seed directly.
+- **Live map:** `MapViewModel` owns puck `LoadState`, dynamic group filters (`GroupFilterItem` from `GroupRepository`), and `filteredPucks`; `ContentView` is render-only. `MapContentBuilder` (`Push/Data/Derived/`) groups `VisiblePresence` by exact place into `MapPuckData`. `MapPuckKind` (`individual`, `hangout`, `cluster`, `friendGroup`) drives annotation rendering and `FriendDetailSheet` layout/detents; multi-person pucks use `.joinable` availability. Filter pucks by `groupIDs`, not legacy `groups`; `FriendPuckData.id` is `String`.
+- **Friend Groups:** `GroupContentBuilder` (`Push/Data/Derived/`) derives `PushGroupData` cards and `PushGroupMemberData` rows from memberships + `PresenceStatus` (counts, badges, member availability) — never stored in seed; canonical presence wins over legacy group-table values.
+- **Pushes tab cards:** `PlansContentBuilder` (`Push/Data/Derived/`) derives `PlanData`, hangout calendar, and most-active-group from `PushPlan`/`PushResponse`/`PastHangout`; timing via `PushTimingFormatter`. Card status pills reflect the viewer's `PushResponse`, not `PushPlan.state`.
+- **Profile:** `ProfileContentBuilder` (`Push/Data/Derived/`) derives `ProfileData` from `UserProfile`, `Person`, and self-scoped `VisiblePresence`; toggles/connectors load from canonical `UserProfile`. Place line uses vague label (`Near …`), not exact venue.
+- **Current user on map:** Place the user inside group pucks (`isCurrentUser: true`); the standalone `UserLocationPin` hides when any puck has `includesCurrentUser`.
 - **Map attribution:** Set `MKMapView.layoutMargins` via `StyledMapView.mapLayoutMargins` (`MapAttributionLayout` in `ContentView`) for Apple logo and legal text only; compass is a manually placed `MKCompassButton` in `StyledMapView` (`CompassLayout`). Update insets when top/bottom UI changes.
-- **Pushes tab:** `PlansView` splits owned vs invited pushes — `PlanData.isOwner`; `PlansViewModel.yourPushes` / `activePushes`. Weekly recap card (`PlansCalendarView` + `PlansWeeklyRecapDayTile`) shows a Monday-first week with `moveWeek` navigation; day taps open detail only when `pushCount > 0` or `almostHappened`. Use `plansGlassCard` / `PlansColor` for Pushes tab glass cards. Owned preview uses `YourPushCard` ("Manage →" opens `ManagePushView` via `isManagePushPresented` / `managedPlan`); invited pushes use `ActivePlanCard` (review deck). `PlanData.participants` is `[HangoutPerson]` (default `[]`) for owned-push avatar rows; seed non-empty for `isOwner` entries in `PlansMockData`.
-- **Feature files:** Flat under `Push/` — split by suffix: `*Models`, `*MockData`, `*View`, `*ViewModel`, `*Style`. Multi-step flows add `*FlowView` (container), `*StepNView`, and shared `*Style`; register on `MainMapRoute`.
+- **Pushes tab:** `PlansView` splits owned vs invited pushes — `PlanData.isOwner`; `PlansViewModel.yourPushes` / `activePushes`. Weekly recap card (`PlansCalendarView` + `PlansWeeklyRecapDayTile`) shows a Monday-first week with `moveWeek` navigation; day taps open detail only when `pushCount > 0` or `almostHappened`. Use `plansGlassCard` / `PlansColor` for Pushes tab glass cards. Owned preview uses `YourPushCard` ("Manage →" opens `ManagePushView` via `isManagePushPresented` / `managedPlan`); invited pushes use `ActivePlanCard` (review deck). `PlansContentBuilder` derives push cards, weekly history rows, and `PlanData.participants` from canonical data.
+- **Start Push flow:** `StartPushViewModel` loads groups/friends from `AppDataContainer` repos with `LoadState`; Step 4 suggestion buckets (`likelyFreeNow`, `mightBeInterested`) derive from canonical `PresenceStatus` availability (`.freeNow`/`.joinable` vs `.maybeDown`/`.freeSoon`) — never hardcode recipient IDs.
+- **Feature files:** Flat under `Push/` — split by suffix: `*Models`, `*View`, `*ViewModel`, `*Style`. App data flows through repos + derived builders, not `*MockData` files. Multi-step flows add `*FlowView` (container), `*StepNView`, and shared `*Style`; register on `MainMapRoute`.
+- **Xcode registration:** Register every new Swift file in `Push.xcodeproj` via `python3 scripts/pbxproj_add.py <path>` (paths relative to `Push/`; `--target tests` for `PushTests/`). Idempotent — safe to re-run.
+- **Tests:** After seed changes, run `DataLayerTests` (referential integrity). Full suite: `xcodebuild test -project Push.xcodeproj -scheme Push -destination 'platform=iOS Simulator,name=iPhone 14' -only-testing:PushTests -parallel-testing-enabled NO` — parallel testing intermittently drops the simulator runner in this environment.
 - **Files ≤ 400 lines.** Split by responsibility.
 - **Functions ≤ 40 lines, single responsibility.**
 - **No magic numbers.** Named constants only.
@@ -90,7 +97,9 @@ See `coding-standards.md` for the full reference. Key rules for this project:
 |---|---|
 | `tasks/todo.md` | Current plan and progress tracking |
 | `tasks/spec.md` | Active feature spec (write before implementation) |
+| `docs/data-architecture.md` | Seed workflow, derivation rules, test suites, Supabase migration seam |
 | `docs/superpowers/specs/*.md` | Dated design specs per feature; read the relevant file before implementing |
+| `docs/superpowers/plans/*.md` | Step-by-step implementation plans for multi-task rollouts; follow task-by-task |
 | `tasks/lessons.md` | Project-specific learnings and gotchas |
 
 ### Session Resume Protocol

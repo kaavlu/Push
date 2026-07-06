@@ -16,7 +16,7 @@ Push is **not** a tracking app, not a generic map app, and not a chat app. It sh
 - **Framework:** SwiftUI
 - **Target:** iOS 17+
 - **Architecture:** MVVM
-- **Data:** Mock data and mock services only (no backend)
+- **Data:** Local in-memory store + async throwing repository protocols (mock backend; Supabase plugs in at repo layer later). See `AGENTS.md`, `docs/data-architecture.md`, and `docs/superpowers/specs/2026-07-05-data-architecture-design.md`.
 - **Maps:** MapKit
 
 This is a **high-fidelity prototype** that can become production later.
@@ -85,7 +85,7 @@ See `coding-standards.md` for the full reference. Key rules for this project:
 
 ### Session Resume Protocol
 
-Read: `CLAUDE.md` → `tasks/lessons.md` → `tasks/todo.md` → `git log --oneline -5`
+Read: `CLAUDE.md` → `tasks/lessons.md` → `tasks/todo.md` → `git log --oneline -5`. When implementing a multi-task feature, also read the matching file under `docs/superpowers/specs/` (design) or `docs/superpowers/plans/` (execution). For data-layer or seed work, also read `docs/data-architecture.md`.
 
 Do not ask the user to re-explain context that is in these files.
 

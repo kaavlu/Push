@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum FriendAvailabilityState: CaseIterable, Equatable {
+enum FriendAvailabilityState: String, Codable, CaseIterable, Equatable {
     case freeNow
     case freeSoon
     case maybeDown
@@ -92,7 +92,7 @@ enum FriendAvailabilityState: CaseIterable, Equatable {
 }
 
 struct FriendPuckData: Identifiable, Equatable {
-    let id: UUID
+    let id: String
     let name: String
     let avatarPlaceholder: String
     let profileImageAssetName: String?
@@ -108,7 +108,7 @@ struct FriendPuckData: Identifiable, Equatable {
     let isCurrentUser: Bool
 
     init(
-        id: UUID = UUID(),
+        id: String = UUID().uuidString,
         name: String,
         avatarPlaceholder: String,
         profileImageAssetName: String? = nil,
@@ -175,15 +175,38 @@ enum FriendClusterLayoutKind: Equatable {
     }
 }
 
-enum PuckLabMockData {
+/// Hand-crafted design-lab scenarios. These intentionally live outside the
+/// data layer: PuckLab exists to render edge cases (odd names, group sizes,
+/// every availability state) that the real seed data doesn't contain.
+enum PuckLabFixtures {
     static let scenarios: [PuckLabScenario] = singleFriendScenarios + clusterScenarios + friendGroupScenarios
+
+    private static func labFriend(
+        _ firstName: String,
+        activity: String,
+        symbolName: String,
+        displayText: String,
+        availability: FriendAvailabilityState,
+        venueStatusText: String
+    ) -> FriendPuckData {
+        FriendPuckData(
+            name: firstName.prefix(1).uppercased() + firstName.dropFirst(),
+            avatarPlaceholder: String(firstName.prefix(2)).uppercased(),
+            profileImageAssetName: "assets/friends/\(firstName).png",
+            activity: activity,
+            activitySymbolName: symbolName,
+            activityDisplayText: displayText,
+            availability: availability,
+            venueStatusText: venueStatusText
+        )
+    }
 
     static let singleFriendScenarios: [PuckLabScenario] = [
         PuckLabScenario(
             title: "Free now",
             subtitle: "Green live glow, open to move",
             friends: [
-                RealWorldMockData.friendPuck(
+                labFriend(
                     "chitty",
                     activity: "Coffee",
                     symbolName: "cup.and.saucer.fill",
@@ -197,7 +220,7 @@ enum PuckLabMockData {
             title: "Maybe down",
             subtitle: "Yellow, soft social signal",
             friends: [
-                RealWorldMockData.friendPuck(
+                labFriend(
                     "nitin",
                     activity: "Park",
                     symbolName: "leaf.fill",
@@ -211,7 +234,7 @@ enum PuckLabMockData {
             title: "Joinable",
             subtitle: "Blue, clear pull-up energy",
             friends: [
-                RealWorldMockData.friendPuck(
+                labFriend(
                     "ishan",
                     activity: "Gym",
                     symbolName: "dumbbell.fill",
@@ -225,7 +248,7 @@ enum PuckLabMockData {
             title: "Busy-ish",
             subtitle: "Orange, currently in something",
             friends: [
-                RealWorldMockData.friendPuck(
+                labFriend(
                     "ram",
                     activity: "Food",
                     symbolName: "fork.knife",
@@ -239,7 +262,7 @@ enum PuckLabMockData {
             title: "Driving",
             subtitle: "Cyan, moving with ETA context",
             friends: [
-                RealWorldMockData.friendPuck(
+                labFriend(
                     "rohan",
                     activity: "Driving",
                     symbolName: "car.fill",
@@ -253,7 +276,7 @@ enum PuckLabMockData {
             title: "Unavailable",
             subtitle: "Gray, low social availability",
             friends: [
-                RealWorldMockData.friendPuck(
+                labFriend(
                     "ohm",
                     activity: "Work",
                     symbolName: "laptopcomputer",
@@ -270,7 +293,7 @@ enum PuckLabMockData {
             title: "Together",
             subtitle: "Two friends already hanging out",
             friends: [
-                RealWorldMockData.friendPuck(
+                labFriend(
                     "ishan",
                     activity: "Lunch",
                     symbolName: "fork.knife",
@@ -278,7 +301,7 @@ enum PuckLabMockData {
                     availability: .joinable,
                     venueStatusText: "At Souvla"
                 ),
-                RealWorldMockData.friendPuck(
+                labFriend(
                     "viplove",
                     activity: "Lunch",
                     symbolName: "fork.knife",
@@ -292,7 +315,7 @@ enum PuckLabMockData {
             title: "Small group",
             subtitle: "Four people, one social signal",
             friends: [
-                RealWorldMockData.friendPuck(
+                labFriend(
                     "ram",
                     activity: "Park",
                     symbolName: "leaf.fill",
@@ -300,7 +323,7 @@ enum PuckLabMockData {
                     availability: .joinable,
                     venueStatusText: "Near Dolores"
                 ),
-                RealWorldMockData.friendPuck(
+                labFriend(
                     "rohan",
                     activity: "Park",
                     symbolName: "leaf.fill",
@@ -308,7 +331,7 @@ enum PuckLabMockData {
                     availability: .joinable,
                     venueStatusText: "Walking over"
                 ),
-                RealWorldMockData.friendPuck(
+                labFriend(
                     "ryan",
                     activity: "Park",
                     symbolName: "leaf.fill",
@@ -316,7 +339,7 @@ enum PuckLabMockData {
                     availability: .joinable,
                     venueStatusText: "Free in 20"
                 ),
-                RealWorldMockData.friendPuck(
+                labFriend(
                     "pranay",
                     activity: "Park",
                     symbolName: "leaf.fill",
@@ -333,12 +356,17 @@ enum PuckLabMockData {
             title: "Friend group",
             subtitle: "Saved circle, one group presence",
             friends: [
-                RealWorldMockData.groupPuck(
-                    "india",
+                FriendPuckData(
+                    name: "India",
+                    avatarPlaceholder: "I",
+                    profileImageAssetName: "assets/groups/India/chitty.png",
                     activity: "Gym",
-                    displayText: "Crunch"
+                    activitySymbolName: "person.3.fill",
+                    activityDisplayText: "Crunch",
+                    availability: .joinable,
+                    venueStatusText: "India is together"
                 ),
-                RealWorldMockData.friendPuck(
+                labFriend(
                     "chitty",
                     activity: "Gym",
                     symbolName: "dumbbell.fill",
@@ -346,7 +374,7 @@ enum PuckLabMockData {
                     availability: .joinable,
                     venueStatusText: "Already there"
                 ),
-                RealWorldMockData.friendPuck(
+                labFriend(
                     "nitin",
                     activity: "Gym",
                     symbolName: "dumbbell.fill",
@@ -354,7 +382,7 @@ enum PuckLabMockData {
                     availability: .joinable,
                     venueStatusText: "With the crew"
                 ),
-                RealWorldMockData.friendPuck(
+                labFriend(
                     "ishan",
                     activity: "Gym",
                     symbolName: "dumbbell.fill",
@@ -362,7 +390,7 @@ enum PuckLabMockData {
                     availability: .joinable,
                     venueStatusText: "Wrapping up"
                 ),
-                RealWorldMockData.friendPuck(
+                labFriend(
                     "roh",
                     activity: "Gym",
                     symbolName: "dumbbell.fill",

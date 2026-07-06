@@ -11,7 +11,12 @@ struct GroupsView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel: GroupsViewModel
 
-    init(viewModel: GroupsViewModel = GroupsViewModel()) {
+    @MainActor
+    init() {
+        _viewModel = StateObject(wrappedValue: GroupsViewModel())
+    }
+
+    init(viewModel: GroupsViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
     }
 

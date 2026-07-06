@@ -39,7 +39,7 @@ struct PuckLabView: View {
             columns: [GridItem(.adaptive(minimum: PuckLabLayout.cardMinimumWidth), spacing: PuckLabLayout.cardSpacing)],
             spacing: PuckLabLayout.cardSpacing
         ) {
-            ForEach(PuckLabMockData.scenarios) { scenario in
+            ForEach(PuckLabFixtures.scenarios) { scenario in
                 PuckLabScenarioCard(scenario: scenario)
             }
         }

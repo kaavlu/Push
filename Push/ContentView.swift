@@ -10,24 +10,17 @@ import MapKit
 import UIKit
 
 struct ContentView: View {
+    @StateObject private var viewModel = MapViewModel()
     @State private var selectedNavigationItem: BottomNavigationItem = .map
-    @State private var selectedFriendGroup: FriendGroupFilter = .allFriends
     @State private var presentedRoute: MainMapRoute?
     @State private var isCreateMenuPresented = false
     @State private var selectedPuck: MapPuckData?
-
-    private var filteredPucks: [MapPuckData] {
-        guard selectedFriendGroup != .allFriends else {
-            return MapPuckMockData.pucks
-        }
-        return MapPuckMockData.pucks.filter { $0.groups.contains(selectedFriendGroup) }
-    }
 
     var body: some View {
         ZStack(alignment: .bottom) {
             StyledMapView(
                 region: MapDefaults.region,
-                pucks: filteredPucks,
+                pucks: viewModel.filteredPucks,
                 onPuckSelected: { puck in selectedPuck = puck },
                 mapLayoutMargins: MapAttributionLayout.edgeInsets
             )
@@ -68,7 +61,11 @@ struct ContentView: View {
 
                 Spacer(minLength: 0)
 
-                FriendGroupDropdown(selectedGroup: $selectedFriendGroup)
+                FriendGroupDropdown(
+                    items: viewModel.filters,
+                    selectedID: $viewModel.selectedFilterID,
+                    selectedTitle: viewModel.selectedFilterTitle
+                )
                     .frame(width: TopControlLayout.dropdownWidth)
 
                 Spacer(minLength: 0)
@@ -167,7 +164,9 @@ struct ContentView: View {
 }
 
 private struct FriendGroupDropdown: View {
-    @Binding var selectedGroup: FriendGroupFilter
+    let items: [GroupFilterItem]
+    @Binding var selectedID: String
+    let selectedTitle: String
     @State private var isExpanded = false
 
     var body: some View {
@@ -191,7 +190,7 @@ private struct FriendGroupDropdown: View {
             isExpanded.toggle()
         } label: {
             HStack(spacing: TopDropdownLayout.labelSpacing) {
-                Text(selectedGroup.title)
+                Text(selectedTitle)
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(PushControlColors.activeForeground)
 
@@ -209,18 +208,18 @@ private struct FriendGroupDropdown: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Friend group")
-        .accessibilityValue(selectedGroup.title)
+        .accessibilityValue(selectedTitle)
     }
 
     private var dropdownPanel: some View {
         VStack(spacing: TopDropdownLayout.rowSpacing) {
-            ForEach(FriendGroupFilter.allCases) { group in
+            ForEach(items) { item in
                 Button {
-                    select(group)
+                    select(item)
                 } label: {
                     FriendGroupDropdownRow(
-                        group: group,
-                        isSelected: selectedGroup == group
+                        item: item,
+                        isSelected: selectedID == item.id
                     )
                 }
                 .buttonStyle(.plain)
@@ -231,19 +230,19 @@ private struct FriendGroupDropdown: View {
         .pushGlassBackground(cornerRadius: TopDropdownLayout.panelCornerRadius)
     }
 
-    private func select(_ group: FriendGroupFilter) {
-        selectedGroup = group
+    private func select(_ item: GroupFilterItem) {
+        selectedID = item.id
         isExpanded = false
     }
 }
 
 private struct FriendGroupDropdownRow: View {
-    let group: FriendGroupFilter
+    let item: GroupFilterItem
     let isSelected: Bool
 
     var body: some View {
         HStack(spacing: TopDropdownLayout.rowIconSpacing) {
-            Text(group.title)
+            Text(item.title)
                 .font(.subheadline.weight(isSelected ? .semibold : .medium))
                 .foregroundStyle(isSelected ? PushControlColors.activeForeground : PushControlColors.inactiveForeground)
 

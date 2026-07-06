@@ -1,3 +1,34 @@
+# Data Architecture Standardization (issue #15)
+
+## Goal
+Replace six scattered mock-data enums with one local data layer: normalized seed →
+in-memory store → async-throws repositories → view-model builders. See
+`docs/data-architecture.md` and `docs/superpowers/specs/2026-07-05-data-architecture-design.md`.
+
+## Completed
+- [x] Domain entities with opaque String IDs + `LoadState` (`Push/Data/Domain`, `Push/Data/LoadState.swift`).
+- [x] Centralized `SeedData` reproducing every screen's content (`Push/Data/Seed`).
+- [x] `InMemoryDatabase`, async-throws repositories, `AppDataContainer` (`Push/Data/Store`, `Push/Data/Repositories`).
+- [x] `VisiblePresence` + sharing-policy resolution (`Push/Data/Derived/VisiblePresence.swift`).
+- [x] Derivation builders: map pucks, group cards, push cards/calendar, profile (`Push/Data/Derived`).
+- [x] Rewired Map, Groups, Pushes, Profile, Start Push view models onto repositories + `LoadState`.
+- [x] PuckLab renamed to `PuckLabFixtures` (self-contained design fixtures).
+- [x] Deleted `RealWorldMockData`, `ProfileMockData`, `MapPuckMockData`, `GroupsMockData`, `SeededGroupFriends`, `PlansMockData`, `FriendGroupFilter`.
+- [x] Documented content changes and Supabase migration path in `docs/data-architecture.md`.
+- [x] Added `scripts/pbxproj_add.py` to register new files in the objectVersion-56 project.
+- [x] Merged with the weekly Pushes calendar polish on `main`.
+
+## Verification
+- [x] PR branch: `xcodebuild build` (generic iOS Simulator): BUILD SUCCEEDED.
+- [x] PR branch: `xcodebuild test -only-testing:PushTests -parallel-testing-enabled NO`: 89 tests, 0 failures.
+
+## Notes
+- Run tests with `-parallel-testing-enabled NO`; the parallel runner intermittently
+  drops the simulator connection (`DTXProxyChannel` / Mach `-308`) in this environment.
+  A `simctl shutdown all` + kill of `CoreSimulatorService` clears it.
+
+---
+
 # Pushes Weekly Calendar
 
 ## Completed

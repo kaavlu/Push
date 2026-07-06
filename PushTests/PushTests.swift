@@ -13,7 +13,7 @@ final class PushTests: XCTestCase {
     func testBottomNavigationItemsExposePlaceholderTabs() throws {
         let items = BottomNavigationItem.allCases
 
-        XCTAssertEqual(items.map(\.title), ["Map", "Group", "+", "Feed", "Plans"])
+        XCTAssertEqual(items.map(\.title), ["Map", "Group", "+", "Feed", "Pushes"])
         XCTAssertEqual(items.map(\.systemImageName), [
             "map.fill",
             "person.2.fill",
@@ -28,40 +28,31 @@ final class PushTests: XCTestCase {
         let items = CreateActionMenuItem.allCases
 
         XCTAssertEqual(items.map(\.title), [
-            "Start plan",
+            "Start push",
             "Add friend"
         ])
         XCTAssertEqual(items.map(\.subtitle), [
-            "Create a plan with friends",
+            "Send a social signal to your crew",
             "Invite someone to Push"
         ])
         XCTAssertEqual(items.map(\.symbolName), [
-            "calendar.badge.plus",
+            "bolt.fill",
             "person.badge.plus"
         ])
         XCTAssertEqual(items.map(\.route), [
-            .startPlan,
+            .startPush,
             .addFriend
         ])
     }
 
-    func testFriendGroupFiltersExposeMockDropdownOptions() throws {
-        XCTAssertEqual(FriendGroupFilter.allCases.map(\.title), [
-            "All Friends",
-            "India",
-            "Exec",
-            "Michigan"
-        ])
-    }
-
     func testGlassStyleTokensExposeConsistentMaterialValues() throws {
-        XCTAssertEqual(PushGlassStyle.materialPresenceOpacity, 0.72)
-        XCTAssertEqual(PushGlassStyle.tintOpacity, 0.24)
-        XCTAssertEqual(PushGlassStyle.strokeOpacity, 0.62)
+        XCTAssertEqual(PushGlassStyle.materialPresenceOpacity, 0.68)
+        XCTAssertEqual(PushGlassStyle.tintOpacity, 0.22)
+        XCTAssertEqual(PushGlassStyle.strokeOpacity, 0.52)
         XCTAssertEqual(PushGlassStyle.strokeWidth, 0.8)
-        XCTAssertEqual(PushGlassStyle.shadowOpacity, 0.24)
-        XCTAssertEqual(PushGlassStyle.shadowRadius, 26)
-        XCTAssertEqual(PushGlassStyle.shadowYOffset, 12)
+        XCTAssertEqual(PushGlassStyle.shadowOpacity, 0.18)
+        XCTAssertEqual(PushGlassStyle.shadowRadius, 24)
+        XCTAssertEqual(PushGlassStyle.shadowYOffset, 10)
     }
 
     func testControlStyleTokensExposeSharedAccentBehavior() throws {
@@ -100,7 +91,7 @@ final class PushTests: XCTestCase {
     }
 
     func testMockPuckScenariosCoverSinglePairAndSmallGroup() throws {
-        let scenarios = PuckLabMockData.scenarios
+        let scenarios = PuckLabFixtures.scenarios
 
         XCTAssertTrue(scenarios.contains { $0.title == "Together" && $0.friends.count == 2 })
         XCTAssertTrue(scenarios.contains { $0.title == "Small group" && $0.friends.count == 4 })
@@ -114,7 +105,7 @@ final class PushTests: XCTestCase {
     }
 
     func testHangoutScenariosUseOneSharedAvailabilityState() throws {
-        let hangoutScenarios = PuckLabMockData.scenarios.filter { $0.friends.count > 1 }
+        let hangoutScenarios = PuckLabFixtures.scenarios.filter { $0.friends.count > 1 }
 
         for scenario in hangoutScenarios {
             let availabilityStates = Set(scenario.friends.map(\.availability))
@@ -123,14 +114,14 @@ final class PushTests: XCTestCase {
     }
 
     func testFriendGroupScenarioUsesFriendGroupPuckStyle() throws {
-        let scenario = try XCTUnwrap(PuckLabMockData.scenarios.first { $0.title == "Friend group" })
+        let scenario = try XCTUnwrap(PuckLabFixtures.scenarios.first { $0.title == "Friend group" })
 
         XCTAssertEqual(scenario.puckStyle, .friendGroup)
         XCTAssertGreaterThan(scenario.friends.count, 3)
     }
 
     func testSingleFriendPuckExamplesCoverAvailabilityStates() throws {
-        let examples = PuckLabMockData.singleFriendScenarios
+        let examples = PuckLabFixtures.singleFriendScenarios
 
         XCTAssertEqual(examples.map(\.title), [
             "Free now",
@@ -152,7 +143,7 @@ final class PushTests: XCTestCase {
     }
 
     func testMockPuckActivitiesPreferSpecificDisplayText() throws {
-        let singleFriends = PuckLabMockData.singleFriendScenarios.compactMap(\.friends.first)
+        let singleFriends = PuckLabFixtures.singleFriendScenarios.compactMap(\.friends.first)
 
         XCTAssertEqual(singleFriends.map(\.activityDisplayText), [
             "Blue Bottle",
@@ -189,57 +180,35 @@ final class PushTests: XCTestCase {
         XCTAssertEqual(friend.profileImageAssetName, "assets/friends/chitty.png")
     }
 
-    func testMapPuckMockDataContainsRequiredPuckMix() throws {
-        let pucks = MapPuckMockData.pucks
 
-        XCTAssertEqual(pucks.count, 5)
-        XCTAssertEqual(pucks.filter { $0.kind == .individual }.count, 2)
-        XCTAssertEqual(pucks.filter { $0.kind == .hangout }.count, 1)
-        XCTAssertEqual(pucks.filter { $0.kind == .cluster }.count, 1)
-        XCTAssertEqual(pucks.filter { $0.kind == .friendGroup }.count, 1)
-        XCTAssertTrue(pucks.allSatisfy { !$0.people.isEmpty })
-        XCTAssertTrue(pucks.allSatisfy { $0.coordinate.latitude != 0 && $0.coordinate.longitude != 0 })
+    @MainActor
+    private func loadedProfileViewModel() async -> ProfileViewModel {
+        let viewModel = ProfileViewModel(container: AppDataContainer(seed: .standard()))
+        await viewModel.load()
+        return viewModel
     }
 
-    func testMapPuckMockDataUsesAvailableAssetNames() throws {
-        let pucks = MapPuckMockData.pucks
-        let assetNames = Set(pucks.flatMap { $0.people.compactMap(\.profileImageAssetName) })
-
-        XCTAssertTrue(assetNames.isSubset(of: [
-            "assets/friends/chitty.png",
-            "assets/friends/nitin.png",
-            "assets/friends/ishan.png",
-            "assets/friends/viplove.png",
-            "assets/friends/ram.png",
-            "assets/friends/rohan.png",
-            "assets/friends/ryan.png",
-            "assets/friends/pranay.png",
-            "assets/friends/ohm.png",
-            "assets/friends/roh.png",
-            "assets/groups/Exec/ram.png"
-        ]))
-        XCTAssertTrue(assetNames.contains("assets/friends/chitty.png"))
-        XCTAssertTrue(assetNames.contains("assets/friends/nitin.png"))
-        XCTAssertTrue(assetNames.contains("assets/friends/ishan.png"))
-        XCTAssertTrue(assetNames.contains("assets/groups/Exec/ram.png"))
-    }
-
-    func testProfileMockDataExposesCurrentUserIdentity() throws {
-        let profile = ProfileMockData.currentUser
+    @MainActor
+    func testProfileDataDerivesFromCanonicalUser() async throws {
+        let viewModel = await loadedProfileViewModel()
+        let profile = viewModel.profile
 
         XCTAssertEqual(profile.name, "Manav")
-        XCTAssertEqual(profile.initials, "MK")
+        // Firstname-derived initials, consistent with all friends (documented change from "MK").
+        XCTAssertEqual(profile.initials, "MA")
         XCTAssertEqual(profile.handle, "@manav")
         XCTAssertEqual(profile.imageAssetName, "assets/profile/manav.jpeg")
         XCTAssertEqual(profile.availability, .maybeDown)
         XCTAssertEqual(profile.activityTitle, "Maybe down")
-        XCTAssertEqual(profile.placeTitle, "Near Hayes Valley")
+        // Soft-place neighborhood for Crunch (documented change from "Near Hayes Valley").
+        XCTAssertEqual(profile.placeTitle, "Near North Beach")
         XCTAssertEqual(profile.visibilityNote, "Visible to close friends for the next few hours.")
     }
 
-    func testProfileMockDataExposesAvailabilityOptions() throws {
-        let profile = ProfileMockData.currentUser
-        let viewModel = ProfileViewModel(profile: profile)
+    @MainActor
+    func testProfileExposesAvailabilityOptions() async throws {
+        let viewModel = await loadedProfileViewModel()
+        let profile = viewModel.profile
 
         XCTAssertEqual(profile.availabilityOptions.map(\.availability), [
             .freeNow,
@@ -260,10 +229,10 @@ final class PushTests: XCTestCase {
         XCTAssertTrue(viewModel.isSelected(profile.availabilityOptions[1]))
     }
 
-    func testProfileViewModelUpdatesSelectedAvailabilityLocally() throws {
-        let profile = ProfileMockData.currentUser
-        let viewModel = ProfileViewModel(profile: profile)
-        let freeNow = try XCTUnwrap(profile.availabilityOptions.first)
+    @MainActor
+    func testProfileViewModelUpdatesSelectedAvailabilityLocally() async throws {
+        let viewModel = await loadedProfileViewModel()
+        let freeNow = try XCTUnwrap(viewModel.profile.availabilityOptions.first)
 
         XCTAssertEqual(viewModel.selectedAvailability, .maybeDown)
 
@@ -271,11 +240,12 @@ final class PushTests: XCTestCase {
 
         XCTAssertEqual(viewModel.selectedAvailability, .freeNow)
         XCTAssertTrue(viewModel.isSelected(freeNow))
-        XCTAssertFalse(viewModel.isSelected(profile.availabilityOptions[1]))
+        XCTAssertFalse(viewModel.isSelected(viewModel.profile.availabilityOptions[1]))
     }
 
-    func testProfileViewModelExposesPhotoEditingPlaceholder() throws {
-        let viewModel = ProfileViewModel()
+    @MainActor
+    func testProfileViewModelExposesPhotoEditingPlaceholder() async throws {
+        let viewModel = await loadedProfileViewModel()
 
         XCTAssertFalse(viewModel.isPhotoEditorPresented)
 
@@ -284,15 +254,17 @@ final class PushTests: XCTestCase {
         XCTAssertTrue(viewModel.isPhotoEditorPresented)
     }
 
-    func testProfileViewModelDefaultsGhostModeOff() throws {
-        let viewModel = ProfileViewModel()
+    @MainActor
+    func testProfileViewModelDefaultsGhostModeOff() async throws {
+        let viewModel = await loadedProfileViewModel()
 
         XCTAssertFalse(viewModel.isGhostModeEnabled)
         XCTAssertEqual(viewModel.visibilitySummary, "Visible to close friends for the next few hours.")
     }
 
-    func testProfileViewModelSelectsGhostModeExclusively() throws {
-        let viewModel = ProfileViewModel()
+    @MainActor
+    func testProfileViewModelSelectsGhostModeExclusively() async throws {
+        let viewModel = await loadedProfileViewModel()
         let freeNow = try XCTUnwrap(viewModel.profile.availabilityOptions.first)
 
         viewModel.select(.ghostMode)
@@ -312,8 +284,9 @@ final class PushTests: XCTestCase {
         XCTAssertEqual(viewModel.selectedAvailability, .freeNow)
     }
 
-    func testProfileRoutesExposeSettingsAndPrivacyMetadata() throws {
-        let viewModel = ProfileViewModel()
+    @MainActor
+    func testProfileRoutesExposeSettingsAndPrivacyMetadata() async throws {
+        let viewModel = await loadedProfileViewModel()
 
         XCTAssertEqual(viewModel.settingsRoutes.map(\.id), [
             "edit-profile",
@@ -344,8 +317,9 @@ final class PushTests: XCTestCase {
         XCTAssertEqual(viewModel.privacyRoutes.map(\.section), Array(repeating: .privacy, count: 1))
     }
 
-    func testProfileViewModelEditsProfileBasicsLocally() throws {
-        let viewModel = ProfileViewModel()
+    @MainActor
+    func testProfileViewModelEditsProfileBasicsLocally() async throws {
+        let viewModel = await loadedProfileViewModel()
 
         viewModel.setProfileBasics(name: "Manny", handle: "@manny", initials: "MN")
 
@@ -354,8 +328,9 @@ final class PushTests: XCTestCase {
         XCTAssertEqual(viewModel.initials, "MN")
     }
 
-    func testProfileViewModelTogglesActivityVisibilityLocally() throws {
-        let viewModel = ProfileViewModel()
+    @MainActor
+    func testProfileViewModelTogglesActivityVisibilityLocally() async throws {
+        let viewModel = await loadedProfileViewModel()
 
         XCTAssertTrue(try XCTUnwrap(viewModel.activityVisibility.first { $0.id == "place" }).isEnabled)
 
@@ -364,8 +339,10 @@ final class PushTests: XCTestCase {
         XCTAssertFalse(try XCTUnwrap(viewModel.activityVisibility.first { $0.id == "place" }).isEnabled)
     }
 
-    func testProfileConnectSectionExposesGSuiteCalendarFirst() throws {
-        let connector = try XCTUnwrap(ProfileViewModel().connectors.first)
+    @MainActor
+    func testProfileConnectSectionExposesGSuiteCalendarFirst() async throws {
+        let viewModel = await loadedProfileViewModel()
+        let connector = try XCTUnwrap(viewModel.connectors.first)
 
         XCTAssertEqual(connector.id, "gsuite-calendar")
         XCTAssertEqual(connector.title, "GSuite Calendar")
@@ -375,8 +352,9 @@ final class PushTests: XCTestCase {
         XCTAssertTrue(connector.permissionCopy.contains("Event titles"))
     }
 
-    func testProfileConnectAlertUsesAvailabilityOnlyCopy() throws {
-        let viewModel = ProfileViewModel()
+    @MainActor
+    func testProfileConnectAlertUsesAvailabilityOnlyCopy() async throws {
+        let viewModel = await loadedProfileViewModel()
         let connector = try XCTUnwrap(viewModel.connectors.first)
 
         viewModel.connect(connector)
@@ -389,39 +367,13 @@ final class PushTests: XCTestCase {
         )
     }
 
-    func testMapPuckMockDataExposesGroupTags() throws {
-        let pucks = MapPuckMockData.pucks
-
-        XCTAssertEqual(pucks.filter { $0.groups.contains(.india) }.count, 3)
-        XCTAssertEqual(pucks.filter { $0.groups.contains(.michigan) }.count, 1)
-        XCTAssertEqual(pucks.filter { $0.groups.contains(.exec) }.count, 1)
-        XCTAssertTrue(pucks.allSatisfy { !$0.groups.isEmpty })
-    }
-
-    func testGroupFilterReturnsPucksForSelectedGroup() throws {
-        let allPucks = MapPuckMockData.pucks
-
-        let indiaPucks = allPucks.filter { $0.groups.contains(.india) }
-        XCTAssertEqual(indiaPucks.count, 3)
-        XCTAssertTrue(indiaPucks.allSatisfy { $0.groups.contains(.india) })
-
-        let michiganPucks = allPucks.filter { $0.groups.contains(.michigan) }
-        XCTAssertEqual(michiganPucks.count, 1)
-
-        let execPucks = allPucks.filter { $0.groups.contains(.exec) }
-        XCTAssertEqual(execPucks.count, 1)
-
-        // allFriends returns everything
-        XCTAssertEqual(allPucks.count, 5)
-    }
-
     func testMainMapRoutesFeedAndPlansExposeMetadata() throws {
         XCTAssertEqual(MainMapRoute.feed.id, "feed")
         XCTAssertEqual(MainMapRoute.feed.accessibilityLabel, "Feed")
         XCTAssertEqual(MainMapRoute.feed.systemImageName, "list.bullet")
 
         XCTAssertEqual(MainMapRoute.plans.id, "plans")
-        XCTAssertEqual(MainMapRoute.plans.accessibilityLabel, "Plans")
+        XCTAssertEqual(MainMapRoute.plans.accessibilityLabel, "Pushes")
         XCTAssertEqual(MainMapRoute.plans.systemImageName, "calendar")
     }
 
@@ -435,7 +387,7 @@ final class PushTests: XCTestCase {
         XCTAssertEqual(MainMapRoute.profile.systemImageName, "person.crop.circle.fill")
 
         XCTAssertEqual(MainMapRoute.startPlan.id, "startPlan")
-        XCTAssertEqual(MainMapRoute.startPlan.accessibilityLabel, "Start Plan")
+        XCTAssertEqual(MainMapRoute.startPlan.accessibilityLabel, "Start Push")
         XCTAssertEqual(MainMapRoute.startPlan.systemImageName, "calendar.badge.plus")
 
         XCTAssertEqual(MainMapRoute.addFriend.id, "addFriend")

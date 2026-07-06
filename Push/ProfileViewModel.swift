@@ -8,34 +8,84 @@
 import Combine
 import Foundation
 
+@MainActor
 final class ProfileViewModel: ObservableObject {
-    @Published private(set) var profile: ProfileData
-    @Published var displayName: String
-    @Published var handle: String
-    @Published var initials: String
+    @Published private(set) var profile: ProfileData = ProfileViewModel.placeholder
+    @Published var displayName: String = ""
+    @Published var handle: String = ""
+    @Published var initials: String = ""
     @Published private(set) var profileImageAssetName: String?
-    @Published private(set) var selectedAvailability: FriendAvailabilityState
-    @Published private(set) var selectedStatusID: String
+    @Published private(set) var selectedAvailability: FriendAvailabilityState = .maybeDown
+    @Published private(set) var selectedStatusID: String = FriendAvailabilityState.maybeDown.title
     @Published var isPhotoEditorPresented = false
     @Published var connectorAlert: ProfileConnectorAlert?
-    @Published private(set) var activityVisibility: [ProfileToggleItem]
-    @Published private(set) var mapPreferences: [ProfileToggleItem]
-    @Published private(set) var closeFriends: [ProfileToggleItem]
-    let connectors: [ProfileConnector]
+    @Published private(set) var activityVisibility: [ProfileToggleItem] = []
+    @Published private(set) var mapPreferences: [ProfileToggleItem] = []
+    @Published private(set) var closeFriends: [ProfileToggleItem] = []
+    @Published private(set) var connectors: [ProfileConnector] = []
+    @Published private(set) var loadState: LoadState<ProfileData> = .idle
 
-    init(profile: ProfileData = ProfileMockData.currentUser) {
-        self.profile = profile
-        self.displayName = profile.name
-        self.handle = profile.handle
-        self.initials = profile.initials
-        self.profileImageAssetName = profile.imageAssetName
-        self.selectedAvailability = profile.availability
-        self.selectedStatusID = profile.availability.title
-        self.activityVisibility = ProfileMockData.activityVisibility
-        self.mapPreferences = ProfileMockData.mapPreferences
-        self.closeFriends = ProfileMockData.closeFriends
-        self.connectors = ProfileMockData.connectors
+    private let container: AppDataContainer?
+
+    init(container: AppDataContainer = .shared) {
+        self.container = container
+        Task { await load() }
     }
+
+    func load() async {
+        guard let container else { return }
+        loadState = .loading
+        do {
+            let userProfile = try await container.profile.userProfile()
+            let user = try await container.friends.currentUser()
+            let statuses = try await container.friends.presenceStatuses()
+            let places = try await container.pushes.allPlaces()
+            let policies = try await container.sharing.allPolicies()
+
+            let placesByID = Dictionary(uniqueKeysWithValues: places.map { ($0.id, $0) })
+            var presence: VisiblePresence?
+            if let status = statuses.first(where: { $0.personID == user.id }) {
+                presence = VisiblePresenceBuilder.visiblePresence(
+                    of: status, owner: user, viewerID: user.id,
+                    sharedGroupIDs: [], policies: policies,
+                    placesByID: placesByID, now: Date()
+                )
+            }
+            let data = ProfileContentBuilder.profileData(
+                profile: userProfile, person: user, presence: presence
+            )
+            apply(data: data, userProfile: userProfile)
+            loadState = .loaded(data)
+        } catch {
+            loadState = .failed(error)
+        }
+    }
+
+    private func apply(data: ProfileData, userProfile: UserProfile) {
+        profile = data
+        displayName = data.name
+        handle = data.handle
+        initials = data.initials
+        profileImageAssetName = data.imageAssetName
+        selectedAvailability = data.availability
+        selectedStatusID = data.availability.title
+        activityVisibility = userProfile.activityVisibility
+        mapPreferences = userProfile.mapPreferences
+        closeFriends = userProfile.closeFriends
+        connectors = userProfile.connectors
+    }
+
+    private static let placeholder = ProfileData(
+        name: "",
+        initials: "",
+        handle: "",
+        imageAssetName: nil,
+        availability: .maybeDown,
+        activityTitle: "",
+        placeTitle: "",
+        visibilityNote: "",
+        availabilityOptions: []
+    )
 
     var settingsRoutes: [ProfileRoute] {
         ProfileRoute.allCases.filter { $0.section == .settings }

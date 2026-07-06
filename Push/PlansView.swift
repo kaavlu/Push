@@ -5,7 +5,12 @@ struct PlansView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel: PlansViewModel
 
-    init(viewModel: PlansViewModel = PlansViewModel()) {
+    @MainActor
+    init() {
+        _viewModel = StateObject(wrappedValue: PlansViewModel())
+    }
+
+    init(viewModel: PlansViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
     }
 
