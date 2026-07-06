@@ -16,7 +16,7 @@ Push is **not** a tracking app, not a generic map app, and not a chat app. It sh
 - **Framework:** SwiftUI
 - **Target:** iOS 17+
 - **Architecture:** MVVM
-- **Data:** Local in-memory store + async throwing repository protocols (mock backend seam for Supabase later; no networking yet). Layout: `Push/Data/` — Domain, Seed, Store, Repositories, Derived, `AppDataContainer`. Spec: `docs/superpowers/specs/2026-07-05-data-architecture-design.md`.
+- **Data:** Local in-memory store + async throwing repository protocols (mock backend seam for Supabase later; no networking yet). Layout: `Push/Data/` — Domain, Seed, Store, Repositories, Derived, `AppDataContainer`. Guides: `docs/data-architecture.md` (seed workflow, derivations, tests), `docs/superpowers/specs/2026-07-05-data-architecture-design.md`.
 - **Maps:** MapKit — live map base layer is satellite imagery (`MKImageryMapConfiguration`), not muted standard
 
 This is a **high-fidelity prototype** that can become production later.
@@ -83,6 +83,7 @@ See `coding-standards.md` for the full reference. Key rules for this project:
 - **Start Push flow:** `StartPushViewModel` loads groups/friends from `AppDataContainer` repos with `LoadState`; Step 4 suggestion buckets (`likelyFreeNow`, `mightBeInterested`) derive from canonical `PresenceStatus` availability (`.freeNow`/`.joinable` vs `.maybeDown`/`.freeSoon`) — never hardcode recipient IDs.
 - **Feature files:** Flat under `Push/` — split by suffix: `*Models`, `*View`, `*ViewModel`, `*Style`. App data flows through repos + derived builders, not `*MockData` files. Multi-step flows add `*FlowView` (container), `*StepNView`, and shared `*Style`; register on `MainMapRoute`.
 - **Xcode registration:** Register every new Swift file in `Push.xcodeproj` via `python3 scripts/pbxproj_add.py <path>` (paths relative to `Push/`; `--target tests` for `PushTests/`). Idempotent — safe to re-run.
+- **Tests:** After seed changes, run `DataLayerTests` (referential integrity). Full suite: `xcodebuild test -project Push.xcodeproj -scheme Push -destination 'platform=iOS Simulator,name=iPhone 14' -only-testing:PushTests -parallel-testing-enabled NO` — parallel testing intermittently drops the simulator runner in this environment.
 - **Files ≤ 400 lines.** Split by responsibility.
 - **Functions ≤ 40 lines, single responsibility.**
 - **No magic numbers.** Named constants only.
@@ -96,6 +97,7 @@ See `coding-standards.md` for the full reference. Key rules for this project:
 |---|---|
 | `tasks/todo.md` | Current plan and progress tracking |
 | `tasks/spec.md` | Active feature spec (write before implementation) |
+| `docs/data-architecture.md` | Seed workflow, derivation rules, test suites, Supabase migration seam |
 | `docs/superpowers/specs/*.md` | Dated design specs per feature; read the relevant file before implementing |
 | `docs/superpowers/plans/*.md` | Step-by-step implementation plans for multi-task rollouts; follow task-by-task |
 | `tasks/lessons.md` | Project-specific learnings and gotchas |
