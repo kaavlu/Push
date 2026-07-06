@@ -144,6 +144,43 @@ final class DataLayerTests: XCTestCase {
     }
 }
 
+extension DataLayerTests {
+
+    // MARK: - StartPushViewModel
+
+    @MainActor
+    func testStartPushLoadsRecipientsAndSuggestions() async throws {
+        let viewModel = StartPushViewModel(container: AppDataContainer(seed: .standard()))
+        await viewModel.load()
+
+        XCTAssertEqual(viewModel.groups.map(\.id), ["group_india", "group_exec", "group_michigan"])
+        XCTAssertEqual(viewModel.groups.map(\.memberCount), [5, 3, 5])
+        XCTAssertEqual(viewModel.friends.count, 10)
+
+        XCTAssertEqual(viewModel.likelyFreeNow.map(\.id), [
+            "friend_chitty", "friend_ishan", "friend_rohan", "friend_viplove"
+        ])
+        XCTAssertEqual(viewModel.mightBeInterested.map(\.id), [
+            "friend_nitin", "friend_pranay", "friend_ram", "friend_ryan"
+        ])
+    }
+
+    @MainActor
+    func testStartPushRecipientSelectionBehavior() async throws {
+        let viewModel = StartPushViewModel(container: AppDataContainer(seed: .standard()))
+        await viewModel.load()
+
+        viewModel.toggleRecipient("friend_chitty")
+        viewModel.toggleRecipient("group_india")
+        XCTAssertTrue(viewModel.isSelected("friend_chitty"))
+        XCTAssertEqual(viewModel.selectedRecipients.count, 2)
+
+        viewModel.toggleRecipient("friend_chitty")
+        XCTAssertFalse(viewModel.isSelected("friend_chitty"))
+        XCTAssertEqual(viewModel.selectedRecipients.count, 1)
+    }
+}
+
 /// Proves the async-throws seam carries failures into LoadState.
 struct ThrowingFriendRepository: FriendRepository {
     func friends() async throws -> [Person] { throw URLError(.badServerResponse) }

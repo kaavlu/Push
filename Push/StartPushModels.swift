@@ -21,6 +21,7 @@ let pushSuggestions = ["Coffee run", "Taco night", "Sunset walk", "Hit the gym",
 
 private let pushTextMaxLength = 120
 
+@MainActor
 final class StartPushViewModel: ObservableObject {
     @Published var step: Int = 1
     @Published var selectedRecipientIDs: Set<String> = []
@@ -36,8 +37,13 @@ final class StartPushViewModel: ObservableObject {
     @Published var notes: String = ""
     @Published var searchText: String = ""
 
-    let groups: [PushRecipientItem]
-    let friends: [PushRecipientItem]
+    @Published private(set) var groups: [PushRecipientItem] = []
+    @Published private(set) var friends: [PushRecipientItem] = []
+    @Published private(set) var likelyFreeNow: [PushRecipientItem] = []
+    @Published private(set) var mightBeInterested: [PushRecipientItem] = []
+    @Published private(set) var loadState: LoadState<Void> = .idle
+
+    private let container: AppDataContainer?
 
     var canAdvanceStep1: Bool { !selectedRecipientIDs.isEmpty }
     var canAdvanceStep2: Bool { !pushText.trimmingCharacters(in: .whitespaces).isEmpty }
@@ -64,26 +70,57 @@ final class StartPushViewModel: ObservableObject {
         return extra == 0 ? first.name : "\(first.name) +\(extra)"
     }
 
-    init() {
-        groups = GroupsMockData.groups.map { group in
-            PushRecipientItem(
-                id: "group_\(group.id)",
-                name: group.name,
-                memberCount: group.memberCount,
-                imageAssetName: group.imageAssetName,
-                initials: String(group.name.prefix(2)).uppercased(),
-                isGroup: true
-            )
-        }
-        friends = RealWorldMockData.friends.map { friend in
-            PushRecipientItem(
-                id: "friend_\(friend.id)",
-                name: friend.displayName,
-                memberCount: nil,
-                imageAssetName: friend.imageAssetName,
-                initials: friend.initials,
-                isGroup: false
-            )
+    init(container: AppDataContainer = .shared) {
+        self.container = container
+        Task { await load() }
+    }
+
+    func load() async {
+        guard let container else { return }
+        loadState = .loading
+        do {
+            let groupList = try await container.groups.groups()
+            let memberships = try await container.groups.memberships()
+            let friendList = try await container.friends.friends()
+            let statuses = try await container.friends.presenceStatuses()
+
+            let statusByPersonID = Dictionary(uniqueKeysWithValues: statuses.map { ($0.personID, $0) })
+            let memberCountByGroup: [String: Int] = memberships
+                .filter { $0.membershipStatus == .active }
+                .reduce(into: [:]) { $0[$1.groupID, default: 0] += 1 }
+
+            groups = groupList.map { group in
+                PushRecipientItem(
+                    id: "group_\(group.id)",
+                    name: group.name,
+                    memberCount: memberCountByGroup[group.id] ?? 0,
+                    imageAssetName: group.imageAssetPath,
+                    initials: String(group.name.prefix(2)).uppercased(),
+                    isGroup: true
+                )
+            }
+            let friendItems = friendList.map { friend in
+                (person: friend, item: PushRecipientItem(
+                    id: "friend_\(friend.id)",
+                    name: friend.displayName,
+                    memberCount: nil,
+                    imageAssetName: friend.imageAssetPath,
+                    initials: friend.initials,
+                    isGroup: false
+                ))
+            }
+            friends = friendItems.map(\.item)
+            likelyFreeNow = friendItems.filter {
+                let availability = statusByPersonID[$0.person.id]?.availability
+                return availability == .freeNow || availability == .joinable
+            }.map(\.item)
+            mightBeInterested = friendItems.filter {
+                let availability = statusByPersonID[$0.person.id]?.availability
+                return availability == .maybeDown || availability == .freeSoon
+            }.map(\.item)
+            loadState = .loaded(())
+        } catch {
+            loadState = .failed(error)
         }
     }
 

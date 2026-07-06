@@ -7,9 +7,6 @@
 
 import SwiftUI
 
-private let likelyFreeIDs = ["chitty", "ishan", "nitin"]
-private let mightBeInterestedIDs = ["ram", "ohm", "pranay", "viplove", "rohan"]
-
 struct StartPushStep4View: View {
     @ObservedObject var viewModel: StartPushViewModel
     let onViewResponses: () -> Void
@@ -73,16 +70,14 @@ struct StartPushStep4View: View {
             }
             HStack(spacing: StartPushLayout.sectionSpacing) {
                 responseGroup(
-                    count: 3,
-                    label: "likely free now",
-                    friendIDs: likelyFreeIDs
+                    items: viewModel.likelyFreeNow,
+                    label: "likely free now"
                 )
                 Divider()
                     .frame(height: StartPushLayout.responseDividerHeight)
                 responseGroup(
-                    count: 5,
-                    label: "might be interested",
-                    friendIDs: mightBeInterestedIDs
+                    items: viewModel.mightBeInterested,
+                    label: "might be interested"
                 )
             }
         }
@@ -93,14 +88,13 @@ struct StartPushStep4View: View {
         )
     }
 
-    private func responseGroup(count: Int, label: String, friendIDs: [String]) -> some View {
+    private func responseGroup(items: [PushRecipientItem], label: String) -> some View {
         VStack(spacing: StartPushLayout.responseGroupSpacing) {
             HStack(spacing: -8) {
-                ForEach(friendIDs.prefix(3), id: \.self) { id in
-                    let friend = RealWorldMockData.friend(withID: id)
+                ForEach(items.prefix(3)) { item in
                     RecipientAvatarView(
-                        imageAssetName: friend.imageAssetName,
-                        initials: friend.initials,
+                        imageAssetName: item.imageAssetName,
+                        initials: item.initials,
                         size: StartPushLayout.responseAvatarSize
                     )
                     .overlay(
@@ -108,7 +102,7 @@ struct StartPushStep4View: View {
                     )
                 }
             }
-            Text("\(count) \(label)")
+            Text("\(items.count) \(label)")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(PushControlColors.textSecondary)
                 .multilineTextAlignment(.center)
