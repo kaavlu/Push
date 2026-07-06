@@ -3,18 +3,18 @@ import SwiftUI
 
 enum PlansLayout {
     static let horizontalPadding: CGFloat = 18
-    static let topPadding: CGFloat = 18
+    static let topPadding: CGFloat = 8
     static let bottomPadding: CGFloat = 110
-    static let sectionSpacing: CGFloat = 16
+    static let sectionSpacing: CGFloat = 10
     static let cardCornerRadius: CGFloat = 26
-    static let cardPadding: CGFloat = 18
-    static let cardRowSpacing: CGFloat = 8
+    static let cardPadding: CGFloat = 15
+    static let cardRowSpacing: CGFloat = 6
     static let calendarCornerRadius: CGFloat = 26
-    static let calendarPadding: CGFloat = 18
-    static let calendarCellSize: CGFloat = 30
+    static let calendarPadding: CGFloat = 14
+    static let calendarCellSize: CGFloat = 28
     static let calendarCellSpacing: CGFloat = 4
-    static let calendarHeaderSpacing: CGFloat = 12
-    static let calendarFooterSpacing: CGFloat = 12
+    static let calendarHeaderSpacing: CGFloat = 8
+    static let calendarFooterSpacing: CGFloat = 8
     static let dotEmptySize: CGFloat = 4
     static let dotSmallSize: CGFloat = 6
     static let dotMediumSize: CGFloat = 9
@@ -23,13 +23,13 @@ enum PlansLayout {
     static let dotRingPadding: CGFloat = 6
     static let statusPillHorizontalPadding: CGFloat = 10
     static let statusPillVerticalPadding: CGFloat = 5
-    static let currentPushesSpacing: CGFloat = 12
+    static let currentPushesSpacing: CGFloat = 8
     static let reviewAllButtonTopPadding: CGFloat = 4
     static let startPlanButtonHeight: CGFloat = 46
     static let startPlanButtonCornerRadius: CGFloat = 23
-    static let startPlanButtonBottomPadding: CGFloat = 32
-    static let startPlanButtonHorizontalPadding: CGFloat = 48
-    static let headerTopPadding: CGFloat = 18
+    static let startPlanButtonBottomPadding: CGFloat = 20
+    static let startPlanButtonHorizontalPadding: CGFloat = 32
+    static let headerTopPadding: CGFloat = 12
     static let deckCardPadding: CGFloat = 24
     static let swipeThreshold: CGFloat = 100
     static let swipeUpThreshold: CGFloat = -80

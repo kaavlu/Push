@@ -41,7 +41,7 @@ struct PlansView: View {
             ActivePushesModule(viewModel: viewModel)
             Spacer(minLength: 0)
             StartPlanButton { viewModel.isStartPushPresented = true }
-                .padding(.horizontal, PlansLayout.startPlanButtonHorizontalPadding)
+                .frame(maxWidth: .infinity)
         }
         .padding(.horizontal, PlansLayout.horizontalPadding)
         .padding(.top, PlansLayout.topPadding)
@@ -179,12 +179,10 @@ private struct StartPlanButton: View {
         Button(action: action) {
             Text("+ Start Push")
                 .font(.headline.weight(.semibold))
-                .foregroundStyle(PushControlColors.textEspresso)
-                .frame(maxWidth: .infinity)
+                .foregroundStyle(PushControlColors.textPrimary)
+                .padding(.horizontal, PlansLayout.startPlanButtonHorizontalPadding)
                 .frame(height: PlansLayout.startPlanButtonHeight)
-                .background(
-                    Capsule().fill(PushColorPalette.Accent.sunbeam)
-                )
+                .pushGlassBackground(cornerRadius: PlansLayout.startPlanButtonCornerRadius)
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Start a new push")
