@@ -10,7 +10,17 @@ struct PlanData: Identifiable {
     let locationHint: String
     var status: PlanStatus
     let isOwner: Bool
+    /// People who are in (excludes the current user).
     let participants: [HangoutPerson]
+    /// People who tapped maybe (excludes the current user).
+    let maybeParticipants: [HangoutPerson]
+    /// Creator's free-text details; nil/empty when none was added.
+    let note: String?
+    /// Street-level address of the push's place, if known.
+    let address: String
+    /// Distance from the current user to the place, e.g. "4.3 mi away".
+    /// nil when the user's location or the place is unknown.
+    let distanceLabel: String?
 
     init(
         id: String,
@@ -21,7 +31,11 @@ struct PlanData: Identifiable {
         locationHint: String,
         status: PlanStatus,
         isOwner: Bool,
-        participants: [HangoutPerson] = []
+        participants: [HangoutPerson] = [],
+        maybeParticipants: [HangoutPerson] = [],
+        note: String? = nil,
+        address: String = "",
+        distanceLabel: String? = nil
     ) {
         self.id = id
         self.title = title
@@ -32,6 +46,10 @@ struct PlanData: Identifiable {
         self.status = status
         self.isOwner = isOwner
         self.participants = participants
+        self.maybeParticipants = maybeParticipants
+        self.note = note
+        self.address = address
+        self.distanceLabel = distanceLabel
     }
 }
 

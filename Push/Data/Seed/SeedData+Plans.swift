@@ -19,29 +19,34 @@ extension SeedData {
             plan(
                 "food-tonight", title: "Food tonight?", groupID: "michigan", creatorID: "ram",
                 startsAt: today(hour: 20, minute: 0, relativeTo: now),
-                placeID: "north-park", placeIsSuggested: true, state: .collecting, now: now
+                placeID: "north-park", placeIsSuggested: true, state: .collecting, now: now,
+                note: "Thinking tacos or the new ramen spot — open to ideas. Street parking is easy after 7."
             ),
             plan(
                 "gym-later", title: "Gym later", groupID: "exec", creatorID: SeedIDs.currentUser,
                 startsAt: today(hour: 19, minute: 45, relativeTo: now),
                 isApproximateTime: true,
-                placeID: "crunch", placeIsSuggested: false, state: .locked, now: now
+                placeID: "crunch", placeIsSuggested: false, state: .locked, now: now,
+                note: "Push + legs day. Bring the guest pass if you're not a member."
             ),
             plan(
                 "coffee", title: "Coffee?", groupID: "india", creatorID: "chitty",
                 startsAt: now.addingTimeInterval(-5 * SeedTime.minute),
-                placeID: "blue-bottle", placeIsSuggested: false, state: .happening, now: now
+                placeID: "blue-bottle", placeIsSuggested: false, state: .happening, now: now,
+                note: "Grabbing a table outside. Text me if you can't find it."
             ),
             plan(
                 "drinks-friday", title: "Drinks Friday?", groupID: "michigan", creatorID: SeedIDs.currentUser,
                 startsAt: next(weekday: friday, hour: 21, minute: 0, after: now),
-                placeID: "little-italy", placeIsSuggested: true, state: .collecting, now: now
+                placeID: "little-italy", placeIsSuggested: true, state: .collecting, now: now,
+                note: "Rooftop bar has a dress code — no sneakers. Reservation under my name at 9."
             ),
             plan(
                 "poker-night", title: "Poker night", groupID: "exec", creatorID: "ram",
                 startsAt: next(weekday: saturday, hour: 19, minute: 0, after: now),
                 hasExplicitTime: false,
-                placeID: "rams-place", placeIsSuggested: false, state: .collecting, now: now
+                placeID: "rams-place", placeIsSuggested: false, state: .collecting, now: now,
+                note: "$20 buy-in, cash only. I've got snacks, bring your own drinks."
             )
         ]
     }
@@ -57,7 +62,8 @@ extension SeedData {
         placeID: String,
         placeIsSuggested: Bool,
         state: PushPlan.State,
-        now: Date
+        now: Date,
+        note: String? = nil
     ) -> PushPlan {
         PushPlan(
             id: id,
@@ -74,7 +80,8 @@ extension SeedData {
             placeID: placeID,
             placeIsSuggested: placeIsSuggested,
             state: state,
-            audience: .group
+            audience: .group,
+            note: note
         )
     }
 

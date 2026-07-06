@@ -6,6 +6,7 @@
 //  canonical plans, responses, and recorded hangouts.
 //
 
+import CoreLocation
 import Foundation
 
 enum PlansContentBuilder {
@@ -19,7 +20,8 @@ enum PlansContentBuilder {
         placesByID: [Place.ID: Place],
         peopleByID: [Person.ID: Person],
         currentUserID: Person.ID,
-        now: Date
+        now: Date,
+        userCoordinate: CLLocationCoordinate2D? = nil
     ) -> [PlanData] {
         plans.map { plan in
             let planResponses = responses.filter { $0.pushID == plan.id }
@@ -38,8 +40,16 @@ enum PlansContentBuilder {
                 status: pill(for: mine),
                 isOwner: plan.creatorID == currentUserID,
                 participants: participants(
-                    responses: planResponses, peopleByID: peopleByID, currentUserID: currentUserID
-                )
+                    responses: planResponses, peopleByID: peopleByID,
+                    currentUserID: currentUserID, matching: .in
+                ),
+                maybeParticipants: participants(
+                    responses: planResponses, peopleByID: peopleByID,
+                    currentUserID: currentUserID, matching: .maybe
+                ),
+                note: plan.note,
+                address: place?.address ?? "",
+                distanceLabel: distanceLabel(from: userCoordinate, to: place)
             )
         }
     }
@@ -63,12 +73,26 @@ enum PlansContentBuilder {
     private static func participants(
         responses: [PushResponse],
         peopleByID: [Person.ID: Person],
-        currentUserID: Person.ID
+        currentUserID: Person.ID,
+        matching response: PushResponse.Response
     ) -> [HangoutPerson] {
         responses
-            .filter { $0.response == .in && $0.personID != currentUserID }
+            .filter { $0.response == response && $0.personID != currentUserID }
             .compactMap { peopleByID[$0.personID] }
             .map(hangoutPerson)
+    }
+
+    /// Great-circle distance to the place, rounded to a tenth of a mile.
+    /// Kept vague enough to feel social, not surveillance-grade.
+    private static func distanceLabel(
+        from userCoordinate: CLLocationCoordinate2D?,
+        to place: Place?
+    ) -> String? {
+        guard let userCoordinate, let place else { return nil }
+        let user = CLLocation(latitude: userCoordinate.latitude, longitude: userCoordinate.longitude)
+        let destination = CLLocation(latitude: place.latitude, longitude: place.longitude)
+        let miles = user.distance(from: destination) / DistanceUnit.metersPerMile
+        return String(format: "%.1f mi away", miles)
     }
 
     // MARK: - Calendar
@@ -147,6 +171,10 @@ enum PlansContentBuilder {
             initials: person.initials
         )
     }
+}
+
+private enum DistanceUnit {
+    static let metersPerMile = 1609.344
 }
 
 /// Social proof copy rules, reproducing today's five strings exactly.

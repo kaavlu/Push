@@ -36,12 +36,12 @@ enum PlansLayout {
     static let startPlanButtonBottomPadding: CGFloat = 28
     static let startPlanButtonHorizontalPadding: CGFloat = 46
     static let headerTopPadding: CGFloat = 12
-    static let deckCardPadding: CGFloat = 24
+    static let deckCardPadding: CGFloat = 12
     static let swipeThreshold: CGFloat = 100
     static let swipeUpThreshold: CGFloat = -80
     static let swipeRotationDivisor: Double = 20.0
-    static let deckHintsBottomPadding: CGFloat = 24
-    static let deckRemainingLabelBottomPadding: CGFloat = 48
+    static let deckHintsBottomPadding: CGFloat = 12
+    static let deckRemainingLabelBottomPadding: CGFloat = 24
 }
 
 enum PlansColor {
@@ -61,7 +61,61 @@ enum PlansColor {
     static let pageBottom = PushColorPalette.Accent.walnut.opacity(0.11)
 }
 
+/// Tokens for the premium liquid-glass treatment on the Review deck card.
+/// Kept translucent so the warm modal gradient blurs through, rather than
+/// reading as a flat beige panel.
+enum ReviewGlassStyle {
+    static let warmFill = PlansColor.creamBase.opacity(0.20)
+    static let sunbeamTint = PushColorPalette.Accent.sunbeam.opacity(0.08)
+    static let highlight = Color.white.opacity(0.34)
+    static let walnutStroke = PushColorPalette.Accent.walnut.opacity(0.10)
+    static let shadow = PushColorPalette.Accent.walnut.opacity(0.12)
+    static let shadowRadius: CGFloat = 28
+    static let shadowYOffset: CGFloat = 14
+    static let whiteStrokeWidth: CGFloat = 1
+    static let walnutStrokeWidth: CGFloat = 0.5
+
+    /// Specular edge: bright at the top-left, fading toward the bottom so the
+    /// rim catches light like real glass.
+    static let edgeSheen = LinearGradient(
+        colors: [Color.white.opacity(0.62), Color.white.opacity(0.18), Color.white.opacity(0.30)],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+}
+
 extension View {
+    /// Reusable liquid-glass card: blurred material + translucent warm fill,
+    /// a top-left sheen, layered white/walnut strokes, and a soft warm shadow.
+    func reviewGlassCard(cornerRadius: CGFloat) -> some View {
+        let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+        return background(.ultraThinMaterial, in: shape)
+            .background(shape.fill(ReviewGlassStyle.warmFill))
+            .background(shape.fill(ReviewGlassStyle.sunbeamTint))
+            .overlay {
+                shape.fill(
+                    LinearGradient(
+                        colors: [ReviewGlassStyle.highlight, .clear],
+                        startPoint: .topLeading,
+                        endPoint: .center
+                    )
+                )
+                .allowsHitTesting(false)
+            }
+            .overlay {
+                shape.stroke(ReviewGlassStyle.walnutStroke, lineWidth: ReviewGlassStyle.walnutStrokeWidth)
+            }
+            .overlay {
+                shape.inset(by: 1)
+                    .stroke(ReviewGlassStyle.edgeSheen, lineWidth: ReviewGlassStyle.whiteStrokeWidth)
+            }
+            .shadow(
+                color: ReviewGlassStyle.shadow,
+                radius: ReviewGlassStyle.shadowRadius,
+                y: ReviewGlassStyle.shadowYOffset
+            )
+    }
+
     func plansGlassCard(cornerRadius: CGFloat) -> some View {
         background(
             .ultraThinMaterial,
