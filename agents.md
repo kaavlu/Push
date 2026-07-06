@@ -49,7 +49,7 @@ This is a **high-fidelity prototype** that can become production later.
 - iMessage extension
 - Ghost Mode
 - Large groups
-- Weekly recaps
+- Weekly recap history (History › stub)
 - Dating / social graph features
 
 ---
@@ -75,7 +75,7 @@ See `coding-standards.md` for the full reference. Key rules for this project:
 - **Map pucks:** `MapPuckKind` (`individual`, `hangout`, `cluster`, `friendGroup`) drives annotation rendering and `FriendDetailSheet` layout/detents; fixtures live in `MapPuckMockData`.
 - **Current user on map:** Place the user inside group pucks via `RealWorldMockData.userPuck()` (`isCurrentUser: true`); the standalone `UserLocationPin` hides when any puck has `includesCurrentUser`.
 - **Map attribution:** Set `MKMapView.layoutMargins` via `StyledMapView.mapLayoutMargins` (`MapAttributionLayout` in `ContentView`) for Apple logo and legal text only; compass is a manually placed `MKCompassButton` in `StyledMapView` (`CompassLayout`). Update insets when top/bottom UI changes.
-- **Pushes tab:** `PlansView` splits owned vs invited pushes — `PlanData.isOwner`; `PlansViewModel.yourPushes` / `activePushes`. Owned preview uses `YourPushCard` ("Manage →" opens `ManagePushView` via `isManagePushPresented` / `managedPlan`); invited pushes use `ActivePlanCard` (review deck). `PlanData.participants` is `[HangoutPerson]` (default `[]`) for owned-push avatar rows; seed non-empty for `isOwner` entries in `PlansMockData`.
+- **Pushes tab:** `PlansView` splits owned vs invited pushes — `PlanData.isOwner`; `PlansViewModel.yourPushes` / `activePushes`. Weekly recap card (`PlansCalendarView` + `PlansWeeklyRecapDayTile`) shows a Monday-first week with `moveWeek` navigation; day taps open detail only when `pushCount > 0` or `almostHappened`. Use `plansGlassCard` / `PlansColor` for Pushes tab glass cards. Owned preview uses `YourPushCard` ("Manage →" opens `ManagePushView` via `isManagePushPresented` / `managedPlan`); invited pushes use `ActivePlanCard` (review deck). `PlanData.participants` is `[HangoutPerson]` (default `[]`) for owned-push avatar rows; seed non-empty for `isOwner` entries in `PlansMockData`.
 - **Feature files:** Flat under `Push/` — split by suffix: `*Models`, `*MockData`, `*View`, `*ViewModel`, `*Style`. Multi-step flows add `*FlowView` (container), `*StepNView`, and shared `*Style`; register on `MainMapRoute`.
 - **Files ≤ 400 lines.** Split by responsibility.
 - **Functions ≤ 40 lines, single responsibility.**
