@@ -1,3 +1,30 @@
+# Pushes Weekly Calendar
+
+## Goal
+Polish the Pushes screen weekly recap and push modules so actions, color hierarchy, and glass treatment feel premium and social while keeping the existing content and mock data.
+
+## Contract
+- Show exactly seven Monday-first days for the reference week.
+- Calendar top row shows `This week` on the left and `History ›` on the right.
+- Calendar second row shows the current week range centered between subtle previous/next chevrons.
+- Day cells read as a weekly recap rhythm: weekday, date, then a soft vertical activity tile.
+- Keep today and the selected day softly emphasized with sunbeam tint/stroke.
+- Active days should use warm, lightweight indicators without making every day equally heavy.
+- Footer summarizes weekly Push activity instead of monthly Push activity.
+- Day taps still open the lightweight day detail sheet.
+- Your Pushes and Active Pushes section actions live in their section headers, not as floating links.
+- Main titles use espresso; metadata and recap secondary text use quieter taupe/gray-brown tones.
+- Start Push remains a glass pill but reads as the primary action with a subtle warm glow.
+- Pushes cards use cleaner white/glass strokes and softer shadows against a warmer, less intense background.
+
+## Acceptance Criteria
+- Pushes calendar renders one row of seven days.
+- ViewModel exposes weekly calendar data and weekly total state.
+- Tests cover week length, Monday-first behavior, week label, navigation, and weekly total.
+- Pushes screen builds successfully after the visual changes.
+
+---
+
 # Profile Page Production Pass
 
 ## Goal

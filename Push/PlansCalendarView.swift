@@ -8,183 +8,107 @@ struct PlansCalendarView: View {
         VStack(alignment: .leading, spacing: 0) {
             calendarHeader
                 .padding(.bottom, PlansLayout.calendarHeaderSpacing)
-            weekdayRow
-                .padding(.bottom, 8)
-            calendarGrid
+            weekRow
             calendarFooter
                 .padding(.top, PlansLayout.calendarFooterSpacing)
         }
         .padding(PlansLayout.calendarPadding)
-        .pushGlassBackground(cornerRadius: PlansLayout.calendarCornerRadius)
+        .plansGlassCard(cornerRadius: PlansLayout.calendarCornerRadius)
         .sheet(item: $viewModel.selectedDay) { day in
             DayDetailSheet(day: day)
         }
     }
 
     private var calendarHeader: some View {
-        HStack {
-            Text(viewModel.monthLabel)
-                .font(.headline.weight(.bold))
-                .foregroundStyle(PushControlColors.textEspresso)
-            Spacer()
-            Button {
-                // history stub — future issue
-            } label: {
+        HStack(alignment: .center, spacing: WeeklyRecapCardLayout.headerSpacing) {
+            HStack(spacing: WeeklyRecapCardLayout.weekRangeSpacing) {
+                weekNavigationButton(systemName: "chevron.left") {
+                    viewModel.moveWeek(by: -1)
+                }
+
+                Text(viewModel.weekLabel)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(PushControlColors.textEspresso)
+                    .frame(width: WeeklyRecapCardLayout.weekLabelWidth)
+                    .lineLimit(1)
+                    .minimumScaleFactor(WeeklyRecapCardLayout.weekLabelMinimumScale)
+
+                weekNavigationButton(systemName: "chevron.right") {
+                    viewModel.moveWeek(by: 1)
+                }
+            }
+
+            Spacer(minLength: WeeklyRecapCardLayout.headerSpacerMinLength)
+
+            Button(action: {}) {
                 Text("History ›")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(PushControlColors.textSecondary)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(PushColorPalette.Accent.walnut)
             }
             .buttonStyle(.plain)
         }
     }
 
-    private var weekdayRow: some View {
-        HStack(spacing: PlansLayout.calendarCellSpacing) {
-            ForEach(CalendarConstants.weekdayLabels, id: \.self) { label in
-                Text(label)
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(PushControlColors.textTertiary)
-                    .frame(maxWidth: .infinity)
+    private func weekNavigationButton(systemName: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: systemName)
+                .font(.system(size: WeeklyRecapCardLayout.chevronSize, weight: .semibold))
+                .foregroundStyle(PlansColor.metadataSecondary)
+                .frame(
+                    width: WeeklyRecapCardLayout.chevronTapSize,
+                    height: WeeklyRecapCardLayout.chevronTapSize
+                )
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var weekRow: some View {
+        HStack(spacing: WeeklyRecapCardLayout.daySpacing) {
+            ForEach(viewModel.weekDays) { day in
+                WeeklyRecapDayTile(
+                    day: day,
+                    isSelected: viewModel.selectedDay?.id == day.id,
+                    opensDetail: opensDetail(for: day)
+                ) {
+                    if opensDetail(for: day) {
+                        viewModel.selectedDay = day
+                    }
+                }
+                .frame(maxWidth: .infinity)
             }
         }
     }
 
-    private var calendarGrid: some View {
-        let weeks = groupedIntoWeeks(viewModel.calendarDays)
-        return VStack(spacing: PlansLayout.calendarCellSpacing) {
-            ForEach(Array(weeks.enumerated()), id: \.offset) { _, week in
-                HStack(spacing: PlansLayout.calendarCellSpacing) {
-                    ForEach(0..<7, id: \.self) { col in
-                        if let day = week[col] {
-                            CalendarDayCell(day: day) {
-                                viewModel.selectedDay = day
-                            }
-                            .frame(maxWidth: .infinity)
-                        } else {
-                            Color.clear
-                                .frame(
-                                    width: PlansLayout.calendarCellSize,
-                                    height: PlansLayout.calendarCellSize
-                                )
-                                .frame(maxWidth: .infinity)
-                        }
-                    }
-                }
-            }
-        }
+    private func opensDetail(for day: CalendarDayData) -> Bool {
+        day.pushCount > 0 || day.almostHappened
     }
 
     private var calendarFooter: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("\(viewModel.totalPushesThisMonth) Pushes this month")
+            Text("\(viewModel.totalPushesThisWeek) Pushes this week")
                 .font(.footnote.weight(.semibold))
-                .foregroundStyle(PushControlColors.textPrimary)
+                .foregroundStyle(PushControlColors.textEspresso)
             Text("Most active: \(viewModel.mostActiveGroup)")
                 .font(.footnote)
-                .foregroundStyle(PushControlColors.textSecondary)
-        }
-    }
-
-    private func groupedIntoWeeks(_ days: [CalendarDayData]) -> [[CalendarDayData?]] {
-        guard let firstDate = days.first?.date else { return [] }
-        let calendar = Calendar.current
-        let weekdayOfFirst = calendar.component(.weekday, from: firstDate)
-        // Monday-first: Mon=2→0, Tue=3→1, ... Sun=1→6
-        let mondayOffset = (weekdayOfFirst + 5) % 7
-        var slots: [CalendarDayData?] = Array(repeating: nil, count: mondayOffset)
-        slots.append(contentsOf: days.map { Optional($0) })
-        let remainder = slots.count % 7
-        if remainder != 0 {
-            slots.append(contentsOf: Array(repeating: nil, count: 7 - remainder))
-        }
-        return stride(from: 0, to: slots.count, by: 7).map {
-            Array(slots[$0..<$0 + 7])
-        }
-    }
-}
-
-private enum CalendarConstants {
-    static let weekdayLabels = ["M", "T", "W", "T", "F", "S", "S"]
-}
-
-private enum CalendarCellLayout {
-    static let highlightSize: CGFloat = 24
-    static let activityDotSize: CGFloat = 3
-    static let dotSpacing: CGFloat = 2
-}
-
-private struct CalendarDayCell: View {
-    let day: CalendarDayData
-    let onTap: () -> Void
-
-    private var isToday: Bool {
-        Calendar.current.isDateInToday(day.date)
-    }
-
-    private var dayNumber: Int {
-        Calendar.current.component(.day, from: day.date)
-    }
-
-    var body: some View {
-        Button(action: onTap) {
-            ZStack {
-                if isToday {
-                    Circle()
-                        .fill(PushColorPalette.Accent.sunbeam)
-                        .frame(
-                            width: CalendarCellLayout.highlightSize,
-                            height: CalendarCellLayout.highlightSize
-                        )
-                } else if day.almostHappened {
-                    Circle()
-                        .stroke(
-                            PushColorPalette.Accent.walnut.opacity(0.35),
-                            style: StrokeStyle(lineWidth: 1.0, dash: [2, 2])
-                        )
-                        .frame(
-                            width: CalendarCellLayout.highlightSize,
-                            height: CalendarCellLayout.highlightSize
-                        )
-                }
-
-                VStack(spacing: CalendarCellLayout.dotSpacing) {
-                    Text("\(dayNumber)")
-                        .font(.caption.weight(fontWeight))
-                        .foregroundStyle(textColor)
-
-                    Circle()
-                        .fill(PushColorPalette.Accent.walnut.opacity(0.6))
-                        .frame(
-                            width: CalendarCellLayout.activityDotSize,
-                            height: CalendarCellLayout.activityDotSize
-                        )
-                        .opacity(day.pushCount > 0 && !isToday ? 1 : 0)
-                }
+                .foregroundStyle(PlansColor.metadata)
+            if let bestDay = viewModel.bestDayThisWeek {
+                Text("Best day: \(bestDay)")
+                    .font(.caption)
+                    .foregroundStyle(PlansColor.metadataSecondary)
             }
-            .frame(width: PlansLayout.calendarCellSize, height: PlansLayout.calendarCellSize)
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel(accessibilityLabel)
     }
+}
 
-    private var fontWeight: Font.Weight {
-        if isToday { return .bold }
-        if day.pushCount > 0 { return .semibold }
-        return .regular
-    }
-
-    private var textColor: Color {
-        if isToday { return PushControlColors.textEspresso }
-        if day.pushCount > 0 { return PushControlColors.textPrimary }
-        return PushControlColors.textTertiary
-    }
-
-    private var accessibilityLabel: String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .none
-        return "\(formatter.string(from: day.date)), \(day.pushCount) pushes"
-    }
+private enum WeeklyRecapCardLayout {
+    static let chevronSize: CGFloat = 12
+    static let chevronTapSize: CGFloat = 26
+    static let daySpacing: CGFloat = 6
+    static let headerSpacing: CGFloat = 8
+    static let headerSpacerMinLength: CGFloat = 8
+    static let weekRangeSpacing: CGFloat = 6
+    static let weekLabelWidth: CGFloat = 116
+    static let weekLabelMinimumScale: CGFloat = 0.86
 }
 
 private struct DayDetailSheet: View {

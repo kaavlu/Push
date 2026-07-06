@@ -1,0 +1,15 @@
+"/Users/manavkhanvilkar/Desktop/Push/Push/StartPushStep1View.swift":
+  swift-dependencies: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/StartPushStep1View.swiftdeps"
+  object: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/StartPushStep1View.o"
+  dependencies: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/StartPushStep1View.d"
+  diagnostics: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/StartPushStep1View.dia"
+"/Users/manavkhanvilkar/Desktop/Push/Push/StartPushStep2View.swift":
+  object: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/StartPushStep2View.o"
+  diagnostics: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/StartPushStep2View.dia"
+  dependencies: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/StartPushStep2View.d"
+  swift-dependencies: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/StartPushStep2View.swiftdeps"
+"/Users/manavkhanvilkar/Desktop/Push/Push/StartPushFlowView.swift":
+  object: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/StartPushFlowView.o"
+  diagnostics: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/StartPushFlowView.dia"
+  dependencies: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/StartPushFlowView.d"
+  swift-dependencies: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/StartPushFlowView.swiftdeps"

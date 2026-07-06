@@ -1,0 +1,15 @@
+"/Users/manavkhanvilkar/Desktop/Push/Push/GroupsModels.swift":
+  object: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/GroupsModels.o"
+  swift-dependencies: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/GroupsModels.swiftdeps"
+  dependencies: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/GroupsModels.d"
+  diagnostics: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/GroupsModels.dia"
+"/Users/manavkhanvilkar/Desktop/Push/Push/GroupDetailView.swift":
+  object: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/GroupDetailView.o"
+  dependencies: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/GroupDetailView.d"
+  diagnostics: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/GroupDetailView.dia"
+  swift-dependencies: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/GroupDetailView.swiftdeps"
+"/Users/manavkhanvilkar/Desktop/Push/Push/GroupsView.swift":
+  swift-dependencies: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/GroupsView.swiftdeps"
+  diagnostics: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/GroupsView.dia"
+  object: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/GroupsView.o"
+  dependencies: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/GroupsView.d"

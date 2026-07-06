@@ -35,16 +35,19 @@ struct PlansView: View {
     }
 
     private var pageContent: some View {
-        VStack(alignment: .leading, spacing: PlansLayout.sectionSpacing) {
+        VStack(alignment: .leading, spacing: 0) {
             PlansCalendarView(viewModel: viewModel)
+            Spacer(minLength: PlansLayout.calendarToYourPushesSpacing)
             YourPushesModule(viewModel: viewModel)
+            Spacer(minLength: PlansLayout.pushesModuleSpacing)
             ActivePushesModule(viewModel: viewModel)
             Spacer(minLength: 0)
             StartPlanButton { viewModel.isStartPushPresented = true }
                 .frame(maxWidth: .infinity)
+                .padding(.top, PlansLayout.startButtonTopSpacing)
         }
         .padding(.horizontal, PlansLayout.horizontalPadding)
-        .padding(.top, PlansLayout.topPadding)
+        .padding(.top, PlansLayout.headerToCalendarSpacing)
         .padding(.bottom, PlansLayout.startPlanButtonBottomPadding)
     }
 }
@@ -56,12 +59,12 @@ private struct PlansPageHeader: View {
         HStack(alignment: .center) {
             Text("Pushes")
                 .font(.largeTitle.weight(.bold))
-                .foregroundStyle(PushControlColors.activeForeground)
+                .foregroundStyle(PushControlColors.textEspresso)
             Spacer()
             Button(action: dismissAction) {
                 Image(systemName: "xmark")
                     .font(.system(size: ProfileLayout.closeIconSize, weight: .bold))
-                    .foregroundStyle(PushControlColors.activeForeground)
+                    .foregroundStyle(PushColorPalette.Accent.walnut)
                     .frame(width: ProfileLayout.closeButtonSize, height: ProfileLayout.closeButtonSize)
                     .pushGlassBackground(cornerRadius: ProfileLayout.closeButtonSize / 2)
             }
@@ -76,32 +79,32 @@ private struct YourPushesModule: View {
     @ObservedObject var viewModel: PlansViewModel
 
     var body: some View {
-        VStack(alignment: .leading, spacing: PlansLayout.currentPushesSpacing) {
-            Text("Your Pushes")
-                .font(.headline.weight(.bold))
-                .foregroundStyle(PushControlColors.textEspresso)
+        VStack(alignment: .leading, spacing: PlansLayout.moduleTitleCardSpacing) {
+            HStack(alignment: .center) {
+                Text("Your Pushes")
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(PushControlColors.textEspresso)
+
+                Spacer(minLength: 0)
+
+                if viewModel.yourPushes.count > 1 {
+                    Button {
+                        viewModel.isYourPushesPresented = true
+                    } label: {
+                        Text("See all \(viewModel.yourPushes.count) ›")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(PushColorPalette.Accent.walnut)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+
             if let first = viewModel.yourPushes.first {
                 YourPushCard(plan: first) {
                     viewModel.openManage(plan: first)
                 }
             }
-            if viewModel.yourPushes.count > 1 {
-                seeAllButton
-            }
         }
-    }
-
-    private var seeAllButton: some View {
-        Button {
-            viewModel.isYourPushesPresented = true
-        } label: {
-            Text("See all \(viewModel.yourPushes.count) →")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(PushControlColors.textPrimary)
-                .frame(maxWidth: .infinity, alignment: .trailing)
-        }
-        .buttonStyle(.plain)
-        .padding(.top, PlansLayout.reviewAllButtonTopPadding)
     }
 }
 
@@ -109,30 +112,30 @@ private struct ActivePushesModule: View {
     @ObservedObject var viewModel: PlansViewModel
 
     var body: some View {
-        VStack(alignment: .leading, spacing: PlansLayout.currentPushesSpacing) {
-            Text("Active Pushes")
-                .font(.headline.weight(.bold))
-                .foregroundStyle(PushControlColors.textEspresso)
+        VStack(alignment: .leading, spacing: PlansLayout.moduleTitleCardSpacing) {
+            HStack(alignment: .center) {
+                Text("Active Pushes")
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(PushControlColors.textEspresso)
+
+                Spacer(minLength: 0)
+
+                if viewModel.activePushes.count > 1 {
+                    Button {
+                        viewModel.isReviewDeckPresented = true
+                    } label: {
+                        Text("Review \(viewModel.activePushes.count) ›")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(PushColorPalette.Accent.walnut)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+
             if let first = viewModel.activePushes.first {
                 ActivePlanCard(plan: first)
             }
-            if viewModel.activePushes.count > 1 {
-                reviewAllButton
-            }
         }
-    }
-
-    private var reviewAllButton: some View {
-        Button {
-            viewModel.isReviewDeckPresented = true
-        } label: {
-            Text("Review all \(viewModel.activePushes.count) →")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(PushControlColors.textPrimary)
-                .frame(maxWidth: .infinity, alignment: .trailing)
-        }
-        .buttonStyle(.plain)
-        .padding(.top, PlansLayout.reviewAllButtonTopPadding)
     }
 }
 
@@ -146,7 +149,7 @@ struct YourPushesListView: View {
             VStack(alignment: .leading, spacing: 0) {
                 Text("Your Pushes")
                     .font(.largeTitle.weight(.bold))
-                    .foregroundStyle(PushControlColors.activeForeground)
+                    .foregroundStyle(PushControlColors.textEspresso)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.top, PlansLayout.headerTopPadding)
                     .padding(.horizontal, PlansLayout.horizontalPadding)
@@ -177,12 +180,23 @@ private struct StartPlanButton: View {
 
     var body: some View {
         Button(action: action) {
-            Text("+ Start Push")
-                .font(.headline.weight(.semibold))
-                .foregroundStyle(PushControlColors.textPrimary)
-                .padding(.horizontal, PlansLayout.startPlanButtonHorizontalPadding)
-                .frame(height: PlansLayout.startPlanButtonHeight)
-                .pushGlassBackground(cornerRadius: PlansLayout.startPlanButtonCornerRadius)
+            HStack(spacing: 7) {
+                Image(systemName: "plus.circle.fill")
+                    .font(.system(size: 17, weight: .bold))
+                Text("Start Push")
+                    .font(.headline.weight(.bold))
+            }
+            .foregroundStyle(PushControlColors.textEspresso)
+            .padding(.horizontal, PlansLayout.startPlanButtonHorizontalPadding)
+            .frame(height: PlansLayout.startPlanButtonHeight)
+            .background {
+                Capsule()
+                    .fill(PlansColor.primaryGlow)
+                    .blur(radius: 16)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 8)
+            }
+            .plansGlassCard(cornerRadius: PlansLayout.startPlanButtonCornerRadius)
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Start a new push")

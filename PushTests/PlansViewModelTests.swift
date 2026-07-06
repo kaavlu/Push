@@ -96,26 +96,45 @@ final class PlansViewModelTests: XCTestCase {
         XCTAssertEqual(vm.plans.first?.status, .pending)
     }
 
-    func testMonthLabel_matchesCurrentMonth() {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM"
-        let vm = PlansViewModel()
-        XCTAssertEqual(vm.monthLabel, formatter.string(from: Date()))
+    func testWeekLabel_matchesReferenceWeek() throws {
+        let components = DateComponents(year: 2026, month: 7, day: 5)
+        let sunday = try XCTUnwrap(Calendar.current.date(from: components))
+        let vm = PlansViewModel(referenceDate: sunday)
+        XCTAssertEqual(vm.weekLabel, "Jun 29 – Jul 5")
     }
 
-    func testCalendarDays_countMatchesDaysInMonth() throws {
+    func testWeekDays_countMatchesDaysInWeek() throws {
         let components = DateComponents(year: 2026, month: 7, day: 1)
-        let july = try XCTUnwrap(Calendar.current.date(from: components))
-        let vm = PlansViewModel(referenceDate: july)
-        XCTAssertEqual(vm.calendarDays.count, 31)
+        let wednesday = try XCTUnwrap(Calendar.current.date(from: components))
+        let vm = PlansViewModel(referenceDate: wednesday)
+        XCTAssertEqual(vm.weekDays.count, 7)
     }
 
-    func testTotalPushesThisMonth_sumsPushCounts() throws {
+    func testWeekDays_startOnMonday() throws {
         let components = DateComponents(year: 2026, month: 7, day: 1)
-        let july = try XCTUnwrap(Calendar.current.date(from: components))
-        let vm = PlansViewModel(referenceDate: july)
-        let expected = vm.calendarDays.reduce(0) { $0 + $1.pushCount }
-        XCTAssertEqual(vm.totalPushesThisMonth, expected)
+        let wednesday = try XCTUnwrap(Calendar.current.date(from: components))
+        let vm = PlansViewModel(referenceDate: wednesday)
+        let weekday = Calendar.current.component(
+            .weekday,
+            from: try XCTUnwrap(vm.weekDays.first?.date)
+        )
+        XCTAssertEqual(weekday, 2)
+    }
+
+    func testTotalPushesThisWeek_sumsPushCounts() throws {
+        let components = DateComponents(year: 2026, month: 7, day: 1)
+        let wednesday = try XCTUnwrap(Calendar.current.date(from: components))
+        let vm = PlansViewModel(referenceDate: wednesday)
+        let expected = vm.weekDays.reduce(0) { $0 + $1.pushCount }
+        XCTAssertEqual(vm.totalPushesThisWeek, expected)
+    }
+
+    func testMoveWeek_updatesWeekData() throws {
+        let components = DateComponents(year: 2026, month: 7, day: 1)
+        let wednesday = try XCTUnwrap(Calendar.current.date(from: components))
+        let vm = PlansViewModel(referenceDate: wednesday)
+        vm.moveWeek(by: 1)
+        XCTAssertEqual(vm.weekLabel, "Jul 6 – 12")
     }
 
     func testYourPushes_ownedPlansHaveParticipants() {

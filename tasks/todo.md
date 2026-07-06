@@ -1,3 +1,28 @@
+# Pushes Weekly Calendar
+
+## Completed
+- [x] Replace monthly Pushes calendar with a seven-day weekly view.
+- [x] Update calendar ViewModel state from month summary to week summary.
+- [x] Preserve existing Push glass styling and day detail behavior.
+- [x] Add focused ViewModel tests for weekly calendar data.
+- [x] Redesign weekly calendar as a social recap card with chevron week navigation.
+- [x] Add soft vertical day activity tiles with today/selected emphasis.
+- [x] Add compact best-day recap text when the week has activity.
+- [x] Deepen day tiles into liquid-glass heat bars where higher activity renders more glowing bars.
+- [x] Add more breathing room below the Pushes header and between module titles and their cards.
+- [x] Restore History in the weekly recap card with a two-row calendar header.
+- [x] Move Your Pushes and Active Pushes actions into their section headers.
+- [x] Clean Pushes card glass, metadata color hierarchy, and Start Push primary treatment.
+
+## Verification
+- [x] Passed: `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild -project Push.xcodeproj -scheme Push -destination 'generic/platform=iOS Simulator' build`
+- [x] Passed after latest Pushes polish: `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild -project Push.xcodeproj -scheme Push -destination 'generic/platform=iOS Simulator' build`
+- [x] Passed: `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild build-for-testing -project Push.xcodeproj -scheme Push -destination 'generic/platform=iOS Simulator'`
+- [x] Earlier calendar tests passed inside `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild test -project Push.xcodeproj -scheme Push -destination 'platform=iOS Simulator,name=iPhone 14' -only-testing:PushTests`; the later navigation assertion was compiled via `build-for-testing`.
+- [ ] Overall `PushTests` run still exits 65 from unrelated existing failures in `GroupsTests` and non-calendar `PushTests`.
+
+---
+
 # Profile Page Production Pass
 
 ## Goal

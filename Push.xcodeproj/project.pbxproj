@@ -52,6 +52,7 @@
 		5217A2E22FF350000011F860 /* PlansStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2E12FF350000011F860 /* PlansStyle.swift */; };
 		5217A2E42FF350000011F860 /* ActivePlanCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2E32FF350000011F860 /* ActivePlanCard.swift */; };
 		5217A2E62FF360000011F860 /* PlansCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2E52FF360000011F860 /* PlansCalendarView.swift */; };
+		AA01000600000000AA010006 /* PlansWeeklyRecapDayTile.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA01000500000000AA010005 /* PlansWeeklyRecapDayTile.swift */; };
 		5217A2E82FF370000011F860 /* PlansView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2E72FF370000011F860 /* PlansView.swift */; };
 		5217A2EA2FF380000011F860 /* ReviewPushesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2E92FF380000011F860 /* ReviewPushesView.swift */; };
 		F511D9CB8F68D9D9B0341314 /* StartPushModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A043BAE1603803A839C0CB52 /* StartPushModels.swift */; };
@@ -132,6 +133,7 @@
 		5217A2E12FF350000011F860 /* PlansStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlansStyle.swift; sourceTree = "<group>"; };
 		5217A2E32FF350000011F860 /* ActivePlanCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivePlanCard.swift; sourceTree = "<group>"; };
 		5217A2E52FF360000011F860 /* PlansCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlansCalendarView.swift; sourceTree = "<group>"; };
+		AA01000500000000AA010005 /* PlansWeeklyRecapDayTile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlansWeeklyRecapDayTile.swift; sourceTree = "<group>"; };
 		5217A2E72FF370000011F860 /* PlansView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlansView.swift; sourceTree = "<group>"; };
 		5217A2E92FF380000011F860 /* ReviewPushesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewPushesView.swift; sourceTree = "<group>"; };
 		A043BAE1603803A839C0CB52 /* StartPushModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartPushModels.swift; sourceTree = "<group>"; };
@@ -214,6 +216,7 @@
 				5217A2E12FF350000011F860 /* PlansStyle.swift */,
 				5217A2E32FF350000011F860 /* ActivePlanCard.swift */,
 				5217A2E52FF360000011F860 /* PlansCalendarView.swift */,
+				AA01000500000000AA010005 /* PlansWeeklyRecapDayTile.swift */,
 				5217A2E72FF370000011F860 /* PlansView.swift */,
 				5217A2E92FF380000011F860 /* ReviewPushesView.swift */,
 				AA01000200000000AA010002 /* YourPushCard.swift */,
@@ -428,6 +431,7 @@
 				5217A2E22FF350000011F860 /* PlansStyle.swift in Sources */,
 				5217A2E42FF350000011F860 /* ActivePlanCard.swift in Sources */,
 				5217A2E62FF360000011F860 /* PlansCalendarView.swift in Sources */,
+				AA01000600000000AA010006 /* PlansWeeklyRecapDayTile.swift in Sources */,
 				5217A2E82FF370000011F860 /* PlansView.swift in Sources */,
 				5217A2EA2FF380000011F860 /* ReviewPushesView.swift in Sources */,
 				AA01000100000000AA010001 /* YourPushCard.swift in Sources */,

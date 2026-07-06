@@ -6,7 +6,7 @@
 	<integer>10</integer>
 	<key>logs</key>
 	<dict>
-		<key>79B559D4-9A40-49C4-A71E-DBCFDC7997EB</key>
+		<key>B453DC03-1D59-437A-A070-0CBAEBAA64BD</key>
 		<dict>
 			<key>className</key>
 			<string>IDECommandLineBuildLog</string>
@@ -15,7 +15,7 @@
 			<key>domainType</key>
 			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
 			<key>fileName</key>
-			<string>79B559D4-9A40-49C4-A71E-DBCFDC7997EB.xcactivitylog</string>
+			<string>B453DC03-1D59-437A-A070-0CBAEBAA64BD.xcactivitylog</string>
 			<key>hasPrimaryLog</key>
 			<true/>
 			<key>primaryObservable</key>
@@ -32,47 +32,13 @@
 			<key>signature</key>
 			<string>Building project Push with scheme Push and configuration Debug</string>
 			<key>timeStartedRecording</key>
-			<real>804983941.34408402</real>
+			<real>805013176.22439301</real>
 			<key>timeStoppedRecording</key>
-			<real>804983943.97526896</real>
+			<real>805013177.73789096</real>
 			<key>title</key>
 			<string>Building project Push with scheme Push and configuration Debug</string>
 			<key>uniqueIdentifier</key>
-			<string>79B559D4-9A40-49C4-A71E-DBCFDC7997EB</string>
-		</dict>
-		<key>8DBC60F2-E74F-45CF-B7A6-6EF37443113D</key>
-		<dict>
-			<key>className</key>
-			<string>IDECommandLineBuildLog</string>
-			<key>documentTypeString</key>
-			<string>&lt;nil&gt;</string>
-			<key>domainType</key>
-			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
-			<key>fileName</key>
-			<string>8DBC60F2-E74F-45CF-B7A6-6EF37443113D.xcactivitylog</string>
-			<key>hasPrimaryLog</key>
-			<true/>
-			<key>primaryObservable</key>
-			<dict>
-				<key>highLevelStatus</key>
-				<string>S</string>
-			</dict>
-			<key>schemeIdentifier-containerName</key>
-			<string>Push project</string>
-			<key>schemeIdentifier-schemeName</key>
-			<string>Push</string>
-			<key>schemeIdentifier-sharedScheme</key>
-			<integer>1</integer>
-			<key>signature</key>
-			<string>Building project Push with scheme Push and configuration Debug</string>
-			<key>timeStartedRecording</key>
-			<real>804984229.34254503</real>
-			<key>timeStoppedRecording</key>
-			<real>804984231.51474404</real>
-			<key>title</key>
-			<string>Building project Push with scheme Push and configuration Debug</string>
-			<key>uniqueIdentifier</key>
-			<string>8DBC60F2-E74F-45CF-B7A6-6EF37443113D</string>
+			<string>B453DC03-1D59-437A-A070-0CBAEBAA64BD</string>
 		</dict>
 	</dict>
 </dict>

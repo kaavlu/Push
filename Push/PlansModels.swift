@@ -76,7 +76,12 @@ enum PlansMockData {
             socialProof: "3 in · 2 maybe",
             locationHint: "Suggested: North Park",
             status: .pending,
-            isOwner: false
+            isOwner: false,
+            participants: [
+                HangoutPerson(id: "chitty", name: "Chitty", imageAssetName: "assets/friends/chitty.png", initials: "CH"),
+                HangoutPerson(id: "ishan", name: "Ishan", imageAssetName: "assets/friends/ishan.png", initials: "IS"),
+                HangoutPerson(id: "rohan", name: "Rohan", imageAssetName: "assets/friends/rohan.png", initials: "RO")
+            ]
         ),
         PlanData(
             id: "gym-later",
@@ -102,7 +107,10 @@ enum PlansMockData {
             socialProof: "Chitty is there · Ishan maybe",
             locationHint: "Blue Bottle",
             status: .open,
-            isOwner: false
+            isOwner: false,
+            participants: [
+                HangoutPerson(id: "chitty", name: "Chitty", imageAssetName: "assets/friends/chitty.png", initials: "CH")
+            ]
         ),
         PlanData(
             id: "drinks-friday",
@@ -126,7 +134,10 @@ enum PlansMockData {
             socialProof: "Ram in · Ohm maybe",
             locationHint: "Ram's place",
             status: .waiting,
-            isOwner: false
+            isOwner: false,
+            participants: [
+                HangoutPerson(id: "ram", name: "Ram", imageAssetName: "assets/friends/ram.png", initials: "RA")
+            ]
         )
     ]
 
@@ -202,6 +213,25 @@ enum PlansMockData {
         ]
     ]
 
+    static func weekDays(for referenceDate: Date) -> [CalendarDayData] {
+        let calendar = Calendar.current
+        let startOfDay = calendar.startOfDay(for: referenceDate)
+        let weekday = calendar.component(.weekday, from: startOfDay)
+        let daysFromMonday = (weekday + CalendarMockConstants.mondayOffsetAdjustment)
+            % CalendarMockConstants.daysPerWeek
+        guard let weekStart = calendar.date(
+            byAdding: .day,
+            value: -daysFromMonday,
+            to: startOfDay
+        ) else { return [] }
+
+        return calendarDays(
+            startingAt: weekStart,
+            count: CalendarMockConstants.daysPerWeek,
+            calendar: calendar
+        )
+    }
+
     static func calendarDays(for month: Date) -> [CalendarDayData] {
         let calendar = Calendar.current
         guard
@@ -211,6 +241,14 @@ enum PlansMockData {
             )
         else { return [] }
 
+        return calendarDays(startingAt: monthStart, count: range.count, calendar: calendar)
+    }
+
+    private static func calendarDays(
+        startingAt startDate: Date,
+        count: Int,
+        calendar: Calendar
+    ) -> [CalendarDayData] {
         let pushPattern: [Int: (pushCount: Int, hadPlan: Bool, almostHappened: Bool)] = [
             3:  (2, false, false),
             5:  (3, true,  false),
@@ -229,10 +267,11 @@ enum PlansMockData {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withFullDate]
 
-        return range.compactMap { day -> CalendarDayData? in
+        return (0..<count).compactMap { offset -> CalendarDayData? in
             guard let date = calendar.date(
-                byAdding: .day, value: day - 1, to: monthStart
+                byAdding: .day, value: offset, to: startDate
             ) else { return nil }
+            let day = calendar.component(.day, from: date)
             let pattern = pushPattern[day] ?? (pushCount: 0, hadPlan: false, almostHappened: false)
             return CalendarDayData(
                 id: formatter.string(from: date),
@@ -244,4 +283,9 @@ enum PlansMockData {
             )
         }
     }
+}
+
+private enum CalendarMockConstants {
+    static let daysPerWeek = 7
+    static let mondayOffsetAdjustment = 5
 }

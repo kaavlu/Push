@@ -9,12 +9,14 @@ struct ActivePlanCard: View {
             headerRow
             groupRow
             Divider()
-                .background(PushColorPalette.Accent.walnut.opacity(0.12))
+                .background(PlansColor.creamBase.opacity(PlansLayout.cardDividerOpacity))
+            goingSection
             socialProofRow
             locationRow
         }
         .padding(PlansLayout.cardPadding)
-        .pushGlassBackground(cornerRadius: PlansLayout.cardCornerRadius)
+        .frame(height: PlansLayout.pushCardHeight, alignment: .top)
+        .plansGlassCard(cornerRadius: PlansLayout.cardCornerRadius)
     }
 
     private var headerRow: some View {
@@ -31,21 +33,30 @@ struct ActivePlanCard: View {
     private var groupRow: some View {
         Text("\(plan.group) · \(plan.timeSignal)")
             .font(.subheadline.weight(.medium))
-            .foregroundStyle(PushControlColors.textSecondary)
+            .foregroundStyle(PlansColor.metadataSecondary)
             .lineLimit(1)
     }
 
     private var socialProofRow: some View {
         Text(plan.socialProof)
             .font(.subheadline)
-            .foregroundStyle(PushControlColors.textSecondary)
+            .foregroundStyle(PlansColor.metadataSecondary)
             .lineLimit(1)
+    }
+
+    private var goingSection: some View {
+        VStack(alignment: .leading, spacing: YourPushCardLayout.joinedLabelSpacing) {
+            Text("Going:")
+                .font(.caption.weight(.medium))
+                .foregroundStyle(PlansColor.metadataSecondary)
+            YourPushAvatarRow(participants: plan.participants)
+        }
     }
 
     private var locationRow: some View {
         Text(plan.locationHint)
             .font(.footnote.weight(.medium))
-            .foregroundStyle(PushControlColors.textTertiary)
+            .foregroundStyle(PlansColor.metadataTertiary)
             .lineLimit(1)
     }
 }

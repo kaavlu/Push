@@ -16,7 +16,7 @@
       },
       {
         "comment": "",
-        "key": "See all %lld →"
+        "key": "See all %lld ›"
       },
       {
         "comment": "",
@@ -24,7 +24,7 @@
       },
       {
         "comment": "",
-        "key": "Review all %lld →"
+        "key": "Review %lld ›"
       },
       {
         "comment": "",
@@ -32,7 +32,7 @@
       },
       {
         "comment": "",
-        "key": "+ Start Push"
+        "key": "Start Push"
       }
     ]
   },

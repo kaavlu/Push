@@ -8,7 +8,7 @@
       },
       {
         "comment": "",
-        "key": "%lld Pushes this month"
+        "key": "%lld Pushes this week"
       },
       {
         "comment": "",
@@ -16,7 +16,7 @@
       },
       {
         "comment": "",
-        "key": "%lld"
+        "key": "Best day: %@"
       },
       {
         "comment": "",

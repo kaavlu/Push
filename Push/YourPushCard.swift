@@ -9,14 +9,13 @@ struct YourPushCard: View {
         VStack(alignment: .leading, spacing: PlansLayout.cardRowSpacing) {
             headerRow
             groupLocationRow
-            Rectangle()
-                .fill(PushColorPalette.Accent.walnut.opacity(YourPushCardLayout.dividerOpacity))
-                .frame(height: YourPushCardLayout.dividerHeight)
+            Divider()
+                .background(PlansColor.creamBase.opacity(PlansLayout.cardDividerOpacity))
             joinedSection
             footerRow
         }
         .padding(PlansLayout.cardPadding)
-        .pushGlassBackground(cornerRadius: PlansLayout.cardCornerRadius)
+        .plansGlassCard(cornerRadius: PlansLayout.cardCornerRadius)
     }
 
     private var headerRow: some View {
@@ -33,7 +32,7 @@ struct YourPushCard: View {
     private var groupLocationRow: some View {
         Text("\(plan.group) · \(plan.locationHint)")
             .font(.subheadline.weight(.medium))
-            .foregroundStyle(PushControlColors.textSecondary)
+            .foregroundStyle(PlansColor.metadataTertiary)
             .lineLimit(1)
     }
 
@@ -41,21 +40,22 @@ struct YourPushCard: View {
         VStack(alignment: .leading, spacing: YourPushCardLayout.joinedLabelSpacing) {
             Text("Joined:")
                 .font(.caption.weight(.medium))
-                .foregroundStyle(PushControlColors.textTertiary)
+                .foregroundStyle(PlansColor.metadataSecondary)
             YourPushAvatarRow(participants: plan.participants)
         }
     }
 
     private var footerRow: some View {
-        HStack {
+        HStack(alignment: .center) {
             Text(plan.socialProof)
                 .font(.footnote)
-                .foregroundStyle(PushControlColors.textSecondary)
-            Spacer()
+                .foregroundStyle(PlansColor.metadataSecondary)
+                .lineLimit(1)
+            Spacer(minLength: YourPushCardLayout.headerSpacerMinLength)
             Button(action: onManage) {
                 Text("Manage →")
                     .font(.footnote.weight(.semibold))
-                    .foregroundStyle(PushControlColors.textPrimary)
+                    .foregroundStyle(PushColorPalette.Accent.walnut)
             }
             .buttonStyle(.plain)
         }
@@ -69,20 +69,20 @@ private struct YourPushTimeChip: View {
     var body: some View {
         Text(timeSignal)
             .font(.caption.weight(.semibold))
-            .foregroundStyle(PushControlColors.textPrimary)
+            .foregroundStyle(PushControlColors.textEspresso)
             .padding(.horizontal, YourPushCardLayout.timeChipHorizontalPadding)
             .padding(.vertical, YourPushCardLayout.timeChipVerticalPadding)
             .overlay {
                 Capsule()
                     .stroke(
-                        PushColorPalette.Accent.walnut.opacity(YourPushCardLayout.timeChipStrokeOpacity),
+                        PlansColor.creamBase.opacity(YourPushCardLayout.timeChipStrokeOpacity),
                         lineWidth: YourPushCardLayout.timeChipStrokeWidth
                     )
             }
     }
 }
 
-private struct YourPushAvatarRow: View {
+struct YourPushAvatarRow: View {
     let participants: [HangoutPerson]
 
     private var visible: [HangoutPerson] {
@@ -125,7 +125,7 @@ private struct YourPushOverflowBubble: View {
     var body: some View {
         Text("+\(count)")
             .font(.system(size: YourPushCardLayout.overflowFontSize, weight: .semibold, design: .rounded))
-            .foregroundStyle(PushControlColors.textPrimary)
+            .foregroundStyle(PushControlColors.textEspresso)
             .frame(
                 width: YourPushCardLayout.overflowAvatarSize,
                 height: YourPushCardLayout.overflowAvatarSize
