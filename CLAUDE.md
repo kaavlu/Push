@@ -85,7 +85,7 @@ See `coding-standards.md` for the full reference. Key rules for this project:
 
 ### Session Resume Protocol
 
-Read: `CLAUDE.md` → `tasks/lessons.md` → `tasks/todo.md` → `git log --oneline -5`
+Read: `CLAUDE.md` → `tasks/lessons.md` → `tasks/todo.md` → `git log --oneline -5`. When implementing a multi-task feature, also read the matching file under `docs/superpowers/specs/` (design) or `docs/superpowers/plans/` (execution).
 
 Do not ask the user to re-explain context that is in these files.
 

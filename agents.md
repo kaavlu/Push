@@ -92,6 +92,7 @@ See `coding-standards.md` for the full reference. Key rules for this project:
 | `tasks/todo.md` | Current plan and progress tracking |
 | `tasks/spec.md` | Active feature spec (write before implementation) |
 | `docs/superpowers/specs/*.md` | Dated design specs per feature; read the relevant file before implementing |
+| `docs/superpowers/plans/*.md` | Step-by-step implementation plans for multi-task rollouts; follow task-by-task |
 | `tasks/lessons.md` | Project-specific learnings and gotchas |
 
 ### Session Resume Protocol
