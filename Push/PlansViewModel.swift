@@ -1,4 +1,5 @@
 // Push/PlansViewModel.swift
+import CoreLocation
 import Foundation
 import Combine
 
@@ -56,20 +57,25 @@ final class PlansViewModel: ObservableObject {
             let groupList = try await container.groups.groups()
             let memberships = try await container.groups.memberships()
             let friendList = try await container.friends.friends()
+            let statuses = try await container.friends.presenceStatuses()
             let user = try await container.friends.currentUser()
 
             let peopleByID = Dictionary(
                 uniqueKeysWithValues: (friendList + [user]).map { ($0.id, $0) }
             )
             let groupsByID = Dictionary(uniqueKeysWithValues: groupList.map { ($0.id, $0) })
+            let placesByID = Dictionary(uniqueKeysWithValues: places.map { ($0.id, $0) })
             let cards = PlansContentBuilder.planData(
                 plans: planList,
                 responses: responses,
                 groupsByID: groupsByID,
-                placesByID: Dictionary(uniqueKeysWithValues: places.map { ($0.id, $0) }),
+                placesByID: placesByID,
                 peopleByID: peopleByID,
                 currentUserID: user.id,
-                now: Date()
+                now: Date(),
+                userCoordinate: userCoordinate(
+                    userID: user.id, statuses: statuses, placesByID: placesByID
+                )
             )
             let days = PlansContentBuilder.calendarDays(
                 hangouts: hangouts,
@@ -141,6 +147,20 @@ final class PlansViewModel: ObservableObject {
                 try? await container.pushes.setCurrentUserResponse(planID: plan.id, response: response)
             }
         }
+    }
+
+    /// The user's own coordinate, resolved from their current presence place.
+    /// Powers the "x mi away" distance shown on review cards.
+    private func userCoordinate(
+        userID: Person.ID,
+        statuses: [PresenceStatus],
+        placesByID: [Place.ID: Place]
+    ) -> CLLocationCoordinate2D? {
+        guard
+            let placeID = statuses.first(where: { $0.personID == userID })?.placeID,
+            let place = placesByID[placeID]
+        else { return nil }
+        return place.coordinate
     }
 
     private func applyWeekSummary(from days: [CalendarDayData]) {

@@ -18,7 +18,9 @@ struct ReviewPushesView: View {
         ZStack {
             PushModalBackground()
             VStack(spacing: 0) {
-                reviewHeader
+                reviewHeader {
+                    dismiss()
+                }
                     .padding(.top, PlansLayout.headerTopPadding)
                 Spacer()
                 cardOrEmptyState
@@ -27,29 +29,33 @@ struct ReviewPushesView: View {
                     swipeHints
                         .padding(.bottom, PlansLayout.deckHintsBottomPadding)
                 }
-                remainingLabel
-                    .padding(.bottom, PlansLayout.deckRemainingLabelBottomPadding)
             }
             .padding(.horizontal, PlansLayout.horizontalPadding)
         }
-        .overlay(alignment: .top) {
-            PushModalCloseButtonBar(accessibilityLabel: "Close review") {
-                dismiss()
-            }
-        }
     }
 
-    private var reviewHeader: some View {
-        Text("Review Pushes")
-            .font(.largeTitle.weight(.bold))
-            .foregroundStyle(PushControlColors.activeForeground)
-            .frame(maxWidth: .infinity, alignment: .leading)
+    private func reviewHeader(dismissAction: @escaping () -> Void) -> some View {
+        HStack(alignment: .center) {
+            Text("Review Pushes")
+                .font(.largeTitle.weight(.bold))
+                .foregroundStyle(PushControlColors.activeForeground)
+            Spacer(minLength: 0)
+            Button(action: dismissAction) {
+                Image(systemName: "xmark")
+                    .font(.system(size: ProfileLayout.closeIconSize, weight: .bold))
+                    .foregroundStyle(PushControlColors.activeForeground)
+                    .frame(width: ProfileLayout.closeButtonSize, height: ProfileLayout.closeButtonSize)
+                    .pushGlassBackground(cornerRadius: ProfileLayout.closeButtonSize / 2)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Close review")
+        }
     }
 
     @ViewBuilder
     private var cardOrEmptyState: some View {
         if let plan = currentPlan {
-            ActivePlanCard(plan: plan)
+            ReviewPushCard(plan: plan)
                 .padding(PlansLayout.deckCardPadding)
                 .offset(dragOffset)
                 .rotationEffect(
@@ -86,25 +92,19 @@ struct ReviewPushesView: View {
 
     private var swipeHints: some View {
         HStack {
-            Text("← Pass")
-                .font(.footnote.weight(.semibold))
-                .foregroundStyle(PushControlColors.textTertiary)
+            swipeHint("← Pass")
             Spacer()
-            Text("Maybe ↑")
-                .font(.footnote.weight(.semibold))
-                .foregroundStyle(PushControlColors.textSecondary)
+            swipeHint("Maybe ↑")
             Spacer()
-            Text("Join →")
-                .font(.footnote.weight(.semibold))
-                .foregroundStyle(PushColorPalette.Accent.walnut)
+            swipeHint("Join →")
         }
     }
 
-    private var remainingLabel: some View {
-        let remaining = max(0, viewModel.plansNeedingResponse.count - deckIndex)
-        return Text(remaining > 0 ? "\(remaining) left" : "")
+    private func swipeHint(_ title: String) -> some View {
+        Text(title)
             .font(.caption)
-            .foregroundStyle(PushControlColors.textTertiary)
+            .fontWeight(.semibold)
+            .foregroundStyle(PushColorPalette.Accent.walnut)
     }
 
     private func handleSwipeEnd(_ translation: CGSize, plan: PlanData) {

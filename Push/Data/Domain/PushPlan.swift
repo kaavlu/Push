@@ -28,4 +28,7 @@ struct PushPlan: Identifiable, Codable, Equatable {
     let placeIsSuggested: Bool
     let state: State
     let audience: Audience
+    /// Creator's free-text details (dress code, what to bring, parking…).
+    /// Captured by the Start Push flow; nil when the creator skipped it.
+    let note: String?
 }
