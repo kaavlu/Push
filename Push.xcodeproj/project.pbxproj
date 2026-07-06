@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C12A5396FF48C4ED513E6548 /* AppDataContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B4FADB44245BA63FB30360F /* AppDataContainer.swift */; };
+		4D4261F6ED1CD237CF1A8755 /* LocalRepositories.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2074F3C1B8AC44081173369 /* LocalRepositories.swift */; };
+		26F2C6792B7A7B95A4CAA07A /* Repositories.swift in Sources */ = {isa = PBXBuildFile; fileRef = 044B9089C6312A67778760DF /* Repositories.swift */; };
+		3AA978F62441A910EF220535 /* InMemoryDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2B9A16F8C8E659474978351 /* InMemoryDatabase.swift */; };
 		768266CC6D86EB9853C7AF19 /* SeedData+History.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313359C0CE93392A7FB14E60 /* SeedData+History.swift */; };
 		F63F80582BADB81AD016CD1E /* SeedData+Plans.swift in Sources */ = {isa = PBXBuildFile; fileRef = D41ACB4705324F58A3A9E8E2 /* SeedData+Plans.swift */; };
 		931141460FD9DB44C45422DF /* SeedData+Presence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32604E88B8758E2F640D66AD /* SeedData+Presence.swift */; };
@@ -101,6 +105,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3B4FADB44245BA63FB30360F /* AppDataContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "AppDataContainer.swift"; path = "Data/AppDataContainer.swift"; sourceTree = "<group>"; };
+		D2074F3C1B8AC44081173369 /* LocalRepositories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "LocalRepositories.swift"; path = "Data/Repositories/LocalRepositories.swift"; sourceTree = "<group>"; };
+		044B9089C6312A67778760DF /* Repositories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Repositories.swift"; path = "Data/Repositories/Repositories.swift"; sourceTree = "<group>"; };
+		F2B9A16F8C8E659474978351 /* InMemoryDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "InMemoryDatabase.swift"; path = "Data/Store/InMemoryDatabase.swift"; sourceTree = "<group>"; };
 		313359C0CE93392A7FB14E60 /* SeedData+History.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SeedData+History.swift"; path = "Data/Seed/SeedData+History.swift"; sourceTree = "<group>"; };
 		D41ACB4705324F58A3A9E8E2 /* SeedData+Plans.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SeedData+Plans.swift"; path = "Data/Seed/SeedData+Plans.swift"; sourceTree = "<group>"; };
 		32604E88B8758E2F640D66AD /* SeedData+Presence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SeedData+Presence.swift"; path = "Data/Seed/SeedData+Presence.swift"; sourceTree = "<group>"; };
@@ -231,6 +239,10 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				3B4FADB44245BA63FB30360F /* AppDataContainer.swift */,
+				D2074F3C1B8AC44081173369 /* LocalRepositories.swift */,
+				044B9089C6312A67778760DF /* Repositories.swift */,
+				F2B9A16F8C8E659474978351 /* InMemoryDatabase.swift */,
 				313359C0CE93392A7FB14E60 /* SeedData+History.swift */,
 				D41ACB4705324F58A3A9E8E2 /* SeedData+Plans.swift */,
 				32604E88B8758E2F640D66AD /* SeedData+Presence.swift */,
@@ -460,6 +472,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				C12A5396FF48C4ED513E6548 /* AppDataContainer.swift in Sources */,
+				4D4261F6ED1CD237CF1A8755 /* LocalRepositories.swift in Sources */,
+				26F2C6792B7A7B95A4CAA07A /* Repositories.swift in Sources */,
+				3AA978F62441A910EF220535 /* InMemoryDatabase.swift in Sources */,
 				768266CC6D86EB9853C7AF19 /* SeedData+History.swift in Sources */,
 				F63F80582BADB81AD016CD1E /* SeedData+Plans.swift in Sources */,
 				931141460FD9DB44C45422DF /* SeedData+Presence.swift in Sources */,

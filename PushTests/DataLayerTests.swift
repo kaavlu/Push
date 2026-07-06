@@ -85,4 +85,29 @@ final class DataLayerTests: XCTestCase {
         XCTAssertEqual(ram.count, 1)
         XCTAssertEqual(ram.first?.placeID, "crunch")
     }
+
+    // MARK: - Repositories
+
+    @MainActor
+    func testRepositoriesServeSeededData() async throws {
+        let container = AppDataContainer(seed: .standard())
+        let friends = try await container.friends.friends()
+        XCTAssertEqual(friends.count, 10)
+        XCTAssertFalse(friends.contains { $0.id == "manav" })
+        let user = try await container.friends.currentUser()
+        XCTAssertEqual(user.id, "manav")
+        let groups = try await container.groups.groups()
+        XCTAssertEqual(groups.map(\.id), ["india", "exec", "michigan"])
+        let plans = try await container.pushes.activePlans()
+        XCTAssertEqual(plans.count, 5)
+    }
+
+    @MainActor
+    func testSetCurrentUserResponseUpsertsRow() async throws {
+        let container = AppDataContainer(seed: .standard())
+        try await container.pushes.setCurrentUserResponse(planID: "food-tonight", response: .in)
+        let responses = try await container.pushes.responses()
+        let mine = responses.first { $0.pushID == "food-tonight" && $0.personID == "manav" }
+        XCTAssertEqual(mine?.response, .in)
+    }
 }
