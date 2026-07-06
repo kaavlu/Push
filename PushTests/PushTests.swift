@@ -100,7 +100,7 @@ final class PushTests: XCTestCase {
     }
 
     func testMockPuckScenariosCoverSinglePairAndSmallGroup() throws {
-        let scenarios = PuckLabMockData.scenarios
+        let scenarios = PuckLabFixtures.scenarios
 
         XCTAssertTrue(scenarios.contains { $0.title == "Together" && $0.friends.count == 2 })
         XCTAssertTrue(scenarios.contains { $0.title == "Small group" && $0.friends.count == 4 })
@@ -114,7 +114,7 @@ final class PushTests: XCTestCase {
     }
 
     func testHangoutScenariosUseOneSharedAvailabilityState() throws {
-        let hangoutScenarios = PuckLabMockData.scenarios.filter { $0.friends.count > 1 }
+        let hangoutScenarios = PuckLabFixtures.scenarios.filter { $0.friends.count > 1 }
 
         for scenario in hangoutScenarios {
             let availabilityStates = Set(scenario.friends.map(\.availability))
@@ -123,14 +123,14 @@ final class PushTests: XCTestCase {
     }
 
     func testFriendGroupScenarioUsesFriendGroupPuckStyle() throws {
-        let scenario = try XCTUnwrap(PuckLabMockData.scenarios.first { $0.title == "Friend group" })
+        let scenario = try XCTUnwrap(PuckLabFixtures.scenarios.first { $0.title == "Friend group" })
 
         XCTAssertEqual(scenario.puckStyle, .friendGroup)
         XCTAssertGreaterThan(scenario.friends.count, 3)
     }
 
     func testSingleFriendPuckExamplesCoverAvailabilityStates() throws {
-        let examples = PuckLabMockData.singleFriendScenarios
+        let examples = PuckLabFixtures.singleFriendScenarios
 
         XCTAssertEqual(examples.map(\.title), [
             "Free now",
@@ -152,7 +152,7 @@ final class PushTests: XCTestCase {
     }
 
     func testMockPuckActivitiesPreferSpecificDisplayText() throws {
-        let singleFriends = PuckLabMockData.singleFriendScenarios.compactMap(\.friends.first)
+        let singleFriends = PuckLabFixtures.singleFriendScenarios.compactMap(\.friends.first)
 
         XCTAssertEqual(singleFriends.map(\.activityDisplayText), [
             "Blue Bottle",
