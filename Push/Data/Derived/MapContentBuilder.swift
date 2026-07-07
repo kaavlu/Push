@@ -39,6 +39,7 @@ enum MapContentBuilder {
                 var members = presencesByPlace[placeID],
                 let place = members.first?.placeInfo?.place
             else { return nil }
+            if members.count == 1, members[0].isCurrentUser { return nil }
             // Current user renders last in avatar stacks, matching today's map.
             members = members.filter { !$0.isCurrentUser } + members.filter(\.isCurrentUser)
             return puck(

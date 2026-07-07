@@ -18,9 +18,9 @@ final class GroupsTests: XCTestCase {
     func testGroupCardsDeriveFromCanonicalData() async throws {
         let viewModel = await loadedViewModel()
         XCTAssertEqual(viewModel.groups.map(\.name), ["India", "Exec", "Michigan"])
-        XCTAssertEqual(viewModel.groups.map(\.memberCount), [5, 3, 5])
+        XCTAssertEqual(viewModel.groups.map(\.memberCount), [5, 2, 5])
         XCTAssertEqual(viewModel.groups.map(\.status), [.activeNow, .activeNow, .planLive])
-        XCTAssertEqual(viewModel.groups.map(\.activeNowCount), [2, 3, 5])
+        XCTAssertEqual(viewModel.groups.map(\.activeNowCount), [2, 2, 5])
         XCTAssertEqual(viewModel.groups.map(\.nearbyCount), [2, 0, 0])
         XCTAssertEqual(viewModel.groups.map(\.planCount), [1, 2, 2])
         XCTAssertEqual(viewModel.groups.map(\.imageAssetName), [

@@ -18,8 +18,37 @@ struct Place: Identifiable, Codable, Equatable {
     let vagueLabel: String
     let latitude: Double
     let longitude: Double
+    let vagueLatitude: Double?
+    let vagueLongitude: Double?
+
+    init(
+        id: String,
+        name: String,
+        shortName: String,
+        address: String,
+        vagueLabel: String,
+        latitude: Double,
+        longitude: Double,
+        vagueLatitude: Double? = nil,
+        vagueLongitude: Double? = nil
+    ) {
+        self.id = id
+        self.name = name
+        self.shortName = shortName
+        self.address = address
+        self.vagueLabel = vagueLabel
+        self.latitude = latitude
+        self.longitude = longitude
+        self.vagueLatitude = vagueLatitude
+        self.vagueLongitude = vagueLongitude
+    }
 
     var coordinate: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+    }
+
+    var vagueCoordinate: CLLocationCoordinate2D? {
+        guard let vagueLatitude, let vagueLongitude else { return nil }
+        return CLLocationCoordinate2D(latitude: vagueLatitude, longitude: vagueLongitude)
     }
 }

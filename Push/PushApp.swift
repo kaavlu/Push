@@ -12,7 +12,15 @@ import SwiftUI
 struct PushApp: App {
     var body: some Scene {
         WindowGroup {
+            #if DEBUG
+            if ProcessInfo.processInfo.arguments.contains("--pucklab") {
+                PuckLabView()
+            } else {
+                ContentView()
+            }
+            #else
             ContentView()
+            #endif
         }
     }
 }

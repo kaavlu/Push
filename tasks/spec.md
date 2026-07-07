@@ -1,3 +1,62 @@
+# Issue #8 — Zoom-Aware Pucks And Regional Clustering
+
+## Goal
+Render the live map at different zoom levels without puck overlap by deriving presentation-only
+render pucks from privacy-filtered presence data.
+
+## Contract
+- Canonical exact-place pucks stay in `MapContentBuilder` and never use a `.regional` overload.
+- `MapDisplayPuckBuilder` returns `MapPuckRenderModel.selfPuck`, `.friend`, `.smallGroup`,
+  or `.regionalCluster`.
+- Close zoom (`latitudeDelta <= 0.22`) renders exact friend/group pucks unchanged plus the
+  standalone self puck when the user is not inside another rendered puck.
+- Any zoom beyond close (`latitudeDelta > 0.22`) uses final regional clustering immediately,
+  folding visible sources within roughly 100 miles into regional pucks, including the current
+  user and joined groups.
+- Regional clusters expose `RegionalPuckModel` with member count, self/joined flags, active,
+  joinable and busy counts, dominant availability, representative avatars, region name,
+  activity score, and group IDs.
+- Group filters apply before clustering using canonical `groupIDs`.
+- Map rendering continues to consume `VisiblePresence`; hidden/status-only users are excluded.
+- Vague-location users never produce exact pucks. They can only contribute to regional clusters
+  through `Place.vagueCoordinate` neighborhood/city centroids.
+
+## Acceptance Criteria
+- Zooming out reduces rendered puck count when nearby sources would overlap.
+- Regional pucks show location initials and member count, with no profile photos.
+- Regional pucks containing the current user or a joined group use the soft joined/self pulse.
+- Tapping a regional puck smoothly requests a centered zoom into that region and does not open
+  `FriendDetailSheet`.
+- Existing exact friend/group taps still open `FriendDetailSheet`.
+- Build succeeds and focused tests cover close, zoomed-out, self-containing, filtering,
+  vague-location, and regional tap behavior.
+
+---
+
+# Map Self Puck
+
+## Goal
+Replace the current triangular user-location marker with a calm circular Self Puck that uses
+the current user's profile photo, warm walnut/gold identity styling, and a subtle location halo.
+
+## Contract
+- The self marker derives from the current user's visible presence and uses that place coordinate.
+- The self marker is not rendered as a friend puck when the current user is alone.
+- If the current user is part of a multi-person puck, keep the existing behavior and hide the standalone self marker.
+- The Self Puck is circular, slightly smaller than friend pucks, and never shows venue/activity/location text.
+- The Self Puck uses the current user's profile photo with a frosted circular base, walnut outer stroke, subtle champagne inner ring/glow, and soft halo.
+- The Self Puck always shows an attached `person.fill` + `You` badge using the same glass badge style as solo friend pucks.
+- Tapping the Self Puck does not show an extra callout for now.
+- Friend pucks stay visually unchanged.
+
+## Acceptance Criteria
+- `UserLocationPin` is no longer used by the live map marker.
+- Current user appears as a circular avatar puck when not inside a group puck.
+- Self Puck has a muted walnut/champagne double ring, soft halo, frosted base, and attached `You` badge.
+- Map build and test build succeed.
+
+---
+
 # Pushes Weekly Calendar
 
 ## Goal

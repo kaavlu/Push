@@ -2,6 +2,7 @@
 set -euo pipefail
 
 ACTION="${1:-run}"
+APP_ARGS=("${@:2}")
 
 ROOT="$(git rev-parse --show-toplevel)"
 cd "$ROOT"
@@ -140,7 +141,11 @@ run_app() {
 
   xcrun simctl terminate "$UDID" "$BUNDLE_ID" 2>/dev/null || true
   xcrun simctl install "$UDID" "$APP" >/dev/null
-  xcrun simctl launch "$UDID" "$BUNDLE_ID" >/dev/null
+  if [ "${#APP_ARGS[@]}" -gt 0 ]; then
+    xcrun simctl launch "$UDID" "$BUNDLE_ID" "${APP_ARGS[@]}" >/dev/null
+  else
+    xcrun simctl launch "$UDID" "$BUNDLE_ID" >/dev/null
+  fi
 
   echo "Ran $SCHEME on \"$SIM_NAME\""
 }

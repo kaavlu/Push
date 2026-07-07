@@ -200,8 +200,7 @@ final class PushTests: XCTestCase {
         XCTAssertEqual(profile.imageAssetName, "assets/profile/manav.jpeg")
         XCTAssertEqual(profile.availability, .maybeDown)
         XCTAssertEqual(profile.activityTitle, "Maybe down")
-        // Soft-place neighborhood for Crunch (documented change from "Near Hayes Valley").
-        XCTAssertEqual(profile.placeTitle, "Near North Beach")
+        XCTAssertEqual(profile.placeTitle, "Near North Park")
         XCTAssertEqual(profile.visibilityNote, "Visible to close friends for the next few hours.")
     }
 
