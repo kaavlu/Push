@@ -73,6 +73,12 @@ final class FriendsViewModel: ObservableObject {
     private let groups: GroupRepository
     private let sharing: SharingRepository
     private let pushes: PushRepository
+    // Set only in the container convenience init; used to stamp lastSeenRevision after each load.
+    private var containerForRefresh: AppDataContainer? = nil
+    // Holds the active store-change subscription; nil when initialised without a container.
+    private var storeChangeSub: AnyCancellable?
+    // Tracks the last revision we loaded so the subscription skips redundant reloads.
+    private var lastSeenRevision = 0
 
     init(
         friends: FriendRepository,
@@ -94,6 +100,13 @@ final class FriendsViewModel: ObservableObject {
             sharing: container.sharing,
             pushes: container.pushes
         )
+        // Capture container so load() can stamp lastSeenRevision via the store.
+        containerForRefresh = container
+        // Subscribe after the initial load task so each real mutation triggers a reload.
+        storeChangeSub = container.onStoreChange { [weak self] revision in
+            guard let self, revision != self.lastSeenRevision else { return }
+            Task { await self.load() }
+        }
     }
 
     /// Total direct friends — powers the "Friends N" segment badge.
@@ -160,6 +173,8 @@ final class FriendsViewModel: ObservableObject {
             )
             rows = builtRows
             loadState = .loaded(builtRows)
+            // Stamp the revision so the subscription guard can detect duplicates.
+            lastSeenRevision = containerForRefresh?.storeRevision ?? lastSeenRevision
         } catch {
             loadState = .failed(error)
         }

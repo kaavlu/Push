@@ -181,6 +181,26 @@ final class PlansViewModelTests: XCTestCase {
         XCTAssertEqual(sunday?.hangouts.count, 3)
     }
 
+    // MARK: - Cross-screen refresh subscription
+
+    @MainActor
+    func test_plansViewModel_reloadsWhenPushCreated() async throws {
+        let container = AppDataContainer(seed: .standard())
+        let vm = PlansViewModel(container: container)
+        await vm.load()
+        let before = vm.plans.count
+
+        _ = try await container.pushes.createPush(PushDraft(
+            title: "New hang",
+            recipientIDs: ["friend_\(try await container.friends.friends()[0].id)"],
+            startsAt: Date(), locationText: "", notes: "", creatorID: container.currentUserID
+        ))
+        // Let the change subscription's reload Task run.
+        try await Task.sleep(nanoseconds: 200_000_000)
+        XCTAssertEqual(vm.plans.count, before + 1)
+        XCTAssertTrue(vm.plans.contains { $0.title == "New hang" })
+    }
+
     func testRespondWritesThroughToRepository() async throws {
         let date = try julyDate(day: 6)
         let container = AppDataContainer(seed: .standard(now: date), referenceDate: date)

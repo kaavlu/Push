@@ -55,10 +55,19 @@ final class GroupsViewModel: ObservableObject {
 
     private let container: AppDataContainer?
     private var membersByGroupID: [String: [PushGroupMemberData]] = [:]
+    // Holds the active store-change subscription; nil when container is absent.
+    private var storeChangeSub: AnyCancellable?
+    // Tracks the last revision we loaded so the subscription skips redundant reloads.
+    private var lastSeenRevision = 0
 
     init(container: AppDataContainer = .shared) {
         self.container = container
         Task { await load() }
+        // Subscribe after the initial load task so each real mutation triggers a reload.
+        storeChangeSub = container.onStoreChange { [weak self] revision in
+            guard let self, revision != self.lastSeenRevision else { return }
+            Task { await self.load() }
+        }
     }
 
     /// Preview/test seam: serve injected cards without touching repositories.
@@ -107,6 +116,8 @@ final class GroupsViewModel: ObservableObject {
             groups = cards
             if selectedGroupID == nil { selectedGroupID = cards.first?.id }
             loadState = .loaded(cards)
+            // Stamp the revision so the subscription guard can detect duplicates.
+            lastSeenRevision = container.storeRevision
         } catch {
             loadState = .failed(error)
         }

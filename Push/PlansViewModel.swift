@@ -21,6 +21,10 @@ final class PlansViewModel: ObservableObject {
     private let container: AppDataContainer?
     private var referenceDate: Date
     private var monthDays: [CalendarDayData] = []
+    // Holds the active store-change subscription; nil when container is absent.
+    private var storeChangeSub: AnyCancellable?
+    // Tracks the last revision we loaded so the subscription skips redundant reloads.
+    private var lastSeenRevision = 0
 
     init(container: AppDataContainer = .shared, referenceDate: Date = Date()) {
         self.container = container
@@ -31,6 +35,11 @@ final class PlansViewModel: ObservableObject {
         totalPushesThisWeek = summary.totalPushes
         bestDayThisWeek = summary.bestDay
         Task { await load() }
+        // Subscribe after the initial load task so each real mutation triggers a reload.
+        storeChangeSub = container.onStoreChange { [weak self] revision in
+            guard let self, revision != self.lastSeenRevision else { return }
+            Task { await self.load() }
+        }
     }
 
     /// Preview/test seam: serve injected cards without touching repositories.
@@ -92,6 +101,8 @@ final class PlansViewModel: ObservableObject {
                 groupOrder: groupList.map(\.id)
             )
             loadState = .loaded(cards)
+            // Stamp the revision so the subscription guard can detect duplicates.
+            lastSeenRevision = container.storeRevision
         } catch {
             loadState = .failed(error)
         }
