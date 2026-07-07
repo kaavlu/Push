@@ -179,6 +179,36 @@ extension DataLayerTests {
         XCTAssertFalse(viewModel.isSelected("friend_chitty"))
         XCTAssertEqual(viewModel.selectedRecipients.count, 1)
     }
+
+    // MARK: - Store revision broadcaster
+
+    @MainActor
+    func test_setResponse_bumpsRevision() throws {
+        let container = AppDataContainer(seed: .standard())
+        let before = container.storeRevision
+        container.database.setResponse(
+            pushID: "food-tonight",
+            personID: container.currentUserID,
+            response: .in,
+            at: Date()
+        )
+        XCTAssertEqual(container.storeRevision, before + 1)
+    }
+
+    @MainActor
+    func test_onStoreChange_firesAfterMutation() throws {
+        let container = AppDataContainer(seed: .standard())
+        var received: Int?
+        let sub = container.onStoreChange { received = $0 }
+        container.database.setResponse(
+            pushID: "food-tonight",
+            personID: container.currentUserID,
+            response: .maybe,
+            at: Date()
+        )
+        XCTAssertEqual(received, container.storeRevision)
+        sub.cancel()
+    }
 }
 
 /// Proves the async-throws seam carries failures into LoadState.

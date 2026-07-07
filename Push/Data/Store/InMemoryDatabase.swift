@@ -6,11 +6,16 @@
 //  the only consumers; view models never touch this directly.
 //
 
+import Combine
 import Foundation
 
 @MainActor
-final class InMemoryDatabase {
+final class InMemoryDatabase: ObservableObject {
     let currentUserID: Person.ID
+
+    /// Bumped once after every mutation so view models can reload. Emitted only
+    /// after a write completes — never during reads — to avoid reload loops.
+    @Published private(set) var revision: Int = 0
 
     private(set) var peopleByID: [Person.ID: Person]
     private(set) var groupsByID: [FriendGroup.ID: FriendGroup]
@@ -47,6 +52,10 @@ final class InMemoryDatabase {
         profile = seed.profile
     }
 
+    private func didMutate() {
+        revision += 1
+    }
+
     func setResponse(
         pushID: PushPlan.ID,
         personID: Person.ID,
@@ -66,5 +75,6 @@ final class InMemoryDatabase {
         } else {
             responses.append(row)
         }
+        didMutate()
     }
 }
