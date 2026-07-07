@@ -1,3 +1,18 @@
+# Dependencies
 node_modules/
-node_modules/
+
+# Local tool state
 .superpowers/
+.claude/*.log
+.claude/settings.local.json
+
+# Xcode local/build products
+DerivedData/
+build/
+*.xcresult
+*.moved-aside
+*.xcuserstate
+xcuserdata/
+
+# macOS
+.DS_Store

@@ -10,6 +10,7 @@ import SwiftUI
 struct GroupsView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel: GroupsViewModel
+    @State private var startPushContext: StartPushLaunchContext?
 
     @MainActor
     init() {
@@ -21,10 +22,19 @@ struct GroupsView: View {
     }
 
     var body: some View {
+        content
+            .fullScreenCover(item: $startPushContext) { context in
+                StartPushFlowView(context: context)
+            }
+    }
+
+    @ViewBuilder
+    private var content: some View {
         if let group = viewModel.group(for: viewModel.presentedGroupID) {
             GroupDetailView(
                 group: group,
-                members: viewModel.members(for: group)
+                members: viewModel.members(for: group),
+                onStartPush: { startPushContext = .group(group.id) }
             ) {
                 viewModel.closeDetail()
             }

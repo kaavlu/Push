@@ -48,20 +48,43 @@ enum GroupContentBuilder {
         groupID: FriendGroup.ID,
         memberships: [GroupMembership],
         people: [Person.ID: Person],
-        statuses: [Person.ID: PresenceStatus]
+        statuses: [Person.ID: PresenceStatus],
+        places: [Place.ID: Place] = [:],
+        now: Date = Date()
     ) -> [PushGroupMemberData] {
         memberships
             .filter { $0.groupID == groupID && $0.membershipStatus == .active }
             .compactMap { membership in
                 guard let person = people[membership.personID] else { return nil }
+                let status = statuses[person.id]
                 return PushGroupMemberData(
                     id: person.id,
                     name: person.displayName,
                     avatarPlaceholder: person.initials,
                     profileImageAssetName: person.imageAssetPath,
-                    availability: statuses[person.id]?.availability
+                    availability: status?.availability,
+                    activitySymbolName: status?.activity.symbolName ?? "moon.zzz.fill",
+                    venueStatusText: memberStatusText(status: status, places: places),
+                    lastUpdated: memberLastUpdated(status: status, now: now)
                 )
             }
+    }
+
+    private static func memberStatusText(
+        status: PresenceStatus?,
+        places: [Place.ID: Place]
+    ) -> String {
+        guard let status else { return "Hidden right now" }
+        if let note = status.statusNote, !note.isEmpty { return note }
+        if let placeID = status.placeID, let place = places[placeID] {
+            return "At \(place.shortName)"
+        }
+        return status.availability.title
+    }
+
+    private static func memberLastUpdated(status: PresenceStatus?, now: Date) -> String {
+        guard let status else { return "" }
+        return RelativeTimeFormatter.label(for: status.updatedAt, now: now)
     }
 
     // MARK: - Stats

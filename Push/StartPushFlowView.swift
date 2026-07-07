@@ -8,9 +8,14 @@
 import SwiftUI
 
 struct StartPushFlowView: View {
-    @StateObject private var viewModel = StartPushViewModel()
+    @StateObject private var viewModel: StartPushViewModel
     @Environment(\.dismiss) private var dismiss
     @State private var movingForward = true
+
+    @MainActor
+    init(context: StartPushLaunchContext? = nil) {
+        _viewModel = StateObject(wrappedValue: StartPushViewModel(context: context))
+    }
 
     var body: some View {
         ZStack {

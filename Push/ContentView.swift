@@ -15,6 +15,7 @@ struct ContentView: View {
     @State private var presentedRoute: MainMapRoute?
     @State private var isCreateMenuPresented = false
     @State private var selectedPuck: MapPuckData?
+    @State private var startPushContext: StartPushLaunchContext?
     @State private var mapSpan = MapDefaults.region.span
     @State private var forcedRenderSpan: MKCoordinateSpan?
 
@@ -84,8 +85,13 @@ struct ContentView: View {
         .fullScreenCover(item: $presentedRoute) { route in
             destination(for: route)
         }
+        .fullScreenCover(item: $startPushContext) { context in
+            StartPushFlowView(context: context)
+        }
         .sheet(item: $selectedPuck) { puck in
-            FriendDetailSheet(puck: puck)
+            FriendDetailSheet(puck: puck) { context in
+                launchStartPush(context)
+            }
         }
     }
 
@@ -126,11 +132,7 @@ struct ContentView: View {
         case .profile:
             ProfileView()
         case .startPlan:
-            CreatePlaceholderView(
-                title: "Start Push",
-                subtitle: "Create a push with friends.",
-                symbolName: route.systemImageName
-            )
+            StartPushFlowView()
         case .addFriend:
             CreatePlaceholderView(
                 title: "Add Friend",
@@ -175,12 +177,23 @@ struct ContentView: View {
         }
     }
 
+    private func launchStartPush(_ context: StartPushLaunchContext) {
+        selectedPuck = nil
+        DispatchQueue.main.asyncAfter(deadline: .now() + MainMapPresentationTiming.sheetDismissalDelay) {
+            startPushContext = context
+        }
+    }
+
     private func handleRegionChanged(_ span: MKCoordinateSpan) {
         mapSpan = span
         if span.latitudeDelta <= MapDefaults.closeRegionalLatitudeDelta {
             forcedRenderSpan = nil
         }
     }
+}
+
+private enum MainMapPresentationTiming {
+    static let sheetDismissalDelay = 0.22
 }
 
 private struct FriendGroupDropdown: View {

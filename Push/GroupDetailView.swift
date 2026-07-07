@@ -10,17 +10,18 @@ import SwiftUI
 struct GroupDetailView: View {
     let group: PushGroupData
     let members: [PushGroupMemberData]
+    let onStartPush: () -> Void
     let backAction: () -> Void
 
     var body: some View {
         ZStack {
-            PushModalBackground()
+            FriendsBackground()
 
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: GroupDetailLayout.sectionSpacing) {
                     GroupDetailHeader(group: group)
-                    GroupDetailActions()
-                    GroupMembersCard(members: members)
+                    GroupDetailActions(onStartPush: onStartPush)
+                    GroupMembersList(members: members)
                 }
                 .padding(.horizontal, GroupDetailLayout.horizontalPadding)
                 .padding(.top, GroupDetailLayout.topPadding)
@@ -149,10 +150,22 @@ private struct GroupDetailFallbackTile: View {
 }
 
 private struct GroupDetailActions: View {
+    let onStartPush: () -> Void
+
     var body: some View {
         HStack(spacing: GroupDetailLayout.actionSpacing) {
-            GroupDetailActionButton(title: "Start push", symbolName: "calendar.badge.plus", isPrimary: true)
-            GroupDetailActionButton(title: "Ping group", symbolName: "paperplane.fill", isPrimary: false)
+            GroupDetailActionButton(
+                title: "Start push",
+                symbolName: "calendar.badge.plus",
+                isPrimary: true,
+                action: onStartPush
+            )
+            GroupDetailActionButton(
+                title: "Ping group",
+                symbolName: "paperplane.fill",
+                isPrimary: false,
+                action: {}
+            )
         }
     }
 }
@@ -161,10 +174,10 @@ private struct GroupDetailActionButton: View {
     let title: String
     let symbolName: String
     let isPrimary: Bool
+    let action: () -> Void
 
     var body: some View {
-        Button {
-        } label: {
+        Button(action: action) {
             HStack(spacing: GroupDetailLayout.actionLabelSpacing) {
                 Image(systemName: symbolName)
                     .font(.system(size: GroupDetailLayout.actionIconSize, weight: .bold))
@@ -189,87 +202,17 @@ private struct GroupDetailActionButton: View {
     }
 }
 
-private struct GroupMembersCard: View {
+private struct GroupMembersList: View {
     let members: [PushGroupMemberData]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: GroupDetailLayout.memberSpacing) {
-            Text("Members")
-                .font(.headline.weight(.bold))
-                .foregroundStyle(PushControlColors.activeForeground)
+        LazyVStack(alignment: .leading, spacing: FriendsLayout.listSpacing) {
+            FriendsSectionHeader(title: "Members", count: members.count)
 
             ForEach(members) { member in
-                GroupMemberRow(member: member)
+                FriendRowCard(row: member.friendRow, showsGroupLabel: false)
             }
         }
-        .padding(GroupDetailLayout.cardPadding)
-        .pushGlassBackground(cornerRadius: GroupDetailLayout.cardCornerRadius)
-    }
-}
-
-private struct GroupMemberRow: View {
-    let member: PushGroupMemberData
-
-    var body: some View {
-        HStack(spacing: GroupDetailLayout.memberRowSpacing) {
-            GroupMemberAvatar(member: member)
-
-            Text(member.name)
-                .font(.subheadline.weight(.bold))
-                .foregroundStyle(PushControlColors.activeForeground)
-
-            Spacer(minLength: 0)
-
-            if let availability = member.availability {
-                GroupMemberStatusPill(availability: availability)
-            }
-        }
-        .padding(GroupDetailLayout.memberRowPadding)
-        .background {
-            RoundedRectangle(cornerRadius: GroupDetailLayout.memberRowCornerRadius, style: .continuous)
-                .fill(.white.opacity(GroupDetailColor.memberRowFillOpacity))
-        }
-    }
-}
-
-private struct GroupMemberAvatar: View {
-    let member: PushGroupMemberData
-
-    var body: some View {
-        ZStack {
-            if let image = PushImageAssets.image(named: member.profileImageAssetName) {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFill()
-            } else {
-                Text(member.avatarPlaceholder)
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(PushControlColors.activeForeground)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(PushControlColors.activeFill.opacity(GroupDetailColor.avatarFallbackFillOpacity))
-            }
-        }
-        .frame(width: GroupDetailLayout.memberAvatarSize, height: GroupDetailLayout.memberAvatarSize)
-        .clipShape(Circle())
-        .overlay {
-            Circle()
-                .stroke(.white.opacity(GroupDetailColor.imageStrokeOpacity), lineWidth: GroupDetailLayout.avatarStrokeWidth)
-        }
-    }
-}
-
-private struct GroupMemberStatusPill: View {
-    let availability: FriendAvailabilityState
-
-    var body: some View {
-        Text(availability.title)
-            .font(.caption2.weight(.bold))
-            .foregroundStyle(PushControlColors.activeForeground)
-            .lineLimit(1)
-            .minimumScaleFactor(GroupDetailLayout.minimumTextScale)
-            .padding(.horizontal, GroupDetailLayout.statusHorizontalPadding)
-            .padding(.vertical, GroupDetailLayout.statusVerticalPadding)
-            .background(Capsule().fill(PushControlColors.activeFill.opacity(GroupDetailColor.statusFillOpacity)))
     }
 }
 
@@ -295,16 +238,6 @@ private enum GroupDetailLayout {
     static let actionIconSize: CGFloat = 14
     static let actionVerticalPadding: CGFloat = 14
     static let actionCornerRadius: CGFloat = 18
-    static let cardPadding: CGFloat = 16
-    static let cardCornerRadius: CGFloat = 26
-    static let memberSpacing: CGFloat = 8
-    static let memberRowSpacing: CGFloat = 12
-    static let memberRowPadding: CGFloat = 10
-    static let memberRowCornerRadius: CGFloat = 18
-    static let memberAvatarSize: CGFloat = 40
-    static let avatarStrokeWidth: CGFloat = 1
-    static let statusHorizontalPadding: CGFloat = 9
-    static let statusVerticalPadding: CGFloat = 6
     static let minimumTextScale = 0.82
 }
 
@@ -315,9 +248,6 @@ private enum GroupDetailColor {
     static let fallbackBottomOpacity = 0.86
     static let editBadgeFillOpacity = 0.9
     static let secondaryActionFillOpacity = 0.38
-    static let memberRowFillOpacity = 0.28
-    static let avatarFallbackFillOpacity = 0.92
-    static let statusFillOpacity = 0.72
 }
 
 struct GroupDetailView_Previews: PreviewProvider {
@@ -351,7 +281,8 @@ struct GroupDetailView_Previews: PreviewProvider {
                     profileImageAssetName: "assets/friends/nitin.png",
                     availability: .maybeDown
                 )
-            ]
+            ],
+            onStartPush: {}
         ) {
         }
     }

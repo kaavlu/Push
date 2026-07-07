@@ -17,6 +17,62 @@ struct PushRecipientItem: Identifiable, Equatable {
     let isGroup: Bool
 }
 
+struct StartPushLaunchContext: Identifiable, Equatable {
+    let id = UUID()
+    let recipientIDs: Set<String>
+    let locationHint: String?
+    let initialStep: Int
+
+    static let blank = StartPushLaunchContext(
+        recipientIDs: [],
+        locationHint: nil,
+        initialStep: StartPushStep.recipients
+    )
+
+    static func friends(_ friendIDs: [String], locationHint: String? = nil) -> StartPushLaunchContext {
+        let recipientIDs = Set(friendIDs.map { "friend_\($0)" })
+        return StartPushLaunchContext(
+            recipientIDs: recipientIDs,
+            locationHint: locationHint,
+            initialStep: recipientIDs.isEmpty ? StartPushStep.recipients : StartPushStep.details
+        )
+    }
+
+    static func group(_ groupID: String, locationHint: String? = nil) -> StartPushLaunchContext {
+        return StartPushLaunchContext(
+            recipientIDs: ["group_\(groupID)"],
+            locationHint: locationHint,
+            initialStep: StartPushStep.details
+        )
+    }
+
+    static func from(puck: MapPuckData) -> StartPushLaunchContext {
+        if puck.kind == .friendGroup, let groupID = groupID(from: puck.people.first?.id) {
+            return .group(groupID, locationHint: locationHint(from: puck))
+        }
+        let friendIDs = puck.people
+            .filter { !$0.isCurrentUser && groupID(from: $0.id) == nil }
+            .map(\.id)
+        return .friends(friendIDs, locationHint: locationHint(from: puck))
+    }
+
+    private static func groupID(from id: String?) -> String? {
+        guard let id, id.hasPrefix("group-") else { return nil }
+        return String(id.dropFirst("group-".count))
+    }
+
+    private static func locationHint(from puck: MapPuckData) -> String? {
+        puck.people.first?.placeName ?? puck.people.first?.activityDisplayText
+    }
+}
+
+enum StartPushStep {
+    static let recipients = 1
+    static let details = 2
+    static let timing = 3
+    static let confirmation = 4
+}
+
 let pushSuggestions = ["Coffee run", "Taco night", "Sunset walk", "Hit the gym", "Dessert run", "Game night"]
 
 private let pushTextMaxLength = 120
@@ -44,6 +100,7 @@ final class StartPushViewModel: ObservableObject {
     @Published private(set) var loadState: LoadState<Void> = .idle
 
     private let container: AppDataContainer?
+    private let launchContext: StartPushLaunchContext
     // Prevents duplicate submissions if the user somehow triggers the flow twice.
     private var hasSubmitted = false
 
@@ -72,9 +129,19 @@ final class StartPushViewModel: ObservableObject {
         return extra == 0 ? first.name : "\(first.name) +\(extra)"
     }
 
-    init(container: AppDataContainer = .shared) {
+    init(container: AppDataContainer = .shared, context: StartPushLaunchContext? = nil) {
         self.container = container
+        self.launchContext = context ?? .blank
+        applyLaunchContext()
         Task { await load() }
+    }
+
+    private func applyLaunchContext() {
+        selectedRecipientIDs = launchContext.recipientIDs
+        if let locationHint = launchContext.locationHint {
+            location = locationHint
+        }
+        step = launchContext.initialStep
     }
 
     func load() async {

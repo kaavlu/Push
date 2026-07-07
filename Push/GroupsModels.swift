@@ -44,6 +44,49 @@ struct PushGroupMemberData: Identifiable, Equatable {
     let avatarPlaceholder: String
     let profileImageAssetName: String?
     let availability: FriendAvailabilityState?
+    let activitySymbolName: String
+    let venueStatusText: String
+    let lastUpdated: String
+
+    init(
+        id: String,
+        name: String,
+        avatarPlaceholder: String,
+        profileImageAssetName: String?,
+        availability: FriendAvailabilityState?,
+        activitySymbolName: String = "person.fill",
+        venueStatusText: String? = nil,
+        lastUpdated: String = ""
+    ) {
+        self.id = id
+        self.name = name
+        self.avatarPlaceholder = avatarPlaceholder
+        self.profileImageAssetName = profileImageAssetName
+        self.availability = availability
+        self.activitySymbolName = activitySymbolName
+        self.venueStatusText = venueStatusText ?? availability?.title ?? "Hidden right now"
+        self.lastUpdated = lastUpdated
+    }
+
+    var friendRow: FriendRowModel {
+        FriendRowModel(
+            id: id,
+            friend: FriendPuckData(
+                id: id,
+                name: name,
+                avatarPlaceholder: avatarPlaceholder,
+                profileImageAssetName: profileImageAssetName,
+                activity: "",
+                activitySymbolName: activitySymbolName,
+                activityDisplayText: "",
+                availability: availability ?? .unavailable,
+                venueStatusText: venueStatusText,
+                lastUpdated: lastUpdated,
+                isCurrentUser: false
+            ),
+            groupLabel: nil
+        )
+    }
 }
 
 @MainActor
@@ -88,6 +131,7 @@ final class GroupsViewModel: ObservableObject {
             let plans = try await container.pushes.activePlans()
             let friendList = try await container.friends.friends()
             let user = try await container.friends.currentUser()
+            let places = try await container.pushes.allPlaces()
 
             let statusesByPersonID = Dictionary(
                 uniqueKeysWithValues: statuses.map { ($0.personID, $0) }
@@ -95,12 +139,14 @@ final class GroupsViewModel: ObservableObject {
             let peopleByID = Dictionary(
                 uniqueKeysWithValues: (friendList + [user]).map { ($0.id, $0) }
             )
+            let placesByID = Dictionary(uniqueKeysWithValues: places.map { ($0.id, $0) })
+            let now = Date()
             let cards = GroupContentBuilder.groupCards(
                 groups: groupList,
                 memberships: memberships,
                 statuses: statusesByPersonID,
                 plans: plans,
-                now: Date()
+                now: now
             )
             membersByGroupID = Dictionary(uniqueKeysWithValues: groupList.map { group in
                 (
@@ -109,7 +155,9 @@ final class GroupsViewModel: ObservableObject {
                         groupID: group.id,
                         memberships: memberships,
                         people: peopleByID,
-                        statuses: statusesByPersonID
+                        statuses: statusesByPersonID,
+                        places: placesByID,
+                        now: now
                     )
                 )
             })

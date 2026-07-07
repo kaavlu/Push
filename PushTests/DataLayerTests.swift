@@ -4,6 +4,7 @@
 //
 
 import XCTest
+import CoreLocation
 @testable import Push
 
 final class DataLayerTests: XCTestCase {
@@ -180,6 +181,60 @@ extension DataLayerTests {
         XCTAssertEqual(viewModel.selectedRecipients.count, 1)
     }
 
+    @MainActor
+    func testStartPushLaunchContextPreselectsFriends() async throws {
+        let context = StartPushLaunchContext.friends(["chitty", "ishan"], locationHint: "Souvla")
+        let viewModel = StartPushViewModel(container: AppDataContainer(seed: .standard()), context: context)
+        await viewModel.load()
+
+        XCTAssertEqual(viewModel.step, StartPushStep.details)
+        XCTAssertEqual(viewModel.selectedRecipientIDs, ["friend_chitty", "friend_ishan"])
+        XCTAssertEqual(viewModel.selectedRecipients.map(\.id), ["friend_chitty", "friend_ishan"])
+        XCTAssertEqual(viewModel.location, "Souvla")
+    }
+
+    func testStartPushLaunchContextDerivesFriendRecipientsFromPuck() throws {
+        let puck = MapPuckData(
+            id: "puck-souvla",
+            kind: .hangout,
+            people: [
+                makePuckFriend(id: "ishan", placeName: "Souvla"),
+                makePuckFriend(id: "viplove", placeName: "Souvla")
+            ],
+            activity: "Lunch",
+            availability: .joinable,
+            venueStatusText: "At Souvla",
+            coordinate: CLLocationCoordinate2D(latitude: 0, longitude: 0)
+        )
+
+        let context = StartPushLaunchContext.from(puck: puck)
+
+        XCTAssertEqual(context.recipientIDs, ["friend_ishan", "friend_viplove"])
+        XCTAssertEqual(context.locationHint, "Souvla")
+        XCTAssertEqual(context.initialStep, StartPushStep.details)
+    }
+
+    func testStartPushLaunchContextDerivesGroupRecipientFromGroupPuck() throws {
+        let puck = MapPuckData(
+            id: "puck-india",
+            kind: .friendGroup,
+            people: [
+                makePuckFriend(id: "group-india", placeName: "Blue Bottle"),
+                makePuckFriend(id: "chitty", placeName: "Blue Bottle")
+            ],
+            activity: "Coffee",
+            availability: .joinable,
+            venueStatusText: "India is together",
+            coordinate: CLLocationCoordinate2D(latitude: 0, longitude: 0)
+        )
+
+        let context = StartPushLaunchContext.from(puck: puck)
+
+        XCTAssertEqual(context.recipientIDs, ["group_india"])
+        XCTAssertEqual(context.locationHint, "Blue Bottle")
+        XCTAssertEqual(context.initialStep, StartPushStep.details)
+    }
+
     // MARK: - Store revision broadcaster
 
     @MainActor
@@ -308,6 +363,20 @@ extension DataLayerTests {
         let updatedProfile = try await container.profile.userProfile()
         XCTAssertEqual(updatedProfile.handle, "@manny")
     }
+}
+
+private func makePuckFriend(id: String, placeName: String) -> FriendPuckData {
+    FriendPuckData(
+        id: id,
+        name: id,
+        avatarPlaceholder: String(id.prefix(2)).uppercased(),
+        activity: "Lunch",
+        activitySymbolName: "fork.knife",
+        activityDisplayText: placeName,
+        availability: .joinable,
+        venueStatusText: "At \(placeName)",
+        placeName: placeName
+    )
 }
 
 /// Proves the async-throws seam carries failures into LoadState.

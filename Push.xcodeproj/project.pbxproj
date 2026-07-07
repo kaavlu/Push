@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		945940BE8D1FA7DF04A88CFE /* FriendRowCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07FDF57D3BD2C46A6CE61FD7 /* FriendRowCard.swift */; };
 		0D828BEBEA992D231352079F /* MapRenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE9275BF1B3723589A96B9B9 /* MapRenderTests.swift */; };
 		B080CB7201321E2EA13DE61A /* MapDisplayPuckBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79592A0DE1B5691B233102F0 /* MapDisplayPuckBuilder.swift */; };
 		D8DD5F18932805672E8A3B5C /* RegionalActivityPuck.swift in Sources */ = {isa = PBXBuildFile; fileRef = E075D5F75356C7CC3A1C626A /* RegionalActivityPuck.swift */; };
@@ -132,6 +133,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		07FDF57D3BD2C46A6CE61FD7 /* FriendRowCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FriendRowCard.swift"; sourceTree = "<group>"; };
 		AA02000100000000AA020001 /* FriendsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsView.swift; sourceTree = "<group>"; };
 		AA02000300000000AA020003 /* FriendsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsViewModel.swift; sourceTree = "<group>"; };
 		AA02000500000000AA020005 /* FriendsStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsStyle.swift; sourceTree = "<group>"; };
@@ -293,6 +295,7 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				07FDF57D3BD2C46A6CE61FD7 /* FriendRowCard.swift */,
 				79592A0DE1B5691B233102F0 /* MapDisplayPuckBuilder.swift */,
 				E075D5F75356C7CC3A1C626A /* RegionalActivityPuck.swift */,
 				A570E63A1964611D67DC8399 /* SelfPuckView.swift */,
@@ -553,6 +556,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				945940BE8D1FA7DF04A88CFE /* FriendRowCard.swift in Sources */,
 				B080CB7201321E2EA13DE61A /* MapDisplayPuckBuilder.swift in Sources */,
 				D8DD5F18932805672E8A3B5C /* RegionalActivityPuck.swift in Sources */,
 				45A1523B07FCA80CD92D6554 /* SelfPuckView.swift in Sources */,

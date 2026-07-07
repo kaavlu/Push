@@ -100,6 +100,7 @@ enum FriendsLayout {
     static let chipHorizontalPadding: CGFloat = 10
     static let chipVerticalPadding: CGFloat = 5
     static let liveDotSize: CGFloat = 5
+    static let liveTimestampSpacing: CGFloat = 4
 
     // Group card
     static let groupAvatarSize: CGFloat = 54

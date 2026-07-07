@@ -43,6 +43,7 @@ struct FriendDetailViewData {
 
 struct FriendDetailSheet: View {
     let puck: MapPuckData
+    var onStartPush: (StartPushLaunchContext) -> Void = { _ in }
     @State private var toastMessage: String?
 
     private var isHangout: Bool {
@@ -114,7 +115,7 @@ struct FriendDetailSheet: View {
             FriendActivityStatusCard(viewData: viewData)
             FriendDetailActionCards(
                 onDirections: { triggerToast("Opening in Maps…") },
-                onStartPlan:  { triggerToast("Push started") }
+                onStartPlan: { startPush(with: .friends([friend.id], locationHint: friend.placeName)) }
             )
         }
         .padding(.horizontal, FriendDetailSheetLayout.contentHorizontalPadding)
@@ -132,7 +133,7 @@ struct FriendDetailSheet: View {
             PairActionRow(
                 onDirections: { triggerToast("Opening in Maps…") },
                 onAskToJoin: { triggerToast("Request sent") },
-                onStartPlan: { triggerToast("Push started") }
+                onStartPlan: { startPush(with: .from(puck: puck)) }
             )
         }
         .padding(.horizontal, FriendDetailSheetLayout.contentHorizontalPadding)
@@ -151,7 +152,7 @@ struct FriendDetailSheet: View {
             PairActionRow(
                 onDirections: { triggerToast("Opening in Maps…") },
                 onAskToJoin: { triggerToast("Request sent") },
-                onStartPlan: { triggerToast("Push started") }
+                onStartPlan: { startPush(with: .from(puck: puck)) }
             )
         }
         .padding(.horizontal, FriendDetailSheetLayout.contentHorizontalPadding)
@@ -168,6 +169,10 @@ struct FriendDetailSheet: View {
                 toastMessage = nil
             }
         }
+    }
+
+    private func startPush(with context: StartPushLaunchContext) {
+        onStartPush(context)
     }
 
 }

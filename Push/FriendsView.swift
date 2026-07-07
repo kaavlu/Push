@@ -17,6 +17,7 @@ struct FriendsView: View {
     @State private var mode: FriendsMode = .friends
     @State private var isAddFriendPresented = false
     @State private var isAddGroupPresented = false
+    @State private var startPushContext: StartPushLaunchContext?
     @State private var groupSearchText = ""
 
     @MainActor
@@ -31,10 +32,19 @@ struct FriendsView: View {
     }
 
     var body: some View {
+        content
+            .fullScreenCover(item: $startPushContext) { context in
+                StartPushFlowView(context: context)
+            }
+    }
+
+    @ViewBuilder
+    private var content: some View {
         if mode == .groups, let group = groupsViewModel.group(for: groupsViewModel.presentedGroupID) {
             GroupDetailView(
                 group: group,
-                members: groupsViewModel.members(for: group)
+                members: groupsViewModel.members(for: group),
+                onStartPush: { launchStartPush(.group(group.id)) }
             ) {
                 groupsViewModel.closeDetail()
             }
@@ -88,7 +98,9 @@ struct FriendsView: View {
             .padding(.top, FriendsLayout.topPadding)
         }
         .sheet(item: $viewModel.selectedFriend) { puck in
-            FriendDetailSheet(puck: puck)
+            FriendDetailSheet(puck: puck) { context in
+                launchStartPush(context)
+            }
         }
         .sheet(isPresented: $isAddFriendPresented) {
             CreatePlaceholderView(
@@ -161,6 +173,21 @@ struct FriendsView: View {
             group.name.localizedCaseInsensitiveContains(query)
         }
     }
+
+    private func launchStartPush(_ context: StartPushLaunchContext) {
+        viewModel.selectedFriend = nil
+        if groupsViewModel.presentedGroupID != nil {
+            startPushContext = context
+            return
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + FriendsPresentationTiming.sheetDismissalDelay) {
+            startPushContext = context
+        }
+    }
+}
+
+private enum FriendsPresentationTiming {
+    static let sheetDismissalDelay = 0.22
 }
 
 // MARK: - Header
@@ -344,100 +371,6 @@ private struct FriendsSearchField: View {
                     PushColorPalette.Accent.walnut.opacity(FriendsColor.chipStrokeWalnutOpacity),
                     lineWidth: FriendsColor.cardStrokeWidth
                 )
-        }
-    }
-}
-
-// MARK: - Friend Row
-
-private struct FriendRowCard: View {
-    let row: FriendRowModel
-    let action: () -> Void
-
-    private var friend: FriendPuckData { row.friend }
-    private var isHidden: Bool { friend.availability == .unavailable }
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: FriendsLayout.rowSpacing) {
-                avatar
-                identity
-                Spacer(minLength: 0)
-                trailing
-            }
-            .padding(FriendsLayout.cardPadding)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .friendsCard(cornerRadius: FriendsLayout.cardCornerRadius)
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(friend.name)
-        .accessibilityValue(friend.venueStatusText)
-    }
-
-    private var avatar: some View {
-        ProfilePhotoAvatar(
-            imageAssetName: friend.profileImageAssetName,
-            fallbackInitials: friend.avatarPlaceholder
-        )
-        .frame(width: FriendsLayout.rowAvatarSize, height: FriendsLayout.rowAvatarSize)
-        .overlay {
-            Circle()
-                .stroke(
-                    friend.availability.accentColor.opacity(FriendsColor.ringOpacity),
-                    lineWidth: FriendsLayout.rowRingWidth
-                )
-        }
-        .opacity(isHidden ? 0.72 : 1)
-    }
-
-    private var identity: some View {
-        VStack(alignment: .leading, spacing: FriendsLayout.rowTextSpacing) {
-            Text(friend.name)
-                .font(.headline.weight(.semibold))
-                .foregroundStyle(PushControlColors.textEspresso)
-                .lineLimit(1)
-
-            HStack(spacing: FriendsLayout.rowSubtitleSpacing) {
-                Image(systemName: friend.activitySymbolName)
-                    .font(.system(size: FriendsLayout.rowSubtitleIconSize, weight: .semibold))
-                    .foregroundStyle(friend.availability.accentColor)
-                Text(friend.venueStatusText)
-                    .font(.subheadline)
-                    .foregroundStyle(PushControlColors.textSecondary)
-                    .lineLimit(1)
-            }
-
-            if let groupLabel = row.groupLabel {
-                groupTag(groupLabel)
-            }
-        }
-    }
-
-    private func groupTag(_ label: String) -> some View {
-        HStack(spacing: FriendsLayout.rowGroupTagSpacing) {
-            Image(systemName: "person.2.fill")
-                .font(.system(size: FriendsLayout.rowGroupTagIconSize, weight: .semibold))
-            Text(label)
-                .font(.caption2.weight(.semibold))
-                .lineLimit(1)
-        }
-        .foregroundStyle(PushControlColors.textTertiary)
-    }
-
-    private var trailing: some View {
-        VStack(alignment: .trailing, spacing: FriendsLayout.rowTrailingSpacing) {
-            FriendsAvailabilityChip(availability: friend.availability)
-
-            if !friend.lastUpdated.isEmpty {
-                HStack(spacing: 4) {
-                    Circle()
-                        .fill(friend.availability.accentColor)
-                        .frame(width: FriendsLayout.liveDotSize, height: FriendsLayout.liveDotSize)
-                    Text(friend.lastUpdated)
-                        .font(.caption2.weight(.medium))
-                        .foregroundStyle(PushControlColors.textTertiary)
-                }
-            }
         }
     }
 }
