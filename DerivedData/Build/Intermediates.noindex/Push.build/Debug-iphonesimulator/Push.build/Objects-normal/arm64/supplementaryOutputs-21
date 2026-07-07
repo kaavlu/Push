@@ -1,15 +1,20 @@
-"/Users/manavkhanvilkar/Desktop/Push/Push/ProfileView.swift":
-  object: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/ProfileView.o"
-  swift-dependencies: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/ProfileView.swiftdeps"
-  diagnostics: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/ProfileView.dia"
-  dependencies: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/ProfileView.d"
-"/Users/manavkhanvilkar/Desktop/Push/Push/ProfileDestinationView.swift":
-  diagnostics: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/ProfileDestinationView.dia"
-  swift-dependencies: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/ProfileDestinationView.swiftdeps"
-  dependencies: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/ProfileDestinationView.d"
-  object: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/ProfileDestinationView.o"
-"/Users/manavkhanvilkar/Desktop/Push/Push/FriendPuck.swift":
-  object: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/FriendPuck.o"
-  swift-dependencies: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/FriendPuck.swiftdeps"
-  diagnostics: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/FriendPuck.dia"
-  dependencies: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/FriendPuck.d"
+"/Users/manavkhanvilkar/Desktop/Push/Push/StartPushStep4View.swift":
+  swift-dependencies: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/StartPushStep4View.swiftdeps"
+  dependencies: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/StartPushStep4View.d"
+  object: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/StartPushStep4View.o"
+  diagnostics: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/StartPushStep4View.dia"
+"/Users/manavkhanvilkar/Desktop/Push/Push/StartPushTimingPickers.swift":
+  object: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/StartPushTimingPickers.o"
+  dependencies: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/StartPushTimingPickers.d"
+  diagnostics: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/StartPushTimingPickers.dia"
+  swift-dependencies: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/StartPushTimingPickers.swiftdeps"
+"/Users/manavkhanvilkar/Desktop/Push/Push/StartPushStep2View.swift":
+  dependencies: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/StartPushStep2View.d"
+  swift-dependencies: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/StartPushStep2View.swiftdeps"
+  object: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/StartPushStep2View.o"
+  diagnostics: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/StartPushStep2View.dia"
+"/Users/manavkhanvilkar/Desktop/Push/Push/StartPushStep3View.swift":
+  swift-dependencies: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/StartPushStep3View.swiftdeps"
+  diagnostics: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/StartPushStep3View.dia"
+  dependencies: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/StartPushStep3View.d"
+  object: "/Users/manavkhanvilkar/Desktop/Push/DerivedData/Build/Intermediates.noindex/Push.build/Debug-iphonesimulator/Push.build/Objects-normal/arm64/StartPushStep3View.o"

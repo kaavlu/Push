@@ -98,6 +98,11 @@
 		AA01000100000000AA010001 /* YourPushCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA01000200000000AA010002 /* YourPushCard.swift */; };
 		AA01000700000000AA010007 /* ReviewPushCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA01000800000000AA010008 /* ReviewPushCard.swift */; };
 		AA01000300000000AA010003 /* ManagePushView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA01000400000000AA010004 /* ManagePushView.swift */; };
+		AA02000200000000AA020002 /* FriendsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA02000100000000AA020001 /* FriendsView.swift */; };
+		AA02000400000000AA020004 /* FriendsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA02000300000000AA020003 /* FriendsViewModel.swift */; };
+		AA02000600000000AA020006 /* FriendsStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA02000500000000AA020005 /* FriendsStyle.swift */; };
+		AA02000800000000AA020008 /* FriendsComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA02000700000000AA020007 /* FriendsComponents.swift */; };
+		AA02001000000000AA020010 /* FriendsContentBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA02000900000000AA020009 /* FriendsContentBuilder.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -118,6 +123,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		AA02000100000000AA020001 /* FriendsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsView.swift; sourceTree = "<group>"; };
+		AA02000300000000AA020003 /* FriendsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsViewModel.swift; sourceTree = "<group>"; };
+		AA02000500000000AA020005 /* FriendsStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsStyle.swift; sourceTree = "<group>"; };
+		AA02000700000000AA020007 /* FriendsComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsComponents.swift; sourceTree = "<group>"; };
+		AA02000900000000AA020009 /* FriendsContentBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FriendsContentBuilder.swift; path = "Data/Derived/FriendsContentBuilder.swift"; sourceTree = "<group>"; };
 		AE9275BF1B3723589A96B9B9 /* MapRenderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MapRenderTests.swift"; sourceTree = "<group>"; };
 		79592A0DE1B5691B233102F0 /* MapDisplayPuckBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "MapDisplayPuckBuilder.swift"; path = "Data/Derived/MapDisplayPuckBuilder.swift"; sourceTree = "<group>"; };
 		E075D5F75356C7CC3A1C626A /* RegionalActivityPuck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RegionalActivityPuck.swift"; sourceTree = "<group>"; };
@@ -307,6 +317,11 @@
 				5217A2B32FF2F8000011F860 /* GroupsModels.swift */,
 				5217A2B52FF2F8000011F860 /* GroupsView.swift */,
 				5217A2B72FF2FA000011F860 /* GroupDetailView.swift */,
+				AA02000100000000AA020001 /* FriendsView.swift */,
+				AA02000300000000AA020003 /* FriendsViewModel.swift */,
+				AA02000500000000AA020005 /* FriendsStyle.swift */,
+				AA02000700000000AA020007 /* FriendsComponents.swift */,
+				AA02000900000000AA020009 /* FriendsContentBuilder.swift */,
 				5217A2DB2FF330000011F860 /* PlansModels.swift */,
 				5217A2DD2FF340000011F860 /* PlansViewModel.swift */,
 				5217A2E12FF350000011F860 /* PlansStyle.swift */,
@@ -555,6 +570,11 @@
 				5217A2B42FF2F8000011F860 /* GroupsModels.swift in Sources */,
 				5217A2B62FF2F8000011F860 /* GroupsView.swift in Sources */,
 				5217A2B82FF2FA000011F860 /* GroupDetailView.swift in Sources */,
+				AA02000200000000AA020002 /* FriendsView.swift in Sources */,
+				AA02000400000000AA020004 /* FriendsViewModel.swift in Sources */,
+				AA02000600000000AA020006 /* FriendsStyle.swift in Sources */,
+				AA02000800000000AA020008 /* FriendsComponents.swift in Sources */,
+				AA02001000000000AA020010 /* FriendsContentBuilder.swift in Sources */,
 				5217A2DC2FF330000011F860 /* PlansModels.swift in Sources */,
 				5217A2DE2FF340000011F860 /* PlansViewModel.swift in Sources */,
 				5217A2E22FF350000011F860 /* PlansStyle.swift in Sources */,

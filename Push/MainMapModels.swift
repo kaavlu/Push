@@ -21,7 +21,7 @@ enum BottomNavigationItem: String, CaseIterable, Identifiable {
         case .map:
             return "Map"
         case .group:
-            return "Group"
+            return "Friends"
         case .create:
             return "+"
         case .feed:
@@ -69,7 +69,7 @@ enum MainMapRoute: String, Identifiable, Equatable {
     var accessibilityLabel: String {
         switch self {
         case .groups:
-            return "Groups"
+            return "Friends"
         case .profile:
             return "Profile"
         case .startPlan:

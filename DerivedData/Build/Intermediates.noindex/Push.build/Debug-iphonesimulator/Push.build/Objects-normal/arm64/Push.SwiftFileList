@@ -1,4 +1,7 @@
 /Users/manavkhanvilkar/Desktop/Push/Push/ContentView.swift
+/Users/manavkhanvilkar/Desktop/Push/Push/Data/Derived/MapDisplayPuckBuilder.swift
+/Users/manavkhanvilkar/Desktop/Push/Push/RegionalActivityPuck.swift
+/Users/manavkhanvilkar/Desktop/Push/Push/SelfPuckView.swift
 /Users/manavkhanvilkar/Desktop/Push/Push/Data/Derived/ProfileContentBuilder.swift
 /Users/manavkhanvilkar/Desktop/Push/Push/MapViewModel.swift
 /Users/manavkhanvilkar/Desktop/Push/Push/Data/Derived/PlansContentBuilder.swift
@@ -40,6 +43,11 @@
 /Users/manavkhanvilkar/Desktop/Push/Push/GroupsModels.swift
 /Users/manavkhanvilkar/Desktop/Push/Push/GroupsView.swift
 /Users/manavkhanvilkar/Desktop/Push/Push/GroupDetailView.swift
+/Users/manavkhanvilkar/Desktop/Push/Push/FriendsView.swift
+/Users/manavkhanvilkar/Desktop/Push/Push/FriendsViewModel.swift
+/Users/manavkhanvilkar/Desktop/Push/Push/FriendsStyle.swift
+/Users/manavkhanvilkar/Desktop/Push/Push/FriendsComponents.swift
+/Users/manavkhanvilkar/Desktop/Push/Push/Data/Derived/FriendsContentBuilder.swift
 /Users/manavkhanvilkar/Desktop/Push/Push/PlansModels.swift
 /Users/manavkhanvilkar/Desktop/Push/Push/PlansViewModel.swift
 /Users/manavkhanvilkar/Desktop/Push/Push/PlansStyle.swift
@@ -49,6 +57,7 @@
 /Users/manavkhanvilkar/Desktop/Push/Push/PlansView.swift
 /Users/manavkhanvilkar/Desktop/Push/Push/ReviewPushesView.swift
 /Users/manavkhanvilkar/Desktop/Push/Push/YourPushCard.swift
+/Users/manavkhanvilkar/Desktop/Push/Push/ReviewPushCard.swift
 /Users/manavkhanvilkar/Desktop/Push/Push/ManagePushView.swift
 /Users/manavkhanvilkar/Desktop/Push/Push/StartPushModels.swift
 /Users/manavkhanvilkar/Desktop/Push/Push/StartPushStyle.swift

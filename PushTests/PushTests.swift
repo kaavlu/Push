@@ -13,7 +13,7 @@ final class PushTests: XCTestCase {
     func testBottomNavigationItemsExposePlaceholderTabs() throws {
         let items = BottomNavigationItem.allCases
 
-        XCTAssertEqual(items.map(\.title), ["Map", "Group", "+", "Feed", "Pushes"])
+        XCTAssertEqual(items.map(\.title), ["Map", "Friends", "+", "Feed", "Pushes"])
         XCTAssertEqual(items.map(\.systemImageName), [
             "map.fill",
             "person.2.fill",
@@ -378,7 +378,7 @@ final class PushTests: XCTestCase {
 
     func testMainMapRoutesExposeStableProfileMetadata() throws {
         XCTAssertEqual(MainMapRoute.groups.id, "groups")
-        XCTAssertEqual(MainMapRoute.groups.accessibilityLabel, "Groups")
+        XCTAssertEqual(MainMapRoute.groups.accessibilityLabel, "Friends")
         XCTAssertEqual(MainMapRoute.groups.systemImageName, "person.2.fill")
 
         XCTAssertEqual(MainMapRoute.profile.id, "profile")

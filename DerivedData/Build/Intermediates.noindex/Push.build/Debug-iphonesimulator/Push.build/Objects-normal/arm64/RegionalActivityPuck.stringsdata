@@ -1,0 +1,16 @@
+{
+  "source": "/Users/manavkhanvilkar/Desktop/Push/Push/RegionalActivityPuck.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "%lld friends active near %@"
+      },
+      {
+        "comment": "",
+        "key": "%lld"
+      }
+    ]
+  },
+  "version": 1
+}

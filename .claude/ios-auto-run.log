@@ -26,3 +26,18 @@ Ran Push on "Push - main"
 { platform:iOS Simulator, id:9C593E29-C433-478D-B24C-9C02210FBA8E, OS:16.4, name:Push - main }
 { platform:iOS Simulator, id:9C593E29-C433-478D-B24C-9C02210FBA8E, OS:16.4, name:Push - main }
 Ran Push on "Push - main"
+2026-07-06 20:03:48.981 xcodebuild[88792:2805804] DVTCoreDeviceEnabledState: DVTCoreDeviceEnabledState_Disabled set via user default (DVTEnableCoreDevice=disabled)
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:iOS Simulator, id:9C593E29-C433-478D-B24C-9C02210FBA8E, OS:16.4, name:Push - main }
+{ platform:iOS Simulator, id:9C593E29-C433-478D-B24C-9C02210FBA8E, OS:16.4, name:Push - main }
+Ran Push on "Push - main"
+2026-07-06 20:05:54.210 xcodebuild[89544:2810103] DVTCoreDeviceEnabledState: DVTCoreDeviceEnabledState_Disabled set via user default (DVTEnableCoreDevice=disabled)
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:iOS Simulator, id:9C593E29-C433-478D-B24C-9C02210FBA8E, OS:16.4, name:Push - main }
+{ platform:iOS Simulator, id:9C593E29-C433-478D-B24C-9C02210FBA8E, OS:16.4, name:Push - main }
+Ran Push on "Push - main"
+2026-07-06 20:12:37.274 xcodebuild[92429:2834108] DVTCoreDeviceEnabledState: DVTCoreDeviceEnabledState_Disabled set via user default (DVTEnableCoreDevice=disabled)
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:iOS Simulator, id:9C593E29-C433-478D-B24C-9C02210FBA8E, OS:16.4, name:Push - main }
+{ platform:iOS Simulator, id:9C593E29-C433-478D-B24C-9C02210FBA8E, OS:16.4, name:Push - main }
+Ran Push on "Push - main"

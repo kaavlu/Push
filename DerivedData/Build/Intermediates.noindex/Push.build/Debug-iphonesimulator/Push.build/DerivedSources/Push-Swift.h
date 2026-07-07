@@ -291,13 +291,14 @@ SWIFT_CLASS("_TtC4Push11Coordinator")
 @interface Coordinator : NSObject <MKMapViewDelegate>
 - (MKAnnotationView * _Nullable)mapView:(MKMapView * _Nonnull)mapView viewForAnnotation:(id <MKAnnotation> _Nonnull)annotation SWIFT_WARN_UNUSED_RESULT;
 - (void)mapView:(MKMapView * _Nonnull)mapView didSelectAnnotationView:(MKAnnotationView * _Nonnull)view;
+- (void)mapView:(MKMapView * _Nonnull)mapView regionDidChangeAnimated:(BOOL)animated;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
 
 
-SWIFT_CLASS("_TtC4Push22UserLocationAnnotation")
-@interface UserLocationAnnotation : NSObject <MKAnnotation>
+SWIFT_CLASS("_TtC4Push18SelfPuckAnnotation")
+@interface SelfPuckAnnotation : NSObject <MKAnnotation>
 @property (nonatomic, readonly) CLLocationCoordinate2D coordinate;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
@@ -306,8 +307,8 @@ SWIFT_CLASS("_TtC4Push22UserLocationAnnotation")
 @class NSString;
 @class NSCoder;
 
-SWIFT_CLASS("_TtC4Push26UserLocationAnnotationView")
-@interface UserLocationAnnotationView : MKAnnotationView
+SWIFT_CLASS("_TtC4Push22SelfPuckAnnotationView")
+@interface SelfPuckAnnotationView : MKAnnotationView
 - (nonnull instancetype)initWithAnnotation:(id <MKAnnotation> _Nullable)annotation reuseIdentifier:(NSString * _Nullable)reuseIdentifier OBJC_DESIGNATED_INITIALIZER;
 - (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)coder OBJC_DESIGNATED_INITIALIZER;
 @end

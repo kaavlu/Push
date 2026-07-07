@@ -1,0 +1,20 @@
+{
+  "source": "/Users/manavkhanvilkar/Desktop/Push/Push/FriendsView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Friends"
+      },
+      {
+        "comment": "",
+        "key": "%lld"
+      },
+      {
+        "comment": "",
+        "key": "Clear search"
+      }
+    ]
+  },
+  "version": 1
+}

@@ -122,7 +122,7 @@ struct ContentView: View {
     private func destination(for route: MainMapRoute) -> some View {
         switch route {
         case .groups:
-            GroupsView()
+            FriendsView()
         case .profile:
             ProfileView()
         case .startPlan:
