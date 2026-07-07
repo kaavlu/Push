@@ -15,6 +15,8 @@ struct PushApp: App {
             #if DEBUG
             if ProcessInfo.processInfo.arguments.contains("--pucklab") {
                 PuckLabView()
+            } else if ProcessInfo.processInfo.arguments.contains("--onboardinglab") {
+                OnboardingLabView()
             } else if ProcessInfo.processInfo.arguments.contains("--friends") {
                 FriendsView()
             } else {
