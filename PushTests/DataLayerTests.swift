@@ -283,6 +283,31 @@ extension DataLayerTests {
         XCTAssertEqual(after.count, before + 1)
         XCTAssertTrue(after.contains { $0.title == "Taco night" && $0.locationText == "El Farolito" })
     }
+
+    // MARK: - Profile / status / privacy persistence
+
+    @MainActor
+    func test_setAvailability_persistsToPresenceAndProfile() async throws {
+        let container = AppDataContainer(seed: .standard())
+        try await container.friends.setCurrentUserAvailability(.freeNow)
+        let status = try await container.friends.presenceStatuses()
+            .first { $0.personID == container.currentUserID }
+        XCTAssertEqual(status?.availability, .freeNow)
+        XCTAssertEqual(status?.source, .manualOverride)
+        let profile = try await container.profile.userProfile()
+        XCTAssertEqual(profile.chosenAvailability, .freeNow)
+    }
+
+    @MainActor
+    func test_updateBasics_persistsFirstNameAndHandle() async throws {
+        let container = AppDataContainer(seed: .standard())
+        try await container.profile.updateBasics(displayName: "Manny", handle: "@manny")
+        let user = try await container.friends.currentUser()
+        // displayName is computed from firstName.
+        XCTAssertEqual(user.displayName, "Manny")
+        let updatedProfile = try await container.profile.userProfile()
+        XCTAssertEqual(updatedProfile.handle, "@manny")
+    }
 }
 
 /// Proves the async-throws seam carries failures into LoadState.
@@ -290,4 +315,7 @@ struct ThrowingFriendRepository: FriendRepository {
     func friends() async throws -> [Person] { throw URLError(.badServerResponse) }
     func currentUser() async throws -> Person { throw URLError(.badServerResponse) }
     func presenceStatuses() async throws -> [PresenceStatus] { throw URLError(.badServerResponse) }
+    func setCurrentUserAvailability(_ availability: FriendAvailabilityState) async throws {
+        throw URLError(.badServerResponse)
+    }
 }

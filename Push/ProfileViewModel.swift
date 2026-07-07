@@ -145,6 +145,8 @@ final class ProfileViewModel: ObservableObject {
     func select(_ option: ProfileAvailabilityOption) {
         selectedAvailability = option.availability
         selectedStatusID = ProfileStatusOption.availability(option).id
+        guard let container else { return }
+        Task { try? await container.friends.setCurrentUserAvailability(option.availability) }
     }
 
     func select(_ option: ProfileStatusOption) {
@@ -159,6 +161,9 @@ final class ProfileViewModel: ObservableObject {
         displayName = name
         self.handle = handle
         self.initials = initials
+        guard let container else { return }
+        // initials derive from firstName, so only name + handle need to persist.
+        Task { try? await container.profile.updateBasics(displayName: name, handle: handle) }
     }
 
     func beginPhotoEditing() {
@@ -167,14 +172,29 @@ final class ProfileViewModel: ObservableObject {
 
     func toggleActivityVisibility(id: String) {
         activityVisibility.toggleItem(id: id)
+        persistPrivacy()
     }
 
     func toggleMapPreference(id: String) {
         mapPreferences.toggleItem(id: id)
+        persistPrivacy()
     }
 
     func toggleCloseFriend(id: String) {
         closeFriends.toggleItem(id: id)
+        persistPrivacy()
+    }
+
+    /// Shared writer — fires the current toggle arrays to the store after any toggle mutation.
+    private func persistPrivacy() {
+        guard let container else { return }
+        Task {
+            try? await container.profile.updatePrivacy(
+                activityVisibility: activityVisibility,
+                mapPreferences: mapPreferences,
+                closeFriends: closeFriends
+            )
+        }
     }
 
     func connect(_ connector: ProfileConnector) {

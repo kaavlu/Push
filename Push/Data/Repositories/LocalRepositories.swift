@@ -28,6 +28,10 @@ final class LocalFriendRepository: FriendRepository {
     func presenceStatuses() async throws -> [PresenceStatus] {
         database.orderedPeople.compactMap { database.statusesByPersonID[$0.id] }
     }
+
+    func setCurrentUserAvailability(_ availability: FriendAvailabilityState) async throws {
+        database.setAvailability(availability)
+    }
 }
 
 @MainActor
@@ -149,6 +153,30 @@ final class LocalProfileRepository: ProfileRepository {
 
     func userProfile() async throws -> UserProfile {
         database.profile
+    }
+
+    func updateBasics(displayName: String, handle: String) async throws {
+        // updatePerson targets firstName; displayName and initials derive automatically.
+        database.updatePerson(id: database.currentUserID, firstName: displayName)
+        database.updateProfile(
+            handle: handle,
+            activityVisibility: database.profile.activityVisibility,
+            mapPreferences: database.profile.mapPreferences,
+            closeFriends: database.profile.closeFriends
+        )
+    }
+
+    func updatePrivacy(
+        activityVisibility: [ProfileToggleItem],
+        mapPreferences: [ProfileToggleItem],
+        closeFriends: [ProfileToggleItem]
+    ) async throws {
+        database.updateProfile(
+            handle: database.profile.handle,
+            activityVisibility: activityVisibility,
+            mapPreferences: mapPreferences,
+            closeFriends: closeFriends
+        )
     }
 }
 

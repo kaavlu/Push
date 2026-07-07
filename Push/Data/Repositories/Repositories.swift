@@ -15,6 +15,9 @@ protocol FriendRepository {
     func currentUser() async throws -> Person
     /// Canonical internal presence — consumed by builders only, never by UI.
     func presenceStatuses() async throws -> [PresenceStatus]
+    /// Writes the user's chosen availability to PresenceStatus and UserProfile,
+    /// then bumps the store revision so view models reload.
+    func setCurrentUserAvailability(_ availability: FriendAvailabilityState) async throws
 }
 
 protocol GroupRepository {
@@ -45,6 +48,14 @@ protocol PushRepository {
 
 protocol ProfileRepository {
     func userProfile() async throws -> UserProfile
+    /// Persists the display name (mapped to Person.firstName) and handle.
+    func updateBasics(displayName: String, handle: String) async throws
+    /// Persists the three privacy toggle arrays to the shared store.
+    func updatePrivacy(
+        activityVisibility: [ProfileToggleItem],
+        mapPreferences: [ProfileToggleItem],
+        closeFriends: [ProfileToggleItem]
+    ) async throws
 }
 
 protocol SharingRepository {
