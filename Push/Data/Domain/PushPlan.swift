@@ -12,7 +12,8 @@ struct PushPlan: Identifiable, Codable, Equatable {
 
     let id: String
     let title: String
-    let groupID: FriendGroup.ID
+    /// nil for friends-only (inviteesOnly) pushes with no backing group.
+    let groupID: FriendGroup.ID?
     let creatorID: Person.ID
     let createdAt: Date
     let updatedAt: Date
@@ -23,7 +24,8 @@ struct PushPlan: Identifiable, Codable, Equatable {
     let isApproximateTime: Bool
     let expiresAt: Date
     let cancelledAt: Date?
-    let placeID: Place.ID
+    /// nil when the creator typed a free-text location instead of picking a Place.
+    let placeID: Place.ID?
     /// true → location renders as "Suggested: {place}".
     let placeIsSuggested: Bool
     let state: State
@@ -31,4 +33,6 @@ struct PushPlan: Identifiable, Codable, Equatable {
     /// Creator's free-text details (dress code, what to bring, parking…).
     /// Captured by the Start Push flow; nil when the creator skipped it.
     let note: String?
+    /// Free-text location captured by Start Push when placeID is nil.
+    let locationText: String?
 }

@@ -383,6 +383,25 @@ final class DerivationTests: XCTestCase {
         XCTAssertTrue(expected.allSatisfy { $0.hasPrefix("assets/") })
     }
 
+    func test_planData_handlesNilGroupAndPlace_usesLocationText() {
+        let now = Date()
+        let plan = PushPlan(
+            id: "p1", title: "Coffee run", groupID: nil, creatorID: "me",
+            createdAt: now, updatedAt: now, startsAt: now,
+            hasExplicitTime: true, isApproximateTime: false,
+            expiresAt: now.addingTimeInterval(3600), cancelledAt: nil,
+            placeID: nil, placeIsSuggested: false, state: .collecting,
+            audience: .inviteesOnly, note: nil, locationText: "Blue Bottle, Hayes"
+        )
+        let cards = PlansContentBuilder.planData(
+            plans: [plan], responses: [], groupsByID: [:], placesByID: [:],
+            peopleByID: [:], currentUserID: "me", now: now
+        )
+        XCTAssertEqual(cards.count, 1)
+        XCTAssertEqual(cards[0].locationHint, "Blue Bottle, Hayes")
+        XCTAssertEqual(cards[0].group, "")
+    }
+
     func testMostActiveGroupDerivesFromHangouts() {
         let seed = SeedData.standard(now: wednesdayNoon)
         let name = PlansContentBuilder.mostActiveGroup(

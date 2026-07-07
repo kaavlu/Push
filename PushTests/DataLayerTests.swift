@@ -49,9 +49,9 @@ final class DataLayerTests: XCTestCase {
             if let placeID = status.placeID { XCTAssertTrue(placeIDs.contains(placeID), status.id) }
         }
         for plan in seed.plans {
-            XCTAssertTrue(groupIDs.contains(plan.groupID), plan.id)
+            if let groupID = plan.groupID { XCTAssertTrue(groupIDs.contains(groupID), plan.id) }
             XCTAssertTrue(personIDs.contains(plan.creatorID), plan.id)
-            XCTAssertTrue(placeIDs.contains(plan.placeID), plan.id)
+            if let placeID = plan.placeID { XCTAssertTrue(placeIDs.contains(placeID), plan.id) }
         }
         for response in seed.responses {
             XCTAssertTrue(planIDs.contains(response.pushID), response.id)
