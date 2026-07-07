@@ -156,6 +156,7 @@ final class StartPushViewModel: ObservableObject {
     /// from step 3 to the confirmation step, so the push exists before step 4.
     func submit() async {
         guard let container, !hasSubmitted else { return }
+        hasSubmitted = true
         let draft = PushDraft(
             title: pushText.trimmingCharacters(in: .whitespacesAndNewlines),
             recipientIDs: selectedRecipientIDs,
@@ -166,9 +167,9 @@ final class StartPushViewModel: ObservableObject {
         )
         do {
             _ = try await container.pushes.createPush(draft)
-            hasSubmitted = true
         } catch {
-            // Local repo never throws; a real backend would surface this.
+            // Local repo never throws; a real backend would surface this. Flag
+            // stays true so a failed submit does not silently retry.
         }
     }
 }
