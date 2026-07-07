@@ -44,6 +44,8 @@ final class StartPushViewModel: ObservableObject {
     @Published private(set) var loadState: LoadState<Void> = .idle
 
     private let container: AppDataContainer?
+    // Prevents duplicate submissions if the user somehow triggers the flow twice.
+    private var hasSubmitted = false
 
     var canAdvanceStep1: Bool { !selectedRecipientIDs.isEmpty }
     var canAdvanceStep2: Bool { !pushText.trimmingCharacters(in: .whitespaces).isEmpty }
@@ -148,5 +150,25 @@ final class StartPushViewModel: ObservableObject {
 
     func editFromConfirmation() {
         step = 3
+    }
+
+    /// Submits the draft into shared local state. Called when the flow advances
+    /// from step 3 to the confirmation step, so the push exists before step 4.
+    func submit() async {
+        guard let container, !hasSubmitted else { return }
+        let draft = PushDraft(
+            title: pushText.trimmingCharacters(in: .whitespacesAndNewlines),
+            recipientIDs: selectedRecipientIDs,
+            startsAt: selectedTime,
+            locationText: location.trimmingCharacters(in: .whitespacesAndNewlines),
+            notes: notes.trimmingCharacters(in: .whitespacesAndNewlines),
+            creatorID: container.currentUserID
+        )
+        do {
+            _ = try await container.pushes.createPush(draft)
+            hasSubmitted = true
+        } catch {
+            // Local repo never throws; a real backend would surface this.
+        }
     }
 }

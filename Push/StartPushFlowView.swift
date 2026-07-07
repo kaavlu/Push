@@ -31,7 +31,7 @@ struct StartPushFlowView: View {
                     case 2:
                         StartPushStep2View(viewModel: viewModel, onNext: advance)
                     case 3:
-                        StartPushStep3View(viewModel: viewModel, onNext: advance)
+                        StartPushStep3View(viewModel: viewModel, onNext: submitAndAdvance)
                     default:
                         StartPushStep4View(
                             viewModel: viewModel,
@@ -92,6 +92,14 @@ struct StartPushFlowView: View {
     private func advance() {
         movingForward = true
         viewModel.advance()
+    }
+
+    private func submitAndAdvance() {
+        movingForward = true
+        Task {
+            await viewModel.submit()
+            viewModel.advance()
+        }
     }
 
     private func goBack() {

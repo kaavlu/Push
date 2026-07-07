@@ -266,6 +266,23 @@ extension DataLayerTests {
         ))
         XCTAssertEqual(container.storeRevision, before + 1)
     }
+
+    @MainActor
+    func test_startPushViewModel_submit_createsPush() async throws {
+        let container = AppDataContainer(seed: .standard())
+        let vm = StartPushViewModel(container: container)
+        await vm.load()
+        let friend = try await container.friends.friends()[0]
+        vm.pushText = "Taco night"
+        vm.location = "El Farolito"
+        vm.toggleRecipient("friend_\(friend.id)")
+
+        let before = try await container.pushes.activePlans().count
+        await vm.submit()
+        let after = try await container.pushes.activePlans()
+        XCTAssertEqual(after.count, before + 1)
+        XCTAssertTrue(after.contains { $0.title == "Taco night" && $0.locationText == "El Farolito" })
+    }
 }
 
 /// Proves the async-throws seam carries failures into LoadState.
