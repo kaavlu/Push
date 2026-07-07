@@ -41,3 +41,23 @@ Ran Push on "Push - main"
 { platform:iOS Simulator, id:9C593E29-C433-478D-B24C-9C02210FBA8E, OS:16.4, name:Push - main }
 { platform:iOS Simulator, id:9C593E29-C433-478D-B24C-9C02210FBA8E, OS:16.4, name:Push - main }
 Ran Push on "Push - main"
+2026-07-06 21:28:50.084 xcodebuild[16791:2951091] DVTCoreDeviceEnabledState: DVTCoreDeviceEnabledState_Disabled set via user default (DVTEnableCoreDevice=disabled)
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:iOS Simulator, id:9C593E29-C433-478D-B24C-9C02210FBA8E, OS:16.4, name:Push - main }
+{ platform:iOS Simulator, id:9C593E29-C433-478D-B24C-9C02210FBA8E, OS:16.4, name:Push - main }
+Ran Push on "Push - main"
+2026-07-06 21:32:51.903 xcodebuild[18153:2958170] DVTCoreDeviceEnabledState: DVTCoreDeviceEnabledState_Disabled set via user default (DVTEnableCoreDevice=disabled)
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:iOS Simulator, id:9C593E29-C433-478D-B24C-9C02210FBA8E, OS:16.4, name:Push - main }
+{ platform:iOS Simulator, id:9C593E29-C433-478D-B24C-9C02210FBA8E, OS:16.4, name:Push - main }
+Ran Push on "Push - main"
+2026-07-06 21:34:58.016 xcodebuild[18889:2962471] DVTCoreDeviceEnabledState: DVTCoreDeviceEnabledState_Disabled set via user default (DVTEnableCoreDevice=disabled)
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:iOS Simulator, id:9C593E29-C433-478D-B24C-9C02210FBA8E, OS:16.4, name:Push - main }
+{ platform:iOS Simulator, id:9C593E29-C433-478D-B24C-9C02210FBA8E, OS:16.4, name:Push - main }
+Ran Push on "Push - main"
+2026-07-06 21:38:41.963 xcodebuild[20000:2968609] DVTCoreDeviceEnabledState: DVTCoreDeviceEnabledState_Disabled set via user default (DVTEnableCoreDevice=disabled)
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:iOS Simulator, id:9C593E29-C433-478D-B24C-9C02210FBA8E, OS:16.4, name:Push - main }
+{ platform:iOS Simulator, id:9C593E29-C433-478D-B24C-9C02210FBA8E, OS:16.4, name:Push - main }
+Ran Push on "Push - main"

@@ -1,7 +1,7 @@
 version: "Apple Swift version 5.8.1 (swiftlang-5.8.0.124.5 clang-1403.0.22.11.100)"
 options: "72ea2860f7c37c4406d105b90f66901ab83fb7988f1c63c67c8b60749ac46384"
-build_start_time: [1783396683, 40819000]
-build_end_time: [1783396684, 604130000]
+build_start_time: [1783399123, 733906000]
+build_end_time: [1783399125, 366073000]
 inputs:
   "/Users/manavkhanvilkar/Desktop/Push/Push/ActivePlanCard.swift": [1783320034, 285362773]
   "/Users/manavkhanvilkar/Desktop/Push/Push/ActivityBadge.swift": [1783390837, 975732615]
@@ -58,8 +58,8 @@ inputs:
   "/Users/manavkhanvilkar/Desktop/Push/Push/MapViewModel.swift": [1783390837, 978563395]
   "/Users/manavkhanvilkar/Desktop/Push/Push/PlansCalendarView.swift": [1783319101, 860613259]
   "/Users/manavkhanvilkar/Desktop/Push/Push/PlansModels.swift": [1783370126, 533201487]
-  "/Users/manavkhanvilkar/Desktop/Push/Push/PlansStyle.swift": [1783370126, 533880196]
-  "/Users/manavkhanvilkar/Desktop/Push/Push/PlansView.swift": [1783320948, 81916796]
+  "/Users/manavkhanvilkar/Desktop/Push/Push/PlansStyle.swift": [1783399090, 339964035]
+  "/Users/manavkhanvilkar/Desktop/Push/Push/PlansView.swift": [1783399103, 38723825]
   "/Users/manavkhanvilkar/Desktop/Push/Push/PlansViewModel.swift": [1783370126, 534258446]
   "/Users/manavkhanvilkar/Desktop/Push/Push/PlansWeeklyRecapDayTile.swift": [1783319856, 721980792]
   "/Users/manavkhanvilkar/Desktop/Push/Push/ProfileComponents.swift": [1782771250, 956818004]

@@ -16,7 +16,7 @@ struct PlansView: View {
 
     var body: some View {
         ZStack {
-            PushModalBackground()
+            FriendsBackground()
             pageContent
         }
         .safeAreaInset(edge: .top, spacing: 0) {
@@ -62,9 +62,15 @@ private struct PlansPageHeader: View {
 
     var body: some View {
         HStack(alignment: .center) {
-            Text("Pushes")
-                .font(.largeTitle.weight(.bold))
-                .foregroundStyle(PushControlColors.textEspresso)
+            VStack(alignment: .leading, spacing: PlansLayout.headerSubtitleSpacing) {
+                Text("Pushes")
+                    .font(.largeTitle.weight(.bold))
+                    .foregroundStyle(PushControlColors.activeForeground)
+
+                Text("Plan your next move")
+                    .font(.callout.weight(.semibold))
+                    .foregroundStyle(PushControlColors.inactiveForeground)
+            }
             Spacer()
             Button(action: dismissAction) {
                 Image(systemName: "xmark")
@@ -76,7 +82,8 @@ private struct PlansPageHeader: View {
             .buttonStyle(.plain)
             .accessibilityLabel("Close pushes")
         }
-        .padding(.top, PlansLayout.headerTopPadding)
+        // Match the Friends screen's header-to-top spacing exactly.
+        .padding(.top, FriendsLayout.topPadding)
     }
 }
 
@@ -191,7 +198,8 @@ private struct StartPlanButton: View {
                 Text("Start Push")
                     .font(.headline.weight(.bold))
             }
-            .foregroundStyle(PushControlColors.textEspresso)
+            // Brown accenting, no near-black espresso text.
+            .foregroundStyle(PushColorPalette.Accent.walnut)
             .padding(.horizontal, PlansLayout.startPlanButtonHorizontalPadding)
             .frame(height: PlansLayout.startPlanButtonHeight)
             .background {
@@ -201,7 +209,13 @@ private struct StartPlanButton: View {
                     .padding(.horizontal, 10)
                     .padding(.vertical, 8)
             }
-            .plansGlassCard(cornerRadius: PlansLayout.startPlanButtonCornerRadius)
+            // True liquid-glass control treatment (glassEffect on iOS 26+),
+            // matching the header buttons rather than the flat cream cards.
+            .pushGlassBackground(cornerRadius: PlansLayout.startPlanButtonCornerRadius)
+            .overlay {
+                RoundedRectangle(cornerRadius: PlansLayout.startPlanButtonCornerRadius, style: .continuous)
+                    .stroke(PlansColor.startButtonBorder, lineWidth: PlansColor.startButtonBorderWidth)
+            }
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Start a new push")

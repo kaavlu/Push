@@ -4,6 +4,7 @@ import SwiftUI
 enum PlansLayout {
     static let horizontalPadding: CGFloat = 18
     static let headerToCalendarSpacing: CGFloat = 14
+    static let headerSubtitleSpacing: CGFloat = 3
     static let bottomPadding: CGFloat = 110
     static let sectionSpacing: CGFloat = 10
     static let calendarToYourPushesSpacing: CGFloat = 18
@@ -59,6 +60,16 @@ enum PlansColor {
     static let pageTop = creamSoft.opacity(0.54)
     static let pageMiddle = creamBase.opacity(0.68)
     static let pageBottom = PushColorPalette.Accent.walnut.opacity(0.11)
+
+    // Subtle light-brown card border — mirrors the Friends screen cards so the
+    // calendar and push cards read consistently against the ivory page.
+    static let walnutBorder = PushColorPalette.Accent.walnut.opacity(0.18)
+    static let walnutBorderWidth: CGFloat = 0.8
+
+    // Start Push CTA: a more pronounced walnut rim so the primary button reads
+    // as intentionally brown-accented against the liquid-glass fill.
+    static let startButtonBorder = PushColorPalette.Accent.walnut.opacity(0.32)
+    static let startButtonBorderWidth: CGFloat = 1.0
 }
 
 /// Tokens for the premium liquid-glass treatment on the Review deck card.
@@ -109,6 +120,9 @@ extension View {
                 shape.inset(by: 1)
                     .stroke(ReviewGlassStyle.edgeSheen, lineWidth: ReviewGlassStyle.whiteStrokeWidth)
             }
+            .overlay {
+                shape.stroke(PlansColor.walnutBorder, lineWidth: PlansColor.walnutBorderWidth)
+            }
             .shadow(
                 color: ReviewGlassStyle.shadow,
                 radius: ReviewGlassStyle.shadowRadius,
@@ -137,6 +151,10 @@ extension View {
             RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                 .stroke(PlansColor.innerGlassStroke, lineWidth: PushGlassStyle.strokeWidth)
                 .padding(1)
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                .stroke(PlansColor.walnutBorder, lineWidth: PlansColor.walnutBorderWidth)
         }
         .shadow(color: PlansColor.cardShadow, radius: 20, y: 10)
     }
