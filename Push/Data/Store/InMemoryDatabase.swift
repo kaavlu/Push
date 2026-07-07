@@ -6,11 +6,16 @@
 //  the only consumers; view models never touch this directly.
 //
 
+import Combine
 import Foundation
 
 @MainActor
-final class InMemoryDatabase {
+final class InMemoryDatabase: ObservableObject {
     let currentUserID: Person.ID
+
+    /// Bumped once after every mutation so view models can reload. Emitted only
+    /// after a write completes — never during reads — to avoid reload loops.
+    @Published private(set) var revision: Int = 0
 
     private(set) var peopleByID: [Person.ID: Person]
     private(set) var groupsByID: [FriendGroup.ID: FriendGroup]
@@ -47,6 +52,79 @@ final class InMemoryDatabase {
         profile = seed.profile
     }
 
+    private func didMutate() {
+        revision += 1
+    }
+
+    /// Atomic: inserts the plan and all its initial responses together, then
+    /// notifies once, so no observer can see a plan without its responses.
+    func createPush(plan: PushPlan, responses newResponses: [PushResponse]) {
+        plansByID[plan.id] = plan
+        orderedPlans.append(plan)
+        self.responses.append(contentsOf: newResponses)
+        didMutate()
+    }
+
+    /// Updates only the firstName of a person, preserving all other fields. displayName
+    /// and initials derive from firstName, so callers never pass them explicitly.
+    func updatePerson(id: Person.ID, firstName: String) {
+        guard let existing = peopleByID[id] else { return }
+        let updated = Person(
+            id: existing.id, firstName: firstName, imageAssetPath: existing.imageAssetPath
+        )
+        peopleByID[id] = updated
+        if let index = orderedPeople.firstIndex(where: { $0.id == id }) {
+            orderedPeople[index] = updated
+        }
+        didMutate()
+    }
+
+    /// Rewrites the privacy/settings fields of the current user's profile.
+    /// Call this for handle, activityVisibility, mapPreferences, or closeFriends
+    /// changes; pass the unchanged fields through from `profile` to avoid wiping them.
+    func updateProfile(
+        handle: String,
+        activityVisibility: [ProfileToggleItem],
+        mapPreferences: [ProfileToggleItem],
+        closeFriends: [ProfileToggleItem]
+    ) {
+        profile = UserProfile(
+            personID: profile.personID, handle: handle,
+            chosenAvailability: profile.chosenAvailability,
+            visibilityNote: profile.visibilityNote,
+            availabilityOptions: profile.availabilityOptions,
+            activityVisibility: activityVisibility,
+            mapPreferences: mapPreferences,
+            closeFriends: closeFriends,
+            connectors: profile.connectors
+        )
+        didMutate()
+    }
+
+    /// Writes the user's chosen availability to both their PresenceStatus (with
+    /// source .manualOverride) and their UserProfile.chosenAvailability so both
+    /// the map layer and profile screen read from the same source of truth.
+    func setAvailability(_ availability: FriendAvailabilityState) {
+        if let status = statusesByPersonID[currentUserID] {
+            statusesByPersonID[currentUserID] = PresenceStatus(
+                id: status.id, personID: status.personID, availability: availability,
+                activity: status.activity, placeID: status.placeID,
+                statusNote: status.statusNote, confidence: status.confidence,
+                observedAt: status.observedAt, updatedAt: Date(),
+                expiresAt: status.expiresAt, source: .manualOverride
+            )
+        }
+        profile = UserProfile(
+            personID: profile.personID, handle: profile.handle,
+            chosenAvailability: availability, visibilityNote: profile.visibilityNote,
+            availabilityOptions: profile.availabilityOptions,
+            activityVisibility: profile.activityVisibility,
+            mapPreferences: profile.mapPreferences,
+            closeFriends: profile.closeFriends, connectors: profile.connectors
+        )
+        didMutate()
+    }
+
     func setResponse(
         pushID: PushPlan.ID,
         personID: Person.ID,
@@ -66,5 +144,6 @@ final class InMemoryDatabase {
         } else {
             responses.append(row)
         }
+        didMutate()
     }
 }

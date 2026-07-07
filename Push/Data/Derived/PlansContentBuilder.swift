@@ -26,17 +26,20 @@ enum PlansContentBuilder {
         plans.map { plan in
             let planResponses = responses.filter { $0.pushID == plan.id }
             let mine = planResponses.first { $0.personID == currentUserID }?.response ?? .pending
-            let place = placesByID[plan.placeID]
+            let place = plan.placeID.flatMap { placesByID[$0] }
             return PlanData(
                 id: plan.id,
                 title: plan.title,
-                group: groupsByID[plan.groupID]?.name ?? plan.groupID,
+                group: plan.groupID.flatMap { groupsByID[$0]?.name } ?? "",
                 timeSignal: PushTimingFormatter.label(for: plan, now: now),
                 socialProof: SocialProofFormatter.label(
                     plan: plan, responses: planResponses,
                     peopleByID: peopleByID, currentUserID: currentUserID
                 ),
-                locationHint: locationHint(place: place, isSuggested: plan.placeIsSuggested),
+                locationHint: locationHint(
+                    place: place, isSuggested: plan.placeIsSuggested,
+                    fallback: plan.locationText
+                ),
                 status: pill(for: mine),
                 isOwner: plan.creatorID == currentUserID,
                 participants: participants(
@@ -65,8 +68,8 @@ enum PlansContentBuilder {
         }
     }
 
-    private static func locationHint(place: Place?, isSuggested: Bool) -> String {
-        guard let place else { return "" }
+    private static func locationHint(place: Place?, isSuggested: Bool, fallback: String?) -> String {
+        guard let place else { return fallback ?? "" }
         return isSuggested ? "Suggested: \(place.name)" : place.name
     }
 

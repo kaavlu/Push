@@ -26,10 +26,19 @@ final class ProfileViewModel: ObservableObject {
     @Published private(set) var loadState: LoadState<ProfileData> = .idle
 
     private let container: AppDataContainer?
+    // Holds the active store-change subscription; nil when container is absent.
+    private var storeChangeSub: AnyCancellable?
+    // Tracks the last revision we loaded so the subscription skips redundant reloads.
+    private var lastSeenRevision = 0
 
     init(container: AppDataContainer = .shared) {
         self.container = container
         Task { await load() }
+        // Subscribe after the initial load task so each real mutation triggers a reload.
+        storeChangeSub = container.onStoreChange { [weak self] revision in
+            guard let self, revision != self.lastSeenRevision else { return }
+            Task { await self.load() }
+        }
     }
 
     func load() async {
@@ -56,6 +65,8 @@ final class ProfileViewModel: ObservableObject {
             )
             apply(data: data, userProfile: userProfile)
             loadState = .loaded(data)
+            // Stamp the revision so the subscription guard can detect duplicates.
+            lastSeenRevision = container.storeRevision
         } catch {
             loadState = .failed(error)
         }
@@ -65,6 +76,8 @@ final class ProfileViewModel: ObservableObject {
         profile = data
         displayName = data.name
         handle = data.handle
+        // A store reload is authoritative: intentionally resets UI-only state
+        // (Ghost Mode selection, typed initials) that is deliberately not persisted.
         initials = data.initials
         profileImageAssetName = data.imageAssetName
         selectedAvailability = data.availability
@@ -134,6 +147,8 @@ final class ProfileViewModel: ObservableObject {
     func select(_ option: ProfileAvailabilityOption) {
         selectedAvailability = option.availability
         selectedStatusID = ProfileStatusOption.availability(option).id
+        guard let container else { return }
+        Task { try? await container.friends.setCurrentUserAvailability(option.availability) }
     }
 
     func select(_ option: ProfileStatusOption) {
@@ -148,6 +163,9 @@ final class ProfileViewModel: ObservableObject {
         displayName = name
         self.handle = handle
         self.initials = initials
+        guard let container else { return }
+        // initials derive from firstName, so only name + handle need to persist.
+        Task { try? await container.profile.updateBasics(displayName: name, handle: handle) }
     }
 
     func beginPhotoEditing() {
@@ -156,14 +174,29 @@ final class ProfileViewModel: ObservableObject {
 
     func toggleActivityVisibility(id: String) {
         activityVisibility.toggleItem(id: id)
+        persistPrivacy()
     }
 
     func toggleMapPreference(id: String) {
         mapPreferences.toggleItem(id: id)
+        persistPrivacy()
     }
 
     func toggleCloseFriend(id: String) {
         closeFriends.toggleItem(id: id)
+        persistPrivacy()
+    }
+
+    /// Shared writer — fires the current toggle arrays to the store after any toggle mutation.
+    private func persistPrivacy() {
+        guard let container else { return }
+        Task {
+            try? await container.profile.updatePrivacy(
+                activityVisibility: activityVisibility,
+                mapPreferences: mapPreferences,
+                closeFriends: closeFriends
+            )
+        }
     }
 
     func connect(_ connector: ProfileConnector) {

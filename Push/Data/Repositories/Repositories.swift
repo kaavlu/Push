@@ -15,11 +15,25 @@ protocol FriendRepository {
     func currentUser() async throws -> Person
     /// Canonical internal presence — consumed by builders only, never by UI.
     func presenceStatuses() async throws -> [PresenceStatus]
+    /// Writes the user's chosen availability to PresenceStatus and UserProfile,
+    /// then bumps the store revision so view models reload.
+    func setCurrentUserAvailability(_ availability: FriendAvailabilityState) async throws
 }
 
 protocol GroupRepository {
     func groups() async throws -> [FriendGroup]
     func memberships() async throws -> [GroupMembership]
+}
+
+/// Start Push flow output. `recipientIDs` are the flow's tokens
+/// ("group_<id>" / "friend_<id>").
+struct PushDraft {
+    let title: String
+    let recipientIDs: Set<String>
+    let startsAt: Date
+    let locationText: String
+    let notes: String
+    let creatorID: Person.ID
 }
 
 protocol PushRepository {
@@ -29,10 +43,19 @@ protocol PushRepository {
     func setCurrentUserResponse(planID: PushPlan.ID, response: PushResponse.Response) async throws
     func pastHangouts(forMonthContaining date: Date) async throws -> [PastHangout]
     func allPlaces() async throws -> [Place]
+    func createPush(_ draft: PushDraft) async throws -> PushPlan.ID
 }
 
 protocol ProfileRepository {
     func userProfile() async throws -> UserProfile
+    /// Persists the display name (mapped to Person.firstName) and handle.
+    func updateBasics(displayName: String, handle: String) async throws
+    /// Persists the three privacy toggle arrays to the shared store.
+    func updatePrivacy(
+        activityVisibility: [ProfileToggleItem],
+        mapPreferences: [ProfileToggleItem],
+        closeFriends: [ProfileToggleItem]
+    ) async throws
 }
 
 protocol SharingRepository {

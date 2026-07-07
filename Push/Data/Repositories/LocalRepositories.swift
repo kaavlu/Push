@@ -28,6 +28,10 @@ final class LocalFriendRepository: FriendRepository {
     func presenceStatuses() async throws -> [PresenceStatus] {
         database.orderedPeople.compactMap { database.statusesByPersonID[$0.id] }
     }
+
+    func setCurrentUserAvailability(_ availability: FriendAvailabilityState) async throws {
+        database.setAvailability(availability)
+    }
 }
 
 @MainActor
@@ -82,6 +86,75 @@ final class LocalPushRepository: PushRepository {
     func allPlaces() async throws -> [Place] {
         Array(database.placesByID.values)
     }
+
+    func createPush(_ draft: PushDraft) async throws -> PushPlan.ID {
+        let groupIDs = draft.recipientIDs.compactMap { token in
+            token.hasPrefix("group_") ? String(token.dropFirst("group_".count)) : nil
+        }
+        let friendIDs = draft.recipientIDs.compactMap { token in
+            token.hasPrefix("friend_") ? String(token.dropFirst("friend_".count)) : nil
+        }
+        let singleGroupOnly = groupIDs.count == 1 && friendIDs.isEmpty
+        let planID = "push-\(UUID().uuidString)"
+        let now = Date()
+
+        // Invitees: selected friends plus members of any selected groups,
+        // deduped, with the creator excluded (they get an explicit .in below).
+        let groupMemberIDs = database.memberships
+            .filter { $0.membershipStatus == .active && groupIDs.contains($0.groupID) }
+            .map(\.personID)
+        var invitees = Set(friendIDs).union(groupMemberIDs)
+        invitees.remove(draft.creatorID)
+
+        let plan = makePlan(planID: planID, draft: draft, singleGroupOnly: singleGroupOnly, groupIDs: groupIDs, now: now)
+        let responses = makeResponses(planID: planID, draft: draft, invitees: invitees, now: now)
+        database.createPush(plan: plan, responses: responses)
+        return planID
+    }
+
+    private func makePlan(
+        planID: String, draft: PushDraft,
+        singleGroupOnly: Bool, groupIDs: [String], now: Date
+    ) -> PushPlan {
+        PushPlan(
+            id: planID,
+            title: draft.title,
+            groupID: singleGroupOnly ? groupIDs[0] : nil,
+            creatorID: draft.creatorID,
+            createdAt: now,
+            updatedAt: now,
+            startsAt: draft.startsAt,
+            hasExplicitTime: true,
+            isApproximateTime: false,
+            expiresAt: draft.startsAt.addingTimeInterval(CreatePushConstants.expiryWindow),
+            cancelledAt: nil,
+            placeID: nil,
+            placeIsSuggested: false,
+            state: .collecting,
+            audience: singleGroupOnly ? .group : .inviteesOnly,
+            note: draft.notes.isEmpty ? nil : draft.notes,
+            locationText: draft.locationText.isEmpty ? nil : draft.locationText
+        )
+    }
+
+    private func makeResponses(
+        planID: String, draft: PushDraft,
+        invitees: Set<String>, now: Date
+    ) -> [PushResponse] {
+        let creatorResponse = PushResponse(
+            id: "\(planID)-\(draft.creatorID)", pushID: planID,
+            personID: draft.creatorID, response: .in,
+            respondedAt: now, readyState: .unknown
+        )
+        let inviteeResponses = invitees.map { personID in
+            PushResponse(
+                id: "\(planID)-\(personID)", pushID: planID,
+                personID: personID, response: .pending,
+                respondedAt: nil, readyState: .unknown
+            )
+        }
+        return [creatorResponse] + inviteeResponses
+    }
 }
 
 @MainActor
@@ -94,6 +167,30 @@ final class LocalProfileRepository: ProfileRepository {
 
     func userProfile() async throws -> UserProfile {
         database.profile
+    }
+
+    func updateBasics(displayName: String, handle: String) async throws {
+        // updatePerson targets firstName; displayName and initials derive automatically.
+        database.updatePerson(id: database.currentUserID, firstName: displayName)
+        database.updateProfile(
+            handle: handle,
+            activityVisibility: database.profile.activityVisibility,
+            mapPreferences: database.profile.mapPreferences,
+            closeFriends: database.profile.closeFriends
+        )
+    }
+
+    func updatePrivacy(
+        activityVisibility: [ProfileToggleItem],
+        mapPreferences: [ProfileToggleItem],
+        closeFriends: [ProfileToggleItem]
+    ) async throws {
+        database.updateProfile(
+            handle: database.profile.handle,
+            activityVisibility: activityVisibility,
+            mapPreferences: mapPreferences,
+            closeFriends: closeFriends
+        )
     }
 }
 
@@ -121,4 +218,9 @@ final class LocalFeedRepository: FeedRepository {
     func events() async throws -> [FeedEvent] {
         database.feedEvents
     }
+}
+
+private enum CreatePushConstants {
+    /// Pushes expire six hours after their start, matching seed plans.
+    static let expiryWindow: TimeInterval = 6 * 60 * 60
 }

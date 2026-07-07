@@ -81,7 +81,8 @@ extension SeedData {
             placeIsSuggested: placeIsSuggested,
             state: state,
             audience: .group,
-            note: note
+            note: note,
+            locationText: nil
         )
     }
 
