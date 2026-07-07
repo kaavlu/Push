@@ -106,7 +106,17 @@ final class LocalPushRepository: PushRepository {
         var invitees = Set(friendIDs).union(groupMemberIDs)
         invitees.remove(draft.creatorID)
 
-        let plan = PushPlan(
+        let plan = makePlan(planID: planID, draft: draft, singleGroupOnly: singleGroupOnly, groupIDs: groupIDs, now: now)
+        let responses = makeResponses(planID: planID, draft: draft, invitees: invitees, now: now)
+        database.createPush(plan: plan, responses: responses)
+        return planID
+    }
+
+    private func makePlan(
+        planID: String, draft: PushDraft,
+        singleGroupOnly: Bool, groupIDs: [String], now: Date
+    ) -> PushPlan {
+        PushPlan(
             id: planID,
             title: draft.title,
             groupID: singleGroupOnly ? groupIDs[0] : nil,
@@ -125,7 +135,12 @@ final class LocalPushRepository: PushRepository {
             note: draft.notes.isEmpty ? nil : draft.notes,
             locationText: draft.locationText.isEmpty ? nil : draft.locationText
         )
+    }
 
+    private func makeResponses(
+        planID: String, draft: PushDraft,
+        invitees: Set<String>, now: Date
+    ) -> [PushResponse] {
         let creatorResponse = PushResponse(
             id: "\(planID)-\(draft.creatorID)", pushID: planID,
             personID: draft.creatorID, response: .in,
@@ -138,8 +153,7 @@ final class LocalPushRepository: PushRepository {
                 respondedAt: nil, readyState: .unknown
             )
         }
-        database.createPush(plan: plan, responses: [creatorResponse] + inviteeResponses)
-        return planID
+        return [creatorResponse] + inviteeResponses
     }
 }
 

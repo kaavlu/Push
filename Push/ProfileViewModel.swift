@@ -76,6 +76,8 @@ final class ProfileViewModel: ObservableObject {
         profile = data
         displayName = data.name
         handle = data.handle
+        // A store reload is authoritative: intentionally resets UI-only state
+        // (Ghost Mode selection, typed initials) that is deliberately not persisted.
         initials = data.initials
         profileImageAssetName = data.imageAssetName
         selectedAvailability = data.availability
