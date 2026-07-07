@@ -29,6 +29,30 @@ enum PushControlStyle {
     static let primaryGlowOpacity = 0.34
 }
 
+enum PushOnboardingGlassStyle {
+    static let warmTint = PushColorPalette.Onboarding.glassTint
+    static let stroke = Color.white.opacity(0.66)
+    static let shadow = PushGlassStyle.shadowColor.opacity(PushGlassStyle.shadowOpacity)
+    static let shadowRadius: CGFloat = 15
+    static let shadowYOffset: CGFloat = 14
+}
+
+enum PushOnboardingControlStyle {
+    static let primaryGradient = LinearGradient(
+        colors: [PushColorPalette.Onboarding.ctaTop, PushColorPalette.Onboarding.ctaBottom],
+        startPoint: .top,
+        endPoint: .bottom
+    )
+    static let pressScale = 0.97
+    static let pressAnimation = Animation.easeInOut(duration: 0.18)
+    static let primaryShadowOpacity = 0.32
+    static let primaryShadowRadius: CGFloat = 12
+    static let primaryShadowYOffset: CGFloat = 12
+    static let secondaryShadowOpacity = 0.14
+    static let secondaryShadowRadius: CGFloat = 10
+    static let secondaryShadowYOffset: CGFloat = 8
+}
+
 enum PushControlColors {
     static let activeForeground = PushColorPalette.Accent.walnut
     static let inactiveForeground = PushColorPalette.Accent.walnut.opacity(PushControlStyle.inactiveForegroundOpacity)
@@ -39,6 +63,16 @@ enum PushControlColors {
     static let textPrimary = PushColorPalette.Accent.walnut
     static let textSecondary = PushColorPalette.Accent.walnut.opacity(0.70)
     static let textTertiary = PushColorPalette.Accent.walnut.opacity(0.52)
+}
+
+enum PushTypography {
+    static func rounded(size: CGFloat, weight: Font.Weight) -> Font {
+        .system(size: size, weight: weight, design: .rounded)
+    }
+
+    static func text(size: CGFloat, weight: Font.Weight) -> Font {
+        .system(size: size, weight: weight)
+    }
 }
 
 extension View {
@@ -83,5 +117,30 @@ extension View {
             radius: PushGlassStyle.shadowRadius,
             y: PushGlassStyle.shadowYOffset
         )
+    }
+
+    func pushOnboardingGlassBackground(cornerRadius: CGFloat) -> some View {
+        let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+        return background(.ultraThinMaterial, in: shape)
+            .background(shape.fill(PushOnboardingGlassStyle.warmTint))
+            .overlay {
+                shape.stroke(
+                    PushOnboardingGlassStyle.stroke,
+                    lineWidth: PushGlassStyle.strokeWidth
+                )
+            }
+            .shadow(
+                color: PushOnboardingGlassStyle.shadow,
+                radius: PushOnboardingGlassStyle.shadowRadius,
+                y: PushOnboardingGlassStyle.shadowYOffset
+            )
+    }
+}
+
+struct PushPressStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? PushOnboardingControlStyle.pressScale : 1)
+            .animation(PushOnboardingControlStyle.pressAnimation, value: configuration.isPressed)
     }
 }

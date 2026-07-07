@@ -1,3 +1,28 @@
+# Issue #22 — Onboarding Lab Style-System Migration
+
+## Goal
+Refactor the DEBUG-only onboarding lab so its visual styling is sourced from the shared Push
+design system while preserving the current onboarding UX and visual treatment.
+
+## Contract
+- Keep screen order, copy, spacing, layout hierarchy, animation timing, and interactions unchanged.
+- Keep `OnboardingLabMetric` only for onboarding layout measurements.
+- Make `OnboardingLabColor` a thin semantic alias layer over shared Push palette/control/puck tokens.
+- Move onboarding-specific color, glass, and press/button variants into shared Push style files.
+- Keep onboarding-specific components intact: mini map, keypad, chips, privacy rows, progress chrome,
+  notification rows, and add-friends list.
+- Keep onboarding DEBUG-only; do not add production auth, permissions, contacts, backend, or navigation.
+
+## Acceptance Criteria
+- Onboarding screens look the same or extremely close after the refactor.
+- No standalone `Color(labHex:)` usage remains in `Push/OnboardingLab`.
+- Onboarding glass cards use a shared Push glass variant rather than a local material stack.
+- Onboarding button press styling uses a shared Push control variant.
+- App builds successfully and onboarding preview/source compiles.
+- Manually inspect every onboarding screen for obvious visual regressions.
+
+---
+
 # Issue #8 — Zoom-Aware Pucks And Regional Clustering
 
 ## Goal
