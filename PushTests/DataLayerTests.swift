@@ -209,6 +209,63 @@ extension DataLayerTests {
         XCTAssertEqual(received, container.storeRevision)
         sub.cancel()
     }
+
+    // MARK: - createPush
+
+    @MainActor
+    func test_createPush_friendsOnly_insertsPlanAndPendingResponses() async throws {
+        let container = AppDataContainer(seed: .standard())
+        let me = container.currentUserID
+        let friends = try await container.friends.friends()
+        let a = friends[0].id
+        let b = friends[1].id
+        let draft = PushDraft(
+            title: "Coffee run",
+            recipientIDs: ["friend_\(a)", "friend_\(b)"],
+            startsAt: Date(), locationText: "Blue Bottle", notes: "", creatorID: me
+        )
+        let id = try await container.pushes.createPush(draft)
+
+        let plans = try await container.pushes.activePlans()
+        let plan = try XCTUnwrap(plans.first { $0.id == id })
+        XCTAssertNil(plan.groupID)
+        XCTAssertEqual(plan.audience, .inviteesOnly)
+        XCTAssertEqual(plan.locationText, "Blue Bottle")
+
+        let responses = try await container.pushes.responses().filter { $0.pushID == id }
+        let mine = responses.filter { $0.personID == me }
+        XCTAssertEqual(mine.count, 1)
+        XCTAssertEqual(mine.first?.response, .in)
+        XCTAssertEqual(Set(responses.filter { $0.response == .pending }.map(\.personID)), [a, b])
+        XCTAssertFalse(responses.contains { $0.personID == me && $0.response == .pending })
+    }
+
+    @MainActor
+    func test_createPush_singleGroup_setsGroupAudience() async throws {
+        let container = AppDataContainer(seed: .standard())
+        let groups = try await container.groups.groups()
+        let group = groups[0]
+        let draft = PushDraft(
+            title: "Group hang", recipientIDs: ["group_\(group.id)"],
+            startsAt: Date(), locationText: "", notes: "", creatorID: container.currentUserID
+        )
+        let id = try await container.pushes.createPush(draft)
+        let activePlans = try await container.pushes.activePlans()
+        let plan = try XCTUnwrap(activePlans.first { $0.id == id })
+        XCTAssertEqual(plan.groupID, group.id)
+        XCTAssertEqual(plan.audience, .group)
+    }
+
+    @MainActor
+    func test_createPush_bumpsRevisionOnce() async throws {
+        let container = AppDataContainer(seed: .standard())
+        let before = container.storeRevision
+        _ = try await container.pushes.createPush(PushDraft(
+            title: "X", recipientIDs: ["friend_\(try await container.friends.friends()[0].id)"],
+            startsAt: Date(), locationText: "", notes: "", creatorID: container.currentUserID
+        ))
+        XCTAssertEqual(container.storeRevision, before + 1)
+    }
 }
 
 /// Proves the async-throws seam carries failures into LoadState.

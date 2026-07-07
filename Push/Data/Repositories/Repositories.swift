@@ -22,6 +22,17 @@ protocol GroupRepository {
     func memberships() async throws -> [GroupMembership]
 }
 
+/// Start Push flow output. `recipientIDs` are the flow's tokens
+/// ("group_<id>" / "friend_<id>").
+struct PushDraft {
+    let title: String
+    let recipientIDs: Set<String>
+    let startsAt: Date
+    let locationText: String
+    let notes: String
+    let creatorID: Person.ID
+}
+
 protocol PushRepository {
     /// Non-cancelled plans in seed order.
     func activePlans() async throws -> [PushPlan]
@@ -29,6 +40,7 @@ protocol PushRepository {
     func setCurrentUserResponse(planID: PushPlan.ID, response: PushResponse.Response) async throws
     func pastHangouts(forMonthContaining date: Date) async throws -> [PastHangout]
     func allPlaces() async throws -> [Place]
+    func createPush(_ draft: PushDraft) async throws -> PushPlan.ID
 }
 
 protocol ProfileRepository {

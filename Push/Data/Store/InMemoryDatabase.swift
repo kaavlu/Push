@@ -56,6 +56,15 @@ final class InMemoryDatabase: ObservableObject {
         revision += 1
     }
 
+    /// Atomic: inserts the plan and all its initial responses together, then
+    /// notifies once, so no observer can see a plan without its responses.
+    func createPush(plan: PushPlan, responses newResponses: [PushResponse]) {
+        plansByID[plan.id] = plan
+        orderedPlans.append(plan)
+        self.responses.append(contentsOf: newResponses)
+        didMutate()
+    }
+
     func setResponse(
         pushID: PushPlan.ID,
         personID: Person.ID,
