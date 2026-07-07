@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0D828BEBEA992D231352079F /* MapRenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE9275BF1B3723589A96B9B9 /* MapRenderTests.swift */; };
+		B080CB7201321E2EA13DE61A /* MapDisplayPuckBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79592A0DE1B5691B233102F0 /* MapDisplayPuckBuilder.swift */; };
+		D8DD5F18932805672E8A3B5C /* RegionalActivityPuck.swift in Sources */ = {isa = PBXBuildFile; fileRef = E075D5F75356C7CC3A1C626A /* RegionalActivityPuck.swift */; };
+		45A1523B07FCA80CD92D6554 /* SelfPuckView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A570E63A1964611D67DC8399 /* SelfPuckView.swift */; };
 		D28FBECB719EA956FABC64CB /* ProfileContentBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6815BDC6F29ECA42B0F724D3 /* ProfileContentBuilder.swift */; };
 		B27C0FD8AEB589AA26360620 /* MapViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 093D311BC617336A56068266 /* MapViewModel.swift */; };
 		FEFF554378B10E3E5DFAB0CE /* PlansContentBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA18CAA53840E985E93C8FC /* PlansContentBuilder.swift */; };
@@ -114,6 +118,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		AE9275BF1B3723589A96B9B9 /* MapRenderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MapRenderTests.swift"; sourceTree = "<group>"; };
+		79592A0DE1B5691B233102F0 /* MapDisplayPuckBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "MapDisplayPuckBuilder.swift"; path = "Data/Derived/MapDisplayPuckBuilder.swift"; sourceTree = "<group>"; };
+		E075D5F75356C7CC3A1C626A /* RegionalActivityPuck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RegionalActivityPuck.swift"; sourceTree = "<group>"; };
+		A570E63A1964611D67DC8399 /* SelfPuckView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SelfPuckView.swift"; sourceTree = "<group>"; };
 		6815BDC6F29ECA42B0F724D3 /* ProfileContentBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "ProfileContentBuilder.swift"; path = "Data/Derived/ProfileContentBuilder.swift"; sourceTree = "<group>"; };
 		093D311BC617336A56068266 /* MapViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MapViewModel.swift"; sourceTree = "<group>"; };
 		EDA18CAA53840E985E93C8FC /* PlansContentBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PlansContentBuilder.swift"; path = "Data/Derived/PlansContentBuilder.swift"; sourceTree = "<group>"; };
@@ -257,6 +265,9 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				79592A0DE1B5691B233102F0 /* MapDisplayPuckBuilder.swift */,
+				E075D5F75356C7CC3A1C626A /* RegionalActivityPuck.swift */,
+				A570E63A1964611D67DC8399 /* SelfPuckView.swift */,
 				6815BDC6F29ECA42B0F724D3 /* ProfileContentBuilder.swift */,
 				093D311BC617336A56068266 /* MapViewModel.swift */,
 				EDA18CAA53840E985E93C8FC /* PlansContentBuilder.swift */,
@@ -350,6 +361,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				AE9275BF1B3723589A96B9B9 /* MapRenderTests.swift */,
 				A6ACB1600225E732F2793781 /* DerivationTests.swift */,
 				B7F75D239D47EF653BF50EE2 /* DataLayerTests.swift */,
 				5217A2B92FF2FB000011F860 /* GroupsTests.swift */,
@@ -499,6 +511,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				B080CB7201321E2EA13DE61A /* MapDisplayPuckBuilder.swift in Sources */,
+				D8DD5F18932805672E8A3B5C /* RegionalActivityPuck.swift in Sources */,
+				45A1523B07FCA80CD92D6554 /* SelfPuckView.swift in Sources */,
 				D28FBECB719EA956FABC64CB /* ProfileContentBuilder.swift in Sources */,
 				B27C0FD8AEB589AA26360620 /* MapViewModel.swift in Sources */,
 				FEFF554378B10E3E5DFAB0CE /* PlansContentBuilder.swift in Sources */,
@@ -583,6 +598,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				0D828BEBEA992D231352079F /* MapRenderTests.swift in Sources */,
 				38747D64198854C45CF41A0B /* DerivationTests.swift in Sources */,
 				83766FC6C4041622450C6A58 /* DataLayerTests.swift in Sources */,
 				5217A2BA2FF2FB000011F860 /* GroupsTests.swift in Sources */,

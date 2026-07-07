@@ -182,9 +182,9 @@ final class DerivationTests: XCTestCase {
         let pucks = seedPucks()
         XCTAssertEqual(pucks.count, 5)
         XCTAssertEqual(pucks.filter { $0.kind == .individual }.count, 2)
-        XCTAssertEqual(pucks.filter { $0.kind == .hangout }.count, 1)
+        XCTAssertEqual(pucks.filter { $0.kind == .hangout }.count, 2)
         XCTAssertEqual(pucks.filter { $0.kind == .cluster }.count, 1)
-        XCTAssertEqual(pucks.filter { $0.kind == .friendGroup }.count, 1)
+        XCTAssertEqual(pucks.filter { $0.kind == .friendGroup }.count, 0)
     }
 
     func testClusterIsRohanRyanPranayAfterRamFix() throws {
@@ -193,13 +193,16 @@ final class DerivationTests: XCTestCase {
         XCTAssertEqual(cluster.people.map(\.name), ["Rohan", "Ryan", "Pranay"])
     }
 
-    func testFriendGroupPuckMatchesExecWithGroupAvatarFirst() throws {
-        let exec = try XCTUnwrap(seedPucks().first { $0.kind == .friendGroup })
-        XCTAssertEqual(exec.id, "puck-crunch")
-        XCTAssertEqual(exec.people.first?.id, "group-exec")
-        XCTAssertEqual(exec.people.first?.name, "Exec")
-        XCTAssertEqual(exec.people.last?.isCurrentUser, true)
-        XCTAssertTrue(exec.includesCurrentUser)
+    func testCrunchPuckKeepsExecAfterRemovingCurrentUserFromExec() throws {
+        let crunch = try XCTUnwrap(seedPucks().first { $0.id == "puck-crunch" })
+        XCTAssertEqual(crunch.kind, .hangout)
+        XCTAssertEqual(crunch.people.map(\.id), ["ram", "ohm"])
+        XCTAssertEqual(crunch.groupIDs, ["exec", "michigan"])
+        XCTAssertFalse(crunch.includesCurrentUser)
+    }
+
+    func testSoloCurrentUserRendersAsStandaloneLocationPin() {
+        XCTAssertFalse(seedPucks().contains { $0.includesCurrentUser })
     }
 
     func testPuckVenueTextsMatchToday() {
@@ -225,9 +228,9 @@ final class DerivationTests: XCTestCase {
     func testGroupTagsFilterLikeToday() {
         let pucks = seedPucks()
         XCTAssertEqual(pucks.filter { $0.groupIDs.contains("india") }.count, 3)
-        XCTAssertEqual(pucks.filter { $0.groupIDs.contains("michigan") }.count, 1)
+        XCTAssertEqual(pucks.filter { $0.groupIDs.contains("michigan") }.count, 2)
         XCTAssertEqual(pucks.filter { $0.groupIDs.contains("exec") }.count, 1)
-        XCTAssertTrue(pucks.allSatisfy { !$0.groupIDs.isEmpty })
+        XCTAssertEqual(pucks.first { $0.id == "puck-crunch" }?.groupIDs, ["exec", "michigan"])
     }
 
     func testWithWhomDerivesFromCoLocation() throws {
@@ -254,8 +257,8 @@ final class DerivationTests: XCTestCase {
     func testGroupCardsDeriveCountsAndStats() {
         let cards = seedGroupCards()
         XCTAssertEqual(cards.map(\.name), ["India", "Exec", "Michigan"])
-        XCTAssertEqual(cards.map(\.memberCount), [5, 3, 5])
-        XCTAssertEqual(cards.map(\.activeNowCount), [2, 3, 5])
+        XCTAssertEqual(cards.map(\.memberCount), [5, 2, 5])
+        XCTAssertEqual(cards.map(\.activeNowCount), [2, 2, 5])
         XCTAssertEqual(cards.map(\.nearbyCount), [2, 0, 0])
         XCTAssertEqual(cards.map(\.planCount), [1, 2, 2])
     }

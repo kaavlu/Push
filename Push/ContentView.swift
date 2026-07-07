@@ -15,13 +15,17 @@ struct ContentView: View {
     @State private var presentedRoute: MainMapRoute?
     @State private var isCreateMenuPresented = false
     @State private var selectedPuck: MapPuckData?
+    @State private var mapSpan = MapDefaults.region.span
+    @State private var forcedRenderSpan: MKCoordinateSpan?
 
     var body: some View {
         ZStack(alignment: .bottom) {
             StyledMapView(
                 region: MapDefaults.region,
-                pucks: viewModel.filteredPucks,
-                onPuckSelected: { puck in selectedPuck = puck },
+                pucks: viewModel.renderPucks(for: forcedRenderSpan ?? mapSpan),
+                focusRequest: viewModel.mapFocusRequest,
+                onPuckSelected: selectMapPuck,
+                onRegionChanged: handleRegionChanged,
                 mapLayoutMargins: MapAttributionLayout.edgeInsets
             )
             .ignoresSafeArea()
@@ -160,6 +164,22 @@ struct ContentView: View {
         isCreateMenuPresented = false
         selectedNavigationItem = .map
         presentedRoute = item.route
+    }
+
+    private func selectMapPuck(_ puck: MapPuckRenderModel) {
+        if let selected = viewModel.select(puck) {
+            selectedPuck = selected
+        } else if let focusRequest = viewModel.mapFocusRequest {
+            forcedRenderSpan = focusRequest.region.span
+            mapSpan = focusRequest.region.span
+        }
+    }
+
+    private func handleRegionChanged(_ span: MKCoordinateSpan) {
+        mapSpan = span
+        if span.latitudeDelta <= MapDefaults.closeRegionalLatitudeDelta {
+            forcedRenderSpan = nil
+        }
     }
 }
 
@@ -305,6 +325,7 @@ private enum MapDefaults {
     private static let longitude = -122.4194
     private static let latitudeDelta = 0.08
     private static let longitudeDelta = 0.08
+    static let closeRegionalLatitudeDelta = 0.22
 }
 
 private enum TopDropdownLayout {

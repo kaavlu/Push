@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import MapKit
 
 struct GroupFilterItem: Identifiable, Equatable {
     static let allFriendsID = "all"
@@ -17,12 +18,25 @@ struct GroupFilterItem: Identifiable, Equatable {
     static let allFriends = GroupFilterItem(id: allFriendsID, title: "All Friends")
 }
 
+struct MapFocusRequest: Identifiable, Equatable {
+    let id = UUID()
+    let region: MKCoordinateRegion
+
+    static func == (lhs: MapFocusRequest, rhs: MapFocusRequest) -> Bool {
+        lhs.id == rhs.id
+    }
+}
+
 @MainActor
 final class MapViewModel: ObservableObject {
     @Published private(set) var loadState: LoadState<[MapPuckData]> = .idle
     @Published private(set) var filters: [GroupFilterItem] = [.allFriends]
+    @Published private(set) var selfPuck: SelfPuckData?
+    @Published private(set) var mapFocusRequest: MapFocusRequest?
     @Published var selectedFilterID: String = GroupFilterItem.allFriendsID
 
+    private var vagueRegionalSources: [RegionalPuckSource] = []
+    private var currentUserGroupIDs: Set<String> = []
     private let friends: FriendRepository
     private let groups: GroupRepository
     private let sharing: SharingRepository
@@ -54,6 +68,36 @@ final class MapViewModel: ObservableObject {
         let pucks = loadState.value ?? []
         guard selectedFilterID != GroupFilterItem.allFriendsID else { return pucks }
         return pucks.filter { $0.groupIDs.contains(selectedFilterID) }
+    }
+
+    func renderPucks(for span: MKCoordinateSpan) -> [MapPuckRenderModel] {
+        MapDisplayPuckBuilder.renderPucks(
+            from: filteredPucks,
+            selfPuck: selfPuck,
+            vagueSources: filteredVagueRegionalSources,
+            latitudeDelta: span.latitudeDelta,
+            currentUserGroupIDs: currentUserGroupIDs
+        )
+    }
+
+    func select(_ renderPuck: MapPuckRenderModel) -> MapPuckData? {
+        switch renderPuck {
+        case .friend(let puck), .smallGroup(let puck):
+            return puck
+        case .selfPuck:
+            return nil
+        case .regionalCluster(let puck):
+            mapFocusRequest = MapFocusRequest(
+                region: MKCoordinateRegion(
+                    center: puck.coordinate,
+                    span: MKCoordinateSpan(
+                        latitudeDelta: MapFocusLayout.regionalZoomLatitudeDelta,
+                        longitudeDelta: MapFocusLayout.regionalZoomLongitudeDelta
+                    )
+                )
+            )
+            return nil
+        }
     }
 
     var selectedFilterTitle: String {
@@ -96,13 +140,50 @@ final class MapViewModel: ObservableObject {
             }
 
             filters = [.allFriends] + groupList.map { GroupFilterItem(id: $0.id, title: $0.name) }
+            selfPuck = Self.selfPuck(from: presences, currentUserID: user.id)
+            currentUserGroupIDs = viewerGroups
+            vagueRegionalSources = MapDisplayPuckBuilder.vagueRegionalSources(
+                presences: presences,
+                groups: groupList,
+                memberships: memberships,
+                now: now
+            )
             loadState = .loaded(
                 MapContentBuilder.pucks(
                     presences: presences, groups: groupList, memberships: memberships, now: now
                 )
             )
         } catch {
+            selfPuck = nil
+            currentUserGroupIDs = []
+            vagueRegionalSources = []
             loadState = .failed(error)
         }
     }
+
+    private static func selfPuck(
+        from presences: [VisiblePresence],
+        currentUserID: Person.ID
+    ) -> SelfPuckData? {
+        guard
+            let presence = presences.first(where: { $0.person.id == currentUserID }),
+            let place = presence.placeInfo?.place
+        else { return nil }
+        return SelfPuckData(
+            id: presence.person.id,
+            avatarPlaceholder: presence.person.initials,
+            profileImageAssetName: presence.person.imageAssetPath,
+            coordinate: place.coordinate
+        )
+    }
+
+    private var filteredVagueRegionalSources: [RegionalPuckSource] {
+        guard selectedFilterID != GroupFilterItem.allFriendsID else { return vagueRegionalSources }
+        return vagueRegionalSources.filter { $0.groupIDs.contains(selectedFilterID) }
+    }
+}
+
+private enum MapFocusLayout {
+    static let regionalZoomLatitudeDelta = 0.06
+    static let regionalZoomLongitudeDelta = 0.06
 }

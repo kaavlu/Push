@@ -29,7 +29,7 @@ extension SeedData {
             status("pranay", .freeSoon, park, place: "dolores-lawn", note: "Maybe pulling up", minutesAgo: 5, now: now),
             status("ram", .maybeDown, gym, place: "crunch", note: "Wrapping up", minutesAgo: 12, now: now),
             status("ohm", .busy, gym, place: "crunch", note: "With Ram", minutesAgo: 12, now: now),
-            status(SeedIDs.currentUser, .maybeDown, gym, place: "crunch", note: "With Ram & Ohm", minutesAgo: 0, now: now),
+            status(SeedIDs.currentUser, .maybeDown, park, place: "north-park", note: "Near North Park", minutesAgo: 0, now: now),
             status("roh", .unavailable, off, place: nil, note: nil, minutesAgo: 60, now: now)
         ]
     }

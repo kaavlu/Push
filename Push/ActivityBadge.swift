@@ -9,6 +9,22 @@ struct ActivityBadge: View {
     let text: String
     let symbolName: String
     let availability: FriendAvailabilityState
+    let tintColor: Color?
+    let foregroundColor: Color
+
+    init(
+        text: String,
+        symbolName: String,
+        availability: FriendAvailabilityState,
+        tintColor: Color? = nil,
+        foregroundColor: Color = PuckColorTokens.badgeForeground
+    ) {
+        self.text = text
+        self.symbolName = symbolName
+        self.availability = availability
+        self.tintColor = tintColor
+        self.foregroundColor = foregroundColor
+    }
 
     var body: some View {
         HStack(spacing: ActivityBadgeLayout.spacing) {
@@ -19,7 +35,7 @@ struct ActivityBadge: View {
                 .font(.caption2.weight(.bold))
                 .lineLimit(1)
         }
-        .foregroundStyle(PuckColorTokens.badgeForeground)
+        .foregroundStyle(foregroundColor)
         .padding(.horizontal, ActivityBadgeLayout.horizontalPadding)
         .padding(.vertical, ActivityBadgeLayout.verticalPadding)
         .background {
@@ -27,7 +43,7 @@ struct ActivityBadge: View {
                 .fill(.ultraThinMaterial)
                 .background {
                     Capsule()
-                        .fill(availability.accentColor.opacity(ActivityBadgeLayout.tintOpacity))
+                        .fill((tintColor ?? availability.accentColor).opacity(ActivityBadgeLayout.tintOpacity))
                 }
         }
         .overlay {

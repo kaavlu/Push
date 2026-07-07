@@ -124,7 +124,7 @@ final class DataLayerTests: XCTestCase {
         viewModel.selectedFilterID = "india"
         XCTAssertEqual(viewModel.filteredPucks.count, 3)
         viewModel.selectedFilterID = "michigan"
-        XCTAssertEqual(viewModel.filteredPucks.count, 1)
+        XCTAssertEqual(viewModel.filteredPucks.count, 2)
     }
 
     @MainActor
@@ -154,7 +154,7 @@ extension DataLayerTests {
         await viewModel.load()
 
         XCTAssertEqual(viewModel.groups.map(\.id), ["group_india", "group_exec", "group_michigan"])
-        XCTAssertEqual(viewModel.groups.map(\.memberCount), [5, 3, 5])
+        XCTAssertEqual(viewModel.groups.map(\.memberCount), [5, 2, 5])
         XCTAssertEqual(viewModel.friends.count, 10)
 
         XCTAssertEqual(viewModel.likelyFreeNow.map(\.id), [

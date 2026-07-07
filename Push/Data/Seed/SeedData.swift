@@ -73,7 +73,7 @@ struct SeedData {
     /// First listed member of each group is its owner.
     private static let groupRosters: [(groupID: String, memberIDs: [String])] = [
         ("india", ["chitty", "nitin", "ishan", "viplove", "roh"]),
-        ("exec", ["ram", "ohm", SeedIDs.currentUser]),
+        ("exec", ["ram", "ohm"]),
         ("michigan", ["ram", "rohan", "ryan", "ohm", "pranay"])
     ]
 
@@ -101,42 +101,50 @@ struct SeedData {
             Place(
                 id: "blue-bottle", name: "Blue Bottle", shortName: "Blue Bottle",
                 address: "315 Linden St", vagueLabel: "Hayes Valley",
-                latitude: 37.7812, longitude: -122.4078
+                latitude: 37.7812, longitude: -122.4078,
+                vagueLatitude: 37.7767, vagueLongitude: -122.4241
             ),
             Place(
                 id: "dolores-park", name: "Dolores Park", shortName: "Dolores",
                 address: "19th St & Dolores St", vagueLabel: "Mission",
-                latitude: 37.7596, longitude: -122.4269
+                latitude: 37.7596, longitude: -122.4269,
+                vagueLatitude: 37.7599, vagueLongitude: -122.4148
             ),
             Place(
                 id: "dolores-lawn", name: "Dolores Park Lawn", shortName: "Dolores",
                 address: "Dolores Park, 19th St", vagueLabel: "Mission",
-                latitude: 37.7673, longitude: -122.4358
+                latitude: 37.7673, longitude: -122.4358,
+                vagueLatitude: 37.7599, vagueLongitude: -122.4148
             ),
             Place(
                 id: "souvla", name: "Souvla", shortName: "Souvla",
                 address: "517 Hayes St", vagueLabel: "Hayes Valley",
-                latitude: 37.7765, longitude: -122.4231
+                latitude: 37.7765, longitude: -122.4231,
+                vagueLatitude: 37.7767, vagueLongitude: -122.4241
             ),
             Place(
                 id: "crunch", name: "Crunch Fitness", shortName: "Crunch",
                 address: "350 Bay St", vagueLabel: "North Beach",
-                latitude: 37.7898, longitude: -122.4210
+                latitude: 37.7898, longitude: -122.4210,
+                vagueLatitude: 37.8061, vagueLongitude: -122.4103
             ),
             Place(
                 id: "north-park", name: "North Park", shortName: "North Park",
                 address: "North Park", vagueLabel: "North Park",
-                latitude: 37.7700, longitude: -122.4100
+                latitude: 37.7700, longitude: -122.4100,
+                vagueLatitude: 37.7700, vagueLongitude: -122.4100
             ),
             Place(
                 id: "little-italy", name: "Little Italy", shortName: "Little Italy",
                 address: "Columbus Ave", vagueLabel: "North Beach",
-                latitude: 37.7997, longitude: -122.4098
+                latitude: 37.7997, longitude: -122.4098,
+                vagueLatitude: 37.8061, vagueLongitude: -122.4103
             ),
             Place(
                 id: "rams-place", name: "Ram's place", shortName: "Ram's place",
                 address: "Ram's place", vagueLabel: "Nob Hill",
-                latitude: 37.7920, longitude: -122.4150
+                latitude: 37.7920, longitude: -122.4150,
+                vagueLatitude: 37.7930, vagueLongitude: -122.4161
             )
         ]
     }
