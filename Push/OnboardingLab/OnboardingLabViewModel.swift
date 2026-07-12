@@ -18,6 +18,8 @@ final class OnboardingLabViewModel: ObservableObject {
     @Published private(set) var code: String = ""
     @Published var name: String = ""
     @Published var handle: String = ""
+    @Published var email: String = ""
+    @Published var password: String = ""
     @Published private(set) var photoAdded = false
     @Published private(set) var privacy: OnboardingPrivacyOption = .exactActivity
     @Published private(set) var addedFriendIDs: Set<String> = []
@@ -67,6 +69,33 @@ final class OnboardingLabViewModel: ObservableObject {
 
     func continueFromPreview() {
         go(to: .profile)
+    }
+
+    // MARK: Sign in ⇄ sign up
+
+    /// From the sign-up (welcome) screen into the returning-user path.
+    func goToSignIn() {
+        go(to: .signIn)
+    }
+
+    /// From the sign-in screen back to sign up. Returning-user state is
+    /// cleared so the two entry points never bleed into each other.
+    func goToSignUp() {
+        email = ""
+        password = ""
+        go(to: .welcome)
+    }
+
+    /// A returning user is already set up, so sign-in lands straight on
+    /// the "you're in" screen rather than re-running setup.
+    func completeSignIn() {
+        go(to: .done)
+    }
+
+    /// Sign-in CTA is live once both fields have content (mock only —
+    /// no credentials are validated).
+    var canSubmitSignIn: Bool {
+        !email.trimmingCharacters(in: .whitespaces).isEmpty && !password.isEmpty
     }
 
     // MARK: Phone + verify keypad
@@ -171,6 +200,8 @@ final class OnboardingLabViewModel: ObservableObject {
         code = ""
         name = ""
         handle = ""
+        email = ""
+        password = ""
         photoAdded = false
         privacy = .exactActivity
         addedFriendIDs = []

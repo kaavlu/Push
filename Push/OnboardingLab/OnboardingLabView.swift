@@ -41,6 +41,7 @@ struct OnboardingLabView: View {
     private var screen: some View {
         switch model.screen {
         case .welcome: OnboardingWelcomeScreen(model: model)
+        case .signIn: OnboardingSignInScreen(model: model)
         case .preview: OnboardingPreviewScreen(model: model)
         case .phone: OnboardingPhoneScreen(model: model)
         case .verify: OnboardingVerifyScreen(model: model)

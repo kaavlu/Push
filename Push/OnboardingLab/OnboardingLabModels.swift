@@ -11,7 +11,7 @@ import SwiftUI
 
 /// The eleven onboarding steps, in flow order.
 enum OnboardingScreen: String, CaseIterable, Identifiable {
-    case welcome, phone, verify, preview, profile, privacy
+    case welcome, signIn, phone, verify, preview, profile, privacy
     case location, notifications, contacts, friends, done
 
     var id: String { rawValue }

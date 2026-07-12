@@ -63,6 +63,7 @@
 		89B0A90E7BED82809B8F7CC6 /* OnboardingLabComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9F228154F01B7C43ABF19AC /* OnboardingLabComponents.swift */; };
 		0841988DDDC0FE582CA3DC1C /* OnboardingIntroScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 505D26D8B456C9DA2DA54798 /* OnboardingIntroScreens.swift */; };
 		8DD80312514A04878A5CDA32 /* OnboardingAuthScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB850F67089F40BC89FD317B /* OnboardingAuthScreens.swift */; };
+		A1B2C3D4E5F60718293A4B5C /* OnboardingSignInScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1E2D3C4B5A69788796A5B4 /* OnboardingSignInScreen.swift */; };
 		9B875E5A42B65813296EC86A /* OnboardingSetupScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B36EABEBC00D720BBAEF826 /* OnboardingSetupScreens.swift */; };
 		3365263B3A1DA1852DF9B882 /* OnboardingConnectScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BD4E64A56FA139E560B1EBB /* OnboardingConnectScreens.swift */; };
 		5217A29E2FF1B8A00011F860 /* MapPuckModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A29D2FF1B8A00011F860 /* MapPuckModels.swift */; };
@@ -198,6 +199,7 @@
 		C9F228154F01B7C43ABF19AC /* OnboardingLabComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingLab/OnboardingLabComponents.swift; sourceTree = "<group>"; };
 		505D26D8B456C9DA2DA54798 /* OnboardingIntroScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingLab/OnboardingIntroScreens.swift; sourceTree = "<group>"; };
 		EB850F67089F40BC89FD317B /* OnboardingAuthScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingLab/OnboardingAuthScreens.swift; sourceTree = "<group>"; };
+		0F1E2D3C4B5A69788796A5B4 /* OnboardingSignInScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingLab/OnboardingSignInScreen.swift; sourceTree = "<group>"; };
 		0B36EABEBC00D720BBAEF826 /* OnboardingSetupScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingLab/OnboardingSetupScreens.swift; sourceTree = "<group>"; };
 		2BD4E64A56FA139E560B1EBB /* OnboardingConnectScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingLab/OnboardingConnectScreens.swift; sourceTree = "<group>"; };
 		5217A29D2FF1B8A00011F860 /* MapPuckModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapPuckModels.swift; sourceTree = "<group>"; };
@@ -388,6 +390,7 @@
 				C9F228154F01B7C43ABF19AC /* OnboardingLabComponents.swift */,
 				505D26D8B456C9DA2DA54798 /* OnboardingIntroScreens.swift */,
 				EB850F67089F40BC89FD317B /* OnboardingAuthScreens.swift */,
+				0F1E2D3C4B5A69788796A5B4 /* OnboardingSignInScreen.swift */,
 				0B36EABEBC00D720BBAEF826 /* OnboardingSetupScreens.swift */,
 				2BD4E64A56FA139E560B1EBB /* OnboardingConnectScreens.swift */,
 				5217A26D2FF1B6DA0011F860 /* Assets.xcassets */,
@@ -651,6 +654,7 @@
 				89B0A90E7BED82809B8F7CC6 /* OnboardingLabComponents.swift in Sources */,
 				0841988DDDC0FE582CA3DC1C /* OnboardingIntroScreens.swift in Sources */,
 				8DD80312514A04878A5CDA32 /* OnboardingAuthScreens.swift in Sources */,
+				A1B2C3D4E5F60718293A4B5C /* OnboardingSignInScreen.swift in Sources */,
 				9B875E5A42B65813296EC86A /* OnboardingSetupScreens.swift in Sources */,
 				3365263B3A1DA1852DF9B882 /* OnboardingConnectScreens.swift in Sources */,
 			);

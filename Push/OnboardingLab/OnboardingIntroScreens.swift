@@ -69,6 +69,11 @@ struct OnboardingWelcomeScreen: View {
             OnboardingAuthButton(kind: .apple) { model.choose(.apple) }
             OnboardingAuthButton(kind: .google) { model.choose(.google) }
             OnboardingAuthButton(kind: .mobile) { model.choose(.mobile) }
+            OnboardingAuthSwitchLink(
+                prompt: "Already have an account?",
+                action: "Sign in"
+            ) { model.goToSignIn() }
+            .padding(.top, 2)
             terms
         }
     }
