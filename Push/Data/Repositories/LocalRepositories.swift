@@ -88,12 +88,9 @@ final class LocalPushRepository: PushRepository {
     }
 
     func createPush(_ draft: PushDraft) async throws -> PushPlan.ID {
-        let groupIDs = draft.recipientIDs.compactMap { token in
-            token.hasPrefix("group_") ? String(token.dropFirst("group_".count)) : nil
-        }
-        let friendIDs = draft.recipientIDs.compactMap { token in
-            token.hasPrefix("friend_") ? String(token.dropFirst("friend_".count)) : nil
-        }
+        let recipientIDs = parsedRecipients(from: draft)
+        let groupIDs = recipientIDs.groupIDs
+        let friendIDs = recipientIDs.friendIDs
         let singleGroupOnly = groupIDs.count == 1 && friendIDs.isEmpty
         let planID = "push-\(UUID().uuidString)"
         let now = Date()
@@ -110,6 +107,25 @@ final class LocalPushRepository: PushRepository {
         let responses = makeResponses(planID: planID, draft: draft, invitees: invitees, now: now)
         database.createPush(plan: plan, responses: responses)
         return planID
+    }
+
+    func updatePush(planID: PushPlan.ID, with draft: PushDraft) async throws {
+        guard let existing = database.plansByID[planID] else { return }
+        let recipientIDs = parsedRecipients(from: draft)
+        let singleGroupOnly = recipientIDs.groupIDs.count == 1 && recipientIDs.friendIDs.isEmpty
+        let invitees = invitees(
+            groupIDs: recipientIDs.groupIDs,
+            friendIDs: recipientIDs.friendIDs,
+            creatorID: existing.creatorID
+        )
+        let plan = updatedPlan(
+            existing: existing, draft: draft, singleGroupOnly: singleGroupOnly,
+            groupIDs: recipientIDs.groupIDs, now: Date()
+        )
+        let responses = updatedResponses(
+            planID: planID, creatorID: existing.creatorID, invitees: invitees
+        )
+        database.updatePush(plan: plan, responses: responses)
     }
 
     private func makePlan(
@@ -154,6 +170,79 @@ final class LocalPushRepository: PushRepository {
             )
         }
         return [creatorResponse] + inviteeResponses
+    }
+
+    private func parsedRecipients(from draft: PushDraft) -> (groupIDs: [String], friendIDs: [String]) {
+        let groupIDs = draft.recipientIDs.compactMap { token in
+            token.hasPrefix("group_") ? String(token.dropFirst("group_".count)) : nil
+        }
+        let friendIDs = draft.recipientIDs.compactMap { token in
+            token.hasPrefix("friend_") ? String(token.dropFirst("friend_".count)) : nil
+        }
+        return (groupIDs, friendIDs)
+    }
+
+    private func invitees(
+        groupIDs: [String],
+        friendIDs: [String],
+        creatorID: Person.ID
+    ) -> Set<Person.ID> {
+        let groupMemberIDs = database.memberships
+            .filter { $0.membershipStatus == .active && groupIDs.contains($0.groupID) }
+            .map(\.personID)
+        var invitees = Set(friendIDs).union(groupMemberIDs)
+        invitees.remove(creatorID)
+        return invitees
+    }
+
+    private func updatedPlan(
+        existing: PushPlan, draft: PushDraft,
+        singleGroupOnly: Bool, groupIDs: [String], now: Date
+    ) -> PushPlan {
+        PushPlan(
+            id: existing.id,
+            title: draft.title,
+            groupID: singleGroupOnly ? groupIDs[0] : nil,
+            creatorID: existing.creatorID,
+            createdAt: existing.createdAt,
+            updatedAt: now,
+            startsAt: draft.startsAt,
+            hasExplicitTime: existing.hasExplicitTime,
+            isApproximateTime: existing.isApproximateTime,
+            expiresAt: draft.startsAt.addingTimeInterval(CreatePushConstants.expiryWindow),
+            cancelledAt: existing.cancelledAt,
+            placeID: nil,
+            placeIsSuggested: false,
+            state: existing.state,
+            audience: singleGroupOnly ? .group : .inviteesOnly,
+            note: draft.notes.isEmpty ? nil : draft.notes,
+            locationText: draft.locationText.isEmpty ? nil : draft.locationText
+        )
+    }
+
+    private func updatedResponses(
+        planID: PushPlan.ID,
+        creatorID: Person.ID,
+        invitees: Set<Person.ID>
+    ) -> [PushResponse] {
+        let existing = Dictionary(
+            uniqueKeysWithValues: database.responses
+                .filter { $0.pushID == planID }
+                .map { ($0.personID, $0) }
+        )
+        let creator = existing[creatorID] ?? PushResponse(
+            id: "\(planID)-\(creatorID)", pushID: planID,
+            personID: creatorID, response: .in,
+            respondedAt: Date(), readyState: .unknown
+        )
+        let inviteeRows = invitees.map { personID in
+            existing[personID] ?? PushResponse(
+                id: "\(planID)-\(personID)", pushID: planID,
+                personID: personID, response: .pending,
+                respondedAt: nil, readyState: .unknown
+            )
+        }
+        return [creator] + inviteeRows
     }
 }
 

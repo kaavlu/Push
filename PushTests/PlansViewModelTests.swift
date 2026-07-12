@@ -204,6 +204,28 @@ final class PlansViewModelTests: XCTestCase {
         XCTAssertTrue(vm.plans.contains { $0.title == "New hang" })
     }
 
+    func test_plansViewModel_reloadsWhenPushUpdated() async throws {
+        let container = AppDataContainer(seed: .standard())
+        let vm = PlansViewModel(container: container)
+        try await Task.sleep(nanoseconds: 150_000_000)
+        await vm.load()
+
+        try await container.pushes.updatePush(planID: "gym-later", with: PushDraft(
+            title: "Gym and smoothies",
+            recipientIDs: ["group_exec"],
+            startsAt: Date(),
+            locationText: "Equinox",
+            notes: "Meet downstairs",
+            creatorID: container.currentUserID
+        ))
+
+        try await Task.sleep(nanoseconds: 200_000_000)
+        let edited = try XCTUnwrap(vm.yourPushes.first { $0.id == "gym-later" })
+        XCTAssertEqual(edited.title, "Gym and smoothies")
+        XCTAssertEqual(edited.locationHint, "Equinox")
+        XCTAssertEqual(edited.note, "Meet downstairs")
+    }
+
     func testRespondWritesThroughToRepository() async throws {
         let date = try julyDate(day: 6)
         let container = AppDataContainer(seed: .standard(now: date), referenceDate: date)

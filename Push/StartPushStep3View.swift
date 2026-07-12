@@ -27,7 +27,7 @@ struct StartPushStep3View: View {
                 .padding(.bottom, StartPushLayout.contentTopSpacing)
             }
 
-            StartPushPrimaryButton(title: "Start push", isEnabled: true, action: onNext)
+            StartPushPrimaryButton(title: viewModel.submitButtonTitle, isEnabled: true, action: onNext)
                 .padding(.horizontal, StartPushLayout.horizontalPadding)
                 .padding(.bottom, StartPushLayout.bottomPadding)
         }

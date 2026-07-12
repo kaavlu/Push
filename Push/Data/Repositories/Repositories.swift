@@ -44,6 +44,7 @@ protocol PushRepository {
     func pastHangouts(forMonthContaining date: Date) async throws -> [PastHangout]
     func allPlaces() async throws -> [Place]
     func createPush(_ draft: PushDraft) async throws -> PushPlan.ID
+    func updatePush(planID: PushPlan.ID, with draft: PushDraft) async throws
 }
 
 protocol ProfileRepository {

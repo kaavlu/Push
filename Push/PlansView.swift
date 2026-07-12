@@ -33,9 +33,7 @@ struct PlansView: View {
             YourPushesListView(viewModel: viewModel)
         }
         .fullScreenCover(item: $viewModel.managedPlan) { plan in
-            ManagePushView(plan: plan) {
-                viewModel.managedPlan = nil
-            }
+            StartPushFlowView(context: .edit(plan: plan))
         }
     }
 
@@ -104,8 +102,7 @@ private struct YourPushesModule: View {
                         viewModel.isYourPushesPresented = true
                     } label: {
                         Text("See all \(viewModel.yourPushes.count) ›")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(PushColorPalette.Accent.walnut)
+                            .plansModuleActionText()
                     }
                     .buttonStyle(.plain)
                 }
@@ -137,8 +134,7 @@ private struct ActivePushesModule: View {
                         viewModel.isReviewDeckPresented = true
                     } label: {
                         Text("Review \(viewModel.activePushes.count) ›")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(PushColorPalette.Accent.walnut)
+                            .plansModuleActionText()
                     }
                     .buttonStyle(.plain)
                 }
@@ -154,14 +150,15 @@ private struct ActivePushesModule: View {
 struct YourPushesListView: View {
     @ObservedObject var viewModel: PlansViewModel
     @Environment(\.dismiss) private var dismiss
+    @State private var managedPlan: PlanData?
 
     var body: some View {
         ZStack {
-            PushModalBackground()
+            FriendsBackground()
             VStack(alignment: .leading, spacing: 0) {
                 Text("Your Pushes")
                     .font(.largeTitle.weight(.bold))
-                    .foregroundStyle(PushControlColors.textEspresso)
+                    .foregroundStyle(PushControlColors.activeForeground)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.top, PlansLayout.headerTopPadding)
                     .padding(.horizontal, PlansLayout.horizontalPadding)
@@ -169,12 +166,12 @@ struct YourPushesListView: View {
                     VStack(spacing: PlansLayout.currentPushesSpacing) {
                         ForEach(viewModel.yourPushes) { plan in
                             YourPushCard(plan: plan) {
-                                viewModel.openManage(plan: plan)
+                                managedPlan = plan
                             }
                         }
                     }
                     .padding(.horizontal, PlansLayout.horizontalPadding)
-                    .padding(.top, PlansLayout.sectionSpacing)
+                    .padding(.top, PlansLayout.listHeaderToCardsSpacing)
                     .padding(.bottom, PlansLayout.bottomPadding)
                 }
             }
@@ -183,6 +180,9 @@ struct YourPushesListView: View {
             PushModalCloseButtonBar(accessibilityLabel: "Close your pushes") {
                 dismiss()
             }
+        }
+        .fullScreenCover(item: $managedPlan) { plan in
+            StartPushFlowView(context: .edit(plan: plan))
         }
     }
 }
@@ -219,5 +219,12 @@ private struct StartPlanButton: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Start a new push")
+    }
+}
+
+private extension Text {
+    func plansModuleActionText() -> some View {
+        font(.subheadline.weight(.semibold))
+            .foregroundStyle(PushColorPalette.Accent.walnut)
     }
 }

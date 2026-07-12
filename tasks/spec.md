@@ -1,3 +1,26 @@
+# Issue #24 — Your Pushes Wiring + UI Fix
+
+## Goal
+Let owned Push cards edit their existing Push through the Start Push flow and repository layer,
+and make the Your Pushes list use the same cream page background as the main Pushes screen.
+
+## Contract
+- Tapping `Manage` on a Your Push card opens the first step of `StartPushFlowView`.
+- Edit mode pre-populates recipients, title, start time, location, and notes from the existing
+  `PushPlan` and `PushResponse` rows.
+- Saving an edit updates the existing `PushPlan` and response rows through `PushRepository`;
+  it must not create a duplicate Push or mutate ViewModel-only state.
+- Store mutation bumps the in-memory revision once so existing Pushes views reload.
+- The Your Pushes "See all" screen uses the shared cream `FriendsBackground`.
+- Do not redesign cards or unrelated Pushes behavior.
+
+## Acceptance Criteria
+- Existing owned Pushes open editable Start Push flow from step 1.
+- Edited data persists anywhere Push cards are derived from the repository.
+- Added/removed recipients update response rows without duplicating the Push.
+- Focused data-layer and ViewModel tests cover edit persistence and refresh behavior.
+- Relevant Push tests/build validations pass.
+
 # Issue #22 — Onboarding Lab Style-System Migration
 
 ## Goal
