@@ -22,11 +22,19 @@ struct StartPushLaunchContext: Identifiable, Equatable {
     let recipientIDs: Set<String>
     let locationHint: String?
     let initialStep: Int
+    let editPlanID: PushPlan.ID?
+    let editRecipientIDs: Set<String>
+    let editTitle: String?
+    let editNote: String?
 
     static let blank = StartPushLaunchContext(
         recipientIDs: [],
         locationHint: nil,
-        initialStep: StartPushStep.recipients
+        initialStep: StartPushStep.recipients,
+        editPlanID: nil,
+        editRecipientIDs: [],
+        editTitle: nil,
+        editNote: nil
     )
 
     static func friends(_ friendIDs: [String], locationHint: String? = nil) -> StartPushLaunchContext {
@@ -34,7 +42,11 @@ struct StartPushLaunchContext: Identifiable, Equatable {
         return StartPushLaunchContext(
             recipientIDs: recipientIDs,
             locationHint: locationHint,
-            initialStep: recipientIDs.isEmpty ? StartPushStep.recipients : StartPushStep.details
+            initialStep: recipientIDs.isEmpty ? StartPushStep.recipients : StartPushStep.details,
+            editPlanID: nil,
+            editRecipientIDs: [],
+            editTitle: nil,
+            editNote: nil
         )
     }
 
@@ -42,7 +54,36 @@ struct StartPushLaunchContext: Identifiable, Equatable {
         return StartPushLaunchContext(
             recipientIDs: ["group_\(groupID)"],
             locationHint: locationHint,
-            initialStep: StartPushStep.details
+            initialStep: StartPushStep.details,
+            editPlanID: nil,
+            editRecipientIDs: [],
+            editTitle: nil,
+            editNote: nil
+        )
+    }
+
+    static func edit(planID: PushPlan.ID) -> StartPushLaunchContext {
+        StartPushLaunchContext(
+            recipientIDs: [],
+            locationHint: nil,
+            initialStep: StartPushStep.recipients,
+            editPlanID: planID,
+            editRecipientIDs: [],
+            editTitle: nil,
+            editNote: nil
+        )
+    }
+
+    static func edit(plan: PlanData) -> StartPushLaunchContext {
+        let recipientIDs = Set(plan.participants.map { "friend_\($0.id)" })
+        return StartPushLaunchContext(
+            recipientIDs: recipientIDs,
+            locationHint: plan.locationHint,
+            initialStep: StartPushStep.recipients,
+            editPlanID: plan.id,
+            editRecipientIDs: recipientIDs,
+            editTitle: plan.title,
+            editNote: plan.note
         )
     }
 
@@ -108,6 +149,8 @@ final class StartPushViewModel: ObservableObject {
     var canAdvanceStep2: Bool { !pushText.trimmingCharacters(in: .whitespaces).isEmpty }
     var characterCount: Int { pushText.count }
     var pushTextMaxCount: Int { pushTextMaxLength }
+    var isEditMode: Bool { launchContext.editPlanID != nil }
+    var submitButtonTitle: String { isEditMode ? "Save changes" : "Start push" }
 
     var selectedRecipients: [PushRecipientItem] {
         (groups + friends).filter { selectedRecipientIDs.contains($0.id) }
@@ -138,8 +181,14 @@ final class StartPushViewModel: ObservableObject {
 
     private func applyLaunchContext() {
         selectedRecipientIDs = launchContext.recipientIDs
+        if let editTitle = launchContext.editTitle {
+            pushText = editTitle
+        }
         if let locationHint = launchContext.locationHint {
             location = locationHint
+        }
+        if let editNote = launchContext.editNote {
+            notes = editNote
         }
         step = launchContext.initialStep
     }
@@ -187,6 +236,7 @@ final class StartPushViewModel: ObservableObject {
                 let availability = statusByPersonID[$0.person.id]?.availability
                 return availability == .maybeDown || availability == .freeSoon
             }.map(\.item)
+            try await applyEditContextIfNeeded(container: container)
             loadState = .loaded(())
         } catch {
             loadState = .failed(error)
@@ -212,6 +262,9 @@ final class StartPushViewModel: ObservableObject {
 
     func goBack() {
         guard step > 1 else { return }
+        if isEditMode && step == StartPushStep.confirmation {
+            hasSubmitted = false
+        }
         step -= 1
     }
 
@@ -233,10 +286,48 @@ final class StartPushViewModel: ObservableObject {
             creatorID: container.currentUserID
         )
         do {
-            _ = try await container.pushes.createPush(draft)
+            if let editPlanID = launchContext.editPlanID {
+                try await container.pushes.updatePush(planID: editPlanID, with: draft)
+            } else {
+                _ = try await container.pushes.createPush(draft)
+            }
         } catch {
             // Local repo never throws; a real backend would surface this. Flag
             // stays true so a failed submit does not silently retry.
         }
+    }
+
+    private func applyEditContextIfNeeded(container: AppDataContainer) async throws {
+        guard let planID = launchContext.editPlanID else { return }
+        let plans = try await container.pushes.activePlans()
+        guard let plan = plans.first(where: { $0.id == planID }) else { return }
+        let responses = try await container.pushes.responses()
+        let places = try await container.pushes.allPlaces()
+        pushText = plan.title
+        selectedTime = plan.startsAt
+        location = editLocation(for: plan, places: places)
+        notes = plan.note ?? ""
+        selectedRecipientIDs = editRecipientTokens(for: plan, responses: responses)
+        step = StartPushStep.recipients
+    }
+
+    private func editLocation(for plan: PushPlan, places: [Place]) -> String {
+        if let locationText = plan.locationText { return locationText }
+        guard let placeID = plan.placeID else { return "" }
+        return places.first { $0.id == placeID }?.name ?? ""
+    }
+
+    private func editRecipientTokens(for plan: PushPlan, responses: [PushResponse]) -> Set<String> {
+        let selectedPeople = responses.filter {
+            $0.pushID == plan.id && $0.personID != plan.creatorID && $0.response == .in
+        }
+        if !selectedPeople.isEmpty {
+            return Set(selectedPeople.map { "friend_\($0.personID)" })
+        }
+        if !launchContext.editRecipientIDs.isEmpty {
+            return launchContext.editRecipientIDs
+        }
+        guard let groupID = plan.groupID else { return [] }
+        return ["group_\(groupID)"]
     }
 }

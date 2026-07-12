@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		660C8F455BBABB9E8FA49CF8 /* PushEditTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9DA2691FDAE24B0966505EE /* PushEditTests.swift */; };
 		945940BE8D1FA7DF04A88CFE /* FriendRowCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07FDF57D3BD2C46A6CE61FD7 /* FriendRowCard.swift */; };
 		0D828BEBEA992D231352079F /* MapRenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE9275BF1B3723589A96B9B9 /* MapRenderTests.swift */; };
 		B080CB7201321E2EA13DE61A /* MapDisplayPuckBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79592A0DE1B5691B233102F0 /* MapDisplayPuckBuilder.swift */; };
@@ -133,6 +134,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		F9DA2691FDAE24B0966505EE /* PushEditTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PushEditTests.swift"; sourceTree = "<group>"; };
 		07FDF57D3BD2C46A6CE61FD7 /* FriendRowCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FriendRowCard.swift"; sourceTree = "<group>"; };
 		AA02000100000000AA020001 /* FriendsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsView.swift; sourceTree = "<group>"; };
 		AA02000300000000AA020003 /* FriendsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsViewModel.swift; sourceTree = "<group>"; };
@@ -406,6 +408,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				F9DA2691FDAE24B0966505EE /* PushEditTests.swift */,
 				AE9275BF1B3723589A96B9B9 /* MapRenderTests.swift */,
 				A6ACB1600225E732F2793781 /* DerivationTests.swift */,
 				B7F75D239D47EF653BF50EE2 /* DataLayerTests.swift */,
@@ -658,6 +661,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				660C8F455BBABB9E8FA49CF8 /* PushEditTests.swift in Sources */,
 				0D828BEBEA992D231352079F /* MapRenderTests.swift in Sources */,
 				38747D64198854C45CF41A0B /* DerivationTests.swift in Sources */,
 				83766FC6C4041622450C6A58 /* DataLayerTests.swift in Sources */,

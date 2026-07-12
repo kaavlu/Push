@@ -31,6 +31,7 @@ enum PlansLayout {
     static let statusPillHorizontalPadding: CGFloat = 10
     static let statusPillVerticalPadding: CGFloat = 5
     static let currentPushesSpacing: CGFloat = 8
+    static let listHeaderToCardsSpacing: CGFloat = 22
     static let reviewAllButtonTopPadding: CGFloat = 4
     static let startPlanButtonHeight: CGFloat = 50
     static let startPlanButtonCornerRadius: CGFloat = 25

@@ -16,7 +16,7 @@ struct ReviewPushesView: View {
 
     var body: some View {
         ZStack {
-            PushModalBackground()
+            FriendsBackground()
             VStack(spacing: 0) {
                 reviewHeader {
                     dismiss()

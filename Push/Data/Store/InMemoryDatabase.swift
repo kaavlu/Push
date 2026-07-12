@@ -65,6 +65,19 @@ final class InMemoryDatabase: ObservableObject {
         didMutate()
     }
 
+    /// Atomic: updates the plan and replaces its response set together, then
+    /// notifies once so observers never see mixed edit state.
+    func updatePush(plan: PushPlan, responses newResponses: [PushResponse]) {
+        guard plansByID[plan.id] != nil else { return }
+        plansByID[plan.id] = plan
+        if let index = orderedPlans.firstIndex(where: { $0.id == plan.id }) {
+            orderedPlans[index] = plan
+        }
+        responses.removeAll { $0.pushID == plan.id }
+        responses.append(contentsOf: newResponses)
+        didMutate()
+    }
+
     /// Updates only the firstName of a person, preserving all other fields. displayName
     /// and initials derive from firstName, so callers never pass them explicitly.
     func updatePerson(id: Person.ID, firstName: String) {
