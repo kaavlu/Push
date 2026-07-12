@@ -1,3 +1,201 @@
+# Issue #27 — Supabase Migration (Day 1)
+
+## Goal
+Stand up a real Supabase backend behind the existing repository seam so that **two real
+users can authenticate, keep their session across launches, load their own profiles, see
+each other as friends, load their shared group + memberships, and load sharing policies —
+all from Supabase** — while the existing mock mode, deterministic tests, previews, and
+current UI/MVVM architecture stay fully intact.
+
+This is a **reads-only** slice for the migrated social data. No writes to live data on Day 1.
+
+## Approved Design Decisions (locked)
+- **Parallel composition modes** on `AppDataContainer`: `.mock` (today's `InMemoryDatabase`
+  + `Local*` repos + seed) and `.live` (Supabase repos + identity from the auth session).
+  `AppDataContainer(seed:)` is preserved unchanged.
+- **Environment selection (explicit):**
+  - DEBUG **defaults to mock**.
+  - DEBUG **can opt into live** via the `--live` launch argument.
+  - **Release always uses live.**
+  - Existing `--pucklab` / `--onboardinglab` / `--friends` DEBUG args keep working.
+- **Identity:** in live mode `currentUserID` comes from the authenticated Supabase session
+  (the user's `auth.users.id`, as its UUID string). Domain IDs stay opaque `String`; UUIDs
+  map directly (`uuid.uuidString`). No domain-model ID change. Seed slugs remain mock-only.
+- **Version-controlled migrations are the source of truth.** The remote project
+  (`tzzvwjhvjduyqywlszqc`) is greenfield (no tables, no migrations, no users). All schema,
+  RLS, helpers, and triggers are authored as repo migrations, then applied to remote via MCP
+  `apply_migration` (recorded in migration history). The remote is never the sole source.
+- **No mock data leaks into live sessions** (see Revision 1).
+
+## Revisions Applied (from design approval)
+
+**R1 — Live presence stays empty on Day 1.** Do not mix mock presence, location, pushes, or
+feed into authenticated live sessions. In live mode the presence/push/feed reads return
+empty results. Friends with no live presence render naturally as the existing calm
+"Hidden right now" row via `FriendsContentBuilder` (confirmed: it never drops a friend).
+The live map is expected to be sparse; Friends, Groups, and Profile are the verification
+surfaces.
+
+**R2 — Reuse the completed OnboardingLab sign-in/sign-up experience for production**, rather
+than building a separate auth flow. Promote **only** the production-ready presentation
+pieces needed for real app use — theme tokens (`OnboardingLabTheme`), shared components
+(`OnboardingLabComponents`: header, CTA, auth field, `OnboardingAuthSwitchLink`, etc.), and
+the **sign-in** (`OnboardingSignInScreen`) + **sign-up/welcome** (`OnboardingWelcomeScreen`)
+layouts — out of `#if DEBUG` so production can render them. Wire them to **real Supabase
+auth/session state**. Keep the DEBUG `OnboardingLab` as a sandbox around the **same**
+components where practical. Lab-only fixtures, the phone/keypad + code flow, the 11-step
+setup flow, and the mock `completeSignIn()`→`.done` behavior stay DEBUG-isolated. Prefer the
+**smallest refactor**; do not reorganize files solely for architectural purity. Apple/Google
+buttons are out of scope for Day 1 (hide/disable in the production surface); the sign-up
+cross-link maps to Supabase `signUp`.
+
+**R3 — One canonical source of truth for visibility.** `sharing_policies` is the sole
+authority for presence visibility (resolution friend → group → globalDefault, matching
+`VisiblePresenceBuilder`). `group_memberships` is about membership only and carries **no**
+`sharing_level` column. `GroupMembership.sharingLevel` (vestigial — no builder reads it) is
+mapped by the Supabase group repo to a documented default (`.full`). Group-scoped visibility
+is expressed exclusively via a `sharing_policies` row with `audience_type = 'group'`.
+
+**R4 — Never SQL-seed `auth.users` for deterministic test users.** Create the two test
+identities through **real Supabase Auth** (production sign-up flow and/or a documented
+GoTrue-signup helper — never direct `auth.users` inserts, never a service-role key in the
+app). The `handle_new_user` trigger auto-creates their `profiles` rows. Then `supabase/seed.sql`
+(idempotent, resolves the two users **by email** from `auth.users` — no hardcoded UUIDs)
+seeds the public social graph (friendship, group, memberships, sharing policies) using their
+**actual** IDs. Schema, migrations, policies, and public-data seed all reproducible from repo.
+
+**R5 — Environment behavior explicit.** (Captured in Approved Design Decisions above.)
+
+**R6 — Harden every `SECURITY DEFINER` helper**: fixed safe `search_path` (`set search_path
+= ''`, fully schema-qualified references), minimal privileges (revoke `execute` from
+`public`/`anon`, grant only to `authenticated` where needed), and narrowly scoped behavior
+(single responsibility, no dynamic SQL). Tests must cover **allowed and denied** access,
+including an **unrelated third user** where practical.
+
+**R7 — Full-path RLS verification.** MCP/SQL impersonation (`set request.jwt.claims`) may be
+used during development, but **final** RLS verification must also exercise **real
+authenticated client requests** so we prove the complete Auth → JWT → RLS → PostgREST path.
+
+**R8 — Testing beyond DTO decoding.** DTO→domain mapping tests are useful but not the primary
+layer. Add focused coverage for: environment selection (mock vs live resolution incl.
+`--live` and Release), auth/bootstrap state transitions, live-vs-mock isolation (no mock data
+in a live container), session-restoration behavior, and authenticated RLS behavior.
+
+**R9 — Abstraction rule.** No direct Supabase access from Views or application ViewModels. An
+**auth-specific `AuthViewModel`** may call an injected `AuthService` if that is the cleanest
+MVVM design. Do **not** overcentralize auth into a root coordinator unnecessarily. Existing
+application ViewModels continue to consume repositories only.
+
+**R10 — Advisor gate (softened).** Instead of requiring `get_advisors(security)` to be
+completely clean: **no unresolved high-severity findings** caused by the new schema, RLS
+policies, or `SECURITY DEFINER` functions.
+
+## Database Schema (`public`) — mirrors existing domain structs
+Follow the repo Supabase skills (`supabase`, `supabase-postgres-best-practices`): lowercase
+snake_case identifiers, explicit primary keys, indexes on foreign keys, appropriate
+constraints, and the RLS-performance pattern (`(select auth.uid())`).
+
+| Table | Maps to | Key columns / rules |
+|---|---|---|
+| `profiles` | `Person` + `UserProfile` | `id uuid pk references auth.users(id) on delete cascade`, `first_name text`, `handle text unique`, `image_asset_path text null`, `availability_choice text`, `visibility_note text`, `created_at`, `updated_at` |
+| `friendships` | new (mutual, undirected) | `id uuid pk`, `user_low uuid`, `user_high uuid`, `status text default 'accepted'`, `created_at`; `check (user_low < user_high)`, `unique (user_low, user_high)`, FK both → `profiles(id)` |
+| `groups` | `FriendGroup` | `id uuid pk`, `name text`, `image_asset_path text null`, `created_at` |
+| `group_memberships` | `GroupMembership` | `id uuid pk`, `person_id uuid → profiles(id)`, `group_id uuid → groups(id)`, `role text`, `membership_status text`, `joined_at`; **no** `sharing_level` (R3); `unique (person_id, group_id)` |
+| `sharing_policies` | `SharingPolicy` | `id uuid pk`, `owner_person_id uuid → profiles(id)`, `audience_type text` (`friend`/`group`/`global_default`), `audience_id uuid null`, `location_visibility text`, `activity_visibility text`, `availability_visibility text`, `expires_at timestamptz null` |
+
+- Friendship is **mutual/undirected**, `status = 'accepted'` for Day 1; no request/invite flow.
+- Profile UI scaffolding arrays (`activityVisibility`, `mapPreferences`, `closeFriends`,
+  `connectors`, `availabilityOptions`) are **client-side defaults** for Day 1 (not stored);
+  `SupabaseProfileRepository` synthesizes them so the profile screen renders unchanged.
+
+## RLS & Security (enabled from creation on every table)
+- `profiles`: SELECT if `id = (select auth.uid())` OR `is_friend((select auth.uid()), id)` OR
+  `shares_group((select auth.uid()), id)`. INSERT/UPDATE own row only.
+- `friendships`: SELECT where `(select auth.uid()) in (user_low, user_high)`. No client writes Day 1.
+- `groups` / `group_memberships`: SELECT where `is_group_member((select auth.uid()), group_id)`
+  (or own membership row). No client writes Day 1.
+- `sharing_policies`: SELECT where `owner_person_id = (select auth.uid())` OR the viewer is the
+  policy's audience (friend / group member / global-default of a friend). No client writes Day 1.
+- **Helpers** `is_friend`, `shares_group`, `is_group_member` are `SECURITY DEFINER`, hardened
+  per R6, and used to avoid RLS recursion.
+- **Signup trigger** `handle_new_user()` (`SECURITY DEFINER`, hardened) auto-creates a
+  `profiles` row on `auth.users` insert (handle/first_name from signup metadata or email).
+- **Secrets:** the iOS app ships only the project URL + **anon/publishable** key (safe to
+  embed, e.g. via `.xcconfig`/Info.plist). Service-role key never appears in the app.
+
+## iOS Client Layer
+- **SDK:** add `supabase-swift` (Auth + PostgREST) via SwiftPM. Note: `scripts/pbxproj_add.py`
+  registers source files only — the SPM package is a separate, carefully-verified
+  `project.pbxproj` edit.
+- **`SupabaseConfig`** — URL + anon key (non-secret config, not hardcoded secrets).
+- **`AuthService`** — the only type that talks to GoTrue: `signIn`, `signUp`, `signOut`,
+  `restoreSession`, publishes auth state. Injected (into `AuthViewModel` per R9), never called
+  from application Views/ViewModels.
+- **`AuthViewModel`** — drives the promoted sign-in/sign-up screens; calls injected
+  `AuthService`; surfaces inline errors and `canSubmit` state.
+- **`Supabase{Friend,Group,Profile,Sharing}Repository`** — implement the existing protocols
+  with PostgREST reads, decoding row DTOs (snake_case CodingKeys) into existing domain structs.
+- **Out-of-scope reads in live mode** (`presenceStatuses`, `PushRepository`, `FeedRepository`)
+  return **empty** results (R1) — no mock data in a live session.
+- **`AppDataContainer`**: lift `currentUserID` / change-notification off the hard `InMemoryDatabase`
+  dependency into a tiny internal abstraction. Mock init keeps `InMemoryDatabase` behavior
+  verbatim; live init sources `currentUserID` from the session and provides a no-op change
+  publisher (reads-only Day 1). Additive; the full mock test suite guards the refactor.
+- **Root / bootstrap:** a production entry that, in live mode with no session, shows the
+  promoted onboarding sign-in surface; once authenticated (or session restored), builds the
+  live `AppDataContainer` and renders `ContentView`. Mock mode renders `ContentView` exactly
+  as today.
+
+## Session Restoration
+`supabase-swift` persists the session (Keychain) and restores it on client init;
+`AuthService.restoreSession()` is awaited at launch to route app-vs-gate. No manual token handling.
+
+## Migrations, Seed & Reproducibility
+- `supabase/migrations/NNNN_*.sql`: extensions/helpers → each table + RLS → signup trigger.
+  Authored in repo, applied to remote via MCP `apply_migration`.
+- Test identities created via **real Supabase Auth** (R4); `supabase/seed.sql` idempotently
+  resolves the two users by email and seeds friendship + group + memberships + sharing
+  policies against their real IDs.
+- No Supabase CLI installed; Day 1 applies via MCP with the `.sql` files as the record.
+
+## Out of Scope
+Real location, realtime/subscriptions, feed, pushes, push notifications, activity inference,
+invite/complete-friend-request flow, broad/unrelated UI redesign, Apple/Google social auth,
+and any writes to live social data.
+
+## Testing (R8 — layered, not DTO-only)
+- All existing deterministic mock tests + previews stay green, unchanged.
+- Environment selection: mock default in DEBUG, `--live` opt-in, Release forces live.
+- Auth/bootstrap state transitions (no session → gate; signed-in → app; restore → app).
+- Live-vs-mock isolation: a live container exposes no mock/seed presence/push/feed data.
+- Session restoration behavior.
+- Authenticated RLS behavior (R7: real Auth → JWT → RLS → PostgREST), plus SECURITY DEFINER
+  allow/deny incl. an unrelated third user (R6).
+- DTO→domain mapping (supporting layer, not primary).
+
+## Day-1 Success Criteria
+1. Launch in `--live` with no session → onboarding-styled Supabase-backed sign-in surface.
+2. Sign in as test user A (real Auth) → session persists; **relaunch stays signed in**.
+3. Profile screen shows A's real profile from Supabase.
+4. Friends screen shows user B as a friend (calm hidden-presence row).
+5. Groups screen shows the shared group with both members.
+6. Sharing policies load without error and resolve.
+7. Sign in as B → symmetric: sees A as friend + the same shared group.
+8. Default DEBUG build (no `--live`) is today's mock app; **all existing tests pass**.
+9. Schema + migrations + `seed.sql` reproduce the state from the repo; **no unresolved
+   high-severity `get_advisors(security)` findings** from the new schema/RLS/`SECURITY DEFINER`
+   objects (R10).
+
+## Key Risks & Mitigations
+- **RLS recursion** → hardened `SECURITY DEFINER` helpers (R6).
+- **Hand-editing `project.pbxproj` for SPM** → isolate and verify a clean build.
+- **`AppDataContainer` refactor on a shared root** → keep additive; full mock suite as guard.
+- **Non-deterministic auth IDs** → email-lookup, idempotent `seed.sql` (R4).
+- **Promotion out of `#if DEBUG`** → smallest refactor; lab keeps compiling against the same
+  promoted components; lab-only mock/fixtures stay isolated (R2).
+
+---
+
 # Issue #24 — Your Pushes Wiring + UI Fix
 
 ## Goal
