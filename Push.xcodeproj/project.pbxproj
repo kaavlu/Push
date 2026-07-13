@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A1F873C8D8EA53F9A07531BE /* SupabaseClientProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0B03E7723B8B1AF8E5386D /* SupabaseClientProvider.swift */; };
+		FB1AB98543348B8BBE4233ED /* SupabaseConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26AF0988720D034328C4B8C1 /* SupabaseConfig.swift */; };
 		AA00000000000000000000B3 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = AA00000000000000000000B2 /* Supabase */; };
 		660C8F455BBABB9E8FA49CF8 /* PushEditTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9DA2691FDAE24B0966505EE /* PushEditTests.swift */; };
 		945940BE8D1FA7DF04A88CFE /* FriendRowCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07FDF57D3BD2C46A6CE61FD7 /* FriendRowCard.swift */; };
@@ -136,6 +138,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		AA00000000000000000000C1 /* Supabase.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = "Supabase.xcconfig"; path = "Push/Config/Supabase.xcconfig"; sourceTree = SOURCE_ROOT; };
+		5D0B03E7723B8B1AF8E5386D /* SupabaseClientProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SupabaseClientProvider.swift"; path = "Data/Supabase/SupabaseClientProvider.swift"; sourceTree = "<group>"; };
+		26AF0988720D034328C4B8C1 /* SupabaseConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SupabaseConfig.swift"; path = "Data/Supabase/SupabaseConfig.swift"; sourceTree = "<group>"; };
 		F9DA2691FDAE24B0966505EE /* PushEditTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PushEditTests.swift"; sourceTree = "<group>"; };
 		07FDF57D3BD2C46A6CE61FD7 /* FriendRowCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FriendRowCard.swift"; sourceTree = "<group>"; };
 		AA02000100000000AA020001 /* FriendsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsView.swift; sourceTree = "<group>"; };
@@ -301,6 +306,8 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				5D0B03E7723B8B1AF8E5386D /* SupabaseClientProvider.swift */,
+				26AF0988720D034328C4B8C1 /* SupabaseConfig.swift */,
 				07FDF57D3BD2C46A6CE61FD7 /* FriendRowCard.swift */,
 				79592A0DE1B5691B233102F0 /* MapDisplayPuckBuilder.swift */,
 				E075D5F75356C7CC3A1C626A /* RegionalActivityPuck.swift */,
@@ -570,6 +577,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				A1F873C8D8EA53F9A07531BE /* SupabaseClientProvider.swift in Sources */,
+				FB1AB98543348B8BBE4233ED /* SupabaseConfig.swift in Sources */,
 				945940BE8D1FA7DF04A88CFE /* FriendRowCard.swift in Sources */,
 				B080CB7201321E2EA13DE61A /* MapDisplayPuckBuilder.swift in Sources */,
 				D8DD5F18932805672E8A3B5C /* RegionalActivityPuck.swift in Sources */,
@@ -823,6 +832,7 @@
 		};
 		5217A28B2FF1B6DA0011F860 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = AA00000000000000000000C1 /* Supabase.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -832,6 +842,7 @@
 				DEVELOPMENT_TEAM = 43Z5J88JU8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Push/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -852,6 +863,7 @@
 		};
 		5217A28C2FF1B6DA0011F860 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = AA00000000000000000000C1 /* Supabase.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -861,6 +873,7 @@
 				DEVELOPMENT_TEAM = 43Z5J88JU8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Push/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
