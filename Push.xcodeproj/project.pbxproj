@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E0490DAF10B3D4F1190AC883 /* SupabaseProfileRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B30D392C234352FEAA01293 /* SupabaseProfileRepository.swift */; };
+		D61FB01E9F80D114AADC1635 /* ProfileRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6EAF89A3A2EE35191B58B8D /* ProfileRow.swift */; };
+		5CF19CE345D632CEBECD5099 /* SupabaseMappingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E97C71E27B15A6EFADCF1AB3 /* SupabaseMappingTests.swift */; };
 		13E6CF198FEC5F19A03D60E8 /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2A7F7D90B9A4F3C629A99C7 /* AuthViewModel.swift */; };
 		EDFA93CF2AB9B771AC6B707E /* AuthViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5A2CEFA862F0C05C7C980B /* AuthViewModelTests.swift */; };
 		70726CE7DC5489CD4512D60E /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 814B37589A0CE4C67C82BDE8 /* AuthService.swift */; };
@@ -143,6 +146,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		4B30D392C234352FEAA01293 /* SupabaseProfileRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SupabaseProfileRepository.swift"; path = "Data/Supabase/SupabaseProfileRepository.swift"; sourceTree = "<group>"; };
+		B6EAF89A3A2EE35191B58B8D /* ProfileRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "ProfileRow.swift"; path = "Data/Supabase/Rows/ProfileRow.swift"; sourceTree = "<group>"; };
+		E97C71E27B15A6EFADCF1AB3 /* SupabaseMappingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SupabaseMappingTests.swift"; sourceTree = "<group>"; };
 		B2A7F7D90B9A4F3C629A99C7 /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "AuthViewModel.swift"; path = "Auth/AuthViewModel.swift"; sourceTree = "<group>"; };
 		4C5A2CEFA862F0C05C7C980B /* AuthViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AuthViewModelTests.swift"; sourceTree = "<group>"; };
 		814B37589A0CE4C67C82BDE8 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "AuthService.swift"; path = "Data/Supabase/AuthService.swift"; sourceTree = "<group>"; };
@@ -316,6 +322,8 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				4B30D392C234352FEAA01293 /* SupabaseProfileRepository.swift */,
+				B6EAF89A3A2EE35191B58B8D /* ProfileRow.swift */,
 				B2A7F7D90B9A4F3C629A99C7 /* AuthViewModel.swift */,
 				814B37589A0CE4C67C82BDE8 /* AuthService.swift */,
 				1FAFE82AF285CEA0D0ECAC5E /* AppEnvironment.swift */,
@@ -433,6 +441,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				E97C71E27B15A6EFADCF1AB3 /* SupabaseMappingTests.swift */,
 				4C5A2CEFA862F0C05C7C980B /* AuthViewModelTests.swift */,
 				77A8171918246B4BCDB108E0 /* AppEnvironmentTests.swift */,
 				F9DA2691FDAE24B0966505EE /* PushEditTests.swift */,
@@ -592,6 +601,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				E0490DAF10B3D4F1190AC883 /* SupabaseProfileRepository.swift in Sources */,
+				D61FB01E9F80D114AADC1635 /* ProfileRow.swift in Sources */,
 				13E6CF198FEC5F19A03D60E8 /* AuthViewModel.swift in Sources */,
 				70726CE7DC5489CD4512D60E /* AuthService.swift in Sources */,
 				18F336798B7005AF131A28BE /* AppEnvironment.swift in Sources */,
@@ -700,6 +711,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				5CF19CE345D632CEBECD5099 /* SupabaseMappingTests.swift in Sources */,
 				EDFA93CF2AB9B771AC6B707E /* AuthViewModelTests.swift in Sources */,
 				3680F9B90356830133BCD453 /* AppEnvironmentTests.swift in Sources */,
 				660C8F455BBABB9E8FA49CF8 /* PushEditTests.swift in Sources */,
