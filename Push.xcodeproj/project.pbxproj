@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		70726CE7DC5489CD4512D60E /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 814B37589A0CE4C67C82BDE8 /* AuthService.swift */; };
 		18F336798B7005AF131A28BE /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FAFE82AF285CEA0D0ECAC5E /* AppEnvironment.swift */; };
 		3680F9B90356830133BCD453 /* AppEnvironmentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77A8171918246B4BCDB108E0 /* AppEnvironmentTests.swift */; };
 		A1F873C8D8EA53F9A07531BE /* SupabaseClientProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0B03E7723B8B1AF8E5386D /* SupabaseClientProvider.swift */; };
@@ -140,6 +141,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		814B37589A0CE4C67C82BDE8 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "AuthService.swift"; path = "Data/Supabase/AuthService.swift"; sourceTree = "<group>"; };
 		1FAFE82AF285CEA0D0ECAC5E /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "AppEnvironment.swift"; path = "Data/Supabase/AppEnvironment.swift"; sourceTree = "<group>"; };
 		77A8171918246B4BCDB108E0 /* AppEnvironmentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppEnvironmentTests.swift"; sourceTree = "<group>"; };
 		AA00000000000000000000C1 /* Supabase.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = "Supabase.xcconfig"; path = "Push/Config/Supabase.xcconfig"; sourceTree = SOURCE_ROOT; };
@@ -310,6 +312,7 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				814B37589A0CE4C67C82BDE8 /* AuthService.swift */,
 				1FAFE82AF285CEA0D0ECAC5E /* AppEnvironment.swift */,
 				5D0B03E7723B8B1AF8E5386D /* SupabaseClientProvider.swift */,
 				26AF0988720D034328C4B8C1 /* SupabaseConfig.swift */,
@@ -583,6 +586,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				70726CE7DC5489CD4512D60E /* AuthService.swift in Sources */,
 				18F336798B7005AF131A28BE /* AppEnvironment.swift in Sources */,
 				A1F873C8D8EA53F9A07531BE /* SupabaseClientProvider.swift in Sources */,
 				FB1AB98543348B8BBE4233ED /* SupabaseConfig.swift in Sources */,
