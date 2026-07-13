@@ -53,7 +53,10 @@ final class SupabaseAuthService: AuthService {
     // NOTE: with `import Supabase`, the auth user type resolves as the unqualified
     // `User` (not `Auth.User`) in supabase-swift 2.51.0.
     private static func map(_ user: User) -> AuthedUser {
-        AuthedUser(id: user.id.uuidString, email: user.email)
+        // Lowercase to match PostgREST's UUID rendering: identity flows into
+        // `AppDataContainer.currentUserID`, and any future live read that compares a
+        // DB-sourced id against it must not fail on `UUID.uuidString`'s uppercase form.
+        AuthedUser(id: user.id.uuidString.lowercased(), email: user.email)
     }
 }
 
