@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C584525EA330B07F8DEC01C8 /* SupabaseSharingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5586F03F7DD61AFFA8B3393 /* SupabaseSharingRepository.swift */; };
+		77EE2060BD57C65A45B1D84E /* SharingPolicyRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8521E5498D1F241791F4FB0D /* SharingPolicyRow.swift */; };
 		25122629B1C718DFB5456874 /* SupabaseGroupRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 624897A301E0CEA62664DC1D /* SupabaseGroupRepository.swift */; };
 		67289BEA088BB6FD1E6B857C /* GroupMembershipRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9E07AE98703C8D555A42C42 /* GroupMembershipRow.swift */; };
 		E59BEA8798408ED59E2F5AF3 /* GroupRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11DCA4A8F5F747C292478EF2 /* GroupRow.swift */; };
@@ -150,6 +152,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C5586F03F7DD61AFFA8B3393 /* SupabaseSharingRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SupabaseSharingRepository.swift"; path = "Data/Supabase/SupabaseSharingRepository.swift"; sourceTree = "<group>"; };
+		8521E5498D1F241791F4FB0D /* SharingPolicyRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SharingPolicyRow.swift"; path = "Data/Supabase/Rows/SharingPolicyRow.swift"; sourceTree = "<group>"; };
 		624897A301E0CEA62664DC1D /* SupabaseGroupRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SupabaseGroupRepository.swift"; path = "Data/Supabase/SupabaseGroupRepository.swift"; sourceTree = "<group>"; };
 		B9E07AE98703C8D555A42C42 /* GroupMembershipRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "GroupMembershipRow.swift"; path = "Data/Supabase/Rows/GroupMembershipRow.swift"; sourceTree = "<group>"; };
 		11DCA4A8F5F747C292478EF2 /* GroupRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "GroupRow.swift"; path = "Data/Supabase/Rows/GroupRow.swift"; sourceTree = "<group>"; };
@@ -330,6 +334,8 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				C5586F03F7DD61AFFA8B3393 /* SupabaseSharingRepository.swift */,
+				8521E5498D1F241791F4FB0D /* SharingPolicyRow.swift */,
 				624897A301E0CEA62664DC1D /* SupabaseGroupRepository.swift */,
 				B9E07AE98703C8D555A42C42 /* GroupMembershipRow.swift */,
 				11DCA4A8F5F747C292478EF2 /* GroupRow.swift */,
@@ -613,6 +619,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				C584525EA330B07F8DEC01C8 /* SupabaseSharingRepository.swift in Sources */,
+				77EE2060BD57C65A45B1D84E /* SharingPolicyRow.swift in Sources */,
 				25122629B1C718DFB5456874 /* SupabaseGroupRepository.swift in Sources */,
 				67289BEA088BB6FD1E6B857C /* GroupMembershipRow.swift in Sources */,
 				E59BEA8798408ED59E2F5AF3 /* GroupRow.swift in Sources */,

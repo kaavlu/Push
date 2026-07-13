@@ -35,4 +35,18 @@ final class SupabaseMappingTests: XCTestCase {
         XCTAssertEqual(m.role, .member)
         XCTAssertEqual(m.membershipStatus, .active)
     }
+
+    func testSharingPolicyRowMapsGlobalDefault() throws {
+        let json = """
+        {"id":"p1","owner_person_id":"11111111-1111-1111-1111-111111111111",
+         "audience_type":"global_default","audience_id":null,
+         "location_visibility":"exact","activity_visibility":"full",
+         "availability_visibility":"full","expires_at":null}
+        """.data(using: .utf8)!
+        let row = try JSONDecoder().decode(SharingPolicyRow.self, from: json)
+        let p = row.policy()
+        XCTAssertEqual(p.audienceType, .globalDefault)
+        XCTAssertEqual(p.locationVisibility, .exact)
+        XCTAssertNil(p.audienceID)
+    }
 }
