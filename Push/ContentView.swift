@@ -15,6 +15,7 @@ struct ContentView: View {
     @State private var selectedNavigationItem: BottomNavigationItem = .map
     @State private var presentedRoute: MainMapRoute?
     @State private var isCreateMenuPresented = false
+    @State private var isFilterDropdownExpanded = false
     @State private var selectedPuck: MapPuckData?
     @State private var startPushContext: StartPushLaunchContext?
     @State private var mapSpan = MapDefaults.region.span
@@ -46,6 +47,13 @@ struct ContentView: View {
                     )
             }
 
+            VStack(spacing: 0) {
+                topControlsLayer
+                Spacer(minLength: 0)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            .zIndex(TopDropdownLayout.expandedZIndex)
+
             BottomNavigationBar(
                 selectedItem: $selectedNavigationItem,
                 action: selectNavigationItem
@@ -57,33 +65,7 @@ struct ContentView: View {
             .spring(response: CreateActionMenuLayout.animationResponse, dampingFraction: CreateActionMenuLayout.animationDamping),
             value: isCreateMenuPresented
         )
-        .overlay(alignment: .top) {
-            HStack(alignment: .center, spacing: 0) {
-                TopIconButton(
-                    systemImageName: MainMapRoute.profile.systemImageName,
-                    accessibilityLabel: MainMapRoute.profile.accessibilityLabel
-                ) {
-                    presentedRoute = .profile
-                }
-
-                Spacer(minLength: 0)
-
-                FriendGroupDropdown(
-                    items: viewModel.filters,
-                    selectedID: $viewModel.selectedFilterID,
-                    selectedTitle: viewModel.selectedFilterTitle
-                )
-                    .frame(width: TopControlLayout.dropdownWidth(layout))
-
-                Spacer(minLength: 0)
-
-                // Mirror placeholder keeps dropdown centered
-                Color.clear
-                    .frame(width: TopControlLayout.iconButtonSize, height: TopControlLayout.iconButtonSize)
-            }
-            .padding(.horizontal, TopControlLayout.horizontalMargin(layout))
-            .padding(.top, TopControlLayout.topMargin)
-        }
+        .animation(.spring(response: TopDropdownLayout.animationResponse, dampingFraction: TopDropdownLayout.animationDamping), value: isFilterDropdownExpanded)
         .fullScreenCover(item: $presentedRoute) { route in
             destination(for: route)
         }
@@ -97,7 +79,60 @@ struct ContentView: View {
         }
     }
 
+    private var topControlsLayer: some View {
+        ZStack(alignment: .top) {
+            HStack(alignment: .center, spacing: 0) {
+                TopIconButton(
+                    systemImageName: MainMapRoute.profile.systemImageName,
+                    accessibilityLabel: MainMapRoute.profile.accessibilityLabel
+                ) {
+                    isFilterDropdownExpanded = false
+                    presentedRoute = .profile
+                }
+
+                Spacer(minLength: 0)
+
+                FriendGroupDropdownButton(
+                    selectedTitle: viewModel.selectedFilterTitle,
+                    isExpanded: isFilterDropdownExpanded
+                ) {
+                    isCreateMenuPresented = false
+                    isFilterDropdownExpanded.toggle()
+                }
+                .frame(width: TopControlLayout.dropdownWidth(layout))
+
+                Spacer(minLength: 0)
+
+                // Mirror placeholder keeps dropdown centered
+                Color.clear
+                    .frame(width: TopControlLayout.iconButtonSize, height: TopControlLayout.iconButtonSize)
+            }
+            .padding(.horizontal, TopControlLayout.horizontalMargin(layout))
+            .padding(.top, TopControlLayout.topMargin)
+
+            if isFilterDropdownExpanded {
+                FriendGroupDropdownPanel(
+                    items: viewModel.filters,
+                    selectedID: viewModel.selectedFilterID,
+                    select: selectFilter
+                )
+                .padding(.top, TopControlLayout.topMargin + TopControlLayout.dropdownHeight + TopDropdownLayout.panelSpacing)
+                .transition(
+                    .opacity
+                        .combined(with: .scale(scale: TopDropdownLayout.panelTransitionScale, anchor: .top))
+                )
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .frame(
+            height: isFilterDropdownExpanded ? TopDropdownLayout.overlayHeight : TopDropdownLayout.collapsedOverlayHeight,
+            alignment: .top
+        )
+    }
+
     private func selectNavigationItem(_ item: BottomNavigationItem) {
+        isFilterDropdownExpanded = false
+
         if item == .create {
             isCreateMenuPresented.toggle()
             return
@@ -132,7 +167,9 @@ struct ContentView: View {
         case .groups:
             FriendsView()
         case .profile:
-            ProfileView()
+            ProfileView {
+                presentedRoute = nil
+            }
         case .startPlan:
             StartPushFlowView()
         case .addFriend:
@@ -166,11 +203,13 @@ struct ContentView: View {
 
     private func selectCreateAction(_ item: CreateActionMenuItem) {
         isCreateMenuPresented = false
+        isFilterDropdownExpanded = false
         selectedNavigationItem = .map
         presentedRoute = item.route
     }
 
     private func selectMapPuck(_ puck: MapPuckRenderModel) {
+        isFilterDropdownExpanded = false
         if let selected = viewModel.select(puck) {
             selectedPuck = selected
         } else if let focusRequest = viewModel.mapFocusRequest {
@@ -192,39 +231,28 @@ struct ContentView: View {
             forcedRenderSpan = nil
         }
     }
+
+    private func selectFilter(_ item: GroupFilterItem) {
+        guard viewModel.selectedFilterID != item.id else {
+            isFilterDropdownExpanded = false
+            return
+        }
+        viewModel.selectedFilterID = item.id
+        isFilterDropdownExpanded = false
+    }
 }
 
 private enum MainMapPresentationTiming {
     static let sheetDismissalDelay = 0.22
 }
 
-private struct FriendGroupDropdown: View {
-    @Environment(\.pushLayout) private var layout
-    let items: [GroupFilterItem]
-    @Binding var selectedID: String
+private struct FriendGroupDropdownButton: View {
     let selectedTitle: String
-    @State private var isExpanded = false
+    let isExpanded: Bool
+    let action: () -> Void
 
     var body: some View {
-        dropdownButton
-            .overlay(alignment: .top) {
-                if isExpanded {
-                    dropdownPanel
-                        .padding(.top, TopControlLayout.dropdownHeight + TopDropdownLayout.panelSpacing)
-                        .transition(
-                            .opacity
-                                .combined(with: .scale(scale: TopDropdownLayout.panelTransitionScale, anchor: .top))
-                        )
-                }
-            }
-            .animation(.spring(response: TopDropdownLayout.animationResponse, dampingFraction: TopDropdownLayout.animationDamping), value: isExpanded)
-            .zIndex(TopDropdownLayout.expandedZIndex)
-    }
-
-    private var dropdownButton: some View {
-        Button {
-            isExpanded.toggle()
-        } label: {
+        Button(action: action) {
             HStack(spacing: TopDropdownLayout.labelSpacing) {
                 Text(selectedTitle)
                     .font(.subheadline.weight(.semibold))
@@ -240,14 +268,22 @@ private struct FriendGroupDropdown: View {
             .lineLimit(1)
             .minimumScaleFactor(TopControlLayout.minimumTextScale)
             .padding(.horizontal, TopDropdownLayout.horizontalPadding)
-            .pushGlassBackground(cornerRadius: TopControlLayout.cornerRadius)
+            .topControlBackground(cornerRadius: TopControlLayout.cornerRadius)
         }
         .buttonStyle(.plain)
+        .contentShape(Capsule())
         .accessibilityLabel("Friend group")
         .accessibilityValue(selectedTitle)
     }
+}
 
-    private var dropdownPanel: some View {
+private struct FriendGroupDropdownPanel: View {
+    @Environment(\.pushLayout) private var layout
+    let items: [GroupFilterItem]
+    let selectedID: String
+    let select: (GroupFilterItem) -> Void
+
+    var body: some View {
         VStack(spacing: TopDropdownLayout.rowSpacing) {
             ForEach(items) { item in
                 Button {
@@ -263,12 +299,7 @@ private struct FriendGroupDropdown: View {
         }
         .padding(TopDropdownLayout.panelPadding)
         .frame(width: TopDropdownLayout.panelWidth(layout))
-        .pushGlassBackground(cornerRadius: TopDropdownLayout.panelCornerRadius)
-    }
-
-    private func select(_ item: GroupFilterItem) {
-        selectedID = item.id
-        isExpanded = false
+        .topControlBackground(cornerRadius: TopDropdownLayout.panelCornerRadius)
     }
 }
 
@@ -318,11 +349,34 @@ private struct TopIconButton: View {
                     width: TopControlLayout.iconButtonSize,
                     height: TopControlLayout.iconButtonSize
                 )
-                .pushGlassBackground(cornerRadius: TopControlLayout.cornerRadius)
+                .topControlBackground(cornerRadius: TopControlLayout.cornerRadius)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(accessibilityLabel)
     }
+}
+
+private extension View {
+    func topControlBackground(cornerRadius: CGFloat) -> some View {
+        let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+        return self
+            .background(.ultraThinMaterial, in: shape)
+            .background(shape.fill(TopControlColor.fill))
+            .overlay {
+                shape.stroke(TopControlColor.stroke, lineWidth: TopControlLayout.strokeWidth)
+            }
+            .shadow(
+                color: TopControlColor.shadow,
+                radius: TopControlLayout.shadowRadius,
+                y: TopControlLayout.shadowYOffset
+            )
+    }
+}
+
+private enum TopControlColor {
+    static let fill = PushGlassStyle.warmTint.opacity(PushGlassStyle.tintOpacity)
+    static let stroke = Color.white.opacity(PushGlassStyle.strokeOpacity)
+    static let shadow = PushGlassStyle.shadowColor.opacity(PushGlassStyle.shadowOpacity)
 }
 
 private enum MapDefaults {
@@ -345,6 +399,8 @@ private enum MapDefaults {
 }
 
 private enum TopDropdownLayout {
+    static let collapsedOverlayHeight = TopControlLayout.topMargin + TopControlLayout.dropdownHeight
+    static let overlayHeight: CGFloat = 340
     static let horizontalPadding: CGFloat = 18
     static let labelSpacing: CGFloat = 6
     static let panelSpacing: CGFloat = 8
@@ -373,18 +429,22 @@ private enum TopControlLayout {
     static let cornerRadius: CGFloat = iconButtonSize / 2
     static let iconSize: CGFloat = 17
     static let minimumTextScale = 0.78
+    static let strokeWidth: CGFloat = 1
+    static let shadowRadius: CGFloat = 22
+    static let shadowYOffset: CGFloat = 10
 }
 
 private enum MapAttributionLayout {
     // Insets tell MapKit where to place the Apple logo and legal text.
     // Compass is now a manually placed MKCompassButton — not driven by these margins.
-    // top: 120 pushes attribution below the top controls; bottom: 130 keeps it above the nav bar.
+    // Keep attribution low and discreet, visually below the floating bottom nav.
     static func top(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 104, standard: 112, large: 120) }
-    static func bottom(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 108, standard: 120, large: 130) }
+    static func bottom(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 12, standard: 14, large: 16) }
     static let left: CGFloat = 16
+    static let right: CGFloat = 16
 
     static func edgeInsets(_ layout: PushAdaptiveLayout) -> UIEdgeInsets {
-        UIEdgeInsets(top: top(layout), left: left, bottom: bottom(layout), right: 0)
+        UIEdgeInsets(top: top(layout), left: left, bottom: bottom(layout), right: right)
     }
 }
 

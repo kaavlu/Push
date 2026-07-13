@@ -61,7 +61,7 @@ struct StyledMapView: UIViewRepresentable {
     private func applyStyle(to mapView: MKMapView) {
         if #available(iOS 16.0, *) {
             guard !(mapView.preferredConfiguration is MKImageryMapConfiguration) else { return }
-            mapView.preferredConfiguration = MKImageryMapConfiguration(elevationStyle: .realistic)
+            mapView.preferredConfiguration = MKImageryMapConfiguration(elevationStyle: .flat)
         } else {
             guard mapView.mapType != .hybrid else { return }
             mapView.mapType = .hybrid
@@ -70,8 +70,23 @@ struct StyledMapView: UIViewRepresentable {
 
     private func syncAnnotations(on mapView: MKMapView) {
         let existingPuckAnnotations = mapView.annotations.compactMap { $0 as? MapPuckAnnotation }
-        mapView.removeAnnotations(existingPuckAnnotations)
-        mapView.addAnnotations(pucks.map { MapPuckAnnotation(puck: $0, layout: layout) })
+        let existingByID = Dictionary(uniqueKeysWithValues: existingPuckAnnotations.map { ($0.id, $0) })
+        let incomingByID = Dictionary(uniqueKeysWithValues: pucks.map { ($0.id, $0) })
+        let staleAnnotations = existingPuckAnnotations.filter { annotation in
+            guard let incoming = incomingByID[annotation.id] else { return true }
+            return annotation.puck != incoming || annotation.layout != layout
+        }
+        let staleIDs = Set(staleAnnotations.map(\.id))
+        let newAnnotations = pucks.filter { puck in
+            existingByID[puck.id] == nil || staleIDs.contains(puck.id)
+        }
+
+        if !staleAnnotations.isEmpty {
+            mapView.removeAnnotations(staleAnnotations)
+        }
+        if !newAnnotations.isEmpty {
+            mapView.addAnnotations(newAnnotations.map { MapPuckAnnotation(puck: $0, layout: layout) })
+        }
     }
 
     private func applyFocusRequest(on mapView: MKMapView, coordinator: Coordinator) {
@@ -134,6 +149,7 @@ final class Coordinator: NSObject, MKMapViewDelegate {
 }
 
 private final class MapPuckAnnotation: NSObject, MKAnnotation {
+    let id: String
     let puck: MapPuckRenderModel
     let layout: PushAdaptiveLayout
 
@@ -142,6 +158,7 @@ private final class MapPuckAnnotation: NSObject, MKAnnotation {
     }
 
     init(puck: MapPuckRenderModel, layout: PushAdaptiveLayout) {
+        self.id = puck.id
         self.puck = puck
         self.layout = layout
     }

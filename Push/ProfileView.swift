@@ -12,14 +12,17 @@ struct ProfileView: View {
     @Environment(\.pushLayout) private var layout
     @StateObject private var viewModel: ProfileViewModel
     @State private var navigationPath: [ProfileRoute] = []
+    private let onClose: (() -> Void)?
 
     @MainActor
-    init() {
+    init(onClose: (() -> Void)? = nil) {
         _viewModel = StateObject(wrappedValue: ProfileViewModel())
+        self.onClose = onClose
     }
 
-    init(viewModel: ProfileViewModel) {
+    init(viewModel: ProfileViewModel, onClose: (() -> Void)? = nil) {
         _viewModel = StateObject(wrappedValue: viewModel)
+        self.onClose = onClose
     }
 
     var body: some View {
@@ -35,7 +38,7 @@ struct ProfileView: View {
         .safeAreaInset(edge: .top) {
             if navigationPath.isEmpty {
                 PushModalCloseButtonBar(accessibilityLabel: "Close profile") {
-                    dismiss()
+                    closeProfile()
                 }
             }
         }
@@ -76,6 +79,11 @@ struct ProfileView: View {
             .padding(.top, ProfileLayout.topPadding)
             .padding(.bottom, ProfileLayout.bottomPadding)
         }
+    }
+
+    private func closeProfile() {
+        onClose?()
+        dismiss()
     }
 }
 
