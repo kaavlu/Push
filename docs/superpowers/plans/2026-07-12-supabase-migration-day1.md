@@ -28,9 +28,12 @@
   `xcodebuild test -project Push.xcodeproj -scheme Push -destination 'platform=iOS Simulator,name=iPhone 14' -only-testing:PushTests -parallel-testing-enabled NO`
 - **Register new app-target Swift files** with `python3 scripts/pbxproj_add.py <path relative to Push/>`; test files with `python3 scripts/pbxproj_add.py --target tests <path relative to PushTests/>`.
 - **Test identities (created via real Supabase Auth, never SQL-seeded into `auth.users`):**
-  - User A: `alice@push.test` / `push-test-alice`
-  - User B: `bob@push.test` / `push-test-bob`
-  - Unrelated third user (for deny tests): `carol@push.test` / `push-test-carol`
+  Real-TLD emails are required (`.test`/`.example` are rejected by GoTrue's validator), and
+  the project must have **"Confirm email" OFF** (`mailer_autoconfirm = true`) so signups are
+  immediately usable. Actual values used (see `supabase/README.md`):
+  - User A: `alice@pushapp.dev` / `push-test-alice`
+  - User B: `bob@pushapp.dev` / `push-test-bob`
+  - Unrelated third user (for deny tests): `carol@pushapp.dev` / `push-test-carol`
 
 ---
 
