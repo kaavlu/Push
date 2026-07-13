@@ -180,18 +180,20 @@ struct FriendsSectionHeader: View {
 // MARK: - Group Card
 
 struct FriendGroupCard: View {
+    @Environment(\.pushLayout) private var layout
     let group: PushGroupData
     let members: [PushGroupMemberData]
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: FriendsLayout.groupIdentitySpacing) {
+            HStack(spacing: FriendsLayout.groupIdentitySpacing(layout)) {
                 avatar
                 identity
+                    .layoutPriority(1)
                 Spacer(minLength: 0)
             }
-            .padding(FriendsLayout.cardPadding)
+            .padding(FriendsLayout.cardPadding(layout))
             .frame(maxWidth: .infinity, alignment: .leading)
             .friendsCard(cornerRadius: FriendsLayout.cardCornerRadius)
         }
@@ -220,10 +222,10 @@ struct FriendGroupCard: View {
                     .foregroundStyle(PushControlColors.activeForeground)
             }
         }
-        .frame(width: FriendsLayout.groupAvatarSize, height: FriendsLayout.groupAvatarSize)
-        .clipShape(RoundedRectangle(cornerRadius: FriendsLayout.groupAvatarCornerRadius, style: .continuous))
+        .frame(width: FriendsLayout.groupAvatarSize(layout), height: FriendsLayout.groupAvatarSize(layout))
+        .clipShape(RoundedRectangle(cornerRadius: FriendsLayout.groupAvatarCornerRadius(layout), style: .continuous))
         .overlay {
-            RoundedRectangle(cornerRadius: FriendsLayout.groupAvatarCornerRadius, style: .continuous)
+            RoundedRectangle(cornerRadius: FriendsLayout.groupAvatarCornerRadius(layout), style: .continuous)
                 .stroke(.white.opacity(0.7), lineWidth: 1)
         }
     }

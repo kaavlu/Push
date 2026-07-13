@@ -8,10 +8,11 @@
 import SwiftUI
 
 struct CreateActionMenuView: View {
+    @Environment(\.pushLayout) private var layout
     let action: (CreateActionMenuItem) -> Void
 
     var body: some View {
-        VStack(spacing: CreateActionMenuLayout.rowSpacing) {
+        VStack(spacing: CreateActionMenuLayout.rowSpacing(layout)) {
             ForEach(CreateActionMenuItem.allCases) { item in
                 Button {
                     action(item)
@@ -23,9 +24,9 @@ struct CreateActionMenuView: View {
                 .accessibilityHint(item.subtitle)
             }
         }
-        .padding(CreateActionMenuLayout.cardPadding)
-        .frame(width: CreateActionMenuLayout.cardWidth)
-        .pushGlassBackground(cornerRadius: CreateActionMenuLayout.cardCornerRadius)
+        .padding(CreateActionMenuLayout.cardPadding(layout))
+        .frame(width: CreateActionMenuLayout.cardWidth(layout))
+        .pushGlassBackground(cornerRadius: CreateActionMenuLayout.cardCornerRadius(layout))
         .shadow(
             color: PushColorPalette.Accent.walnut.opacity(CreateActionMenuColor.cardShadowOpacity),
             radius: CreateActionMenuLayout.cardShadowRadius,
@@ -35,14 +36,15 @@ struct CreateActionMenuView: View {
 }
 
 private struct CreateActionMenuRow: View {
+    @Environment(\.pushLayout) private var layout
     let item: CreateActionMenuItem
 
     var body: some View {
-        HStack(spacing: CreateActionMenuLayout.iconSpacing) {
+        HStack(spacing: CreateActionMenuLayout.iconSpacing(layout)) {
             Image(systemName: item.symbolName)
                 .font(.system(size: CreateActionMenuLayout.iconSize, weight: .bold))
                 .foregroundStyle(PushControlColors.activeForeground)
-                .frame(width: CreateActionMenuLayout.iconFrame, height: CreateActionMenuLayout.iconFrame)
+                .frame(width: CreateActionMenuLayout.iconFrame(layout), height: CreateActionMenuLayout.iconFrame(layout))
                 .background(Circle().fill(PushControlColors.activeFill))
 
             VStack(alignment: .leading, spacing: CreateActionMenuLayout.textSpacing) {
@@ -53,11 +55,12 @@ private struct CreateActionMenuRow: View {
                 Text(item.subtitle)
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(PushControlColors.inactiveForeground)
+                    .lineLimit(2)
             }
 
             Spacer(minLength: 0)
         }
-        .padding(CreateActionMenuLayout.rowPadding)
+        .padding(CreateActionMenuLayout.rowPadding(layout))
         .background {
             RoundedRectangle(cornerRadius: CreateActionMenuLayout.rowCornerRadius, style: .continuous)
                 .fill(.white.opacity(CreateActionMenuColor.rowFillOpacity))
@@ -67,18 +70,18 @@ private struct CreateActionMenuRow: View {
 
 enum CreateActionMenuLayout {
     static let backdropOpacity = 0.12
-    static let cardWidth: CGFloat = 292
-    static let cardPadding: CGFloat = 10
-    static let cardCornerRadius: CGFloat = 26
-    static let cardBottomPadding: CGFloat = 104
+    static func cardWidth(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 266, standard: 280, large: 292) }
+    static func cardPadding(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 8, standard: 9, large: 10) }
+    static func cardCornerRadius(_ layout: PushAdaptiveLayout) -> CGFloat { layout.cardCornerRadius }
+    static func cardBottomPadding(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 88, standard: 96, large: 104) }
     static let cardShadowRadius: CGFloat = 24
     static let cardShadowYOffset: CGFloat = 12
-    static let rowSpacing: CGFloat = 6
-    static let rowPadding: CGFloat = 12
+    static func rowSpacing(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 4, standard: 5, large: 6) }
+    static func rowPadding(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 10, standard: 11, large: 12) }
     static let rowCornerRadius: CGFloat = 20
-    static let iconSpacing: CGFloat = 12
+    static func iconSpacing(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 10, standard: 11, large: 12) }
     static let iconSize: CGFloat = 16
-    static let iconFrame: CGFloat = 38
+    static func iconFrame(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 34, standard: 36, large: 38) }
     static let textSpacing: CGFloat = 3
     static let animationResponse = 0.26
     static let animationDamping = 0.88

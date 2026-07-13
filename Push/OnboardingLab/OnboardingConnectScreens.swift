@@ -12,6 +12,7 @@ import SwiftUI
 // MARK: - Location
 
 struct OnboardingLocationScreen: View {
+    @Environment(\.pushLayout) private var layout
     @ObservedObject var model: OnboardingLabViewModel
 
     var body: some View {
@@ -27,8 +28,8 @@ struct OnboardingLocationScreen: View {
                 .padding(.top, 24)
             OnboardingTextButton(title: "Not now") { model.go(to: .notifications) }
         }
-        .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding)
-        .padding(.top, 112)
+        .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
+        .padding(.top, OnboardingLabMetric.contentTopInset(layout))
         .padding(.bottom, 26)
     }
 
@@ -68,6 +69,7 @@ struct OnboardingLocationScreen: View {
 // MARK: - Notifications
 
 struct OnboardingNotificationsScreen: View {
+    @Environment(\.pushLayout) private var layout
     @ObservedObject var model: OnboardingLabViewModel
 
     var body: some View {
@@ -84,8 +86,8 @@ struct OnboardingNotificationsScreen: View {
             OnboardingCTAButton(title: "Turn on notifications") { model.go(to: .contacts) }
             OnboardingTextButton(title: "Maybe later") { model.go(to: .contacts) }
         }
-        .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding)
-        .padding(.top, 116)
+        .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
+        .padding(.top, OnboardingLabMetric.contentTopInset(layout) + layout.value(compact: 2, standard: 3, large: 4))
         .padding(.bottom, 26)
     }
 
@@ -158,6 +160,7 @@ private struct OnboardingNotificationRow: View {
 // MARK: - Find friends
 
 struct OnboardingContactsScreen: View {
+    @Environment(\.pushLayout) private var layout
     @ObservedObject var model: OnboardingLabViewModel
 
     var body: some View {
@@ -170,8 +173,8 @@ struct OnboardingContactsScreen: View {
             Spacer(minLength: 22)
             OnboardingCTAButton(title: model.friendsCTALabel) { model.go(to: .done) }
         }
-        .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding)
-        .padding(.top, 116)
+        .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
+        .padding(.top, OnboardingLabMetric.contentTopInset(layout) + layout.value(compact: 2, standard: 3, large: 4))
         .padding(.bottom, 26)
     }
 

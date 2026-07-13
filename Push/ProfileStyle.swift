@@ -8,7 +8,7 @@
 import SwiftUI
 
 enum ProfileLayout {
-    static let horizontalPadding: CGFloat = 18
+    static func horizontalPadding(_ layout: PushAdaptiveLayout) -> CGFloat { layout.pageHorizontalPadding }
     static let topPadding: CGFloat = 18
     static let bottomPadding: CGFloat = 88
     static let closeTopPadding: CGFloat = 16
@@ -18,17 +18,17 @@ enum ProfileLayout {
     static let backIconSize: CGFloat = 13
     static let backButtonSpacing: CGFloat = 6
     static let backHorizontalPadding: CGFloat = 14
-    static let sectionSpacing: CGFloat = 18
-    static let headerSpacing: CGFloat = 14
-    static let headerTopPadding: CGFloat = 8
+    static func sectionSpacing(_ layout: PushAdaptiveLayout) -> CGFloat { layout.sectionSpacing }
+    static func headerSpacing(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 10, standard: 12, large: 14) }
+    static func headerTopPadding(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 2, standard: 5, large: 8) }
     static let titleSpacing: CGFloat = 3
     static let summaryHorizontalPadding: CGFloat = 18
-    static let avatarSize: CGFloat = 112
-    static let avatarTextSize: CGFloat = 34
+    static func avatarSize(_ layout: PushAdaptiveLayout) -> CGFloat { layout.avatarLarge }
+    static func avatarTextSize(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 30, standard: 32, large: 34) }
     static let avatarStrokeWidth: CGFloat = 1.2
     static let avatarShadowRadius: CGFloat = 18
     static let avatarShadowYOffset: CGFloat = 8
-    static let cameraBadgeSize: CGFloat = 34
+    static func cameraBadgeSize(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 30, standard: 32, large: 34) }
     static let cameraBadgeIconSize: CGFloat = 14
     static let cameraBadgeStrokeWidth: CGFloat = 2
     static let cameraBadgeOffset: CGFloat = 4
@@ -36,8 +36,8 @@ enum ProfileLayout {
     static let pillIconSize: CGFloat = 13
     static let pillHorizontalPadding: CGFloat = 14
     static let pillVerticalPadding: CGFloat = 8
-    static let cardPadding: CGFloat = 16
-    static let cardCornerRadius: CGFloat = 26
+    static func cardPadding(_ layout: PushAdaptiveLayout) -> CGFloat { layout.cardPadding }
+    static func cardCornerRadius(_ layout: PushAdaptiveLayout) -> CGFloat { layout.cardCornerRadius }
     static let statusIconSize: CGFloat = 15
     static let statusIconFrame: CGFloat = 34
     static let rowSpacing: CGFloat = 8
@@ -81,6 +81,7 @@ struct PushModalBackground: View {
 }
 
 struct PushModalCloseButtonBar: View {
+    @Environment(\.pushLayout) private var layout
     let accessibilityLabel: String
     let action: () -> Void
 
@@ -93,7 +94,7 @@ struct PushModalCloseButtonBar: View {
                 action: action
             )
         }
-        .padding(.horizontal, ProfileLayout.horizontalPadding)
+        .padding(.horizontal, ProfileLayout.horizontalPadding(layout))
         .padding(.top, ProfileLayout.closeTopPadding)
         .padding(.bottom, ProfileLayout.closeBottomPadding)
     }

@@ -8,12 +8,13 @@
 import SwiftUI
 
 struct StartPushStep1View: View {
+    @Environment(\.pushLayout) private var layout
     @ObservedObject var viewModel: StartPushViewModel
     let onNext: () -> Void
 
     var body: some View {
         ScrollView {
-            VStack(spacing: StartPushLayout.sectionSpacing) {
+            VStack(spacing: StartPushLayout.sectionSpacing(layout)) {
                 StartPushHeader(
                     title: "Who's this for?",
                     subtitle: "Choose groups or friends to send this push to."
@@ -22,13 +23,13 @@ struct StartPushStep1View: View {
                 groupSection
                 friendSection
             }
-            .padding(.horizontal, StartPushLayout.horizontalPadding)
+            .padding(.horizontal, StartPushLayout.horizontalPadding(layout))
             .padding(.bottom, StartPushLayout.contentTopSpacing)
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             bottomBar
-                .padding(.horizontal, StartPushLayout.horizontalPadding)
-                .padding(.bottom, StartPushLayout.bottomPadding)
+                .padding(.horizontal, StartPushLayout.horizontalPadding(layout))
+                .padding(.bottom, StartPushLayout.bottomPadding(layout))
                 .background(bottomBarBackground)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -46,7 +47,7 @@ struct StartPushStep1View: View {
     private var groupSection: some View {
         VStack(alignment: .leading, spacing: StartPushLayout.sectionLabelSpacing) {
             StartPushSectionLabel(title: "Groups")
-            HStack(spacing: StartPushLayout.groupCardSpacing) {
+            LazyVGrid(columns: groupColumns, spacing: StartPushLayout.groupCardSpacing(layout)) {
                 ForEach(viewModel.filteredGroups) { group in
                     GroupSelectCard(
                         item: group,
@@ -57,6 +58,15 @@ struct StartPushStep1View: View {
             }
             .frame(maxWidth: .infinity)
         }
+    }
+
+    private var groupColumns: [GridItem] {
+        [
+            GridItem(
+                .adaptive(minimum: StartPushLayout.groupCardMinWidth(layout)),
+                spacing: StartPushLayout.groupCardSpacing(layout)
+            )
+        ]
     }
 
     private var friendSection: some View {
@@ -107,6 +117,7 @@ struct StartPushStep1View: View {
 }
 
 private struct GroupSelectCard: View {
+    @Environment(\.pushLayout) private var layout
     let item: PushRecipientItem
     let isSelected: Bool
     let action: () -> Void
@@ -118,7 +129,7 @@ private struct GroupSelectCard: View {
                     RecipientAvatarView(
                         imageAssetName: item.imageAssetName,
                         initials: item.initials,
-                        size: StartPushLayout.groupAvatarSize
+                        size: StartPushLayout.groupAvatarSize(layout)
                     )
                     if isSelected { checkmark }
                 }
@@ -136,13 +147,14 @@ private struct GroupSelectCard: View {
                     .foregroundStyle(PushControlColors.textTertiary)
                 }
             }
-            .frame(width: StartPushLayout.groupCardWidth, height: StartPushLayout.groupCardHeight)
+            .frame(maxWidth: .infinity)
+            .frame(height: StartPushLayout.groupCardHeight(layout))
             .background(
-                RoundedRectangle(cornerRadius: StartPushLayout.cardCornerRadius, style: .continuous)
+                RoundedRectangle(cornerRadius: StartPushLayout.cardCornerRadius(layout), style: .continuous)
                     .fill(isSelected ? PushControlColors.activeFill : .white.opacity(StartPushColor.rowFillOpacity))
             )
             .overlay(
-                RoundedRectangle(cornerRadius: StartPushLayout.cardCornerRadius, style: .continuous)
+                RoundedRectangle(cornerRadius: StartPushLayout.cardCornerRadius(layout), style: .continuous)
                     .stroke(
                         isSelected ? PushColorPalette.Accent.walnut.opacity(StartPushColor.selectedStrokeOpacity) : .clear,
                         lineWidth: 1.5

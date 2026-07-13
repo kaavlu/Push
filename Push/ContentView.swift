@@ -10,6 +10,7 @@ import MapKit
 import UIKit
 
 struct ContentView: View {
+    @Environment(\.pushLayout) private var layout
     @StateObject private var viewModel = MapViewModel()
     @State private var selectedNavigationItem: BottomNavigationItem = .map
     @State private var presentedRoute: MainMapRoute?
@@ -27,7 +28,8 @@ struct ContentView: View {
                 focusRequest: viewModel.mapFocusRequest,
                 onPuckSelected: selectMapPuck,
                 onRegionChanged: handleRegionChanged,
-                mapLayoutMargins: MapAttributionLayout.edgeInsets
+                layout: layout,
+                mapLayoutMargins: MapAttributionLayout.edgeInsets(layout)
             )
             .ignoresSafeArea()
 
@@ -36,7 +38,7 @@ struct ContentView: View {
                     .transition(.opacity)
 
                 CreateActionMenuView(action: selectCreateAction)
-                    .padding(.bottom, CreateActionMenuLayout.cardBottomPadding)
+                    .padding(.bottom, CreateActionMenuLayout.cardBottomPadding(layout))
                     .transition(
                         .move(edge: .bottom)
                             .combined(with: .opacity)
@@ -48,8 +50,8 @@ struct ContentView: View {
                 selectedItem: $selectedNavigationItem,
                 action: selectNavigationItem
             )
-                .padding(.horizontal, BottomNavigationLayout.horizontalMargin)
-                .padding(.bottom, BottomNavigationLayout.bottomMargin)
+                .padding(.horizontal, BottomNavigationLayout.horizontalMargin(layout))
+                .padding(.bottom, BottomNavigationLayout.bottomMargin(layout))
         }
         .animation(
             .spring(response: CreateActionMenuLayout.animationResponse, dampingFraction: CreateActionMenuLayout.animationDamping),
@@ -71,7 +73,7 @@ struct ContentView: View {
                     selectedID: $viewModel.selectedFilterID,
                     selectedTitle: viewModel.selectedFilterTitle
                 )
-                    .frame(width: TopControlLayout.dropdownWidth)
+                    .frame(width: TopControlLayout.dropdownWidth(layout))
 
                 Spacer(minLength: 0)
 
@@ -79,7 +81,7 @@ struct ContentView: View {
                 Color.clear
                     .frame(width: TopControlLayout.iconButtonSize, height: TopControlLayout.iconButtonSize)
             }
-            .padding(.horizontal, TopControlLayout.horizontalMargin)
+            .padding(.horizontal, TopControlLayout.horizontalMargin(layout))
             .padding(.top, TopControlLayout.topMargin)
         }
         .fullScreenCover(item: $presentedRoute) { route in
@@ -197,6 +199,7 @@ private enum MainMapPresentationTiming {
 }
 
 private struct FriendGroupDropdown: View {
+    @Environment(\.pushLayout) private var layout
     let items: [GroupFilterItem]
     @Binding var selectedID: String
     let selectedTitle: String
@@ -259,7 +262,7 @@ private struct FriendGroupDropdown: View {
             }
         }
         .padding(TopDropdownLayout.panelPadding)
-        .frame(width: TopDropdownLayout.panelWidth)
+        .frame(width: TopDropdownLayout.panelWidth(layout))
         .pushGlassBackground(cornerRadius: TopDropdownLayout.panelCornerRadius)
     }
 
@@ -346,7 +349,7 @@ private enum TopDropdownLayout {
     static let labelSpacing: CGFloat = 6
     static let panelSpacing: CGFloat = 8
     static let panelPadding: CGFloat = 6
-    static let panelWidth: CGFloat = 218
+    static func panelWidth(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 196, standard: 208, large: 218) }
     static let panelCornerRadius: CGFloat = 24
     static let rowSpacing: CGFloat = 2
     static let rowHorizontalPadding: CGFloat = 12
@@ -363,8 +366,8 @@ private enum TopDropdownLayout {
 
 private enum TopControlLayout {
     static let topMargin: CGFloat = 10
-    static let horizontalMargin: CGFloat = 16
-    static let dropdownWidth: CGFloat = 139.4
+    static func horizontalMargin(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 12, standard: 14, large: 16) }
+    static func dropdownWidth(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 124, standard: 132, large: 139.4) }
     static let dropdownHeight: CGFloat = 46
     static let iconButtonSize: CGFloat = 44
     static let cornerRadius: CGFloat = iconButtonSize / 2
@@ -376,17 +379,19 @@ private enum MapAttributionLayout {
     // Insets tell MapKit where to place the Apple logo and legal text.
     // Compass is now a manually placed MKCompassButton — not driven by these margins.
     // top: 120 pushes attribution below the top controls; bottom: 130 keeps it above the nav bar.
-    static let top: CGFloat = 120
-    static let bottom: CGFloat = 130
+    static func top(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 104, standard: 112, large: 120) }
+    static func bottom(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 108, standard: 120, large: 130) }
     static let left: CGFloat = 16
 
-    static var edgeInsets: UIEdgeInsets {
-        UIEdgeInsets(top: top, left: left, bottom: bottom, right: 0)
+    static func edgeInsets(_ layout: PushAdaptiveLayout) -> UIEdgeInsets {
+        UIEdgeInsets(top: top(layout), left: left, bottom: bottom(layout), right: 0)
     }
 }
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        PushPreviewMatrix {
+            ContentView()
+        }
     }
 }

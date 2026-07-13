@@ -72,13 +72,13 @@ enum OnboardingLabMotion {
 
 /// Shared metrics used across every screen.
 enum OnboardingLabMetric {
-    static let screenHorizontalPadding: CGFloat = 24
+    static func screenHorizontalPadding(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 18, standard: 21, large: 24) }
     static let ctaHeight: CGFloat = 54
     static let ctaCornerRadius: CGFloat = 27
     static let cardCornerRadius: CGFloat = 24
     static let fieldHeight: CGFloat = 56
     static let fieldCornerRadius: CGFloat = 16
-    static let contentTopInset: CGFloat = 112
+    static func contentTopInset(_ layout: PushAdaptiveLayout) -> CGFloat { layout.onboardingTopInset }
     static let avatarRingWidth: CGFloat = 3
 }
 #endif

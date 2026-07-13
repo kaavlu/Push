@@ -12,6 +12,7 @@ import SwiftUI
 
 struct FriendsView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.pushLayout) private var layout
     @StateObject private var viewModel: FriendsViewModel
     @StateObject private var groupsViewModel: GroupsViewModel
     @State private var mode: FriendsMode = .friends
@@ -57,7 +58,7 @@ struct FriendsView: View {
         ZStack {
             FriendsBackground()
 
-            VStack(spacing: FriendsLayout.screenStackSpacing) {
+            VStack(spacing: FriendsLayout.screenStackSpacing(layout)) {
                 FriendsHeader(
                     mode: mode,
                     onClose: { dismiss() }
@@ -94,7 +95,7 @@ struct FriendsView: View {
 
                 listContent
             }
-            .padding(.horizontal, FriendsLayout.horizontalPadding)
+            .padding(.horizontal, FriendsLayout.horizontalPadding(layout))
             .padding(.top, FriendsLayout.topPadding)
         }
         .sheet(item: $viewModel.selectedFriend) { puck in
@@ -128,7 +129,7 @@ struct FriendsView: View {
                     groupsList
                 }
             }
-            .padding(.bottom, FriendsLayout.bottomPadding)
+            .padding(.bottom, FriendsLayout.bottomPadding(layout))
         }
     }
 
@@ -377,6 +378,8 @@ private struct FriendsSearchField: View {
 
 struct FriendsView_Previews: PreviewProvider {
     static var previews: some View {
-        FriendsView()
+        PushPreviewMatrix {
+            FriendsView()
+        }
     }
 }

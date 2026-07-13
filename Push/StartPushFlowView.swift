@@ -10,6 +10,7 @@ import SwiftUI
 struct StartPushFlowView: View {
     @StateObject private var viewModel: StartPushViewModel
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.pushLayout) private var layout
     @State private var movingForward = true
 
     @MainActor
@@ -22,7 +23,7 @@ struct StartPushFlowView: View {
             PushModalBackground()
             VStack(spacing: 0) {
                 navBar
-                    .padding(.horizontal, StartPushLayout.horizontalPadding)
+                    .padding(.horizontal, StartPushLayout.horizontalPadding(layout))
                     .padding(.top, StartPushLayout.navTopPadding)
                     .padding(.bottom, StartPushLayout.navBottomPadding)
 

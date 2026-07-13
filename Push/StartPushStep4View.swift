@@ -8,22 +8,23 @@
 import SwiftUI
 
 struct StartPushStep4View: View {
+    @Environment(\.pushLayout) private var layout
     @ObservedObject var viewModel: StartPushViewModel
     let onViewResponses: () -> Void
     let onEdit: () -> Void
 
     var body: some View {
         ScrollView {
-            VStack(spacing: StartPushLayout.sectionSpacing) {
+            VStack(spacing: StartPushLayout.sectionSpacing(layout)) {
                 confirmationIcon
                 pushSummary
                 responseCard
                 liveStatusCard
                 actionButtons
             }
-            .padding(.horizontal, StartPushLayout.horizontalPadding)
+            .padding(.horizontal, StartPushLayout.horizontalPadding(layout))
             .padding(.top, 8)
-            .padding(.bottom, StartPushLayout.bottomPadding)
+            .padding(.bottom, StartPushLayout.bottomPadding(layout))
         }
     }
 
@@ -68,24 +69,29 @@ struct StartPushStep4View: View {
                     .foregroundStyle(PushControlColors.textEspresso)
                 Spacer()
             }
-            HStack(spacing: StartPushLayout.sectionSpacing) {
-                responseGroup(
-                    items: viewModel.likelyFreeNow,
-                    label: "likely free now"
-                )
-                Divider()
-                    .frame(height: StartPushLayout.responseDividerHeight)
-                responseGroup(
-                    items: viewModel.mightBeInterested,
-                    label: "might be interested"
-                )
+            ViewThatFits(in: .horizontal) {
+                responseGroupsRow
+                VStack(spacing: StartPushLayout.responseCardSpacing) {
+                    responseGroup(items: viewModel.likelyFreeNow, label: "likely free now")
+                    Divider()
+                    responseGroup(items: viewModel.mightBeInterested, label: "might be interested")
+                }
             }
         }
-        .padding(StartPushLayout.cardPadding)
+        .padding(StartPushLayout.cardPadding(layout))
         .background(
-            RoundedRectangle(cornerRadius: StartPushLayout.cardCornerRadius, style: .continuous)
+            RoundedRectangle(cornerRadius: StartPushLayout.cardCornerRadius(layout), style: .continuous)
                 .fill(.white.opacity(StartPushColor.rowFillOpacity))
         )
+    }
+
+    private var responseGroupsRow: some View {
+        HStack(spacing: StartPushLayout.sectionSpacing(layout)) {
+            responseGroup(items: viewModel.likelyFreeNow, label: "likely free now")
+            Divider()
+                .frame(height: StartPushLayout.responseDividerHeight)
+            responseGroup(items: viewModel.mightBeInterested, label: "might be interested")
+        }
     }
 
     private func responseGroup(items: [PushRecipientItem], label: String) -> some View {
@@ -126,9 +132,9 @@ struct StartPushStep4View: View {
             }
             Spacer(minLength: 0)
         }
-        .padding(StartPushLayout.cardPadding)
+        .padding(StartPushLayout.cardPadding(layout))
         .background(
-            RoundedRectangle(cornerRadius: StartPushLayout.cardCornerRadius, style: .continuous)
+            RoundedRectangle(cornerRadius: StartPushLayout.cardCornerRadius(layout), style: .continuous)
                 .fill(.white.opacity(StartPushColor.rowFillOpacity))
         )
     }

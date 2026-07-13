@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ProfileHeader: View {
+    @Environment(\.pushLayout) private var layout
     let name: String
     let handle: String
     let initials: String
@@ -17,7 +18,7 @@ struct ProfileHeader: View {
     let editPhotoAction: () -> Void
 
     var body: some View {
-        VStack(spacing: ProfileLayout.headerSpacing) {
+        VStack(spacing: ProfileLayout.headerSpacing(layout)) {
             ProfileAvatar(
                 initials: initials,
                 imageAssetName: imageAssetName,
@@ -33,7 +34,7 @@ struct ProfileHeader: View {
             }
             StatusPill(title: statusTitle, symbolName: statusSymbolName)
         }
-        .padding(.top, ProfileLayout.headerTopPadding)
+        .padding(.top, ProfileLayout.headerTopPadding(layout))
     }
 }
 
@@ -59,6 +60,7 @@ struct ProfileBackButton: View {
 }
 
 struct ProfileAvatar: View {
+    @Environment(\.pushLayout) private var layout
     let initials: String
     let imageAssetName: String?
     let action: () -> Void
@@ -86,14 +88,14 @@ struct ProfileAvatar: View {
             Image(uiImage: image)
                 .resizable()
                 .scaledToFill()
-                .frame(width: ProfileLayout.avatarSize, height: ProfileLayout.avatarSize)
+                .frame(width: ProfileLayout.avatarSize(layout), height: ProfileLayout.avatarSize(layout))
                 .clipShape(Circle())
                 .overlay(ProfileAvatarStroke())
         } else {
             Text(initials)
-                .font(.system(size: ProfileLayout.avatarTextSize, weight: .bold, design: .rounded))
+                .font(.system(size: ProfileLayout.avatarTextSize(layout), weight: .bold, design: .rounded))
                 .foregroundStyle(PushControlColors.activeForeground)
-                .frame(width: ProfileLayout.avatarSize, height: ProfileLayout.avatarSize)
+                .frame(width: ProfileLayout.avatarSize(layout), height: ProfileLayout.avatarSize(layout))
                 .background(Circle().fill(PushControlColors.activeFill))
                 .overlay(ProfileAvatarStroke())
         }
@@ -225,6 +227,7 @@ struct SectionTitle: View {
 }
 
 struct GlassCard<Content: View>: View {
+    @Environment(\.pushLayout) private var layout
     private let content: Content
 
     init(@ViewBuilder content: () -> Content) {
@@ -233,19 +236,20 @@ struct GlassCard<Content: View>: View {
 
     var body: some View {
         content
-            .padding(ProfileLayout.cardPadding)
-            .pushGlassBackground(cornerRadius: ProfileLayout.cardCornerRadius)
+            .padding(ProfileLayout.cardPadding(layout))
+            .pushGlassBackground(cornerRadius: ProfileLayout.cardCornerRadius(layout))
     }
 }
 
 private struct ProfileBadge: View {
+    @Environment(\.pushLayout) private var layout
     let symbolName: String
 
     var body: some View {
         Image(systemName: symbolName)
             .font(.system(size: ProfileLayout.cameraBadgeIconSize, weight: .bold))
             .foregroundStyle(PushControlColors.activeForeground)
-            .frame(width: ProfileLayout.cameraBadgeSize, height: ProfileLayout.cameraBadgeSize)
+            .frame(width: ProfileLayout.cameraBadgeSize(layout), height: ProfileLayout.cameraBadgeSize(layout))
             .background(Circle().fill(.white.opacity(ProfileColor.cameraBadgeFillOpacity)))
             .overlay {
                 Circle()

@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ProfileView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.pushLayout) private var layout
     @StateObject private var viewModel: ProfileViewModel
     @State private var navigationPath: [ProfileRoute] = []
 
@@ -55,7 +56,7 @@ struct ProfileView: View {
 
     private var profileContent: some View {
         ScrollView(showsIndicators: false) {
-            VStack(spacing: ProfileLayout.sectionSpacing) {
+            VStack(spacing: ProfileLayout.sectionSpacing(layout)) {
                 ProfileHeader(
                     name: viewModel.displayName,
                     handle: viewModel.handle,
@@ -71,7 +72,7 @@ struct ProfileView: View {
                 ProfileRoutesCard(title: "Privacy", routes: viewModel.privacyRoutes)
                 ProfileConnectCard(viewModel: viewModel)
             }
-            .padding(.horizontal, ProfileLayout.horizontalPadding)
+            .padding(.horizontal, ProfileLayout.horizontalPadding(layout))
             .padding(.top, ProfileLayout.topPadding)
             .padding(.bottom, ProfileLayout.bottomPadding)
         }
@@ -188,6 +189,8 @@ private struct ProfileConnectorRow: View {
 
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
-        ProfileView()
+        PushPreviewMatrix {
+            ProfileView()
+        }
     }
 }

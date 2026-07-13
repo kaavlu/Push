@@ -3,6 +3,7 @@ import SwiftUI
 
 struct PlansView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.pushLayout) private var layout
     @StateObject private var viewModel: PlansViewModel
 
     @MainActor
@@ -21,7 +22,7 @@ struct PlansView: View {
         }
         .safeAreaInset(edge: .top, spacing: 0) {
             PlansPageHeader(dismissAction: { dismiss() })
-                .padding(.horizontal, PlansLayout.horizontalPadding)
+                .padding(.horizontal, PlansLayout.horizontalPadding(layout))
         }
         .fullScreenCover(isPresented: $viewModel.isReviewDeckPresented) {
             ReviewPushesView(viewModel: viewModel)
@@ -40,18 +41,18 @@ struct PlansView: View {
     private var pageContent: some View {
         VStack(alignment: .leading, spacing: 0) {
             PlansCalendarView(viewModel: viewModel)
-            Spacer(minLength: PlansLayout.calendarToYourPushesSpacing)
+            Spacer(minLength: PlansLayout.calendarToYourPushesSpacing(layout))
             YourPushesModule(viewModel: viewModel)
-            Spacer(minLength: PlansLayout.pushesModuleSpacing)
+            Spacer(minLength: PlansLayout.pushesModuleSpacing(layout))
             ActivePushesModule(viewModel: viewModel)
             Spacer(minLength: 0)
             StartPlanButton { viewModel.isStartPushPresented = true }
                 .frame(maxWidth: .infinity)
                 .padding(.top, PlansLayout.startButtonTopSpacing)
         }
-        .padding(.horizontal, PlansLayout.horizontalPadding)
-        .padding(.top, PlansLayout.headerToCalendarSpacing)
-        .padding(.bottom, PlansLayout.startPlanButtonBottomPadding)
+        .padding(.horizontal, PlansLayout.horizontalPadding(layout))
+        .padding(.top, PlansLayout.headerToCalendarSpacing(layout))
+        .padding(.bottom, PlansLayout.startPlanButtonBottomPadding(layout))
     }
 }
 
@@ -150,6 +151,7 @@ private struct ActivePushesModule: View {
 struct YourPushesListView: View {
     @ObservedObject var viewModel: PlansViewModel
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.pushLayout) private var layout
     @State private var managedPlan: PlanData?
 
     var body: some View {
@@ -161,7 +163,7 @@ struct YourPushesListView: View {
                     .foregroundStyle(PushControlColors.activeForeground)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.top, PlansLayout.headerTopPadding)
-                    .padding(.horizontal, PlansLayout.horizontalPadding)
+                    .padding(.horizontal, PlansLayout.horizontalPadding(layout))
                 ScrollView {
                     VStack(spacing: PlansLayout.currentPushesSpacing) {
                         ForEach(viewModel.yourPushes) { plan in
@@ -170,7 +172,7 @@ struct YourPushesListView: View {
                             }
                         }
                     }
-                    .padding(.horizontal, PlansLayout.horizontalPadding)
+                    .padding(.horizontal, PlansLayout.horizontalPadding(layout))
                     .padding(.top, PlansLayout.listHeaderToCardsSpacing)
                     .padding(.bottom, PlansLayout.bottomPadding)
                 }
@@ -188,6 +190,7 @@ struct YourPushesListView: View {
 }
 
 private struct StartPlanButton: View {
+    @Environment(\.pushLayout) private var layout
     let action: () -> Void
 
     var body: some View {
@@ -200,7 +203,7 @@ private struct StartPlanButton: View {
             }
             // Brown accenting, no near-black espresso text.
             .foregroundStyle(PushColorPalette.Accent.walnut)
-            .padding(.horizontal, PlansLayout.startPlanButtonHorizontalPadding)
+            .padding(.horizontal, PlansLayout.startPlanButtonHorizontalPadding(layout))
             .frame(height: PlansLayout.startPlanButtonHeight)
             .background {
                 Capsule()
@@ -226,5 +229,13 @@ private extension Text {
     func plansModuleActionText() -> some View {
         font(.subheadline.weight(.semibold))
             .foregroundStyle(PushColorPalette.Accent.walnut)
+    }
+}
+
+struct PlansView_Previews: PreviewProvider {
+    static var previews: some View {
+        PushPreviewMatrix {
+            PlansView()
+        }
     }
 }

@@ -35,6 +35,7 @@ struct GroupDetailView: View {
 }
 
 private struct GroupDetailBackButtonBar: View {
+    @Environment(\.pushLayout) private var layout
     let action: () -> Void
 
     var body: some View {
@@ -51,7 +52,7 @@ private struct GroupDetailBackButtonBar: View {
 
             Spacer(minLength: 0)
         }
-        .padding(.horizontal, ProfileLayout.horizontalPadding)
+        .padding(.horizontal, ProfileLayout.horizontalPadding(layout))
         .padding(.top, ProfileLayout.closeTopPadding)
         .padding(.bottom, ProfileLayout.closeBottomPadding)
     }

@@ -1,3 +1,39 @@
+# Responsive Layout System Audit
+
+## Goal
+Make Push adapt cleanly across supported iPhone widths while preserving the iPhone 17 Pro Max
+as the visual reference.
+
+## Audit Findings
+- Hardcoded dimensions causing crowding: map annotation frames, bottom-nav margins/button sizes,
+  top map filter widths, Start Push group cards, Push card fixed heights, Friends row avatars and
+  trailing chips, group-card avatars/stats, profile avatar/cards, onboarding top insets, and fixed
+  detail-sheet heights.
+- Repeated values that should be semantic: page horizontal padding, section spacing, card padding,
+  card corner radius, row/avatar/icon sizes, modal spacing, puck sizes, button/tap sizes, and
+  bottom-safe-area clearance.
+- Components that should reflow: Friends rows, group stats, Start Push group selection, detail-sheet
+  action rows, calendar/header controls, and plan-card headers/footers.
+- Limited proportional scaling is appropriate for decorative avatars, pucks, icon circles, card
+  padding, spacing, and non-critical fixed card dimensions. It is not appropriate for body text,
+  primary controls, or minimum tap targets.
+
+## Contract
+- Add one shared adaptive layout source keyed by available container width, with compact, standard,
+  and large tiers.
+- Keep large-tier metrics equal or very close to the current iPhone 17 Pro Max treatment.
+- Use adaptive semantic tokens inside existing feature layout enums instead of scattered screen checks.
+- Replace brittle fixed widths/heights with adaptive grids, `ViewThatFits`, flexible frames, wrapping,
+  or scrolling where those choices preserve usability.
+- Keep controls comfortably tappable and let vertically dense screens scroll.
+- Do not change business logic, repository/data flow, navigation, copy meaning, or brand styling.
+
+## Acceptance Criteria
+- App builds after adding the shared adaptive layout file to the Xcode project.
+- Major app screens inherit compact/standard/large metrics from container width.
+- Preview matrix covers a small iPhone, a standard iPhone, iPhone 17 Pro, and iPhone 17 Pro Max.
+- Layout changes are scoped to SwiftUI geometry/spacing/adaptive presentation only.
+
 # Issue #24 — Your Pushes Wiring + UI Fix
 
 ## Goal

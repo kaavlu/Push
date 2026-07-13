@@ -9,6 +9,7 @@ import SwiftUI
 
 struct GroupsView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.pushLayout) private var layout
     @StateObject private var viewModel: GroupsViewModel
     @State private var startPushContext: StartPushLaunchContext?
 
@@ -63,7 +64,7 @@ struct GroupsView: View {
                         }
                     }
                 }
-                .padding(.horizontal, GroupsLayout.horizontalPadding)
+                .padding(.horizontal, GroupsLayout.horizontalPadding(layout))
                 .padding(.top, GroupsLayout.topPadding)
                 .padding(.bottom, GroupsLayout.bottomPadding)
             }
@@ -92,6 +93,7 @@ private struct GroupsHeader: View {
 }
 
 private struct GroupSocialCircleCard: View {
+    @Environment(\.pushLayout) private var layout
     let group: PushGroupData
     let stats: [PushGroupStat]
     let isSelected: Bool
@@ -103,11 +105,11 @@ private struct GroupSocialCircleCard: View {
                 GroupIdentityRow(group: group)
                 GroupStatsRow(stats: stats)
             }
-            .padding(GroupsLayout.cardPadding)
+            .padding(GroupsLayout.cardPadding(layout))
             .frame(maxWidth: .infinity, alignment: .leading)
-            .pushGlassBackground(cornerRadius: GroupsLayout.cardCornerRadius)
+            .pushGlassBackground(cornerRadius: GroupsLayout.cardCornerRadius(layout))
             .overlay {
-                RoundedRectangle(cornerRadius: GroupsLayout.cardCornerRadius, style: .continuous)
+                RoundedRectangle(cornerRadius: GroupsLayout.cardCornerRadius(layout), style: .continuous)
                     .stroke(selectedStrokeColor, lineWidth: GroupsLayout.selectedStrokeWidth)
             }
             .shadow(
@@ -127,10 +129,11 @@ private struct GroupSocialCircleCard: View {
 }
 
 private struct GroupIdentityRow: View {
+    @Environment(\.pushLayout) private var layout
     let group: PushGroupData
 
     var body: some View {
-        HStack(alignment: .center, spacing: GroupsLayout.identitySpacing) {
+        HStack(alignment: .center, spacing: GroupsLayout.identitySpacing(layout)) {
             GroupProfileImage(group: group)
 
             VStack(alignment: .leading, spacing: GroupsLayout.identityTextSpacing) {
@@ -144,6 +147,7 @@ private struct GroupIdentityRow: View {
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(PushControlColors.inactiveForeground)
             }
+            .layoutPriority(1)
 
             Spacer(minLength: 0)
 
@@ -157,6 +161,7 @@ private struct GroupIdentityRow: View {
 }
 
 private struct GroupProfileImage: View {
+    @Environment(\.pushLayout) private var layout
     let group: PushGroupData
 
     var body: some View {
@@ -169,10 +174,10 @@ private struct GroupProfileImage: View {
                 GroupFallbackTile(group: group)
             }
         }
-        .frame(width: GroupsLayout.avatarSize, height: GroupsLayout.avatarSize)
-        .clipShape(RoundedRectangle(cornerRadius: GroupsLayout.avatarCornerRadius, style: .continuous))
+        .frame(width: GroupsLayout.avatarSize(layout), height: GroupsLayout.avatarSize(layout))
+        .clipShape(RoundedRectangle(cornerRadius: GroupsLayout.avatarCornerRadius(layout), style: .continuous))
         .overlay {
-            RoundedRectangle(cornerRadius: GroupsLayout.avatarCornerRadius, style: .continuous)
+            RoundedRectangle(cornerRadius: GroupsLayout.avatarCornerRadius(layout), style: .continuous)
                 .stroke(.white.opacity(GroupsColor.avatarStrokeOpacity), lineWidth: GroupsLayout.avatarStrokeWidth)
         }
     }
@@ -223,9 +228,20 @@ private struct GroupStatsRow: View {
     let stats: [PushGroupStat]
 
     var body: some View {
-        HStack(spacing: GroupsLayout.statSpacing) {
-            ForEach(stats) { stat in
-                GroupStatBlock(stat: stat)
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: GroupsLayout.statSpacing) {
+                ForEach(stats) { stat in
+                    GroupStatBlock(stat: stat)
+                }
+            }
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: GroupsLayout.statSpacing) {
+                    ForEach(stats) { stat in
+                        GroupStatBlock(stat: stat)
+                            .frame(minWidth: GroupsLayout.compactStatMinWidth)
+                    }
+                }
             }
         }
     }
@@ -256,23 +272,23 @@ private struct GroupStatBlock: View {
 }
 
 private enum GroupsLayout {
-    static let horizontalPadding: CGFloat = 18
+    static func horizontalPadding(_ layout: PushAdaptiveLayout) -> CGFloat { layout.pageHorizontalPadding }
     static let topPadding: CGFloat = 16
     static let bottomPadding: CGFloat = 88
     static let sectionSpacing: CGFloat = 20
     static let headerTopPadding: CGFloat = 0
     static let headerTextSpacing: CGFloat = 3
     static let cardSpacing: CGFloat = 16
-    static let cardPadding: CGFloat = 16
-    static let cardCornerRadius: CGFloat = 28
+    static func cardPadding(_ layout: PushAdaptiveLayout) -> CGFloat { layout.cardPadding }
+    static func cardCornerRadius(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 24, standard: 26, large: 28) }
     static let cardContentSpacing: CGFloat = 18
     static let cardShadowRadius: CGFloat = 18
     static let cardShadowYOffset: CGFloat = 8
     static let selectedStrokeWidth: CGFloat = 1.4
-    static let identitySpacing: CGFloat = 14
+    static func identitySpacing(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 10, standard: 12, large: 14) }
     static let identityTextSpacing: CGFloat = 3
-    static let avatarSize: CGFloat = 68
-    static let avatarCornerRadius: CGFloat = 22
+    static func avatarSize(_ layout: PushAdaptiveLayout) -> CGFloat { layout.avatarMedium }
+    static func avatarCornerRadius(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 18, standard: 20, large: 22) }
     static let avatarStrokeWidth: CGFloat = 1
     static let fallbackSymbolSize: CGFloat = 22
     static let fallbackTextSpacing: CGFloat = 3
@@ -280,6 +296,7 @@ private enum GroupsLayout {
     static let statusVerticalPadding: CGFloat = 7
     static let statSpacing: CGFloat = 8
     static let statPadding: CGFloat = 12
+    static let compactStatMinWidth: CGFloat = 92
     static let statCornerRadius: CGFloat = 18
     static let statTextSpacing: CGFloat = 2
     static let minimumTextScale = 0.82

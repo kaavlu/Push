@@ -2,13 +2,14 @@
 import SwiftUI
 
 struct ManagePushView: View {
+    @Environment(\.pushLayout) private var layout
     let plan: PlanData
     let onDismiss: () -> Void
 
     var body: some View {
         ZStack {
             PushModalBackground()
-            VStack(spacing: PlansLayout.sectionSpacing) {
+            VStack(spacing: PlansLayout.sectionSpacing(layout)) {
                 Text(plan.title)
                     .font(.largeTitle.weight(.bold))
                     .foregroundStyle(PushControlColors.activeForeground)

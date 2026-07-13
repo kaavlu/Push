@@ -42,6 +42,7 @@ struct FriendDetailViewData {
 // MARK: - Sheet Root
 
 struct FriendDetailSheet: View {
+    @Environment(\.pushLayout) private var layout
     let puck: MapPuckData
     var onStartPush: (StartPushLaunchContext) -> Void = { _ in }
     @State private var toastMessage: String?
@@ -53,9 +54,9 @@ struct FriendDetailSheet: View {
     private var detents: Set<PresentationDetent> {
         switch puck.kind {
         case .individual:
-            return [.height(FriendDetailSheetLayout.individualSheetHeight)]
+            return [.height(FriendDetailSheetLayout.individualSheetHeight(layout))]
         case .hangout, .cluster, .friendGroup:
-            return [.height(FriendDetailSheetLayout.hangoutSheetHeight)]
+            return [.height(FriendDetailSheetLayout.hangoutSheetHeight(layout))]
         }
     }
 
@@ -499,15 +500,25 @@ private struct PairActionRow: View {
     let onStartPlan: () -> Void
 
     var body: some View {
-        HStack(spacing: FriendDetailSheetLayout.actionSpacing) {
-            PrimaryActionCard(
-                label: "Directions",
-                symbolName: "arrow.triangle.turn.up.right.circle.fill",
-                action: onDirections
-            )
-            PrimaryActionCard(label: "Ask to join", symbolName: "figure.wave", action: onAskToJoin)
-            PrimaryActionCard(label: "Start push", symbolName: "calendar.badge.plus", action: onStartPlan)
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: FriendDetailSheetLayout.actionSpacing) {
+                actionCards
+            }
+            VStack(spacing: FriendDetailSheetLayout.actionSpacing) {
+                actionCards
+            }
         }
+    }
+
+    @ViewBuilder
+    private var actionCards: some View {
+        PrimaryActionCard(
+            label: "Directions",
+            symbolName: "arrow.triangle.turn.up.right.circle.fill",
+            action: onDirections
+        )
+        PrimaryActionCard(label: "Ask to join", symbolName: "figure.wave", action: onAskToJoin)
+        PrimaryActionCard(label: "Start push", symbolName: "calendar.badge.plus", action: onStartPlan)
     }
 }
 

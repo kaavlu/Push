@@ -75,7 +75,9 @@ enum FriendDetailSheetLayout {
 
     // MARK: - Individual: Sheet Presentation
 
-    static let individualSheetHeight: CGFloat = 250
+    static func individualSheetHeight(_ layout: PushAdaptiveLayout) -> CGFloat {
+        layout.value(compact: 270, standard: 258, large: 250)
+    }
     static let sheetCornerRadius: CGFloat = 32
 
     // MARK: - Individual: Primary Action Cards
@@ -87,7 +89,9 @@ enum FriendDetailSheetLayout {
 
     // MARK: - Hangout (pair + small group)
 
-    static let hangoutSheetHeight: CGFloat = 336
+    static func hangoutSheetHeight(_ layout: PushAdaptiveLayout) -> CGFloat {
+        layout.value(compact: 390, standard: 356, large: 336)
+    }
     static let hangoutMomentHeaderSpacing: CGFloat = 4
     static let pairMemberTileAvatarSize: CGFloat = 72
     static let pairMemberTileSpacing: CGFloat = 20

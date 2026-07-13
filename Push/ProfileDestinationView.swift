@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ProfileDestinationView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.pushLayout) private var layout
     let route: ProfileRoute
     @ObservedObject var viewModel: ProfileViewModel
 
@@ -16,11 +17,11 @@ struct ProfileDestinationView: View {
         ZStack {
             PushModalBackground()
             ScrollView(showsIndicators: false) {
-                VStack(spacing: ProfileLayout.sectionSpacing) {
+                VStack(spacing: ProfileLayout.sectionSpacing(layout)) {
                     ProfileDestinationHeader(route: route)
                     destinationContent
                 }
-                .padding(.horizontal, ProfileLayout.horizontalPadding)
+                .padding(.horizontal, ProfileLayout.horizontalPadding(layout))
                 .padding(.top, ProfileLayout.topPadding)
                 .padding(.bottom, ProfileLayout.bottomPadding)
             }

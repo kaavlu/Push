@@ -2,10 +2,11 @@
 import SwiftUI
 
 struct ActivePlanCard: View {
+    @Environment(\.pushLayout) private var layout
     let plan: PlanData
 
     var body: some View {
-        VStack(alignment: .leading, spacing: PlansLayout.cardRowSpacing) {
+        VStack(alignment: .leading, spacing: PlansLayout.cardRowSpacing(layout)) {
             headerRow
             groupRow
             Divider()
@@ -14,9 +15,9 @@ struct ActivePlanCard: View {
             socialProofRow
             locationRow
         }
-        .padding(PlansLayout.cardPadding)
-        .frame(height: PlansLayout.pushCardHeight, alignment: .top)
-        .plansGlassCard(cornerRadius: PlansLayout.cardCornerRadius)
+        .padding(PlansLayout.cardPadding(layout))
+        .frame(minHeight: PlansLayout.pushCardMinHeight(layout), alignment: .top)
+        .plansGlassCard(cornerRadius: PlansLayout.cardCornerRadius(layout))
     }
 
     private var headerRow: some View {
@@ -24,7 +25,7 @@ struct ActivePlanCard: View {
             Text(plan.title)
                 .font(.headline.weight(.semibold))
                 .foregroundStyle(PushControlColors.textEspresso)
-                .lineLimit(1)
+                .lineLimit(2)
             Spacer(minLength: 8)
             PlanStatusPill(status: plan.status)
         }
@@ -41,7 +42,7 @@ struct ActivePlanCard: View {
         Text(plan.socialProof)
             .font(.subheadline)
             .foregroundStyle(PlansColor.metadataSecondary)
-            .lineLimit(1)
+            .lineLimit(2)
     }
 
     private var goingSection: some View {

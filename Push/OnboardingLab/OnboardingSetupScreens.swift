@@ -12,6 +12,7 @@ import SwiftUI
 // MARK: - Profile
 
 struct OnboardingProfileScreen: View {
+    @Environment(\.pushLayout) private var layout
     @ObservedObject var model: OnboardingLabViewModel
 
     var body: some View {
@@ -25,8 +26,8 @@ struct OnboardingProfileScreen: View {
             Spacer(minLength: 28)
             OnboardingCTAButton(title: "Continue") { model.go(to: .privacy) }
         }
-        .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding)
-        .padding(.top, 116)
+        .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
+        .padding(.top, OnboardingLabMetric.contentTopInset(layout) + layout.value(compact: 2, standard: 3, large: 4))
         .padding(.bottom, 26)
     }
 
@@ -103,6 +104,7 @@ struct OnboardingProfileScreen: View {
 // MARK: - Privacy
 
 struct OnboardingPrivacyScreen: View {
+    @Environment(\.pushLayout) private var layout
     @ObservedObject var model: OnboardingLabViewModel
 
     var body: some View {
@@ -115,8 +117,8 @@ struct OnboardingPrivacyScreen: View {
             Spacer(minLength: 22)
             OnboardingCTAButton(title: "Continue") { model.go(to: .location) }
         }
-        .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding)
-        .padding(.top, 112)
+        .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
+        .padding(.top, OnboardingLabMetric.contentTopInset(layout))
         .padding(.bottom, 26)
     }
 

@@ -97,7 +97,9 @@ struct OnboardingLabView: View {
 
 struct OnboardingLabView_Previews: PreviewProvider {
     static var previews: some View {
-        OnboardingLabView()
+        PushPreviewMatrix {
+            OnboardingLabView()
+        }
     }
 }
 #endif
