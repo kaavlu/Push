@@ -85,7 +85,7 @@ See `coding-standards.md` for the full reference. Key rules for this project:
 
 ### Session Resume Protocol
 
-Read: `CLAUDE.md` → `tasks/lessons.md` → `tasks/todo.md` → `git log --oneline -5`. When implementing a multi-task feature, also read the matching file under `docs/superpowers/specs/` (design) or `docs/superpowers/plans/` (execution). For data-layer, seed, or Supabase work, also read `docs/data-architecture.md` and `tasks/spec.md` (Issue #27); use repo `.claude/skills/supabase*` skills for schema/RLS. For visual/design work, read `Design/PushDesignBrief.md` and `Design/PushThemeAudit.md`; live source is `Push/` — `Design/CoreDesignFiles/` are read-only snapshots.
+Read: `CLAUDE.md` → `tasks/lessons.md` → `tasks/todo.md` → `git log --oneline -5`. When implementing a multi-task feature, also read the matching file under `docs/superpowers/specs/` (design) or `docs/superpowers/plans/` (execution). For data-layer, seed, or Supabase work, also read `supabase/README.md`, `docs/data-architecture.md`, and `tasks/spec.md` (Issue #27); use repo `.claude/skills/supabase*` skills for schema/RLS. For visual/design work, read `Design/PushDesignBrief.md` and `Design/PushThemeAudit.md`; live source is `Push/` — `Design/CoreDesignFiles/` are read-only snapshots.
 
 Do not ask the user to re-explain context that is in these files.
 
