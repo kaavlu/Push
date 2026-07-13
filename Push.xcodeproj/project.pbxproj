@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D13F6E0E7291BC407C3A364D /* AuthGateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE45157A4EDC1A01A29AA5B9 /* AuthGateView.swift */; };
+		3C81C8B4830CDDFF05F6A08A /* AuthFormModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E0849236F8CF96B8A004FC7 /* AuthFormModel.swift */; };
 		79E37ACBC7553EBF28EBF20D /* LiveContainerIsolationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 885A1F84A62285FB4D6AB4A3 /* LiveContainerIsolationTests.swift */; };
 		4F79B20BF8BC37AB63072424 /* EmptyLiveRepositories.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5F7C9F30FFB6C025C03D75 /* EmptyLiveRepositories.swift */; };
 		C584525EA330B07F8DEC01C8 /* SupabaseSharingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5586F03F7DD61AFFA8B3393 /* SupabaseSharingRepository.swift */; };
@@ -154,6 +156,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		EE45157A4EDC1A01A29AA5B9 /* AuthGateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "AuthGateView.swift"; path = "Auth/AuthGateView.swift"; sourceTree = "<group>"; };
+		0E0849236F8CF96B8A004FC7 /* AuthFormModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "AuthFormModel.swift"; path = "Auth/AuthFormModel.swift"; sourceTree = "<group>"; };
 		885A1F84A62285FB4D6AB4A3 /* LiveContainerIsolationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LiveContainerIsolationTests.swift"; sourceTree = "<group>"; };
 		FA5F7C9F30FFB6C025C03D75 /* EmptyLiveRepositories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "EmptyLiveRepositories.swift"; path = "Data/Supabase/EmptyLiveRepositories.swift"; sourceTree = "<group>"; };
 		C5586F03F7DD61AFFA8B3393 /* SupabaseSharingRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SupabaseSharingRepository.swift"; path = "Data/Supabase/SupabaseSharingRepository.swift"; sourceTree = "<group>"; };
@@ -338,6 +342,8 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				EE45157A4EDC1A01A29AA5B9 /* AuthGateView.swift */,
+				0E0849236F8CF96B8A004FC7 /* AuthFormModel.swift */,
 				FA5F7C9F30FFB6C025C03D75 /* EmptyLiveRepositories.swift */,
 				C5586F03F7DD61AFFA8B3393 /* SupabaseSharingRepository.swift */,
 				8521E5498D1F241791F4FB0D /* SharingPolicyRow.swift */,
@@ -625,6 +631,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				D13F6E0E7291BC407C3A364D /* AuthGateView.swift in Sources */,
+				3C81C8B4830CDDFF05F6A08A /* AuthFormModel.swift in Sources */,
 				4F79B20BF8BC37AB63072424 /* EmptyLiveRepositories.swift in Sources */,
 				C584525EA330B07F8DEC01C8 /* SupabaseSharingRepository.swift in Sources */,
 				77EE2060BD57C65A45B1D84E /* SharingPolicyRow.swift in Sources */,
