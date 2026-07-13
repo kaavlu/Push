@@ -62,6 +62,8 @@ This is a **high-fidelity prototype** that can become production later.
 
 **Glass + accents:** Brand colors live in `Push/PushColorPalette.swift` — walnut for foreground/text, sunbeam for active fills. Use `PushControlColors` text hierarchy (`textEspresso`, `textPrimary`, `textSecondary`, `textTertiary`); do not use black or system primary. Reuse `PushGlassStyle`, `PushControlColors`, and `PushControlStyle` for all glass controls; do not one-off material values. Prefer native `glassEffect` on iOS 26+; iOS 17 uses the shared material fallback in `pushGlassBackground`.
 
+**Adaptive layout:** `PushAdaptiveLayout` tiers by container width (compact <380, standard <420, large ≥420). `PushAdaptiveLayoutReader` at app root injects `@Environment(\.pushLayout)`; `*Style` helpers take `PushAdaptiveLayout` and use shared metrics (`pageHorizontalPadding`, `cardCornerRadius`, `puckScale`, etc.) — not one-off spacing constants. DEBUG previews: `PushPreviewMatrix`.
+
 **Design reference (`Design/`):** Handoff bundle for visual work — `PushDesignBrief.md`, `PushThemeAudit.md`, verbatim snapshots in `CoreDesignFiles/`, copied imagery in `Assets/`. Read-only references; implement changes in `Push/`, not in `Design/`.
 
 ---
@@ -89,7 +91,8 @@ See `coding-standards.md` for the full reference. Key rules for this project:
 - **Feature files:** Flat under `Push/` — split by suffix: `*Models`, `*View`, `*ViewModel`, `*Style`. App data flows through repos + derived builders, not `*MockData` files. Multi-step flows add `*FlowView` (container), `*StepNView`, and shared `*Style`; register on `MainMapRoute`.
 - **Xcode registration:** Register every new Swift file in `Push.xcodeproj` via `python3 scripts/pbxproj_add.py <path>` (paths relative to `Push/`; `--target tests` for `PushTests/`). Idempotent — safe to re-run.
 - **Repo hygiene:** Do not commit `DerivedData/`, `build/`, `*.xcresult`, or local IDE state — covered by `.gitignore`.
-- **Tests:** After seed changes, run `DataLayerTests` (referential integrity). Map puck display: `MapRenderTests`. Full suite: `xcodebuild test -project Push.xcodeproj -scheme Push -destination 'platform=iOS Simulator,name=iPhone 14' -only-testing:PushTests -parallel-testing-enabled NO` — parallel testing intermittently drops the simulator runner in this environment.
+- **Tests:** After seed changes, run `DataLayerTests` (referential integrity). Map puck display: `MapRenderTests`. Layout tiers: `AdaptiveLayoutTests`. Full suite: `xcodebuild test -project Push.xcodeproj -scheme Push -destination 'platform=iOS Simulator,name=iPhone 14' -only-testing:PushTests -parallel-testing-enabled NO` — parallel testing intermittently drops the simulator runner in this environment.
+- **iOS Simulator:** `scripts/run-ios-sim.sh [run|stop|restart|status] [--iphone-17|--iphone-17-pro-max|--all] [-- app args…]` — worktree-scoped sims (`Push - <worktree>`); default run reloads booted worktree sims or creates iPhone 17. Pass DEBUG launch args after `--` (e.g. `scripts/run-ios-sim.sh -- --friends`).
 - **Files ≤ 400 lines.** Split by responsibility.
 - **Functions ≤ 40 lines, single responsibility.**
 - **No magic numbers.** Named constants only.
