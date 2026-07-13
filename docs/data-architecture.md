@@ -142,16 +142,34 @@ The old scattered mocks contradicted each other. Canonical values were chosen
 7. **`withWhom`** now includes everyone co-located (e.g. Ram's includes Manav).
 8. **Puck member order** is deterministic seed order, current user last.
 
-## Swapping to Supabase later
+## Live (Supabase) mode — implemented for Day-1 reads (Issue #27)
 
-The repository protocols are the seam. To go live:
+The repository seam is now wired to Supabase for a reads-only Day-1 social graph.
+The mock path is unchanged and remains the DEBUG default.
 
-1. Implement the six repository protocols against Supabase (async/await SDK maps
-   directly onto the `async throws` signatures).
-2. Create tables mirroring the domain structs; convert `SeedData` into SQL seed /
-   migrations.
-3. Point `AppDataContainer` at the Supabase repositories instead of the `Local*`
-   ones.
+- **Mode selection** — `AppEnvironment.resolve(isDebugBuild:arguments:)`: DEBUG
+  defaults to `.mock`; DEBUG opts into `.live` via the `--live` launch argument;
+  Release is always `.live`.
+- **Composition** — `AppDataContainer.init(seed:)` builds the mock container
+  (`InMemoryDatabase` + `Local*` repos, unchanged). `AppDataContainer.live(client:currentUserID:)`
+  builds the live container; `installLive(...)` swaps `.shared` at bootstrap. In
+  live mode there is no `InMemoryDatabase` (reads-only), so `database` is `nil`,
+  `storeRevision`/`onStoreChange` fall back to a no-op subject, and identity comes
+  from the auth session.
+- **Live repositories** (`Push/Data/Supabase/`) — `SupabaseProfileRepository`,
+  `SupabaseFriendRepository`, `SupabaseGroupRepository`, `SupabaseSharingRepository`
+  read via PostgREST behind RLS; pure `*Row` DTOs (`Rows/`) decode PostgREST JSON
+  and map to domain structs. `EmptyLivePushRepository`/`EmptyLiveFeedRepository`
+  return empty and friend presence is `[]` — **no mock presence/push/feed leaks
+  into authenticated sessions** (Day-1 scope).
+- **Auth** — `SupabaseAuthService` (only it + repos touch the SDK) is driven by
+  `AuthViewModel`; `RootView` shows `AuthGateView` until authenticated, then
+  `ContentView` on a live container. Sessions persist via the SDK's Keychain store.
+- **Visibility** — `sharing_policies` is the single source of truth;
+  `GroupMembership.sharingLevel` maps to `.full` (membership carries no visibility).
+- **Schema/RLS** — repo-first SQL migrations under `supabase/migrations/`
+  (`SECURITY DEFINER` helpers hardened in a non-API `private` schema). See
+  `supabase/README.md`.
 
 View models, builders, and views need no changes: they already consume
 repositories and already handle `LoadState.loading` / `.failed`.
@@ -165,7 +183,15 @@ repositories and already handle `LoadState.loading` / `.failed`.
 - `GroupsTests`, `PlansViewModelTests` — screen view models through repositories.
 - `PushTests` — remaining UI/model/style coverage.
 
+Live-mode coverage (Issue #27): `AppEnvironmentTests` (mode selection),
+`AuthViewModelTests` (auth state transitions), `SupabaseMappingTests` (row→domain
+DTO decoding/mapping), `LiveContainerIsolationTests` (live vs. mock isolation),
+`AuthBootstrapTests` (`BootstrapState` gating). These run offline against fakes/JSON;
+the authenticated RLS path is proven separately against the real backend (see
+`supabase/README.md`).
+
 Run: `xcodebuild test -project Push.xcodeproj -scheme Push -destination
-'platform=iOS Simulator,name=iPhone 14' -only-testing:PushTests
+'platform=iOS Simulator,name=iPhone 17' -only-testing:PushTests
 -parallel-testing-enabled NO`. (Parallel testing intermittently drops the
-simulator runner connection in this environment; the serial flag avoids it.)
+simulator runner connection in this environment; the serial flag avoids it.
+Use an installed simulator name — `iPhone 17` on the current Xcode.)
