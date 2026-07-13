@@ -22,4 +22,17 @@ final class SupabaseMappingTests: XCTestCase {
         let rows = try JSONDecoder().decode([ProfileRow].self, from: json)
         XCTAssertEqual(rows.map { $0.person().displayName }, ["Bob"])
     }
+
+    func testMembershipRowDefaultsSharingLevelToFull() throws {
+        let json = """
+        {"id":"m1","person_id":"22222222-2222-2222-2222-222222222222",
+         "group_id":"g1","role":"member","membership_status":"active",
+         "joined_at":"2026-07-12T00:00:00Z"}
+        """.data(using: .utf8)!
+        let row = try JSONDecoder().decode(GroupMembershipRow.self, from: json)
+        let m = row.membership()
+        XCTAssertEqual(m.sharingLevel, .full)          // R3: policies are the visibility source, not membership.
+        XCTAssertEqual(m.role, .member)
+        XCTAssertEqual(m.membershipStatus, .active)
+    }
 }
