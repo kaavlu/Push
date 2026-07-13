@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C37857A3DD927C9BD3A40274 /* SupabaseFriendRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D1A0D7D7775AA4078D7E1E1 /* SupabaseFriendRepository.swift */; };
 		E0490DAF10B3D4F1190AC883 /* SupabaseProfileRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B30D392C234352FEAA01293 /* SupabaseProfileRepository.swift */; };
 		D61FB01E9F80D114AADC1635 /* ProfileRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6EAF89A3A2EE35191B58B8D /* ProfileRow.swift */; };
 		5CF19CE345D632CEBECD5099 /* SupabaseMappingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E97C71E27B15A6EFADCF1AB3 /* SupabaseMappingTests.swift */; };
@@ -146,6 +147,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		2D1A0D7D7775AA4078D7E1E1 /* SupabaseFriendRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SupabaseFriendRepository.swift"; path = "Data/Supabase/SupabaseFriendRepository.swift"; sourceTree = "<group>"; };
 		4B30D392C234352FEAA01293 /* SupabaseProfileRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SupabaseProfileRepository.swift"; path = "Data/Supabase/SupabaseProfileRepository.swift"; sourceTree = "<group>"; };
 		B6EAF89A3A2EE35191B58B8D /* ProfileRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "ProfileRow.swift"; path = "Data/Supabase/Rows/ProfileRow.swift"; sourceTree = "<group>"; };
 		E97C71E27B15A6EFADCF1AB3 /* SupabaseMappingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SupabaseMappingTests.swift"; sourceTree = "<group>"; };
@@ -322,6 +324,7 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				2D1A0D7D7775AA4078D7E1E1 /* SupabaseFriendRepository.swift */,
 				4B30D392C234352FEAA01293 /* SupabaseProfileRepository.swift */,
 				B6EAF89A3A2EE35191B58B8D /* ProfileRow.swift */,
 				B2A7F7D90B9A4F3C629A99C7 /* AuthViewModel.swift */,
@@ -601,6 +604,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				C37857A3DD927C9BD3A40274 /* SupabaseFriendRepository.swift in Sources */,
 				E0490DAF10B3D4F1190AC883 /* SupabaseProfileRepository.swift in Sources */,
 				D61FB01E9F80D114AADC1635 /* ProfileRow.swift in Sources */,
 				13E6CF198FEC5F19A03D60E8 /* AuthViewModel.swift in Sources */,
