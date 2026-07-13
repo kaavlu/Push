@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AA00000000000000000000B3 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = AA00000000000000000000B2 /* Supabase */; };
 		660C8F455BBABB9E8FA49CF8 /* PushEditTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9DA2691FDAE24B0966505EE /* PushEditTests.swift */; };
 		945940BE8D1FA7DF04A88CFE /* FriendRowCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07FDF57D3BD2C46A6CE61FD7 /* FriendRowCard.swift */; };
 		0D828BEBEA992D231352079F /* MapRenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE9275BF1B3723589A96B9B9 /* MapRenderTests.swift */; };
@@ -253,6 +254,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA00000000000000000000B3 /* Supabase in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -446,6 +448,9 @@
 			dependencies = (
 			);
 			name = Push;
+			packageProductDependencies = (
+				AA00000000000000000000B2 /* Supabase */,
+			);
 			productName = Push;
 			productReference = 5217A2662FF1B6D90011F860 /* Push.app */;
 			productType = "com.apple.product-type.application";
@@ -518,6 +523,9 @@
 				Base,
 			);
 			mainGroup = 5217A25D2FF1B6D90011F860;
+			packageReferences = (
+				AA00000000000000000000B1 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+			);
 			productRefGroup = 5217A2672FF1B6D90011F860 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -987,6 +995,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		AA00000000000000000000B1 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		AA00000000000000000000B2 /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA00000000000000000000B1 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 5217A25E2FF1B6D90011F860 /* Project object */;
 }
