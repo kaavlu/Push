@@ -31,7 +31,12 @@ final class ProfileViewModel: ObservableObject {
     // Tracks the last revision we loaded so the subscription skips redundant reloads.
     private var lastSeenRevision = 0
 
-    init(container: AppDataContainer = .shared) {
+    // `container` defaults via `?? .shared` (not `= .shared`) because default-argument
+    // expressions are checked in a nonisolated context even inside a @MainActor
+    // initializer; `.shared` is a MainActor-isolated mutable static, so the fallback
+    // must live in the (MainActor) initializer body instead.
+    init(container: AppDataContainer? = nil) {
+        let container = container ?? .shared
         self.container = container
         Task { await load() }
         // Subscribe after the initial load task so each real mutation triggers a reload.

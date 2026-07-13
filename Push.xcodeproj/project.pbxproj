@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		79E37ACBC7553EBF28EBF20D /* LiveContainerIsolationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 885A1F84A62285FB4D6AB4A3 /* LiveContainerIsolationTests.swift */; };
 		4F79B20BF8BC37AB63072424 /* EmptyLiveRepositories.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5F7C9F30FFB6C025C03D75 /* EmptyLiveRepositories.swift */; };
 		C584525EA330B07F8DEC01C8 /* SupabaseSharingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5586F03F7DD61AFFA8B3393 /* SupabaseSharingRepository.swift */; };
 		77EE2060BD57C65A45B1D84E /* SharingPolicyRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8521E5498D1F241791F4FB0D /* SharingPolicyRow.swift */; };
@@ -153,6 +154,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		885A1F84A62285FB4D6AB4A3 /* LiveContainerIsolationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LiveContainerIsolationTests.swift"; sourceTree = "<group>"; };
 		FA5F7C9F30FFB6C025C03D75 /* EmptyLiveRepositories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "EmptyLiveRepositories.swift"; path = "Data/Supabase/EmptyLiveRepositories.swift"; sourceTree = "<group>"; };
 		C5586F03F7DD61AFFA8B3393 /* SupabaseSharingRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SupabaseSharingRepository.swift"; path = "Data/Supabase/SupabaseSharingRepository.swift"; sourceTree = "<group>"; };
 		8521E5498D1F241791F4FB0D /* SharingPolicyRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SharingPolicyRow.swift"; path = "Data/Supabase/Rows/SharingPolicyRow.swift"; sourceTree = "<group>"; };
@@ -462,6 +464,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				885A1F84A62285FB4D6AB4A3 /* LiveContainerIsolationTests.swift */,
 				E97C71E27B15A6EFADCF1AB3 /* SupabaseMappingTests.swift */,
 				4C5A2CEFA862F0C05C7C980B /* AuthViewModelTests.swift */,
 				77A8171918246B4BCDB108E0 /* AppEnvironmentTests.swift */,
@@ -739,6 +742,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				79E37ACBC7553EBF28EBF20D /* LiveContainerIsolationTests.swift in Sources */,
 				5CF19CE345D632CEBECD5099 /* SupabaseMappingTests.swift in Sources */,
 				EDFA93CF2AB9B771AC6B707E /* AuthViewModelTests.swift in Sources */,
 				3680F9B90356830133BCD453 /* AppEnvironmentTests.swift in Sources */,
