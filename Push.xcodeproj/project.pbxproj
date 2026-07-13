@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E97C488E782CEEBD8CE08C79 /* FriendDetailBottomSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFA2D8E79901202D07BD399A /* FriendDetailBottomSheet.swift */; };
 		67F4A75D64CE4225B69B965C /* AdaptiveLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0AE1378DD16B6E0849F7A1 /* AdaptiveLayoutTests.swift */; };
 		4488D274468B8CF54EF8E572 /* PushAdaptiveLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 561BA912296C8CF1EB60435F /* PushAdaptiveLayout.swift */; };
 		660C8F455BBABB9E8FA49CF8 /* PushEditTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9DA2691FDAE24B0966505EE /* PushEditTests.swift */; };
@@ -137,6 +138,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		DFA2D8E79901202D07BD399A /* FriendDetailBottomSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FriendDetailBottomSheet.swift"; sourceTree = "<group>"; };
 		DD0AE1378DD16B6E0849F7A1 /* AdaptiveLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AdaptiveLayoutTests.swift"; sourceTree = "<group>"; };
 		561BA912296C8CF1EB60435F /* PushAdaptiveLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PushAdaptiveLayout.swift"; sourceTree = "<group>"; };
 		F9DA2691FDAE24B0966505EE /* PushEditTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PushEditTests.swift"; sourceTree = "<group>"; };
@@ -303,6 +305,7 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				DFA2D8E79901202D07BD399A /* FriendDetailBottomSheet.swift */,
 				561BA912296C8CF1EB60435F /* PushAdaptiveLayout.swift */,
 				07FDF57D3BD2C46A6CE61FD7 /* FriendRowCard.swift */,
 				79592A0DE1B5691B233102F0 /* MapDisplayPuckBuilder.swift */,
@@ -568,6 +571,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				E97C488E782CEEBD8CE08C79 /* FriendDetailBottomSheet.swift in Sources */,
 				4488D274468B8CF54EF8E572 /* PushAdaptiveLayout.swift in Sources */,
 				945940BE8D1FA7DF04A88CFE /* FriendRowCard.swift in Sources */,
 				B080CB7201321E2EA13DE61A /* MapDisplayPuckBuilder.swift in Sources */,

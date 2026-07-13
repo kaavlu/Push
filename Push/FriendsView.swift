@@ -97,10 +97,13 @@ struct FriendsView: View {
             }
             .padding(.horizontal, FriendsLayout.horizontalPadding(layout))
             .padding(.top, FriendsLayout.topPadding)
-        }
-        .sheet(item: $viewModel.selectedFriend) { puck in
-            FriendDetailSheet(puck: puck) { context in
-                launchStartPush(context)
+
+            if let selectedFriend = viewModel.selectedFriend {
+                FriendDetailBottomSheet(
+                    puck: selectedFriend,
+                    onDismiss: dismissSelectedFriend,
+                    onStartPush: launchStartPush
+                )
             }
         }
         .sheet(isPresented: $isAddFriendPresented) {
@@ -141,7 +144,7 @@ struct FriendsView: View {
         } else {
             FriendsSectionHeader(title: sectionTitle, count: rows.count)
             ForEach(rows) { row in
-                FriendRowCard(row: row) { viewModel.select(row) }
+                FriendRowCard(row: row) { selectFriend(row) }
             }
         }
     }
@@ -176,7 +179,7 @@ struct FriendsView: View {
     }
 
     private func launchStartPush(_ context: StartPushLaunchContext) {
-        viewModel.selectedFriend = nil
+        dismissSelectedFriend()
         if groupsViewModel.presentedGroupID != nil {
             startPushContext = context
             return
@@ -184,6 +187,26 @@ struct FriendsView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + FriendsPresentationTiming.sheetDismissalDelay) {
             startPushContext = context
         }
+    }
+
+    private func selectFriend(_ row: FriendRowModel) {
+        withAnimation(friendDetailSheetAnimation) {
+            viewModel.select(row)
+        }
+    }
+
+    private func dismissSelectedFriend() {
+        withAnimation(friendDetailSheetAnimation) {
+            viewModel.selectedFriend = nil
+        }
+    }
+
+    private var friendDetailSheetAnimation: Animation {
+        .interactiveSpring(
+            response: FriendDetailBottomSheetLayout.animationResponse,
+            dampingFraction: FriendDetailBottomSheetLayout.animationDamping,
+            blendDuration: FriendDetailBottomSheetLayout.animationBlendDuration
+        )
     }
 }
 

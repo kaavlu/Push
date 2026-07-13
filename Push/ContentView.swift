@@ -60,6 +60,14 @@ struct ContentView: View {
             )
                 .padding(.horizontal, BottomNavigationLayout.horizontalMargin(layout))
                 .padding(.bottom, BottomNavigationLayout.bottomMargin(layout))
+
+            if let selectedPuck {
+                FriendDetailBottomSheet(
+                    puck: selectedPuck,
+                    onDismiss: dismissSelectedPuck,
+                    onStartPush: launchStartPush
+                )
+            }
         }
         .animation(
             .spring(response: CreateActionMenuLayout.animationResponse, dampingFraction: CreateActionMenuLayout.animationDamping),
@@ -71,11 +79,6 @@ struct ContentView: View {
         }
         .fullScreenCover(item: $startPushContext) { context in
             StartPushFlowView(context: context)
-        }
-        .sheet(item: $selectedPuck) { puck in
-            FriendDetailSheet(puck: puck) { context in
-                launchStartPush(context)
-            }
         }
     }
 
@@ -211,18 +214,38 @@ struct ContentView: View {
     private func selectMapPuck(_ puck: MapPuckRenderModel) {
         isFilterDropdownExpanded = false
         if let selected = viewModel.select(puck) {
-            selectedPuck = selected
+            presentSelectedPuck(selected)
         } else if let focusRequest = viewModel.mapFocusRequest {
             forcedRenderSpan = focusRequest.region.span
             mapSpan = focusRequest.region.span
         }
     }
 
+    private func presentSelectedPuck(_ puck: MapPuckData) {
+        withAnimation(friendDetailSheetAnimation) {
+            selectedPuck = puck
+        }
+    }
+
+    private func dismissSelectedPuck() {
+        withAnimation(friendDetailSheetAnimation) {
+            selectedPuck = nil
+        }
+    }
+
     private func launchStartPush(_ context: StartPushLaunchContext) {
-        selectedPuck = nil
+        dismissSelectedPuck()
         DispatchQueue.main.asyncAfter(deadline: .now() + MainMapPresentationTiming.sheetDismissalDelay) {
             startPushContext = context
         }
+    }
+
+    private var friendDetailSheetAnimation: Animation {
+        .interactiveSpring(
+            response: FriendDetailBottomSheetLayout.animationResponse,
+            dampingFraction: FriendDetailBottomSheetLayout.animationDamping,
+            blendDuration: FriendDetailBottomSheetLayout.animationBlendDuration
+        )
     }
 
     private func handleRegionChanged(_ span: MKCoordinateSpan) {

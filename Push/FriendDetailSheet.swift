@@ -42,22 +42,12 @@ struct FriendDetailViewData {
 // MARK: - Sheet Root
 
 struct FriendDetailSheet: View {
-    @Environment(\.pushLayout) private var layout
     let puck: MapPuckData
     var onStartPush: (StartPushLaunchContext) -> Void = { _ in }
     @State private var toastMessage: String?
 
     private var isHangout: Bool {
         puck.kind == .hangout || puck.kind == .cluster
-    }
-
-    private var detents: Set<PresentationDetent> {
-        switch puck.kind {
-        case .individual:
-            return [.height(FriendDetailSheetLayout.individualSheetHeight(layout))]
-        case .hangout, .cluster, .friendGroup:
-            return [.height(FriendDetailSheetLayout.hangoutSheetHeight(layout))]
-        }
     }
 
     var body: some View {
@@ -75,25 +65,7 @@ struct FriendDetailSheet: View {
                     .padding(.top, FriendDetailSheetLayout.toastTopPadding)
             }
         }
-        .presentationDetents(detents)
-        .presentationDragIndicator(.visible)
-        .presentationBackground {
-            ZStack {
-                Rectangle().fill(.ultraThinMaterial)
-                LinearGradient(
-                    stops: [
-                        .init(color: PushColorPalette.Accent.sunbeam.opacity(0.38), location: 0.0),
-                        .init(color: PushColorPalette.Accent.sunbeam.opacity(0.08), location: 0.25),
-                        .init(color: Color.clear, location: 0.45),
-                        .init(color: PushColorPalette.Accent.walnut.opacity(0.08), location: 1.0)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-            }
-            .ignoresSafeArea()
-        }
-        .presentationCornerRadius(FriendDetailSheetLayout.sheetCornerRadius)
+        .frame(maxWidth: .infinity, alignment: .top)
     }
 
     @ViewBuilder
@@ -122,6 +94,7 @@ struct FriendDetailSheet: View {
         .padding(.horizontal, FriendDetailSheetLayout.contentHorizontalPadding)
         .padding(.top, FriendDetailSheetLayout.heroTopPadding)
         .padding(.bottom, FriendDetailSheetLayout.actionBottomPadding)
+        .frame(maxWidth: .infinity, alignment: .top)
     }
 
     // MARK: - Hangout Layout (pair + small group)
@@ -140,6 +113,7 @@ struct FriendDetailSheet: View {
         .padding(.horizontal, FriendDetailSheetLayout.contentHorizontalPadding)
         .padding(.top, FriendDetailSheetLayout.heroTopPadding)
         .padding(.bottom, FriendDetailSheetLayout.actionBottomPadding)
+        .frame(maxWidth: .infinity, alignment: .top)
     }
 
     // MARK: - Friend Group Layout
@@ -159,6 +133,7 @@ struct FriendDetailSheet: View {
         .padding(.horizontal, FriendDetailSheetLayout.contentHorizontalPadding)
         .padding(.top, FriendDetailSheetLayout.heroTopPadding)
         .padding(.bottom, FriendDetailSheetLayout.actionBottomPadding)
+        .frame(maxWidth: .infinity, alignment: .top)
     }
 
     private func triggerToast(_ message: String) {
