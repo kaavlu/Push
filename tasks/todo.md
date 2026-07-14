@@ -1,3 +1,25 @@
+# Eliminate Visible Supabase Data Lag
+
+## Completed
+- [x] Specify the session snapshot, bootstrap gating, write-through, and failure behavior.
+- [x] Add the coalescing concurrent live-data store and shared repository injection.
+- [x] Gate live app bootstrap behind preparation with Retry and Sign Out recovery.
+- [x] Return updated profile rows from writes, update the cache, and publish one revision.
+- [x] Preserve loaded content during subsequent ViewModel refreshes.
+- [x] Add focused store, repository, write, and bootstrap tests.
+- [x] Run PushTests and generic simulator build. Live restored-session smoke reached the branded
+      recoverable failure screen; simulator DNS could not resolve the Supabase hostname.
+
+## Verification
+- [x] Generic iOS Simulator build: succeeded.
+- [x] Focused live-store/bootstrap suite: 8 tests, 0 failures (before duplicate-key regression case).
+- [x] Full `PushTests`: 155 tests, 0 failures.
+- [x] `--live`: restored the authenticated session, exercised preparation, and verified the Retry /
+      Sign Out failure UI under simulator DNS failure. Snapshot primary-key normalization also fixed
+      a live-only duplicate-key crash exposed by this smoke run.
+
+---
+
 # Profile Settings Live Writes  ✅ COMPLETE
 
 Wire the profile screen's settings/options to persist to the Supabase `profiles` table in

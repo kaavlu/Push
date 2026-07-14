@@ -29,12 +29,14 @@ extension EnvironmentValues {
 enum BootstrapState: Equatable {
     case loading
     case gate
+    case preparing(AuthedUser)
+    case preparationFailed(AuthedUser, String)
     case app(AuthedUser?)   // nil user = mock mode (identity comes from the seed container).
 
     static func initial(mode: AppMode, restored: AuthedUser?) -> BootstrapState {
         switch mode {
         case .mock: return .app(nil)
-        case .live: return restored.map { .app($0) } ?? .gate
+        case .live: return restored.map { .preparing($0) } ?? .gate
         }
     }
 }
@@ -57,7 +59,9 @@ struct RootView: View {
             .task {
                 guard case .loading = state else { return }
                 let restored = mode == .live ? await auth.restoreSession() : nil
-                enter(.initial(mode: mode, restored: restored))
+                let initial = BootstrapState.initial(mode: mode, restored: restored)
+                enter(initial)
+                if case .preparing(let user) = initial { await prepare(user) }
             }
     }
 
@@ -66,7 +70,21 @@ struct RootView: View {
         case .loading:
             ProgressView()
         case .gate:
-            AuthGateView(model: authModel) { user in enter(.app(user)) }
+            AuthGateView(model: authModel) { user in
+                enter(.preparing(user))
+                Task { await prepare(user) }
+            }
+        case .preparing:
+            LivePreparationView()
+        case .preparationFailed(let user, let message):
+            LivePreparationFailureView(
+                message: message,
+                retry: {
+                    enter(.preparing(user))
+                    Task { await prepare(user) }
+                },
+                signOut: { Task { await performSignOut() } }
+            )
         case .app:
             // ViewModels default to AppDataContainer.shared (installed in `enter`).
             ContentView()
@@ -93,15 +111,64 @@ struct RootView: View {
         enter(.gate)
     }
 
+    @MainActor
+    private func prepare(_ user: AuthedUser) async {
+        do {
+            let container = try await AppDataContainer.prepareLive(
+                client: SupabaseClientProvider.shared.client, currentUserID: user.id
+            )
+            AppDataContainer.installPreparedLive(container)
+            enter(.app(user))
+        } catch {
+            enter(.preparationFailed(user, error.localizedDescription))
+        }
+    }
+
     /// Install the live container BEFORE flipping to `.app`, so `ContentView`'s
     /// @StateObject ViewModels capture the live `.shared`, not the mock one.
     /// Mock mode keeps the default seed container.
     private func enter(_ next: BootstrapState) {
-        if case .app(let user?) = next {
-            AppDataContainer.installLive(
-                client: SupabaseClientProvider.shared.client, currentUserID: user.id
-            )
-        }
         state = next
+    }
+}
+
+private struct LivePreparationView: View {
+    var body: some View {
+        ZStack {
+            FriendsBackground()
+            VStack(spacing: 18) {
+                Text("Push").font(.system(size: 42, weight: .bold, design: .rounded))
+                    .foregroundStyle(PushControlColors.textEspresso)
+                ProgressView().tint(PushControlColors.textEspresso)
+                Text("Getting your people together…")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(PushControlColors.textSecondary)
+            }
+        }
+        .ignoresSafeArea()
+    }
+}
+
+private struct LivePreparationFailureView: View {
+    let message: String
+    let retry: () -> Void
+    let signOut: () -> Void
+
+    var body: some View {
+        ZStack {
+            FriendsBackground()
+            VStack(spacing: 16) {
+                Text("We couldn’t get Push ready")
+                    .font(.title2.bold()).foregroundStyle(PushControlColors.textEspresso)
+                Text("Check your connection and try again. Your data hasn’t changed.")
+                    .multilineTextAlignment(.center).foregroundStyle(PushControlColors.textSecondary)
+                Button("Try Again", action: retry).buttonStyle(.borderedProminent)
+                Button("Sign Out", action: signOut).foregroundStyle(PushControlColors.textSecondary)
+                Text(message).font(.caption2).foregroundStyle(PushControlColors.textTertiary)
+                    .lineLimit(2).multilineTextAlignment(.center)
+            }
+            .padding(32)
+        }
+        .ignoresSafeArea()
     }
 }

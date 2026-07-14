@@ -199,7 +199,7 @@ final class StartPushViewModel: ObservableObject {
 
     func load() async {
         guard let container else { return }
-        loadState = .loading
+        if loadState.value == nil { loadState = .loading }
         do {
             let groupList = try await container.groups.groups()
             let memberships = try await container.groups.memberships()

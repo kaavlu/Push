@@ -1,3 +1,38 @@
+# Eliminate Visible Supabase Data Lag
+
+## Goal
+Load the live social graph once per authenticated session before presenting the app, so Map,
+Friends, Groups, and Profile all begin from one coherent Supabase snapshot rather than filling
+incrementally.
+
+## Contract
+- A session-scoped, memory-only store owns profile, group, membership, and sharing-policy rows.
+- Initial preparation starts the four independent table reads concurrently. The profiles read is
+  shared by current-user, friend, and user-profile repository methods.
+- Concurrent requests for the same resource coalesce onto one in-flight task.
+- `RootView` installs and presents a live `AppDataContainer` only after every resource succeeds.
+  Preparation shows branded progress; failure offers Retry and Sign Out.
+- Profile and availability updates request the updated `profiles` row from PostgREST, replace that
+  row in the shared store only after success, and publish exactly one live revision.
+- Repository protocols, mock mode, RLS, schema, and empty live presence/push/feed behavior do not
+  change. The synchronous live constructor remains for isolated no-network tests.
+- Later ViewModel refreshes preserve already-loaded content instead of reverting to placeholders.
+- Signing out discards the session container by removing it from the rendered tree; a future login
+  prepares a new store. No snapshot persists across sessions or process launches.
+
+## Acceptance Criteria
+1. Four initial resources overlap in flight and duplicate callers do not create duplicate reads.
+2. All live social repositories map values from the same warmed snapshot without further reads.
+3. Successful profile/availability writes update every profile-backed read and emit one revision;
+   failed writes change neither cache nor revision.
+4. Restored-session and fresh-sign-in paths prepare before app presentation; failure, retry, sign
+   out, and mock-mode routing are covered.
+5. Opening Map, Friends, Groups, and Profile after preparation causes no new social-graph requests.
+6. Focused tests, the full PushTests suite, and a generic simulator build pass; authenticated live
+   smoke verification is recorded separately when credentials/session are available.
+
+---
+
 # Issue #27 — Supabase Migration (Day 1)
 
 ## Goal

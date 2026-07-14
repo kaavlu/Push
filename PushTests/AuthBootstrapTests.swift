@@ -9,8 +9,13 @@ final class AuthBootstrapTests: XCTestCase {
     func testLiveWithNoSessionShowsGate() {
         XCTAssertEqual(BootstrapState.initial(mode: .live, restored: nil), .gate)
     }
-    func testLiveWithRestoredSessionShowsApp() {
+    func testLiveWithRestoredSessionPreparesData() {
         let u = AuthedUser(id: "u1", email: "a@b.c")
-        XCTAssertEqual(BootstrapState.initial(mode: .live, restored: u), .app(u))
+        XCTAssertEqual(BootstrapState.initial(mode: .live, restored: u), .preparing(u))
+    }
+
+    func testPreparationFailureRetainsUserForRetryOrSignOut() {
+        let u = AuthedUser(id: "u1", email: "a@b.c")
+        XCTAssertEqual(BootstrapState.preparationFailed(u, "offline"), .preparationFailed(u, "offline"))
     }
 }

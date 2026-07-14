@@ -147,12 +147,31 @@ The old scattered mocks contradicted each other. Canonical values were chosen
 The repository seam is now wired to Supabase for a reads-only Day-1 social graph.
 The mock path is unchanged and remains the DEBUG default.
 
+### Session snapshot and bootstrap
+
+Live social-graph rows are held in one memory-only, authenticated-session-scoped store. Before
+`ContentView` is created, `RootView` prepares a live container by fetching `profiles`, `groups`,
+`group_memberships`, and `sharing_policies` concurrently. Resource loads coalesce, so overlapping
+repository callers share an in-flight request and each table is fetched at most once per session.
+The one profiles response supplies the current person, friends, and `UserProfile`.
+
+Preparation is an all-or-nothing presentation boundary: the root shows branded progress while the
+snapshot warms, then installs the prepared container before screen ViewModels capture `.shared`.
+A failed warm-up shows Retry and Sign Out rather than a partially populated app. The cache is never
+written to disk and a later authenticated session creates a new store.
+
+Live profile/availability writes use PostgREST's returned updated row. Only a successful response
+replaces the cached profile and emits one live store revision, causing active ViewModels to reload
+from the same snapshot. Failed writes leave both snapshot and revision unchanged. Subsequent
+ViewModel reloads keep their last loaded value visible while refreshing.
+
 - **Mode selection** — `AppEnvironment.resolve(isDebugBuild:arguments:)`: DEBUG
   defaults to `.mock`; DEBUG opts into `.live` via the `--live` launch argument;
   Release is always `.live`.
 - **Composition** — `AppDataContainer.init(seed:)` builds the mock container
   (`InMemoryDatabase` + `Local*` repos, unchanged). `AppDataContainer.live(client:currentUserID:)`
-  builds the live container; `installLive(...)` swaps `.shared` at bootstrap. In
+  builds an unprepared live container for isolated tests; the async preparation API warms a shared
+  snapshot and `installPreparedLive(...)` swaps `.shared` at bootstrap. In
   live mode there is no `InMemoryDatabase` (reads-only), so `database` is `nil`,
   `storeRevision`/`onStoreChange` fall back to a no-op subject, and identity comes
   from the auth session.

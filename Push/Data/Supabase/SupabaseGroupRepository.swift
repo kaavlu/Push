@@ -7,21 +7,17 @@ import Foundation
 import Supabase
 
 final class SupabaseGroupRepository: GroupRepository {
-    private let client: SupabaseClient
+    private let store: LiveDataStore
 
-    init(client: SupabaseClient) {
-        self.client = client
-    }
+    init(store: LiveDataStore) { self.store = store }
 
     func groups() async throws -> [FriendGroup] {
-        let rows: [GroupRow] = try await client.from("groups")
-            .select().execute().value
+        let rows = try await store.groups()
         return rows.map { $0.friendGroup() }
     }
 
     func memberships() async throws -> [GroupMembership] {
-        let rows: [GroupMembershipRow] = try await client.from("group_memberships")
-            .select().execute().value
+        let rows = try await store.memberships()
         return rows.map { $0.membership() }
     }
 }

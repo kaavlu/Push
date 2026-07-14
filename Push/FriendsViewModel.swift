@@ -136,7 +136,7 @@ final class FriendsViewModel: ObservableObject {
     }
 
     func load() async {
-        loadState = .loading
+        if loadState.value == nil { loadState = .loading }
         do {
             let now = Date()
             let user = try await friends.currentUser()

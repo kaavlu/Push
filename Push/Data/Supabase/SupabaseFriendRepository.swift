@@ -7,17 +7,16 @@ import Foundation
 import Supabase
 
 final class SupabaseFriendRepository: FriendRepository {
-    private let client: SupabaseClient
+    private let store: LiveDataStore
     private let currentUserID: String
 
-    init(client: SupabaseClient, currentUserID: String) {
-        self.client = client
+    init(store: LiveDataStore, currentUserID: String) {
+        self.store = store
         self.currentUserID = currentUserID
     }
 
     func currentUser() async throws -> Person {
-        let rows: [ProfileRow] = try await client.from("profiles")
-            .select().eq("id", value: currentUserID).limit(1).execute().value
+        let rows = try await store.profiles()
         guard let row = rows.first else { throw SupabaseRepositoryError.notFound }
         return row.person()
     }
@@ -26,9 +25,9 @@ final class SupabaseFriendRepository: FriendRepository {
     /// `profiles` reads to self + friends + co-members; excluding self yields friends
     /// (co-members are also friends in the Day-1 seed).
     func friends() async throws -> [Person] {
-        let rows: [ProfileRow] = try await client.from("profiles")
-            .select().neq("id", value: currentUserID).execute().value
-        return rows.map { $0.person() }
+        try await store.profiles()
+            .filter { $0.id.caseInsensitiveCompare(currentUserID) != .orderedSame }
+            .map { $0.person() }
     }
 
     // Presence is out of scope on Day 1 — no live presence data (R1).
@@ -37,10 +36,7 @@ final class SupabaseFriendRepository: FriendRepository {
     // Availability is the user's own row (`profiles_update_self` RLS), so
     // Day-1 writes are supported here unlike the reads-only social graph.
     func setCurrentUserAvailability(_ availability: FriendAvailabilityState) async throws {
-        try await client.from("profiles")
-            .update(AvailabilityUpdate(availability_choice: rawValue(for: availability)))
-            .eq("id", value: currentUserID)
-            .execute()
+        try await store.updateAvailability(userID: currentUserID, rawValue: rawValue(for: availability))
     }
 
     // Mirror image of `ProfileRow.mapAvailability` — Swift's raw values are
@@ -56,8 +52,4 @@ final class SupabaseFriendRepository: FriendRepository {
         case .unavailable: return "unavailable"
         }
     }
-}
-
-private struct AvailabilityUpdate: Encodable {
-    let availability_choice: String
 }

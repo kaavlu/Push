@@ -48,7 +48,7 @@ final class ProfileViewModel: ObservableObject {
 
     func load() async {
         guard let container else { return }
-        loadState = .loading
+        if loadState.value == nil { loadState = .loading }
         do {
             let userProfile = try await container.profile.userProfile()
             let user = try await container.friends.currentUser()

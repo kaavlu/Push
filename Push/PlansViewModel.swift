@@ -62,7 +62,7 @@ final class PlansViewModel: ObservableObject {
 
     func load() async {
         guard let container else { return }
-        loadState = .loading
+        if loadState.value == nil { loadState = .loading }
         do {
             let planList = try await container.pushes.activePlans()
             let responses = try await container.pushes.responses()

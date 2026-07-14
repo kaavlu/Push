@@ -24,6 +24,22 @@ final class AppDataContainer {
         return container
     }
 
+    static func prepareLive(client: SupabaseClient, currentUserID: Person.ID) async throws -> AppDataContainer {
+        let store = LiveDataStore(loader: SupabaseLiveDataLoader(client: client))
+        try await store.warm()
+        return live(store: store, currentUserID: currentUserID)
+    }
+
+    static func prepareLive(loader: LiveDataLoading, currentUserID: Person.ID) async throws -> AppDataContainer {
+        let store = LiveDataStore(loader: loader)
+        try await store.warm()
+        return live(store: store, currentUserID: currentUserID)
+    }
+
+    static func installPreparedLive(_ container: AppDataContainer) {
+        shared = container
+    }
+
     /// Present only in mock mode; live mode has no local store (reads-only Day 1).
     /// Implicitly-unwrapped so existing mock tests that touch `.database` compile unchanged.
     let database: InMemoryDatabase!
@@ -37,17 +53,19 @@ final class AppDataContainer {
 
     let currentUserID: Person.ID
 
-    /// Live mode has no InMemoryDatabase, so revisions come from a local subject
-    /// (a no-op on Day 1 — live social data is reads-only).
+    /// Prepared live mode publishes snapshot write-through revisions. The fallback
+    /// subject keeps the synchronous, unprepared constructor useful in isolation tests.
     private let liveRevision = CurrentValueSubject<Int, Never>(0)
+    private let liveStore: LiveDataStore?
 
     /// The store's current mutation revision.
-    var storeRevision: Int { database?.revision ?? liveRevision.value }
+    var storeRevision: Int { database?.revision ?? liveStore?.revision ?? liveRevision.value }
 
     /// Fires with the new revision after each store mutation. `dropFirst()`
     /// skips the initial published value so only real mutations notify.
     func onStoreChange(_ handler: @escaping (Int) -> Void) -> AnyCancellable {
         if let database { return database.$revision.dropFirst().sink(receiveValue: handler) }
+        if let liveStore { return liveStore.onChange(handler) }
         return liveRevision.dropFirst().sink(receiveValue: handler)
     }
 
@@ -57,6 +75,7 @@ final class AppDataContainer {
         self.database = database
         self.currentUserID = database.currentUserID
         self.referenceDate = referenceDate
+        self.liveStore = nil
         self.friends = LocalFriendRepository(database: database)
         self.groups = LocalGroupRepository(database: database)
         self.pushes = LocalPushRepository(database: database)
@@ -68,24 +87,35 @@ final class AppDataContainer {
     /// LIVE: Supabase-backed reads; identity from the auth session.
     static func live(client: SupabaseClient, currentUserID: Person.ID,
                      referenceDate: Date = Date()) -> AppDataContainer {
+        live(
+            store: LiveDataStore(loader: SupabaseLiveDataLoader(client: client)),
+            currentUserID: currentUserID,
+            referenceDate: referenceDate
+        )
+    }
+
+    private static func live(store: LiveDataStore, currentUserID: Person.ID,
+                             referenceDate: Date = Date()) -> AppDataContainer {
         AppDataContainer(
             currentUserID: currentUserID,
             referenceDate: referenceDate,
-            friends: SupabaseFriendRepository(client: client, currentUserID: currentUserID),
-            groups: SupabaseGroupRepository(client: client),
+            liveStore: store,
+            friends: SupabaseFriendRepository(store: store, currentUserID: currentUserID),
+            groups: SupabaseGroupRepository(store: store),
             pushes: EmptyLivePushRepository(),
-            profile: SupabaseProfileRepository(client: client, currentUserID: currentUserID),
-            sharing: SupabaseSharingRepository(client: client),
+            profile: SupabaseProfileRepository(store: store, currentUserID: currentUserID),
+            sharing: SupabaseSharingRepository(store: store),
             feed: EmptyLiveFeedRepository()
         )
     }
 
-    private init(currentUserID: Person.ID, referenceDate: Date,
+    private init(currentUserID: Person.ID, referenceDate: Date, liveStore: LiveDataStore,
                  friends: FriendRepository, groups: GroupRepository, pushes: PushRepository,
                  profile: ProfileRepository, sharing: SharingRepository, feed: FeedRepository) {
         self.database = nil
         self.currentUserID = currentUserID
         self.referenceDate = referenceDate
+        self.liveStore = liveStore
         self.friends = friends; self.groups = groups; self.pushes = pushes
         self.profile = profile; self.sharing = sharing; self.feed = feed
     }

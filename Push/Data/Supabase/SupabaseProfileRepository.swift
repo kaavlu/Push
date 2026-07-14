@@ -14,17 +14,16 @@ enum SupabaseRepositoryError: Error {
 }
 
 final class SupabaseProfileRepository: ProfileRepository {
-    private let client: SupabaseClient
+    private let store: LiveDataStore
     private let currentUserID: String
 
-    init(client: SupabaseClient, currentUserID: String) {
-        self.client = client
+    init(store: LiveDataStore, currentUserID: String) {
+        self.store = store
         self.currentUserID = currentUserID
     }
 
     func userProfile() async throws -> UserProfile {
-        let rows: [ProfileRow] = try await client.from("profiles")
-            .select().eq("id", value: currentUserID).limit(1).execute().value
+        let rows = try await store.profiles()
         guard let row = rows.first else { throw SupabaseRepositoryError.notFound }
         return row.userProfile()
     }
@@ -32,10 +31,7 @@ final class SupabaseProfileRepository: ProfileRepository {
     // Profile settings are the user's own row (`profiles_update_self` RLS), so
     // Day-1 writes are supported here unlike the reads-only social graph.
     func updateBasics(displayName: String, handle: String) async throws {
-        try await client.from("profiles")
-            .update(ProfileBasicsUpdate(first_name: displayName, handle: handle))
-            .eq("id", value: currentUserID)
-            .execute()
+        try await store.updateBasics(userID: currentUserID, displayName: displayName, handle: handle)
     }
 
     func updatePrivacy(
@@ -43,27 +39,13 @@ final class SupabaseProfileRepository: ProfileRepository {
         mapPreferences: [ProfileToggleItem],
         closeFriends: [ProfileToggleItem]
     ) async throws {
-        let payload = ProfileSettingsUpdate(
+        let payload = ProfileSettingsPayload(
             settings_activity_visibility: activityVisibility.enabledByID(),
             settings_map_preferences: mapPreferences.enabledByID(),
             settings_close_friends: closeFriends.enabledByID()
         )
-        try await client.from("profiles")
-            .update(payload)
-            .eq("id", value: currentUserID)
-            .execute()
+        try await store.updatePrivacy(userID: currentUserID, payload: payload)
     }
-}
-
-private struct ProfileBasicsUpdate: Encodable {
-    let first_name: String
-    let handle: String
-}
-
-private struct ProfileSettingsUpdate: Encodable {
-    let settings_activity_visibility: [String: Bool]
-    let settings_map_preferences: [String: Bool]
-    let settings_close_friends: [String: Bool]
 }
 
 private extension Array where Element == ProfileToggleItem {

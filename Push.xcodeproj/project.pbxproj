@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7ABF856C50043FE38E0C984E /* LiveDataStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09E3DC73CEF07CE2678CB944 /* LiveDataStoreTests.swift */; };
+		15046B4ADFAEE459F2E16551 /* LiveDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 731D450A77B07F13281CD345 /* LiveDataStore.swift */; };
 		63DDF65C805D9ADE5FAF7758 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2027ECABEABD4D3AC10D25EF /* RootView.swift */; };
 		AC2768F1A9F6F29F9431BF68 /* AuthBootstrapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 955A5BD19D517681C759DB69 /* AuthBootstrapTests.swift */; };
 		D13F6E0E7291BC407C3A364D /* AuthGateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE45157A4EDC1A01A29AA5B9 /* AuthGateView.swift */; };
@@ -165,6 +167,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		09E3DC73CEF07CE2678CB944 /* LiveDataStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LiveDataStoreTests.swift"; sourceTree = "<group>"; };
+		731D450A77B07F13281CD345 /* LiveDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "LiveDataStore.swift"; path = "Data/Supabase/LiveDataStore.swift"; sourceTree = "<group>"; };
 		2027ECABEABD4D3AC10D25EF /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RootView.swift"; sourceTree = "<group>"; };
 		955A5BD19D517681C759DB69 /* AuthBootstrapTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AuthBootstrapTests.swift"; sourceTree = "<group>"; };
 		EE45157A4EDC1A01A29AA5B9 /* AuthGateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "AuthGateView.swift"; path = "Auth/AuthGateView.swift"; sourceTree = "<group>"; };
@@ -360,6 +364,7 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				731D450A77B07F13281CD345 /* LiveDataStore.swift */,
 				2027ECABEABD4D3AC10D25EF /* RootView.swift */,
 				EE45157A4EDC1A01A29AA5B9 /* AuthGateView.swift */,
 				0E0849236F8CF96B8A004FC7 /* AuthFormModel.swift */,
@@ -495,6 +500,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				09E3DC73CEF07CE2678CB944 /* LiveDataStoreTests.swift */,
 				955A5BD19D517681C759DB69 /* AuthBootstrapTests.swift */,
 				885A1F84A62285FB4D6AB4A3 /* LiveContainerIsolationTests.swift */,
 				E97C71E27B15A6EFADCF1AB3 /* SupabaseMappingTests.swift */,
@@ -658,6 +664,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				15046B4ADFAEE459F2E16551 /* LiveDataStore.swift in Sources */,
 				63DDF65C805D9ADE5FAF7758 /* RootView.swift in Sources */,
 				D13F6E0E7291BC407C3A364D /* AuthGateView.swift in Sources */,
 				3C81C8B4830CDDFF05F6A08A /* AuthFormModel.swift in Sources */,
@@ -784,6 +791,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				7ABF856C50043FE38E0C984E /* LiveDataStoreTests.swift in Sources */,
 				AC2768F1A9F6F29F9431BF68 /* AuthBootstrapTests.swift in Sources */,
 				79E37ACBC7553EBF28EBF20D /* LiveContainerIsolationTests.swift in Sources */,
 				5CF19CE345D632CEBECD5099 /* SupabaseMappingTests.swift in Sources */,
