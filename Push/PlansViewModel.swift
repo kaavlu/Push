@@ -26,7 +26,12 @@ final class PlansViewModel: ObservableObject {
     // Tracks the last revision we loaded so the subscription skips redundant reloads.
     private var lastSeenRevision = 0
 
-    init(container: AppDataContainer = .shared, referenceDate: Date = Date()) {
+    // `container` defaults via `?? .shared` (not `= .shared`) because default-argument
+    // expressions are checked in a nonisolated context even inside a @MainActor
+    // initializer; `.shared` is a MainActor-isolated mutable static, so the fallback
+    // must live in the (MainActor) initializer body instead.
+    init(container: AppDataContainer? = nil, referenceDate: Date = Date()) {
+        let container = container ?? .shared
         self.container = container
         self.referenceDate = referenceDate
         let summary = Self.makeWeekSummary(from: [], for: referenceDate)

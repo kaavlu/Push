@@ -16,7 +16,7 @@ Push is **not** a tracking app, not a generic map app, and not a chat app. It sh
 - **Framework:** SwiftUI
 - **Target:** iOS 17+
 - **Architecture:** MVVM
-- **Data:** Local in-memory store + async throwing repository protocols (mock backend; Supabase plugs in at repo layer later). See `AGENTS.md`, `docs/data-architecture.md`, and `docs/superpowers/specs/2026-07-05-data-architecture-design.md`.
+- **Data:** Parallel mock/live `AppDataContainer` (DEBUG mock default, `--live` opt-in, Release live). Day-1 Supabase is reads-only social graph; no mock presence/push/feed in live sessions. See `AGENTS.md`, `tasks/spec.md` (Issue #27), `docs/data-architecture.md`.
 - **Maps:** MapKit
 
 This is a **high-fidelity prototype** that can become production later.
@@ -42,7 +42,7 @@ This is a **high-fidelity prototype** that can become production later.
 
 ## What NOT to Build Yet
 
-- Backend or authentication
+- Live writes to social data, realtime/subscriptions (Day-1 Supabase is reads-only)
 - Real-time location sharing
 - Real activity inference
 - Push notifications
@@ -67,7 +67,7 @@ This is a **high-fidelity prototype** that can become production later.
 See `coding-standards.md` for the full reference. Key rules for this project:
 
 - **MVVM strictly.** ViewModels own state and logic; Views are dumb.
-- **Mock everything.** No real network calls, no real location. All data is injected via mock services.
+- **Mock by default.** DEBUG mock unless `--live`; auth/repos only via injected services (`AuthService`, repository protocols). No real location.
 - **Files ≤ 400 lines.** Split by responsibility.
 - **Functions ≤ 40 lines, single responsibility.**
 - **No magic numbers.** Named constants only.
@@ -85,7 +85,7 @@ See `coding-standards.md` for the full reference. Key rules for this project:
 
 ### Session Resume Protocol
 
-Read: `CLAUDE.md` → `tasks/lessons.md` → `tasks/todo.md` → `git log --oneline -5`. When implementing a multi-task feature, also read the matching file under `docs/superpowers/specs/` (design) or `docs/superpowers/plans/` (execution). For data-layer or seed work, also read `docs/data-architecture.md`. For visual/design work, read `Design/PushDesignBrief.md` and `Design/PushThemeAudit.md`; live source is `Push/` — `Design/CoreDesignFiles/` are read-only snapshots.
+Read: `CLAUDE.md` → `tasks/lessons.md` → `tasks/todo.md` → `git log --oneline -5`. When implementing a multi-task feature, also read the matching file under `docs/superpowers/specs/` (design) or `docs/superpowers/plans/` (execution). For data-layer, seed, or Supabase work, also read `supabase/README.md`, `docs/data-architecture.md`, and `tasks/spec.md` (Issue #27); use repo `.claude/skills/supabase*` skills for schema/RLS. For visual/design work, read `Design/PushDesignBrief.md` and `Design/PushThemeAudit.md`; live source is `Push/` — `Design/CoreDesignFiles/` are read-only snapshots.
 
 Do not ask the user to re-explain context that is in these files.
 

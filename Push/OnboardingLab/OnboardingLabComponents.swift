@@ -7,7 +7,6 @@
 //  the stylized mini map, status chips, and frosted cards.
 //
 
-#if DEBUG
 import SwiftUI
 
 // MARK: - Buttons
@@ -258,4 +257,3 @@ struct OnboardingKeypad: View {
         .buttonStyle(PushPressStyle())
     }
 }
-#endif

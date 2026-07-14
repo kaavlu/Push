@@ -399,6 +399,7 @@ private struct FriendsSearchField: View {
     }
 }
 
+#if DEBUG
 struct FriendsView_Previews: PreviewProvider {
     static var previews: some View {
         PushPreviewMatrix {
@@ -406,3 +407,4 @@ struct FriendsView_Previews: PreviewProvider {
         }
     }
 }
+#endif

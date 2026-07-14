@@ -471,6 +471,7 @@ private enum MapAttributionLayout {
     }
 }
 
+#if DEBUG
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         PushPreviewMatrix {
@@ -478,3 +479,4 @@ struct ContentView_Previews: PreviewProvider {
         }
     }
 }
+#endif

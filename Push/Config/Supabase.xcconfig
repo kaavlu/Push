@@ -1,0 +1,13 @@
+// Push/Config/Supabase.xcconfig
+// Committed client configuration: project URL + anon (publishable) key ONLY.
+// The anon key is safe to ship in a client. NEVER put the service-role key here.
+//
+// The `$()` in the URL is an empty variable expansion that prevents xcconfig from
+// treating `//` as a comment, so the literal `https://…` survives.
+SUPABASE_URL = https:/$()/tzzvwjhvjduyqywlszqc.supabase.co
+SUPABASE_ANON_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR6enZ3amh2amR1eXF5d2xzenFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4OTE4NTksImV4cCI6MjA5OTQ2Nzg1OX0.MLdUcok0hQIbZwEgK2IM_hAD7fngEEHSflkzIbTDcB8
+
+// The project generates its Info.plist (GENERATE_INFOPLIST_FILE = YES). Xcode only
+// injects its own known INFOPLIST_KEY_* names, NOT arbitrary custom keys, so the two
+// values above are surfaced via a partial INFOPLIST_FILE (Push/Info.plist) that Xcode
+// merges with the generated keys and expands ($(SUPABASE_URL) / $(SUPABASE_ANON_KEY)).

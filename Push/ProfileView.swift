@@ -195,6 +195,7 @@ private struct ProfileConnectorRow: View {
     }
 }
 
+#if DEBUG
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
         PushPreviewMatrix {
@@ -202,3 +203,4 @@ struct ProfileView_Previews: PreviewProvider {
         }
     }
 }
+#endif

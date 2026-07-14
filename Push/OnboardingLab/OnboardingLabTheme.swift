@@ -8,7 +8,6 @@
 //  Push styling. See docs issue #22.
 //
 
-#if DEBUG
 import SwiftUI
 
 /// Semantic aliases for onboarding. Values come from the shared Push
@@ -81,4 +80,3 @@ enum OnboardingLabMetric {
     static func contentTopInset(_ layout: PushAdaptiveLayout) -> CGFloat { layout.onboardingTopInset }
     static let avatarRingWidth: CGFloat = 3
 }
-#endif

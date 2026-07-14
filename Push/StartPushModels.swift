@@ -172,8 +172,12 @@ final class StartPushViewModel: ObservableObject {
         return extra == 0 ? first.name : "\(first.name) +\(extra)"
     }
 
-    init(container: AppDataContainer = .shared, context: StartPushLaunchContext? = nil) {
-        self.container = container
+    // `container` defaults via `?? .shared` (not `= .shared`) because default-argument
+    // expressions are checked in a nonisolated context even inside a @MainActor
+    // initializer; `.shared` is a MainActor-isolated mutable static, so the fallback
+    // must live in the (MainActor) initializer body instead.
+    init(container: AppDataContainer? = nil, context: StartPushLaunchContext? = nil) {
+        self.container = container ?? .shared
         self.launchContext = context ?? .blank
         applyLaunchContext()
         Task { await load() }

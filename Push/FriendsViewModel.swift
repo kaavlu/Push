@@ -93,7 +93,12 @@ final class FriendsViewModel: ObservableObject {
         Task { await load() }
     }
 
-    convenience init(container: AppDataContainer = .shared) {
+    // `container` defaults via `?? .shared` (not `= .shared`) because default-argument
+    // expressions are checked in a nonisolated context even inside a @MainActor
+    // initializer; `.shared` is a MainActor-isolated mutable static, so the fallback
+    // must live in the (MainActor) initializer body instead.
+    convenience init(container: AppDataContainer? = nil) {
+        let container = container ?? .shared
         self.init(
             friends: container.friends,
             groups: container.groups,

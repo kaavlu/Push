@@ -21,10 +21,10 @@ struct PushApp: App {
                 } else if ProcessInfo.processInfo.arguments.contains("--friends") {
                     FriendsView()
                 } else {
-                    ContentView()
+                    RootView()
                 }
                 #else
-                ContentView()
+                RootView()
                 #endif
             }
         }

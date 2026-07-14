@@ -1,3 +1,33 @@
+# Supabase Migration — Day 1 (issue #27)  ✅ COMPLETE
+
+Two real users authenticate against Supabase, sessions persist, and each loads their
+own profile + mutual friendship + shared group/memberships + sharing policies through
+the existing repository seam — mock mode, deterministic tests, previews, and MVVM
+unchanged. Spec: `tasks/spec.md` (Issue #27); plan: `docs/superpowers/plans/2026-07-12-supabase-migration-day1.md`.
+
+## Completed
+- [x] DB backend (repo-first migrations `supabase/migrations/0001–0004` + `seed.sql`):
+      profiles, friendships, groups, memberships, sharing_policies; RLS + hardened
+      `SECURITY DEFINER` helpers in a non-API `private` schema. Advisors clean.
+- [x] iOS live seam: `supabase-swift` (2.51.0), `SupabaseConfig`/`SupabaseClientProvider`,
+      `AppEnvironment` (mock/live), `AuthService`+`AuthViewModel`, four Supabase repos +
+      row DTOs, empty live push/feed, `AppDataContainer.live`/`installLive`,
+      promoted onboarding UI, `AuthGateView`, `RootView` bootstrap.
+- [x] Reads-only Day-1: no live writes, no mock presence/push/feed in live sessions.
+
+## Verification
+- [x] Full `PushTests` suite: 137 tests, 0 failures (iPhone 17). Release build SUCCEEDED.
+- [x] Authenticated Auth→JWT→RLS→PostgREST proof: Alice sees alice+bob+Test Crew (2
+      memberships, 2 policies); Carol (unrelated) denied. Security advisors: no
+      high-severity findings from the new objects.
+- [x] `--live` app launch reaches `AuthGateView` (live bootstrap + config verified).
+
+## Notes
+- Test destination is `iPhone 17` (Xcode 26; `iPhone 14` no longer exists).
+- Gotchas captured in `tasks/lessons.md`; live seam documented in `docs/data-architecture.md`.
+
+---
+
 # Data Architecture Standardization (issue #15)
 
 ## Goal

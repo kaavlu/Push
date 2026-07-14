@@ -232,6 +232,7 @@ private extension Text {
     }
 }
 
+#if DEBUG
 struct PlansView_Previews: PreviewProvider {
     static var previews: some View {
         PushPreviewMatrix {
@@ -239,3 +240,4 @@ struct PlansView_Previews: PreviewProvider {
         }
     }
 }
+#endif
