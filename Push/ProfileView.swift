@@ -10,8 +10,11 @@ import SwiftUI
 struct ProfileView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.pushLayout) private var layout
+    @Environment(\.signOut) private var signOut
     @StateObject private var viewModel: ProfileViewModel
     @State private var navigationPath: [ProfileRoute] = []
+    @State private var isSignOutConfirmationPresented = false
+    @State private var isSigningOut = false
     private let onClose: (() -> Void)?
 
     @MainActor
@@ -55,6 +58,14 @@ struct ProfileView: View {
                 dismissButton: .default(Text("Got it"))
             )
         }
+        .confirmationDialog(
+            "Sign out?",
+            isPresented: $isSignOutConfirmationPresented,
+            titleVisibility: .visible
+        ) {
+            Button("Sign Out", role: .destructive) { performSignOut() }
+            Button("Cancel", role: .cancel) { }
+        }
     }
 
     private var profileContent: some View {
@@ -74,6 +85,12 @@ struct ProfileView: View {
                 ProfileRoutesCard(title: "Settings", routes: viewModel.settingsRoutes)
                 ProfileRoutesCard(title: "Privacy", routes: viewModel.privacyRoutes)
                 ProfileConnectCard(viewModel: viewModel)
+                if signOut.isAvailable {
+                    SignOutButton(isBusy: isSigningOut) {
+                        isSignOutConfirmationPresented = true
+                    }
+                    .padding(.top, ProfileLayout.signOutTopPadding)
+                }
             }
             .padding(.horizontal, ProfileLayout.horizontalPadding(layout))
             .padding(.top, ProfileLayout.topPadding)
@@ -84,6 +101,18 @@ struct ProfileView: View {
     private func closeProfile() {
         onClose?()
         dismiss()
+    }
+
+    /// Guards against double-tap (e.g. a second confirmation while the first
+    /// sign-out is still in flight) and drives the busy state around the
+    /// async `signOut` effect injected by `RootView`.
+    private func performSignOut() {
+        guard !isSigningOut else { return }
+        isSigningOut = true
+        Task {
+            await signOut()
+            isSigningOut = false
+        }
     }
 }
 
@@ -195,11 +224,36 @@ private struct ProfileConnectorRow: View {
     }
 }
 
+private struct SignOutButton: View {
+    let isBusy: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: ProfileLayout.signOutSpacing) {
+                if isBusy {
+                    ProgressView()
+                } else {
+                    Text("Sign Out")
+                        .font(.subheadline.weight(.bold))
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, ProfileLayout.signOutVerticalPadding)
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(.red)
+        .disabled(isBusy)
+        .accessibilityLabel("Sign out")
+    }
+}
+
 #if DEBUG
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
         PushPreviewMatrix {
             ProfileView()
+                .environment(\.signOut, SignOutAction { })
         }
     }
 }

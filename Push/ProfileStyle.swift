@@ -15,9 +15,6 @@ enum ProfileLayout {
     static let closeBottomPadding: CGFloat = 12
     static let closeButtonSize: CGFloat = 44
     static let closeIconSize: CGFloat = 14
-    static let backIconSize: CGFloat = 13
-    static let backButtonSpacing: CGFloat = 6
-    static let backHorizontalPadding: CGFloat = 14
     static func sectionSpacing(_ layout: PushAdaptiveLayout) -> CGFloat { layout.sectionSpacing }
     static func headerSpacing(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 10, standard: 12, large: 14) }
     static func headerTopPadding(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 2, standard: 5, large: 8) }
@@ -53,6 +50,9 @@ enum ProfileLayout {
     static let fieldPadding: CGFloat = 12
     static let selectionAnimationResponse = 0.24
     static let selectionAnimationDamping = 0.88
+    static let signOutTopPadding: CGFloat = 4
+    static let signOutVerticalPadding: CGFloat = 14
+    static let signOutSpacing: CGFloat = 8
 }
 
 enum ProfileColor {
@@ -89,7 +89,8 @@ struct PushModalCloseButtonBar: View {
         HStack {
             Spacer(minLength: 0)
 
-            PushModalCloseButton(
+            PushModalIconButton(
+                symbolName: "xmark",
                 accessibilityLabel: accessibilityLabel,
                 action: action
             )
@@ -100,13 +101,14 @@ struct PushModalCloseButtonBar: View {
     }
 }
 
-private struct PushModalCloseButton: View {
+struct PushModalIconButton: View {
+    let symbolName: String
     let accessibilityLabel: String
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            Image(systemName: "xmark")
+            Image(systemName: symbolName)
                 .font(.system(size: ProfileLayout.closeIconSize, weight: .bold))
                 .foregroundStyle(PushControlColors.activeForeground)
                 .frame(width: ProfileLayout.closeButtonSize, height: ProfileLayout.closeButtonSize)

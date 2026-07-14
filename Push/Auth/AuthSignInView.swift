@@ -1,19 +1,14 @@
-//
-//  OnboardingSignInScreen.swift
-//  Push
-//
-//  Returning-user entry point: email/password plus Apple + Google.
-//  Peer to the sign-up (welcome) screen; the two cross-link via
-//  OnboardingAuthSwitchLink. Reuses the shared onboarding components,
-//  colors, and typography so it reads as the same system.
-//
-
-#if DEBUG
+// Push/Auth/AuthSignInView.swift
 import SwiftUI
 
-struct OnboardingSignInScreen: View {
+/// Production returning-user sign-in screen: the same layout as the DEBUG
+/// onboarding lab's `OnboardingSignInScreen`, but backed by real Supabase
+/// auth via `AuthViewModel.submitPrimary()`. Apple/Google are shown for
+/// visual parity with the design but aren't wired to real auth yet — they
+/// surface "coming soon" rather than silently doing nothing.
+struct AuthSignInView: View {
+    @ObservedObject var model: AuthViewModel
     @Environment(\.pushLayout) private var layout
-    @ObservedObject var model: OnboardingLabViewModel
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -22,6 +17,12 @@ struct OnboardingSignInScreen: View {
                 subtitle: "Sign in to pick up right where you left off."
             )
             fields.padding(.top, 26)
+            if let error = model.errorMessage {
+                Text(error)
+                    .font(OnboardingLabFont.text(14, .medium))
+                    .foregroundStyle(.red)
+                    .padding(.top, 10)
+            }
             signInCTA.padding(.top, 22)
             orDivider.padding(.vertical, 20)
             socialButtons
@@ -29,7 +30,7 @@ struct OnboardingSignInScreen: View {
             OnboardingAuthSwitchLink(
                 prompt: "Don't have an account?",
                 action: "Sign up"
-            ) { model.goToSignUp() }
+            ) { model.showWelcome() }
         }
         .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
         .padding(.top, OnboardingLabMetric.contentTopInset(layout))
@@ -42,7 +43,7 @@ struct OnboardingSignInScreen: View {
         VStack(spacing: 12) {
             OnboardingCredentialField(
                 systemImage: "envelope.fill",
-                placeholder: "Username or email",
+                placeholder: "Email",
                 text: $model.email,
                 isSecure: false
             )
@@ -58,13 +59,10 @@ struct OnboardingSignInScreen: View {
     // MARK: Primary action
 
     private var signInCTA: some View {
-        OnboardingCTAButton(title: "Sign in") {
-            guard model.canSubmitSignIn else { return }
-            model.completeSignIn()
-        }
-        .disabled(!model.canSubmitSignIn)
-        .opacity(model.canSubmitSignIn ? 1 : 0.5)
-        .animation(OnboardingLabMotion.fast, value: model.canSubmitSignIn)
+        OnboardingCTAButton(title: "Sign in") { Task { await model.submitPrimary() } }
+            .disabled(!model.canSubmit)
+            .opacity(model.canSubmit ? 1 : 0.5)
+            .animation(OnboardingLabMotion.fast, value: model.canSubmit)
     }
 
     // MARK: Divider
@@ -86,17 +84,12 @@ struct OnboardingSignInScreen: View {
             .frame(maxWidth: .infinity)
     }
 
-    // MARK: Social sign-in
+    // MARK: Social sign-in (not wired — see file header)
 
     private var socialButtons: some View {
         VStack(spacing: 12) {
-            OnboardingAuthButton(kind: .apple) { model.completeSignIn() }
-            OnboardingAuthButton(kind: .google) { model.completeSignIn() }
+            OnboardingAuthButton(kind: .apple) { model.requestUnavailable() }
+            OnboardingAuthButton(kind: .google) { model.requestUnavailable() }
         }
     }
 }
-
-// `OnboardingCredentialField` and `OnboardingAuthSwitchLink` now live in
-// OnboardingAuthComponents.swift (promoted out of DEBUG so the production
-// auth gate can reuse them).
-#endif

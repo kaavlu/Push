@@ -121,6 +121,14 @@ final class PlansViewModel: ObservableObject {
         plans.filter { !$0.isOwner }.sorted { priority($0) < priority($1) }
     }
 
+    var showsYourPushesEmptyState: Bool {
+        loadState.value != nil && yourPushes.isEmpty
+    }
+
+    var showsActivePushesEmptyState: Bool {
+        loadState.value != nil && activePushes.isEmpty
+    }
+
     var activeCount: Int { activePushes.count }
 
     var needsResponseCount: Int { plansNeedingResponse.count }

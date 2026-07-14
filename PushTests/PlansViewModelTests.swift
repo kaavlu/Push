@@ -132,6 +132,26 @@ final class PlansViewModelTests: XCTestCase {
         XCTAssertNil(vm.managedPlan)
     }
 
+    func testEmptyStates_showForLoadedEmptyPlans() {
+        let vm = PlansViewModel(plans: [])
+        XCTAssertTrue(vm.showsYourPushesEmptyState)
+        XCTAssertTrue(vm.showsActivePushesEmptyState)
+    }
+
+    func testEmptyStates_areScopedToTheirCorrespondingPlanArrays() {
+        let ownedOnly = PlansViewModel(plans: [
+            seamPlan("owned", status: .joined, isOwner: true)
+        ])
+        XCTAssertFalse(ownedOnly.showsYourPushesEmptyState)
+        XCTAssertTrue(ownedOnly.showsActivePushesEmptyState)
+
+        let invitedOnly = PlansViewModel(plans: [
+            seamPlan("invited", status: .pending)
+        ])
+        XCTAssertTrue(invitedOnly.showsYourPushesEmptyState)
+        XCTAssertFalse(invitedOnly.showsActivePushesEmptyState)
+    }
+
     // MARK: - Seeded content through repositories
 
     private func julyDate(day: Int) throws -> Date {

@@ -42,20 +42,11 @@ struct ProfileBackButton: View {
     let action: () -> Void
 
     var body: some View {
-        Button(action: action) {
-            HStack(spacing: ProfileLayout.backButtonSpacing) {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: ProfileLayout.backIconSize, weight: .bold))
-                Text("Back")
-                    .font(.subheadline.weight(.bold))
-            }
-            .foregroundStyle(PushControlColors.activeForeground)
-            .padding(.horizontal, ProfileLayout.backHorizontalPadding)
-            .frame(height: ProfileLayout.closeButtonSize)
-            .pushGlassBackground(cornerRadius: ProfileLayout.closeButtonSize / 2)
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Back")
+        PushModalIconButton(
+            symbolName: "arrow.left",
+            accessibilityLabel: "Back",
+            action: action
+        )
     }
 }
 

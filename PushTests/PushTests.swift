@@ -283,6 +283,33 @@ final class PushTests: XCTestCase {
         XCTAssertEqual(viewModel.selectedAvailability, .freeNow)
     }
 
+    /// A profile's `chosenAvailability` can be outside the 3 quick-pick
+    /// options (e.g. live Supabase data), so the header pill must reflect
+    /// the real status rather than falsely falling back to Ghost Mode.
+    @MainActor
+    func testProfileHeaderReflectsAvailabilityOutsideQuickOptions() async throws {
+        let seed = SeedData.standard()
+        let widened = SeedData(
+            currentUserID: seed.currentUserID, people: seed.people, groups: seed.groups,
+            memberships: seed.memberships, places: seed.places, statuses: seed.statuses,
+            policies: seed.policies, plans: seed.plans, responses: seed.responses,
+            hangouts: seed.hangouts, feedEvents: seed.feedEvents,
+            profile: UserProfile(
+                personID: seed.profile.personID, handle: seed.profile.handle,
+                chosenAvailability: .joinable, visibilityNote: seed.profile.visibilityNote,
+                availabilityOptions: seed.profile.availabilityOptions,
+                activityVisibility: seed.profile.activityVisibility,
+                mapPreferences: seed.profile.mapPreferences,
+                closeFriends: seed.profile.closeFriends, connectors: seed.profile.connectors
+            )
+        )
+        let viewModel = ProfileViewModel(container: AppDataContainer(seed: widened))
+        await viewModel.load()
+
+        XCTAssertEqual(viewModel.selectedStatusTitle, "Joinable")
+        XCTAssertFalse(viewModel.isGhostModeEnabled)
+    }
+
     @MainActor
     func testProfileRoutesExposeSettingsAndPrivacyMetadata() async throws {
         let viewModel = await loadedProfileViewModel()

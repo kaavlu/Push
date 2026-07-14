@@ -34,7 +34,30 @@ final class SupabaseFriendRepository: FriendRepository {
     // Presence is out of scope on Day 1 — no live presence data (R1).
     func presenceStatuses() async throws -> [PresenceStatus] { [] }
 
+    // Availability is the user's own row (`profiles_update_self` RLS), so
+    // Day-1 writes are supported here unlike the reads-only social graph.
     func setCurrentUserAvailability(_ availability: FriendAvailabilityState) async throws {
-        throw SupabaseRepositoryError.writeNotSupported
+        try await client.from("profiles")
+            .update(AvailabilityUpdate(availability_choice: rawValue(for: availability)))
+            .eq("id", value: currentUserID)
+            .execute()
     }
+
+    // Mirror image of `ProfileRow.mapAvailability` — Swift's raw values are
+    // camelCase while the DB column is snake_case, so this needs an explicit map.
+    private func rawValue(for availability: FriendAvailabilityState) -> String {
+        switch availability {
+        case .freeNow: return "free_now"
+        case .freeSoon: return "free_soon"
+        case .maybeDown: return "maybe_down"
+        case .busy: return "busy"
+        case .joinable: return "joinable"
+        case .driving: return "driving"
+        case .unavailable: return "unavailable"
+        }
+    }
+}
+
+private struct AvailabilityUpdate: Encodable {
+    let availability_choice: String
 }

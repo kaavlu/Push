@@ -14,6 +14,12 @@ struct ProfileRow: Decodable {
     let image_asset_path: String?
     let availability_choice: String
     let visibility_note: String
+    // Per-toggle enabled/disabled overrides keyed by ProfileToggleItem.id. Null
+    // (or a missing id) means "use the ProfileScaffolding default" — only the
+    // copy-free boolean state is stored server-side.
+    let settings_activity_visibility: [String: Bool]?
+    let settings_map_preferences: [String: Bool]?
+    let settings_close_friends: [String: Bool]?
 
     func person() -> Person {
         Person(id: id, firstName: first_name, imageAssetPath: image_asset_path)
@@ -25,12 +31,33 @@ struct ProfileRow: Decodable {
             handle: handle,
             chosenAvailability: mapAvailability(availability_choice),
             visibilityNote: visibility_note,
-            availabilityOptions: [],   // Day-1 UI scaffolding synthesized client-side.
-            activityVisibility: [],
-            mapPreferences: [],
-            closeFriends: [],
-            connectors: []
+            // Day-1 UI scaffolding: the copy (title/subtitle/icon) is not real
+            // social data, so it's synthesized client-side from the same source
+            // the mock seed uses (ProfileScaffolding); stored per-id overrides
+            // supply the actual enabled/disabled state a user has changed.
+            availabilityOptions: ProfileScaffolding.availabilityOptions,
+            activityVisibility: Self.applyOverrides(
+                ProfileScaffolding.activityVisibility, overrides: settings_activity_visibility
+            ),
+            mapPreferences: Self.applyOverrides(
+                ProfileScaffolding.mapPreferences, overrides: settings_map_preferences
+            ),
+            closeFriends: Self.applyOverrides(
+                ProfileScaffolding.closeFriends, overrides: settings_close_friends
+            ),
+            connectors: ProfileScaffolding.connectors
         )
+    }
+
+    private static func applyOverrides(
+        _ defaults: [ProfileToggleItem], overrides: [String: Bool]?
+    ) -> [ProfileToggleItem] {
+        guard let overrides else { return defaults }
+        return defaults.map { item in
+            var item = item
+            if let isEnabled = overrides[item.id] { item.isEnabled = isEnabled }
+            return item
+        }
     }
 
     // FriendAvailabilityState's raw values are camelCase (e.g. "freeNow") while

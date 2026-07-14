@@ -26,11 +26,11 @@ struct FriendDetailBottomSheet: View {
                 dismissLayer
                 sheetContainer(bottomInset: proxy.safeAreaInsets.bottom)
                     .compositingGroup()
-                    .transition(.move(edge: .bottom))
             }
             .frame(width: proxy.size.width, height: proxy.size.height, alignment: .bottom)
         }
         .ignoresSafeArea(edges: .bottom)
+        .transition(.move(edge: .bottom))
         .zIndex(FriendDetailBottomSheetLayout.zIndex)
     }
 
@@ -53,9 +53,6 @@ struct FriendDetailBottomSheet: View {
         .contentShape(Rectangle())
         .gesture(dismissDrag)
         .accessibilityAddTraits(.isModal)
-        .transaction { transaction in
-            transaction.animation = nil
-        }
     }
 
     private var sheetBackground: some View {

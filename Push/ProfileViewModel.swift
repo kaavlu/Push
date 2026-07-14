@@ -137,8 +137,12 @@ final class ProfileViewModel: ObservableObject {
         selectedStatusOption.symbolName
     }
 
+    // Falls back to synthesizing the real availability rather than `.ghostMode`:
+    // live profiles can carry a `chosenAvailability` outside the 3 quick-pick
+    // options (e.g. joinable, driving), and those users are not hidden.
     private var selectedStatusOption: ProfileStatusOption {
-        statusOptions.first { $0.id == selectedStatusID } ?? .ghostMode
+        statusOptions.first { $0.id == selectedStatusID }
+            ?? .availability(ProfileAvailabilityOption(availability: selectedAvailability, subtitle: ""))
     }
 
     func isSelected(_ option: ProfileAvailabilityOption) -> Bool {
@@ -159,8 +163,12 @@ final class ProfileViewModel: ObservableObject {
     func select(_ option: ProfileStatusOption) {
         selectedStatusID = option.id
 
+        // Ghost Mode is deliberately not persisted (see `apply(data:userProfile:)`);
+        // a real availability pick is the same write path as `select(_:ProfileAvailabilityOption)`.
         if case .availability(let availabilityOption) = option {
             selectedAvailability = availabilityOption.availability
+            guard let container else { return }
+            Task { try? await container.friends.setCurrentUserAvailability(availabilityOption.availability) }
         }
     }
 

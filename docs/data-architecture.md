@@ -162,6 +162,15 @@ The mock path is unchanged and remains the DEBUG default.
   and map to domain structs. `EmptyLivePushRepository`/`EmptyLiveFeedRepository`
   return empty and friend presence is `[]` — **no mock presence/push/feed leaks
   into authenticated sessions** (Day-1 scope).
+- **Profile settings writes** — unlike the reads-only social graph, the profile
+  screen writes to the user's own `profiles` row (`profiles_update_self` RLS):
+  `SupabaseProfileRepository.updateBasics` (name/handle) and `.updatePrivacy`
+  (Activity visibility / Map preferences / Close Friends toggles, stored as
+  `settings_*` `jsonb` id→enabled maps — copy stays client-side in
+  `ProfileScaffolding`), plus `SupabaseFriendRepository.setCurrentUserAvailability`
+  (Set Status, excluding Ghost Mode, which stays UI-only/unpersisted by design).
+  `ProfileRow` merges stored overrides onto `ProfileScaffolding` defaults so an
+  id with no stored override still renders with its default copy and state.
 - **Auth** — `SupabaseAuthService` (only it + repos touch the SDK) is driven by
   `AuthViewModel`; `RootView` shows `AuthGateView` until authenticated, then
   `ContentView` on a live container. Sessions persist via the SDK's Keychain store.

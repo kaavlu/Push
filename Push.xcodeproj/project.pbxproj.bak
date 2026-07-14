@@ -11,9 +11,6 @@
 		AC2768F1A9F6F29F9431BF68 /* AuthBootstrapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 955A5BD19D517681C759DB69 /* AuthBootstrapTests.swift */; };
 		D13F6E0E7291BC407C3A364D /* AuthGateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE45157A4EDC1A01A29AA5B9 /* AuthGateView.swift */; };
 		3C81C8B4830CDDFF05F6A08A /* AuthFormModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E0849236F8CF96B8A004FC7 /* AuthFormModel.swift */; };
-		AA06000200000000AA060002 /* AuthWelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA06000100000000AA060001 /* AuthWelcomeView.swift */; };
-		AA06000400000000AA060004 /* AuthSignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA06000300000000AA060003 /* AuthSignInView.swift */; };
-		AA06000600000000AA060006 /* OnboardingAuthComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA06000500000000AA060005 /* OnboardingAuthComponents.swift */; };
 		79E37ACBC7553EBF28EBF20D /* LiveContainerIsolationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 885A1F84A62285FB4D6AB4A3 /* LiveContainerIsolationTests.swift */; };
 		4F79B20BF8BC37AB63072424 /* EmptyLiveRepositories.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5F7C9F30FFB6C025C03D75 /* EmptyLiveRepositories.swift */; };
 		C584525EA330B07F8DEC01C8 /* SupabaseSharingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5586F03F7DD61AFFA8B3393 /* SupabaseSharingRepository.swift */; };
@@ -43,7 +40,6 @@
 		D8DD5F18932805672E8A3B5C /* RegionalActivityPuck.swift in Sources */ = {isa = PBXBuildFile; fileRef = E075D5F75356C7CC3A1C626A /* RegionalActivityPuck.swift */; };
 		45A1523B07FCA80CD92D6554 /* SelfPuckView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A570E63A1964611D67DC8399 /* SelfPuckView.swift */; };
 		D28FBECB719EA956FABC64CB /* ProfileContentBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6815BDC6F29ECA42B0F724D3 /* ProfileContentBuilder.swift */; };
-		AA06000800000000AA060008 /* ProfileScaffolding.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA06000700000000AA060007 /* ProfileScaffolding.swift */; };
 		B27C0FD8AEB589AA26360620 /* MapViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 093D311BC617336A56068266 /* MapViewModel.swift */; };
 		FEFF554378B10E3E5DFAB0CE /* PlansContentBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA18CAA53840E985E93C8FC /* PlansContentBuilder.swift */; };
 		AD8E0F77383DC14CA97255E8 /* PushTimingFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B35A9B47B2ABB3C566493555 /* PushTimingFormatter.swift */; };
@@ -169,9 +165,6 @@
 		955A5BD19D517681C759DB69 /* AuthBootstrapTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AuthBootstrapTests.swift"; sourceTree = "<group>"; };
 		EE45157A4EDC1A01A29AA5B9 /* AuthGateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "AuthGateView.swift"; path = "Auth/AuthGateView.swift"; sourceTree = "<group>"; };
 		0E0849236F8CF96B8A004FC7 /* AuthFormModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "AuthFormModel.swift"; path = "Auth/AuthFormModel.swift"; sourceTree = "<group>"; };
-		AA06000100000000AA060001 /* AuthWelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "AuthWelcomeView.swift"; path = "Auth/AuthWelcomeView.swift"; sourceTree = "<group>"; };
-		AA06000300000000AA060003 /* AuthSignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "AuthSignInView.swift"; path = "Auth/AuthSignInView.swift"; sourceTree = "<group>"; };
-		AA06000500000000AA060005 /* OnboardingAuthComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "OnboardingAuthComponents.swift"; path = "OnboardingLab/OnboardingAuthComponents.swift"; sourceTree = "<group>"; };
 		885A1F84A62285FB4D6AB4A3 /* LiveContainerIsolationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LiveContainerIsolationTests.swift"; sourceTree = "<group>"; };
 		FA5F7C9F30FFB6C025C03D75 /* EmptyLiveRepositories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "EmptyLiveRepositories.swift"; path = "Data/Supabase/EmptyLiveRepositories.swift"; sourceTree = "<group>"; };
 		C5586F03F7DD61AFFA8B3393 /* SupabaseSharingRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SupabaseSharingRepository.swift"; path = "Data/Supabase/SupabaseSharingRepository.swift"; sourceTree = "<group>"; };
@@ -206,7 +199,6 @@
 		E075D5F75356C7CC3A1C626A /* RegionalActivityPuck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RegionalActivityPuck.swift"; sourceTree = "<group>"; };
 		A570E63A1964611D67DC8399 /* SelfPuckView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SelfPuckView.swift"; sourceTree = "<group>"; };
 		6815BDC6F29ECA42B0F724D3 /* ProfileContentBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "ProfileContentBuilder.swift"; path = "Data/Derived/ProfileContentBuilder.swift"; sourceTree = "<group>"; };
-		AA06000700000000AA060007 /* ProfileScaffolding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "ProfileScaffolding.swift"; path = "Data/Derived/ProfileScaffolding.swift"; sourceTree = "<group>"; };
 		093D311BC617336A56068266 /* MapViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MapViewModel.swift"; sourceTree = "<group>"; };
 		EDA18CAA53840E985E93C8FC /* PlansContentBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PlansContentBuilder.swift"; path = "Data/Derived/PlansContentBuilder.swift"; sourceTree = "<group>"; };
 		B35A9B47B2ABB3C566493555 /* PushTimingFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushTimingFormatter.swift"; path = "Data/Derived/PushTimingFormatter.swift"; sourceTree = "<group>"; };
@@ -363,9 +355,6 @@
 				2027ECABEABD4D3AC10D25EF /* RootView.swift */,
 				EE45157A4EDC1A01A29AA5B9 /* AuthGateView.swift */,
 				0E0849236F8CF96B8A004FC7 /* AuthFormModel.swift */,
-				AA06000100000000AA060001 /* AuthWelcomeView.swift */,
-				AA06000300000000AA060003 /* AuthSignInView.swift */,
-				AA06000500000000AA060005 /* OnboardingAuthComponents.swift */,
 				FA5F7C9F30FFB6C025C03D75 /* EmptyLiveRepositories.swift */,
 				C5586F03F7DD61AFFA8B3393 /* SupabaseSharingRepository.swift */,
 				8521E5498D1F241791F4FB0D /* SharingPolicyRow.swift */,
@@ -387,7 +376,6 @@
 				E075D5F75356C7CC3A1C626A /* RegionalActivityPuck.swift */,
 				A570E63A1964611D67DC8399 /* SelfPuckView.swift */,
 				6815BDC6F29ECA42B0F724D3 /* ProfileContentBuilder.swift */,
-				AA06000700000000AA060007 /* ProfileScaffolding.swift */,
 				093D311BC617336A56068266 /* MapViewModel.swift */,
 				EDA18CAA53840E985E93C8FC /* PlansContentBuilder.swift */,
 				B35A9B47B2ABB3C566493555 /* PushTimingFormatter.swift */,
@@ -661,9 +649,6 @@
 				63DDF65C805D9ADE5FAF7758 /* RootView.swift in Sources */,
 				D13F6E0E7291BC407C3A364D /* AuthGateView.swift in Sources */,
 				3C81C8B4830CDDFF05F6A08A /* AuthFormModel.swift in Sources */,
-				AA06000200000000AA060002 /* AuthWelcomeView.swift in Sources */,
-				AA06000400000000AA060004 /* AuthSignInView.swift in Sources */,
-				AA06000600000000AA060006 /* OnboardingAuthComponents.swift in Sources */,
 				4F79B20BF8BC37AB63072424 /* EmptyLiveRepositories.swift in Sources */,
 				C584525EA330B07F8DEC01C8 /* SupabaseSharingRepository.swift in Sources */,
 				77EE2060BD57C65A45B1D84E /* SharingPolicyRow.swift in Sources */,
@@ -685,7 +670,6 @@
 				D8DD5F18932805672E8A3B5C /* RegionalActivityPuck.swift in Sources */,
 				45A1523B07FCA80CD92D6554 /* SelfPuckView.swift in Sources */,
 				D28FBECB719EA956FABC64CB /* ProfileContentBuilder.swift in Sources */,
-				AA06000800000000AA060008 /* ProfileScaffolding.swift in Sources */,
 				B27C0FD8AEB589AA26360620 /* MapViewModel.swift in Sources */,
 				FEFF554378B10E3E5DFAB0CE /* PlansContentBuilder.swift in Sources */,
 				AD8E0F77383DC14CA97255E8 /* PushTimingFormatter.swift in Sources */,

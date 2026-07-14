@@ -1,3 +1,38 @@
+# Profile Settings Live Writes  ✅ COMPLETE
+
+Wire the profile screen's settings/options to persist to the Supabase `profiles` table in
+live mode, matching mock behavior. `docs/data-architecture.md` (Live Supabase mode section)
+has the durable reference; this section is a progress log.
+
+## Completed
+- [x] Migration `supabase/migrations/0005_profile_settings.sql`: adds nullable
+      `settings_activity_visibility` / `settings_map_preferences` / `settings_close_friends`
+      `jsonb` columns to `profiles` (id → enabled overrides; toggle copy stays client-side in
+      `ProfileScaffolding`). Applied via MCP `apply_migration`; covered by the existing
+      `profiles_update_self` RLS policy, no new policy needed.
+- [x] `SupabaseProfileRepository.updateBasics`/`.updatePrivacy` and
+      `SupabaseFriendRepository.setCurrentUserAvailability` now write to Supabase instead of
+      throwing `.writeNotSupported`.
+- [x] `ProfileRow` decodes the new columns and merges overrides onto `ProfileScaffolding`
+      defaults (null column or missing id ⇒ default copy + state).
+- [x] Fixed two pre-existing gaps where the View never called the already-wired ViewModel
+      persistence methods (so neither mock nor live mode actually saved these): Edit Profile's
+      name/handle fields now persist via `.onDisappear` (not per-keystroke, to avoid racing the
+      `handle` unique constraint while typing); Set Status's real availability picks (excluding
+      Ghost Mode, which stays intentionally unpersisted) now call
+      `setCurrentUserAvailability`.
+- [x] `PushTests/SupabaseMappingTests.swift`: added override-merge coverage.
+
+## Verification
+- [x] `xcodebuild build` (generic iOS Simulator): BUILD SUCCEEDED.
+- [x] `xcodebuild test -only-testing:PushTests -parallel-testing-enabled NO`: 148 tests, 0 failures.
+- [x] Live RLS check against the real backend (alice/carol test identities): alice PATCHing her
+      own row (name, handle, availability, all three settings columns) succeeds and reads back
+      correctly; carol PATCHing/reading alice's row is denied (`[]`, 0 rows). Alice's row
+      restored to seed state afterward. `get_advisors(security)`: no new findings.
+
+---
+
 # Supabase Migration — Day 1 (issue #27)  ✅ COMPLETE
 
 Two real users authenticate against Supabase, sessions persist, and each loads their

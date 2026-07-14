@@ -106,86 +106,8 @@ private enum OnboardingWelcomeHeroLayout {
     static let centerOffsetY: CGFloat = 52
 }
 
-/// Sign-in button with the three brand-appropriate looks.
-struct OnboardingAuthButton: View {
-    enum Kind { case apple, google, mobile }
-    let kind: Kind
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: OnboardingAuthButtonLayout.iconTextSpacing) {
-                icon
-                    .frame(width: OnboardingAuthButtonLayout.iconFrameWidth)
-                Text(title)
-            }
-            .font(OnboardingLabFont.text(17, .semibold))
-            .foregroundStyle(labelColor)
-            .frame(maxWidth: .infinity)
-            .frame(height: OnboardingLabMetric.ctaHeight)
-            .background(fill, in: Capsule())
-            .shadow(
-                color: OnboardingLabColor.warmShadow.opacity(PushOnboardingControlStyle.secondaryShadowOpacity),
-                radius: PushOnboardingControlStyle.secondaryShadowRadius,
-                y: PushOnboardingControlStyle.secondaryShadowYOffset
-            )
-        }
-        .buttonStyle(PushPressStyle())
-    }
-
-    private var title: String {
-        switch kind {
-        case .apple: return "Continue with Apple"
-        case .google: return "Continue with Google"
-        case .mobile: return "Use mobile number"
-        }
-    }
-
-    @ViewBuilder
-    private var icon: some View {
-        switch kind {
-        case .apple: Image(systemName: "apple.logo")
-        case .google: googleLogo
-        case .mobile: Image(systemName: "iphone")
-        }
-    }
-
-    @ViewBuilder
-    private var googleLogo: some View {
-        if let image = PushImageAssets.image(named: OnboardingAuthButtonLayout.googleLogoAssetName) {
-            Image(uiImage: image)
-                .resizable()
-                .scaledToFit()
-                .frame(width: OnboardingAuthButtonLayout.googleLogoSize, height: OnboardingAuthButtonLayout.googleLogoSize)
-        } else {
-            Text("G")
-                .font(OnboardingLabFont.rounded(18, .heavy))
-        }
-    }
-
-    private var labelColor: Color {
-        switch kind {
-        case .apple: return .white
-        case .google: return OnboardingLabColor.googleButtonText
-        case .mobile: return OnboardingLabColor.walnut
-        }
-    }
-
-    private var fill: Color {
-        switch kind {
-        case .apple: return OnboardingLabColor.appleButtonFill
-        case .google: return .white
-        case .mobile: return OnboardingLabColor.walnut.opacity(0.12)
-        }
-    }
-}
-
-private enum OnboardingAuthButtonLayout {
-    static let iconTextSpacing: CGFloat = 10
-    static let iconFrameWidth: CGFloat = 22
-    static let googleLogoSize: CGFloat = 18
-    static let googleLogoAssetName = "assets/onboarding/google-logo.png"
-}
+// `OnboardingAuthButton` now lives in OnboardingAuthComponents.swift
+// (promoted out of DEBUG so the production auth gate can reuse it).
 
 // MARK: - Value preview
 

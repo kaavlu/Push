@@ -18,6 +18,10 @@ of the files in order reproduces the schema.
   `private.shares_group`, RLS.
 - `migrations/0004_sharing_policies.sql` — `sharing_policies` (sole visibility source) +
   audience-scoped SELECT RLS.
+- `migrations/0005_profile_settings.sql` — adds `settings_activity_visibility`,
+  `settings_map_preferences`, `settings_close_friends` (`jsonb`, nullable) to `profiles`
+  for the profile screen's toggle overrides. No RLS change: covered by the existing
+  `profiles_update_self` policy.
 - `seed.sql` — idempotent public-graph seed keyed off **real** auth IDs (resolved by email).
 
 ## Security model

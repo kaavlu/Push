@@ -113,6 +113,12 @@ private struct YourPushesModule: View {
                 YourPushCard(plan: first) {
                     viewModel.openManage(plan: first)
                 }
+            } else if viewModel.showsYourPushesEmptyState {
+                PlansEmptyCard(
+                    title: "No current pushes",
+                    message: "Start a push and make your next move.",
+                    messageColor: PlansColor.metadataTertiary
+                )
             }
         }
     }
@@ -143,8 +149,38 @@ private struct ActivePushesModule: View {
 
             if let first = viewModel.activePushes.first {
                 ActivePlanCard(plan: first)
+            } else if viewModel.showsActivePushesEmptyState {
+                PlansEmptyCard(
+                    title: "No active pushes",
+                    message: "New invites and active pushes will show up here.",
+                    messageColor: PlansColor.metadataSecondary
+                )
             }
         }
+    }
+}
+
+private struct PlansEmptyCard: View {
+    @Environment(\.pushLayout) private var layout
+    let title: String
+    let message: String
+    let messageColor: Color
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: PlansLayout.cardRowSpacing(layout)) {
+            Text(title)
+                .font(.headline.weight(.semibold))
+                .foregroundStyle(PushControlColors.textEspresso)
+            Text(message)
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(messageColor)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(PlansLayout.cardPadding(layout))
+        .frame(minHeight: PlansLayout.pushCardMinHeight(layout), alignment: .leading)
+        .plansGlassCard(cornerRadius: PlansLayout.cardCornerRadius(layout))
+        .accessibilityElement(children: .combine)
     }
 }
 

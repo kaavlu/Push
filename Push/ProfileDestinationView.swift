@@ -26,15 +26,15 @@ struct ProfileDestinationView: View {
                 .padding(.bottom, ProfileLayout.bottomPadding)
             }
         }
-        .navigationTitle(route.title)
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(true)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                ProfileBackButton {
-                    dismiss()
-                }
+        .toolbar(.hidden, for: .navigationBar)
+        .safeAreaInset(edge: .top) {
+            HStack {
+                ProfileBackButton { dismiss() }
+                Spacer(minLength: 0)
             }
+            .padding(.horizontal, ProfileLayout.horizontalPadding(layout))
+            .padding(.top, ProfileLayout.closeTopPadding)
+            .padding(.bottom, ProfileLayout.closeBottomPadding)
         }
     }
 
@@ -95,6 +95,17 @@ private struct ProfileEditScreen: View {
                 }
                 .buttonStyle(.plain)
             }
+        }
+        // Fields bind directly to the view model's @Published state for a live
+        // preview as the user types; the write only fires once on navigating
+        // away, avoiding a request per keystroke (and mid-edit `handle` writes
+        // that would collide with the column's unique constraint).
+        .onDisappear {
+            viewModel.setProfileBasics(
+                name: viewModel.displayName,
+                handle: viewModel.handle,
+                initials: viewModel.initials
+            )
         }
     }
 }

@@ -12,6 +12,46 @@ final class SupabaseMappingTests: XCTestCase {
         XCTAssertEqual(row.person().id, "11111111-1111-1111-1111-111111111111")
         XCTAssertEqual(row.person().firstName, "Alice")
         XCTAssertEqual(row.userProfile().handle, "alice")
+
+        // Regression guard: live profiles must not collapse to empty scaffolding
+        // (Set Status/Connect/Settings/Privacy cards would otherwise render empty).
+        let profile = row.userProfile()
+        XCTAssertEqual(profile.availabilityOptions, ProfileScaffolding.availabilityOptions)
+        XCTAssertEqual(profile.activityVisibility, ProfileScaffolding.activityVisibility)
+        XCTAssertEqual(profile.mapPreferences, ProfileScaffolding.mapPreferences)
+        XCTAssertEqual(profile.closeFriends, ProfileScaffolding.closeFriends)
+        XCTAssertEqual(profile.connectors, ProfileScaffolding.connectors)
+    }
+
+    func testProfileRowAppliesSettingsOverrides() throws {
+        let json = """
+        {"id":"11111111-1111-1111-1111-111111111111","first_name":"Alice",
+         "handle":"alice","image_asset_path":null,"availability_choice":"free_now",
+         "visibility_note":"","settings_activity_visibility":{"place":false},
+         "settings_map_preferences":null,"settings_close_friends":{"pull-up":false}}
+        """.data(using: .utf8)!
+        let row = try JSONDecoder().decode(ProfileRow.self, from: json)
+        let profile = row.userProfile()
+
+        // A stored override flips only its own id; unmentioned ids keep the
+        // scaffolding default (both copy and enabled state).
+        XCTAssertEqual(profile.activityVisibility.first { $0.id == "place" }?.isEnabled, false)
+        XCTAssertEqual(
+            profile.activityVisibility.first { $0.id == "activity" },
+            ProfileScaffolding.activityVisibility.first { $0.id == "activity" }
+        )
+        // A null column (no overrides saved yet) falls back to scaffolding entirely.
+        XCTAssertEqual(profile.mapPreferences, ProfileScaffolding.mapPreferences)
+        XCTAssertEqual(profile.closeFriends.first { $0.id == "pull-up" }?.isEnabled, false)
+    }
+
+    func testSeedProfileSharesScaffoldingWithLiveProfile() {
+        let seedProfile = SeedData.standardProfile()
+        XCTAssertEqual(seedProfile.availabilityOptions, ProfileScaffolding.availabilityOptions)
+        XCTAssertEqual(seedProfile.activityVisibility, ProfileScaffolding.activityVisibility)
+        XCTAssertEqual(seedProfile.mapPreferences, ProfileScaffolding.mapPreferences)
+        XCTAssertEqual(seedProfile.closeFriends, ProfileScaffolding.closeFriends)
+        XCTAssertEqual(seedProfile.connectors, ProfileScaffolding.connectors)
     }
 
     func testFriendProfileRowsDecode() throws {
