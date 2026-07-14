@@ -30,6 +30,9 @@
 		A1F873C8D8EA53F9A07531BE /* SupabaseClientProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0B03E7723B8B1AF8E5386D /* SupabaseClientProvider.swift */; };
 		FB1AB98543348B8BBE4233ED /* SupabaseConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26AF0988720D034328C4B8C1 /* SupabaseConfig.swift */; };
 		AA00000000000000000000B3 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = AA00000000000000000000B2 /* Supabase */; };
+		E97C488E782CEEBD8CE08C79 /* FriendDetailBottomSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFA2D8E79901202D07BD399A /* FriendDetailBottomSheet.swift */; };
+		67F4A75D64CE4225B69B965C /* AdaptiveLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0AE1378DD16B6E0849F7A1 /* AdaptiveLayoutTests.swift */; };
+		4488D274468B8CF54EF8E572 /* PushAdaptiveLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 561BA912296C8CF1EB60435F /* PushAdaptiveLayout.swift */; };
 		660C8F455BBABB9E8FA49CF8 /* PushEditTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9DA2691FDAE24B0966505EE /* PushEditTests.swift */; };
 		945940BE8D1FA7DF04A88CFE /* FriendRowCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07FDF57D3BD2C46A6CE61FD7 /* FriendRowCard.swift */; };
 		0D828BEBEA992D231352079F /* MapRenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE9275BF1B3723589A96B9B9 /* MapRenderTests.swift */; };
@@ -181,6 +184,9 @@
 		AA00000000000000000000C1 /* Supabase.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = "Supabase.xcconfig"; path = "Push/Config/Supabase.xcconfig"; sourceTree = SOURCE_ROOT; };
 		5D0B03E7723B8B1AF8E5386D /* SupabaseClientProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SupabaseClientProvider.swift"; path = "Data/Supabase/SupabaseClientProvider.swift"; sourceTree = "<group>"; };
 		26AF0988720D034328C4B8C1 /* SupabaseConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SupabaseConfig.swift"; path = "Data/Supabase/SupabaseConfig.swift"; sourceTree = "<group>"; };
+		DFA2D8E79901202D07BD399A /* FriendDetailBottomSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FriendDetailBottomSheet.swift"; sourceTree = "<group>"; };
+		DD0AE1378DD16B6E0849F7A1 /* AdaptiveLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AdaptiveLayoutTests.swift"; sourceTree = "<group>"; };
+		561BA912296C8CF1EB60435F /* PushAdaptiveLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PushAdaptiveLayout.swift"; sourceTree = "<group>"; };
 		F9DA2691FDAE24B0966505EE /* PushEditTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PushEditTests.swift"; sourceTree = "<group>"; };
 		07FDF57D3BD2C46A6CE61FD7 /* FriendRowCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FriendRowCard.swift"; sourceTree = "<group>"; };
 		AA02000100000000AA020001 /* FriendsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsView.swift; sourceTree = "<group>"; };
@@ -363,6 +369,8 @@
 				1FAFE82AF285CEA0D0ECAC5E /* AppEnvironment.swift */,
 				5D0B03E7723B8B1AF8E5386D /* SupabaseClientProvider.swift */,
 				26AF0988720D034328C4B8C1 /* SupabaseConfig.swift */,
+				DFA2D8E79901202D07BD399A /* FriendDetailBottomSheet.swift */,
+				561BA912296C8CF1EB60435F /* PushAdaptiveLayout.swift */,
 				07FDF57D3BD2C46A6CE61FD7 /* FriendRowCard.swift */,
 				79592A0DE1B5691B233102F0 /* MapDisplayPuckBuilder.swift */,
 				E075D5F75356C7CC3A1C626A /* RegionalActivityPuck.swift */,
@@ -480,6 +488,7 @@
 				E97C71E27B15A6EFADCF1AB3 /* SupabaseMappingTests.swift */,
 				4C5A2CEFA862F0C05C7C980B /* AuthViewModelTests.swift */,
 				77A8171918246B4BCDB108E0 /* AppEnvironmentTests.swift */,
+				DD0AE1378DD16B6E0849F7A1 /* AdaptiveLayoutTests.swift */,
 				F9DA2691FDAE24B0966505EE /* PushEditTests.swift */,
 				AE9275BF1B3723589A96B9B9 /* MapRenderTests.swift */,
 				A6ACB1600225E732F2793781 /* DerivationTests.swift */,
@@ -654,6 +663,8 @@
 				18F336798B7005AF131A28BE /* AppEnvironment.swift in Sources */,
 				A1F873C8D8EA53F9A07531BE /* SupabaseClientProvider.swift in Sources */,
 				FB1AB98543348B8BBE4233ED /* SupabaseConfig.swift in Sources */,
+				E97C488E782CEEBD8CE08C79 /* FriendDetailBottomSheet.swift in Sources */,
+				4488D274468B8CF54EF8E572 /* PushAdaptiveLayout.swift in Sources */,
 				945940BE8D1FA7DF04A88CFE /* FriendRowCard.swift in Sources */,
 				B080CB7201321E2EA13DE61A /* MapDisplayPuckBuilder.swift in Sources */,
 				D8DD5F18932805672E8A3B5C /* RegionalActivityPuck.swift in Sources */,
@@ -762,6 +773,7 @@
 				5CF19CE345D632CEBECD5099 /* SupabaseMappingTests.swift in Sources */,
 				EDFA93CF2AB9B771AC6B707E /* AuthViewModelTests.swift in Sources */,
 				3680F9B90356830133BCD453 /* AppEnvironmentTests.swift in Sources */,
+				67F4A75D64CE4225B69B965C /* AdaptiveLayoutTests.swift in Sources */,
 				660C8F455BBABB9E8FA49CF8 /* PushEditTests.swift in Sources */,
 				0D828BEBEA992D231352079F /* MapRenderTests.swift in Sources */,
 				38747D64198854C45CF41A0B /* DerivationTests.swift in Sources */,

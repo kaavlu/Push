@@ -2,6 +2,7 @@
 import SwiftUI
 
 struct PlansCalendarView: View {
+    @Environment(\.pushLayout) private var layout
     @ObservedObject var viewModel: PlansViewModel
 
     var body: some View {
@@ -12,8 +13,8 @@ struct PlansCalendarView: View {
             calendarFooter
                 .padding(.top, PlansLayout.calendarFooterSpacing)
         }
-        .padding(PlansLayout.calendarPadding)
-        .plansGlassCard(cornerRadius: PlansLayout.calendarCornerRadius)
+        .padding(PlansLayout.calendarPadding(layout))
+        .plansGlassCard(cornerRadius: PlansLayout.calendarCornerRadius(layout))
         .sheet(item: $viewModel.selectedDay) { day in
             DayDetailSheet(day: day)
         }

@@ -12,6 +12,7 @@ import SwiftUI
 // MARK: - Phone
 
 struct OnboardingPhoneScreen: View {
+    @Environment(\.pushLayout) private var layout
     @ObservedObject var model: OnboardingLabViewModel
 
     var body: some View {
@@ -26,8 +27,8 @@ struct OnboardingPhoneScreen: View {
             Spacer(minLength: 24)
             OnboardingKeypad(onDigit: { model.pressDigit($0) }, onDelete: { model.deleteDigit() })
         }
-        .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding)
-        .padding(.top, 120)
+        .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
+        .padding(.top, OnboardingLabMetric.contentTopInset(layout) + layout.value(compact: 4, standard: 6, large: 8))
         .padding(.bottom, 26)
     }
 
@@ -64,6 +65,7 @@ struct OnboardingPhoneScreen: View {
 // MARK: - Verify
 
 struct OnboardingVerifyScreen: View {
+    @Environment(\.pushLayout) private var layout
     @ObservedObject var model: OnboardingLabViewModel
 
     private let cellCount = 4
@@ -76,8 +78,8 @@ struct OnboardingVerifyScreen: View {
             Spacer(minLength: 24)
             OnboardingKeypad(onDigit: { model.pressDigit($0) }, onDelete: { model.deleteDigit() })
         }
-        .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding)
-        .padding(.top, 120)
+        .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
+        .padding(.top, OnboardingLabMetric.contentTopInset(layout) + layout.value(compact: 4, standard: 6, large: 8))
         .padding(.bottom, 26)
     }
 

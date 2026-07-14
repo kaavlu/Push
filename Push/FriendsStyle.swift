@@ -31,10 +31,10 @@ enum FriendsMode: String, CaseIterable, Identifiable {
 }
 
 enum FriendsLayout {
-    static let horizontalPadding: CGFloat = 18
+    static func horizontalPadding(_ layout: PushAdaptiveLayout) -> CGFloat { layout.pageHorizontalPadding }
     static let topPadding: CGFloat = 14
-    static let bottomPadding: CGFloat = 96
-    static let screenStackSpacing: CGFloat = 16
+    static func bottomPadding(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 82, standard: 90, large: 96) }
+    static func screenStackSpacing(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 12, standard: 14, large: 16) }
 
     // Header
     static let headerButtonSize: CGFloat = 44
@@ -85,11 +85,11 @@ enum FriendsLayout {
     // Rows / cards
     static let listSpacing: CGFloat = 11
     static let cardCornerRadius: CGFloat = 24
-    static let cardPadding: CGFloat = 13
+    static func cardPadding(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 11, standard: 12, large: 13) }
 
     // Friend row
-    static let rowSpacing: CGFloat = 13
-    static let rowAvatarSize: CGFloat = 52
+    static func rowSpacing(_ layout: PushAdaptiveLayout) -> CGFloat { layout.rowSpacing }
+    static func rowAvatarSize(_ layout: PushAdaptiveLayout) -> CGFloat { layout.avatarSmall }
     static let rowRingWidth: CGFloat = 2.5
     static let rowTextSpacing: CGFloat = 4
     static let rowSubtitleSpacing: CGFloat = 5
@@ -103,9 +103,9 @@ enum FriendsLayout {
     static let liveTimestampSpacing: CGFloat = 4
 
     // Group card
-    static let groupAvatarSize: CGFloat = 54
-    static let groupAvatarCornerRadius: CGFloat = 18
-    static let groupIdentitySpacing: CGFloat = 13
+    static func groupAvatarSize(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 48, standard: 51, large: 54) }
+    static func groupAvatarCornerRadius(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 16, standard: 17, large: 18) }
+    static func groupIdentitySpacing(_ layout: PushAdaptiveLayout) -> CGFloat { layout.rowSpacing }
     static let groupTextSpacing: CGFloat = 3
     static let groupSummarySpacing: CGFloat = 10
 

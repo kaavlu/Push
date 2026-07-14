@@ -9,6 +9,7 @@
 import SwiftUI
 
 struct FriendRowCard: View {
+    @Environment(\.pushLayout) private var layout
     let row: FriendRowModel
     let showsGroupLabel: Bool
     let action: (() -> Void)?
@@ -43,13 +44,26 @@ struct FriendRowCard: View {
     }
 
     private var rowContent: some View {
-        HStack(spacing: FriendsLayout.rowSpacing) {
-            avatar
-            identity
-            Spacer(minLength: 0)
-            trailing
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: FriendsLayout.rowSpacing(layout)) {
+                avatar
+                identity
+                    .layoutPriority(1)
+                Spacer(minLength: 0)
+                trailing
+            }
+
+            VStack(alignment: .leading, spacing: FriendsLayout.rowSpacing(layout)) {
+                HStack(spacing: FriendsLayout.rowSpacing(layout)) {
+                    avatar
+                    identity
+                        .layoutPriority(1)
+                }
+                trailing
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
         }
-        .padding(FriendsLayout.cardPadding)
+        .padding(FriendsLayout.cardPadding(layout))
         .frame(maxWidth: .infinity, alignment: .leading)
         .friendsCard(cornerRadius: FriendsLayout.cardCornerRadius)
     }
@@ -59,7 +73,7 @@ struct FriendRowCard: View {
             imageAssetName: friend.profileImageAssetName,
             fallbackInitials: friend.avatarPlaceholder
         )
-        .frame(width: FriendsLayout.rowAvatarSize, height: FriendsLayout.rowAvatarSize)
+        .frame(width: FriendsLayout.rowAvatarSize(layout), height: FriendsLayout.rowAvatarSize(layout))
         .overlay {
             Circle()
                 .stroke(

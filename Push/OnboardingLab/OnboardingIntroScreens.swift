@@ -190,6 +190,7 @@ private enum OnboardingAuthButtonLayout {
 // MARK: - Value preview
 
 struct OnboardingPreviewScreen: View {
+    @Environment(\.pushLayout) private var layout
     @ObservedObject var model: OnboardingLabViewModel
 
     var body: some View {
@@ -202,8 +203,8 @@ struct OnboardingPreviewScreen: View {
             Spacer(minLength: 24)
             OnboardingCTAButton(title: "Let's get you in") { model.continueFromPreview() }
         }
-        .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding)
-        .padding(.top, OnboardingLabMetric.contentTopInset)
+        .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
+        .padding(.top, OnboardingLabMetric.contentTopInset(layout))
         .padding(.bottom, 26)
     }
 

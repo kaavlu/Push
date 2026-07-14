@@ -12,6 +12,7 @@ import SwiftUI
 
 struct FriendsView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.pushLayout) private var layout
     @StateObject private var viewModel: FriendsViewModel
     @StateObject private var groupsViewModel: GroupsViewModel
     @State private var mode: FriendsMode = .friends
@@ -57,7 +58,7 @@ struct FriendsView: View {
         ZStack {
             FriendsBackground()
 
-            VStack(spacing: FriendsLayout.screenStackSpacing) {
+            VStack(spacing: FriendsLayout.screenStackSpacing(layout)) {
                 FriendsHeader(
                     mode: mode,
                     onClose: { dismiss() }
@@ -94,12 +95,15 @@ struct FriendsView: View {
 
                 listContent
             }
-            .padding(.horizontal, FriendsLayout.horizontalPadding)
+            .padding(.horizontal, FriendsLayout.horizontalPadding(layout))
             .padding(.top, FriendsLayout.topPadding)
-        }
-        .sheet(item: $viewModel.selectedFriend) { puck in
-            FriendDetailSheet(puck: puck) { context in
-                launchStartPush(context)
+
+            if let selectedFriend = viewModel.selectedFriend {
+                FriendDetailBottomSheet(
+                    puck: selectedFriend,
+                    onDismiss: dismissSelectedFriend,
+                    onStartPush: launchStartPush
+                )
             }
         }
         .sheet(isPresented: $isAddFriendPresented) {
@@ -128,7 +132,7 @@ struct FriendsView: View {
                     groupsList
                 }
             }
-            .padding(.bottom, FriendsLayout.bottomPadding)
+            .padding(.bottom, FriendsLayout.bottomPadding(layout))
         }
     }
 
@@ -140,7 +144,7 @@ struct FriendsView: View {
         } else {
             FriendsSectionHeader(title: sectionTitle, count: rows.count)
             ForEach(rows) { row in
-                FriendRowCard(row: row) { viewModel.select(row) }
+                FriendRowCard(row: row) { selectFriend(row) }
             }
         }
     }
@@ -175,7 +179,7 @@ struct FriendsView: View {
     }
 
     private func launchStartPush(_ context: StartPushLaunchContext) {
-        viewModel.selectedFriend = nil
+        dismissSelectedFriend()
         if groupsViewModel.presentedGroupID != nil {
             startPushContext = context
             return
@@ -183,6 +187,26 @@ struct FriendsView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + FriendsPresentationTiming.sheetDismissalDelay) {
             startPushContext = context
         }
+    }
+
+    private func selectFriend(_ row: FriendRowModel) {
+        withAnimation(friendDetailSheetAnimation) {
+            viewModel.select(row)
+        }
+    }
+
+    private func dismissSelectedFriend() {
+        withAnimation(friendDetailSheetAnimation) {
+            viewModel.selectedFriend = nil
+        }
+    }
+
+    private var friendDetailSheetAnimation: Animation {
+        .interactiveSpring(
+            response: FriendDetailBottomSheetLayout.animationResponse,
+            dampingFraction: FriendDetailBottomSheetLayout.animationDamping,
+            blendDuration: FriendDetailBottomSheetLayout.animationBlendDuration
+        )
     }
 }
 
@@ -375,8 +399,12 @@ private struct FriendsSearchField: View {
     }
 }
 
+#if DEBUG
 struct FriendsView_Previews: PreviewProvider {
     static var previews: some View {
-        FriendsView()
+        PushPreviewMatrix {
+            FriendsView()
+        }
     }
 }
+#endif

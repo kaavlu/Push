@@ -10,6 +10,7 @@ import SwiftUI
 // MARK: - Date Picker
 
 struct PushDatePicker: View {
+    @Environment(\.pushLayout) private var layout
     @Binding var selectedDate: Date
     @State private var displayedMonth: Date
 
@@ -72,13 +73,13 @@ struct PushDatePicker: View {
             weekdayRow
             dayGrid
         }
-        .padding(StartPushLayout.cardPadding)
+        .padding(StartPushLayout.cardPadding(layout))
         .background(
-            RoundedRectangle(cornerRadius: StartPushLayout.cardCornerRadius, style: .continuous)
+            RoundedRectangle(cornerRadius: StartPushLayout.cardCornerRadius(layout), style: .continuous)
                 .fill(.white.opacity(StartPushColor.textEditorFill))
         )
         .overlay(
-            RoundedRectangle(cornerRadius: StartPushLayout.cardCornerRadius, style: .continuous)
+            RoundedRectangle(cornerRadius: StartPushLayout.cardCornerRadius(layout), style: .continuous)
                 .stroke(PushColorPalette.Accent.walnut.opacity(StartPushColor.textEditorStrokeOpacity), lineWidth: 1)
         )
     }
@@ -186,6 +187,7 @@ private struct CalendarDayCell: View {
 // MARK: - Time Clicker
 
 struct PushTimeClicker: View {
+    @Environment(\.pushLayout) private var layout
     @Binding var selectedTime: Date
 
     private let calendar = Calendar.current
@@ -214,13 +216,13 @@ struct PushTimeClicker: View {
             Spacer(minLength: 12)
             amPmStack
         }
-        .padding(StartPushLayout.cardPadding)
+        .padding(StartPushLayout.cardPadding(layout))
         .background(
-            RoundedRectangle(cornerRadius: StartPushLayout.cardCornerRadius, style: .continuous)
+            RoundedRectangle(cornerRadius: StartPushLayout.cardCornerRadius(layout), style: .continuous)
                 .fill(.white.opacity(StartPushColor.textEditorFill))
         )
         .overlay(
-            RoundedRectangle(cornerRadius: StartPushLayout.cardCornerRadius, style: .continuous)
+            RoundedRectangle(cornerRadius: StartPushLayout.cardCornerRadius(layout), style: .continuous)
                 .stroke(PushColorPalette.Accent.walnut.opacity(StartPushColor.textEditorStrokeOpacity), lineWidth: 1)
         )
     }

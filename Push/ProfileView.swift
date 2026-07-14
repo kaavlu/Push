@@ -9,16 +9,20 @@ import SwiftUI
 
 struct ProfileView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.pushLayout) private var layout
     @StateObject private var viewModel: ProfileViewModel
     @State private var navigationPath: [ProfileRoute] = []
+    private let onClose: (() -> Void)?
 
     @MainActor
-    init() {
+    init(onClose: (() -> Void)? = nil) {
         _viewModel = StateObject(wrappedValue: ProfileViewModel())
+        self.onClose = onClose
     }
 
-    init(viewModel: ProfileViewModel) {
+    init(viewModel: ProfileViewModel, onClose: (() -> Void)? = nil) {
         _viewModel = StateObject(wrappedValue: viewModel)
+        self.onClose = onClose
     }
 
     var body: some View {
@@ -34,7 +38,7 @@ struct ProfileView: View {
         .safeAreaInset(edge: .top) {
             if navigationPath.isEmpty {
                 PushModalCloseButtonBar(accessibilityLabel: "Close profile") {
-                    dismiss()
+                    closeProfile()
                 }
             }
         }
@@ -55,7 +59,7 @@ struct ProfileView: View {
 
     private var profileContent: some View {
         ScrollView(showsIndicators: false) {
-            VStack(spacing: ProfileLayout.sectionSpacing) {
+            VStack(spacing: ProfileLayout.sectionSpacing(layout)) {
                 ProfileHeader(
                     name: viewModel.displayName,
                     handle: viewModel.handle,
@@ -71,10 +75,15 @@ struct ProfileView: View {
                 ProfileRoutesCard(title: "Privacy", routes: viewModel.privacyRoutes)
                 ProfileConnectCard(viewModel: viewModel)
             }
-            .padding(.horizontal, ProfileLayout.horizontalPadding)
+            .padding(.horizontal, ProfileLayout.horizontalPadding(layout))
             .padding(.top, ProfileLayout.topPadding)
             .padding(.bottom, ProfileLayout.bottomPadding)
         }
+    }
+
+    private func closeProfile() {
+        onClose?()
+        dismiss()
     }
 }
 
@@ -186,8 +195,12 @@ private struct ProfileConnectorRow: View {
     }
 }
 
+#if DEBUG
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
-        ProfileView()
+        PushPreviewMatrix {
+            ProfileView()
+        }
     }
 }
+#endif

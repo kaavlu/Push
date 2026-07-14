@@ -2,11 +2,12 @@
 import SwiftUI
 
 struct YourPushCard: View {
+    @Environment(\.pushLayout) private var layout
     let plan: PlanData
     let onManage: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: PlansLayout.cardRowSpacing) {
+        VStack(alignment: .leading, spacing: PlansLayout.cardRowSpacing(layout)) {
             headerRow
             groupLocationRow
             Divider()
@@ -14,8 +15,8 @@ struct YourPushCard: View {
             joinedSection
             footerRow
         }
-        .padding(PlansLayout.cardPadding)
-        .plansGlassCard(cornerRadius: PlansLayout.cardCornerRadius)
+        .padding(PlansLayout.cardPadding(layout))
+        .plansGlassCard(cornerRadius: PlansLayout.cardCornerRadius(layout))
     }
 
     private var headerRow: some View {
@@ -23,7 +24,8 @@ struct YourPushCard: View {
             Text(plan.title)
                 .font(.headline.weight(.semibold))
                 .foregroundStyle(PushControlColors.textEspresso)
-                .lineLimit(1)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: YourPushCardLayout.headerSpacerMinLength)
             YourPushTimeChip(timeSignal: plan.timeSignal)
         }
@@ -50,7 +52,7 @@ struct YourPushCard: View {
             Text(plan.socialProof)
                 .font(.footnote)
                 .foregroundStyle(PlansColor.metadataSecondary)
-                .lineLimit(1)
+                .lineLimit(2)
             Spacer(minLength: YourPushCardLayout.headerSpacerMinLength)
             Button(action: onManage) {
                 Text("Manage →")

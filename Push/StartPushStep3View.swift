@@ -8,13 +8,14 @@
 import SwiftUI
 
 struct StartPushStep3View: View {
+    @Environment(\.pushLayout) private var layout
     @ObservedObject var viewModel: StartPushViewModel
     let onNext: () -> Void
 
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
-                VStack(spacing: StartPushLayout.sectionSpacing) {
+                VStack(spacing: StartPushLayout.sectionSpacing(layout)) {
                     StartPushHeader(
                         title: "Add quick details.",
                         subtitle: "A few details help your friends respond."
@@ -23,13 +24,13 @@ struct StartPushStep3View: View {
                     locationSection
                     notesSection
                 }
-                .padding(.horizontal, StartPushLayout.horizontalPadding)
+                .padding(.horizontal, StartPushLayout.horizontalPadding(layout))
                 .padding(.bottom, StartPushLayout.contentTopSpacing)
             }
 
             StartPushPrimaryButton(title: viewModel.submitButtonTitle, isEnabled: true, action: onNext)
-                .padding(.horizontal, StartPushLayout.horizontalPadding)
-                .padding(.bottom, StartPushLayout.bottomPadding)
+                .padding(.horizontal, StartPushLayout.horizontalPadding(layout))
+                .padding(.bottom, StartPushLayout.bottomPadding(layout))
         }
     }
 
@@ -80,13 +81,13 @@ struct StartPushStep3View: View {
                     .scrollContentBackground(.hidden)
                     .frame(minHeight: StartPushLayout.notesMinHeight)
             }
-            .padding(StartPushLayout.cardPadding)
+            .padding(StartPushLayout.cardPadding(layout))
             .background(
-                RoundedRectangle(cornerRadius: StartPushLayout.cardCornerRadius, style: .continuous)
+                RoundedRectangle(cornerRadius: StartPushLayout.cardCornerRadius(layout), style: .continuous)
                     .fill(.white.opacity(StartPushColor.textEditorFill))
             )
             .overlay(
-                RoundedRectangle(cornerRadius: StartPushLayout.cardCornerRadius, style: .continuous)
+                RoundedRectangle(cornerRadius: StartPushLayout.cardCornerRadius(layout), style: .continuous)
                     .stroke(PushColorPalette.Accent.walnut.opacity(StartPushColor.textEditorStrokeOpacity), lineWidth: 1)
             )
         }

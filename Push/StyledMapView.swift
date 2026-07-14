@@ -14,6 +14,7 @@ struct StyledMapView: UIViewRepresentable {
     let focusRequest: MapFocusRequest?
     let onPuckSelected: (MapPuckRenderModel) -> Void
     let onRegionChanged: (MKCoordinateSpan) -> Void
+    var layout: PushAdaptiveLayout = .reference
     var mapLayoutMargins: UIEdgeInsets = .zero
 
     func makeCoordinator() -> Coordinator {
@@ -60,7 +61,7 @@ struct StyledMapView: UIViewRepresentable {
     private func applyStyle(to mapView: MKMapView) {
         if #available(iOS 16.0, *) {
             guard !(mapView.preferredConfiguration is MKImageryMapConfiguration) else { return }
-            mapView.preferredConfiguration = MKImageryMapConfiguration(elevationStyle: .realistic)
+            mapView.preferredConfiguration = MKImageryMapConfiguration(elevationStyle: .flat)
         } else {
             guard mapView.mapType != .hybrid else { return }
             mapView.mapType = .hybrid
@@ -69,8 +70,23 @@ struct StyledMapView: UIViewRepresentable {
 
     private func syncAnnotations(on mapView: MKMapView) {
         let existingPuckAnnotations = mapView.annotations.compactMap { $0 as? MapPuckAnnotation }
-        mapView.removeAnnotations(existingPuckAnnotations)
-        mapView.addAnnotations(pucks.map(MapPuckAnnotation.init))
+        let existingByID = Dictionary(uniqueKeysWithValues: existingPuckAnnotations.map { ($0.id, $0) })
+        let incomingByID = Dictionary(uniqueKeysWithValues: pucks.map { ($0.id, $0) })
+        let staleAnnotations = existingPuckAnnotations.filter { annotation in
+            guard let incoming = incomingByID[annotation.id] else { return true }
+            return annotation.puck != incoming || annotation.layout != layout
+        }
+        let staleIDs = Set(staleAnnotations.map(\.id))
+        let newAnnotations = pucks.filter { puck in
+            existingByID[puck.id] == nil || staleIDs.contains(puck.id)
+        }
+
+        if !staleAnnotations.isEmpty {
+            mapView.removeAnnotations(staleAnnotations)
+        }
+        if !newAnnotations.isEmpty {
+            mapView.addAnnotations(newAnnotations.map { MapPuckAnnotation(puck: $0, layout: layout) })
+        }
     }
 
     private func applyFocusRequest(on mapView: MKMapView, coordinator: Coordinator) {
@@ -107,7 +123,7 @@ final class Coordinator: NSObject, MKMapViewDelegate {
             annotation: annotation,
             reuseIdentifier: MapPuckAnnotationHostingView.reuseIdentifier
         )
-        annotationView.configure(with: puckAnnotation.puck)
+        annotationView.configure(with: puckAnnotation.puck, layout: puckAnnotation.layout)
         annotationView.alpha = 0
         annotationView.transform = CGAffineTransform(scaleX: 0.86, y: 0.86)
         UIView.animate(
@@ -133,14 +149,18 @@ final class Coordinator: NSObject, MKMapViewDelegate {
 }
 
 private final class MapPuckAnnotation: NSObject, MKAnnotation {
+    let id: String
     let puck: MapPuckRenderModel
+    let layout: PushAdaptiveLayout
 
     var coordinate: CLLocationCoordinate2D {
         puck.coordinate
     }
 
-    init(puck: MapPuckRenderModel) {
+    init(puck: MapPuckRenderModel, layout: PushAdaptiveLayout) {
+        self.id = puck.id
         self.puck = puck
+        self.layout = layout
     }
 }
 
@@ -149,9 +169,9 @@ private final class MapPuckAnnotationHostingView: MKAnnotationView {
 
     private var hostingController: UIHostingController<MapPuckAnnotationView>?
 
-    func configure(with puck: MapPuckRenderModel) {
-        let rootView = MapPuckAnnotationView(puck: puck)
-        let size = MapPuckAnnotationView.size(for: puck)
+    func configure(with puck: MapPuckRenderModel, layout: PushAdaptiveLayout) {
+        let rootView = MapPuckAnnotationView(puck: puck, layout: layout)
+        let size = MapPuckAnnotationView.size(for: puck, layout: layout)
         bounds = CGRect(origin: .zero, size: size)
         centerOffset = .zero
         canShowCallout = false
@@ -177,12 +197,13 @@ private final class MapPuckAnnotationHostingView: MKAnnotationView {
 
 private struct MapPuckAnnotationView: View {
     let puck: MapPuckRenderModel
+    let layout: PushAdaptiveLayout
 
     var body: some View {
         puckView
             .frame(
-                width: Self.size(for: puck).width,
-                height: Self.size(for: puck).height
+                width: Self.size(for: puck, layout: layout).width,
+                height: Self.size(for: puck, layout: layout).height
             )
             .shadow(
                 color: .black.opacity(MapPuckAnnotationLayout.shadowOpacity),
@@ -191,16 +212,16 @@ private struct MapPuckAnnotationView: View {
             )
     }
 
-    static func size(for puck: MapPuckRenderModel) -> CGSize {
+    static func size(for puck: MapPuckRenderModel, layout: PushAdaptiveLayout) -> CGSize {
         switch puck {
         case .selfPuck:
-            return SelfPuckAnnotationLayout.frameSize
+            return SelfPuckAnnotationLayout.frameSize(layout)
         case .friend:
-            return MapPuckAnnotationLayout.individualFrameSize
+            return MapPuckAnnotationLayout.individualFrameSize(layout)
         case .smallGroup:
-            return MapPuckAnnotationLayout.groupFrameSize
+            return MapPuckAnnotationLayout.groupFrameSize(layout)
         case .regionalCluster:
-            return MapPuckAnnotationLayout.regionalFrameSize
+            return MapPuckAnnotationLayout.regionalFrameSize(layout)
         }
     }
 
@@ -211,13 +232,13 @@ private struct MapPuckAnnotationView: View {
             SelfPuckView(data: data)
         case .friend(let puck):
             if let friend = puck.people.first {
-                FriendPuck(friend: friend, size: MapPuckAnnotationLayout.individualPuckSize)
+                FriendPuck(friend: friend, size: MapPuckAnnotationLayout.individualPuckSize(layout))
             }
         case .smallGroup(let puck):
             if puck.kind == .friendGroup {
-                FriendGroupPuck(friends: puck.people, size: MapPuckAnnotationLayout.friendGroupPuckSize)
+                FriendGroupPuck(friends: puck.people, size: MapPuckAnnotationLayout.friendGroupPuckSize(layout))
             } else {
-                FriendClusterPuck(friends: puck.people, size: MapPuckAnnotationLayout.clusterPuckSize)
+                FriendClusterPuck(friends: puck.people, size: MapPuckAnnotationLayout.clusterPuckSize(layout))
             }
         case .regionalCluster(let puck):
             RegionalActivityPuck(model: puck)
@@ -226,13 +247,19 @@ private struct MapPuckAnnotationView: View {
 }
 
 private enum MapPuckAnnotationLayout {
-    static let individualPuckSize: CGFloat = 82
-    static let clusterPuckSize: CGFloat = 116
-    static let friendGroupPuckSize: CGFloat = 92
+    static func individualPuckSize(_ layout: PushAdaptiveLayout) -> CGFloat { 82 * layout.puckScale }
+    static func clusterPuckSize(_ layout: PushAdaptiveLayout) -> CGFloat { 116 * layout.puckScale }
+    static func friendGroupPuckSize(_ layout: PushAdaptiveLayout) -> CGFloat { 92 * layout.puckScale }
     static let regionalPuckSize: CGFloat = 106
-    static let individualFrameSize = CGSize(width: 126, height: 126)
-    static let groupFrameSize = CGSize(width: 164, height: 154)
-    static let regionalFrameSize = CGSize(width: 154, height: 154)
+    static func individualFrameSize(_ layout: PushAdaptiveLayout) -> CGSize {
+        CGSize(width: 126 * layout.puckScale, height: 126 * layout.puckScale)
+    }
+    static func groupFrameSize(_ layout: PushAdaptiveLayout) -> CGSize {
+        CGSize(width: 164 * layout.puckScale, height: 154 * layout.puckScale)
+    }
+    static func regionalFrameSize(_ layout: PushAdaptiveLayout) -> CGSize {
+        CGSize(width: 154 * layout.puckScale, height: 154 * layout.puckScale)
+    }
     static let shadowOpacity = 0.28
     static let shadowRadius: CGFloat = 16
     static let shadowYOffset: CGFloat = 8
@@ -259,7 +286,7 @@ final class SelfPuckAnnotationView: MKAnnotationView {
 
     override init(annotation: MKAnnotation?, reuseIdentifier: String?) {
         super.init(annotation: annotation, reuseIdentifier: reuseIdentifier)
-        let size = SelfPuckAnnotationLayout.frameSize
+        let size = SelfPuckAnnotationLayout.frameSize(.reference)
         bounds = CGRect(origin: .zero, size: size)
         centerOffset = .zero
         canShowCallout = false
@@ -284,7 +311,9 @@ final class SelfPuckAnnotationView: MKAnnotationView {
 }
 
 private enum SelfPuckAnnotationLayout {
-    static let frameSize = CGSize(width: 132, height: 124)
+    static func frameSize(_ layout: PushAdaptiveLayout) -> CGSize {
+        CGSize(width: 132 * layout.puckScale, height: 124 * layout.puckScale)
+    }
 }
 
 private enum CompassLayout {

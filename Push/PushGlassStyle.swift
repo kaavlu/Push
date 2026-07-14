@@ -78,12 +78,23 @@ enum PushTypography {
 extension View {
     @ViewBuilder
     func pushGlassBackground(cornerRadius: CGFloat) -> some View {
+        let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
         #if compiler(>=6.2)
         if #available(iOS 26.0, *) {
-            self.glassEffect(
-                .regular,
-                in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-            )
+            self
+                .background(shape.fill(PushGlassStyle.warmTint.opacity(PushGlassStyle.tintOpacity)))
+                .glassEffect(.regular, in: shape)
+                .overlay {
+                    shape.stroke(
+                        .white.opacity(PushGlassStyle.strokeOpacity),
+                        lineWidth: PushGlassStyle.strokeWidth
+                    )
+                }
+                .shadow(
+                    color: PushGlassStyle.shadowColor.opacity(PushGlassStyle.shadowOpacity),
+                    radius: PushGlassStyle.shadowRadius,
+                    y: PushGlassStyle.shadowYOffset
+                )
         } else {
             pushMaterialBackground(cornerRadius: cornerRadius)
         }

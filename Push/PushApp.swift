@@ -12,19 +12,21 @@ import SwiftUI
 struct PushApp: App {
     var body: some Scene {
         WindowGroup {
-            #if DEBUG
-            if ProcessInfo.processInfo.arguments.contains("--pucklab") {
-                PuckLabView()
-            } else if ProcessInfo.processInfo.arguments.contains("--onboardinglab") {
-                OnboardingLabView()
-            } else if ProcessInfo.processInfo.arguments.contains("--friends") {
-                FriendsView()
-            } else {
+            PushAdaptiveLayoutReader {
+                #if DEBUG
+                if ProcessInfo.processInfo.arguments.contains("--pucklab") {
+                    PuckLabView()
+                } else if ProcessInfo.processInfo.arguments.contains("--onboardinglab") {
+                    OnboardingLabView()
+                } else if ProcessInfo.processInfo.arguments.contains("--friends") {
+                    FriendsView()
+                } else {
+                    RootView()
+                }
+                #else
                 RootView()
+                #endif
             }
-            #else
-            RootView()
-            #endif
         }
     }
 }

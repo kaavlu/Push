@@ -8,27 +8,27 @@
 import SwiftUI
 
 enum StartPushLayout {
-    static let horizontalPadding: CGFloat = 20
+    static func horizontalPadding(_ layout: PushAdaptiveLayout) -> CGFloat { layout.modalHorizontalPadding }
     static let stepCount = 4
     static let dotSize: CGFloat = 8
     static let dotActiveWidth: CGFloat = 32
     static let dotActiveHeight: CGFloat = 24
     static let dotSpacing: CGFloat = 10
     static let headerSpacing: CGFloat = 6
-    static let sectionSpacing: CGFloat = 22
-    static let cardCornerRadius: CGFloat = 26
-    static let cardPadding: CGFloat = 16
+    static func sectionSpacing(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 16, standard: 19, large: 22) }
+    static func cardCornerRadius(_ layout: PushAdaptiveLayout) -> CGFloat { layout.cardCornerRadius }
+    static func cardPadding(_ layout: PushAdaptiveLayout) -> CGFloat { layout.cardPadding }
     static let chipHorizontalPadding: CGFloat = 14
     static let chipVerticalPadding: CGFloat = 7
     static let pillCornerRadius: CGFloat = 22
     static let pillHorizontalPadding: CGFloat = 16
     static let pillVerticalPadding: CGFloat = 10
-    static let groupCardWidth: CGFloat = 108
-    static let groupCardHeight: CGFloat = 94
-    static let groupAvatarSize: CGFloat = 46
+    static func groupCardMinWidth(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 92, standard: 100, large: 108) }
+    static func groupCardHeight(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 88, standard: 91, large: 94) }
+    static func groupAvatarSize(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 40, standard: 43, large: 46) }
     static let searchBarHeight: CGFloat = 44
     static let searchIconSize: CGFloat = 14
-    static let primaryButtonHeight: CGFloat = 54
+    static func primaryButtonHeight(_ layout: PushAdaptiveLayout) -> CGFloat { layout.primaryButtonHeight }
     static let closeButtonSize: CGFloat = 44
     static let closeIconSize: CGFloat = 14
     static let backIconSize: CGFloat = 13
@@ -39,7 +39,7 @@ enum StartPushLayout {
     static let liveStatusDotSize: CGFloat = 8
     static let confirmIconFrame: CGFloat = 80
     static let confirmIconSize: CGFloat = 34
-    static let bottomPadding: CGFloat = 32
+    static func bottomPadding(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 20, standard: 26, large: 32) }
     static let contentTopSpacing: CGFloat = 12
     static let rowSpacing: CGFloat = 8
     static let navTopPadding: CGFloat = 16
@@ -48,7 +48,7 @@ enum StartPushLayout {
     static let friendRowAvatarSize: CGFloat = 40
     static let memberCountIconSize: CGFloat = 10
     static let sectionLabelSpacing: CGFloat = 12
-    static let groupCardSpacing: CGFloat = 7
+    static func groupCardSpacing(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 6, standard: 7, large: 7) }
     static let groupCheckmarkSize: CGFloat = 16
     static let groupCardCheckOffset: CGFloat = 3
     static let rowHorizontalPadding: CGFloat = 14
@@ -133,6 +133,7 @@ struct StartPushHeader: View {
 }
 
 struct StartPushPrimaryButton: View {
+    @Environment(\.pushLayout) private var layout
     let title: String
     let isEnabled: Bool
     let action: () -> Void
@@ -145,7 +146,7 @@ struct StartPushPrimaryButton: View {
                                  ? PushControlColors.activeForeground
                                  : PushControlColors.inactiveForeground)
                 .frame(maxWidth: .infinity)
-                .frame(height: StartPushLayout.primaryButtonHeight)
+                .frame(height: StartPushLayout.primaryButtonHeight(layout))
                 .background(
                     Capsule().fill(isEnabled
                                    ? PushControlColors.activeFill

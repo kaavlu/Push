@@ -50,15 +50,6 @@ struct FriendDetailSheet: View {
         puck.kind == .hangout || puck.kind == .cluster
     }
 
-    private var detents: Set<PresentationDetent> {
-        switch puck.kind {
-        case .individual:
-            return [.height(FriendDetailSheetLayout.individualSheetHeight)]
-        case .hangout, .cluster, .friendGroup:
-            return [.height(FriendDetailSheetLayout.hangoutSheetHeight)]
-        }
-    }
-
     var body: some View {
         ZStack(alignment: .top) {
             sheetContent
@@ -74,25 +65,7 @@ struct FriendDetailSheet: View {
                     .padding(.top, FriendDetailSheetLayout.toastTopPadding)
             }
         }
-        .presentationDetents(detents)
-        .presentationDragIndicator(.visible)
-        .presentationBackground {
-            ZStack {
-                Rectangle().fill(.ultraThinMaterial)
-                LinearGradient(
-                    stops: [
-                        .init(color: PushColorPalette.Accent.sunbeam.opacity(0.38), location: 0.0),
-                        .init(color: PushColorPalette.Accent.sunbeam.opacity(0.08), location: 0.25),
-                        .init(color: Color.clear, location: 0.45),
-                        .init(color: PushColorPalette.Accent.walnut.opacity(0.08), location: 1.0)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-            }
-            .ignoresSafeArea()
-        }
-        .presentationCornerRadius(FriendDetailSheetLayout.sheetCornerRadius)
+        .frame(maxWidth: .infinity, alignment: .top)
     }
 
     @ViewBuilder
@@ -121,6 +94,7 @@ struct FriendDetailSheet: View {
         .padding(.horizontal, FriendDetailSheetLayout.contentHorizontalPadding)
         .padding(.top, FriendDetailSheetLayout.heroTopPadding)
         .padding(.bottom, FriendDetailSheetLayout.actionBottomPadding)
+        .frame(maxWidth: .infinity, alignment: .top)
     }
 
     // MARK: - Hangout Layout (pair + small group)
@@ -139,6 +113,7 @@ struct FriendDetailSheet: View {
         .padding(.horizontal, FriendDetailSheetLayout.contentHorizontalPadding)
         .padding(.top, FriendDetailSheetLayout.heroTopPadding)
         .padding(.bottom, FriendDetailSheetLayout.actionBottomPadding)
+        .frame(maxWidth: .infinity, alignment: .top)
     }
 
     // MARK: - Friend Group Layout
@@ -158,6 +133,7 @@ struct FriendDetailSheet: View {
         .padding(.horizontal, FriendDetailSheetLayout.contentHorizontalPadding)
         .padding(.top, FriendDetailSheetLayout.heroTopPadding)
         .padding(.bottom, FriendDetailSheetLayout.actionBottomPadding)
+        .frame(maxWidth: .infinity, alignment: .top)
     }
 
     private func triggerToast(_ message: String) {
@@ -499,15 +475,25 @@ private struct PairActionRow: View {
     let onStartPlan: () -> Void
 
     var body: some View {
-        HStack(spacing: FriendDetailSheetLayout.actionSpacing) {
-            PrimaryActionCard(
-                label: "Directions",
-                symbolName: "arrow.triangle.turn.up.right.circle.fill",
-                action: onDirections
-            )
-            PrimaryActionCard(label: "Ask to join", symbolName: "figure.wave", action: onAskToJoin)
-            PrimaryActionCard(label: "Start push", symbolName: "calendar.badge.plus", action: onStartPlan)
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: FriendDetailSheetLayout.actionSpacing) {
+                actionCards
+            }
+            VStack(spacing: FriendDetailSheetLayout.actionSpacing) {
+                actionCards
+            }
         }
+    }
+
+    @ViewBuilder
+    private var actionCards: some View {
+        PrimaryActionCard(
+            label: "Directions",
+            symbolName: "arrow.triangle.turn.up.right.circle.fill",
+            action: onDirections
+        )
+        PrimaryActionCard(label: "Ask to join", symbolName: "figure.wave", action: onAskToJoin)
+        PrimaryActionCard(label: "Start push", symbolName: "calendar.badge.plus", action: onStartPlan)
     }
 }
 

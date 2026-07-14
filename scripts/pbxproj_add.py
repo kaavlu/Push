@@ -8,11 +8,13 @@ Usage:
 IDs are deterministic (md5 of target+path) so re-running is idempotent.
 """
 import hashlib
+import argparse
 import pathlib
 import re
 import sys
 
 PBXPROJ = pathlib.Path("Push.xcodeproj/project.pbxproj")
+VALID_TARGETS = {"app", "tests"}
 
 
 def hex_id(seed: str) -> str:
@@ -25,6 +27,25 @@ def insert_after(content: str, pattern: str, addition: str) -> str:
         sys.exit(f"anchor not found: {pattern}")
     idx = content.index("\n", match.end()) + 1
     return content[:idx] + addition + content[idx:]
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Register Swift source files in Push.xcodeproj."
+    )
+    parser.add_argument(
+        "--target",
+        choices=sorted(VALID_TARGETS),
+        default="app",
+        help="Target to register files with. Paths are relative to Push/ for app and PushTests/ for tests.",
+    )
+    parser.add_argument("files", nargs="+", help="Swift files to register.")
+    return parser.parse_args()
+
+
+def validate_project() -> None:
+    if not PBXPROJ.exists():
+        sys.exit(f"project file not found: {PBXPROJ}")
 
 
 def add_file(content: str, rel_path: str, target: str) -> str:
@@ -68,16 +89,11 @@ def add_file(content: str, rel_path: str, target: str) -> str:
 
 
 def main() -> None:
-    args = sys.argv[1:]
-    target = "app"
-    if args[:1] == ["--target"]:
-        target = "tests" if args[1] == "tests" else "app"
-        args = args[2:]
-    if not args:
-        sys.exit("no files given")
+    parsed = parse_args()
+    validate_project()
     content = PBXPROJ.read_text()
-    for rel in args:
-        content = add_file(content, rel, target)
+    for rel in parsed.files:
+        content = add_file(content, rel, parsed.target)
     PBXPROJ.write_text(content)
 
 

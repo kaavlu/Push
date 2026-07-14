@@ -4,6 +4,7 @@ import SwiftUI
 struct ReviewPushesView: View {
     @ObservedObject var viewModel: PlansViewModel
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.pushLayout) private var layout
 
     @State private var deckIndex: Int = 0
     @State private var dragOffset: CGSize = .zero
@@ -30,7 +31,7 @@ struct ReviewPushesView: View {
                         .padding(.bottom, PlansLayout.deckHintsBottomPadding)
                 }
             }
-            .padding(.horizontal, PlansLayout.horizontalPadding)
+            .padding(.horizontal, PlansLayout.horizontalPadding(layout))
         }
     }
 

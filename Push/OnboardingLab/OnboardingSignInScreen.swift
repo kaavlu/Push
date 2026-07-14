@@ -12,6 +12,7 @@
 import SwiftUI
 
 struct OnboardingSignInScreen: View {
+    @Environment(\.pushLayout) private var layout
     @ObservedObject var model: OnboardingLabViewModel
 
     var body: some View {
@@ -30,8 +31,8 @@ struct OnboardingSignInScreen: View {
                 action: "Sign up"
             ) { model.goToSignUp() }
         }
-        .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding)
-        .padding(.top, OnboardingLabMetric.contentTopInset)
+        .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
+        .padding(.top, OnboardingLabMetric.contentTopInset(layout))
         .padding(.bottom, 26)
     }
 

@@ -2,22 +2,22 @@
 import SwiftUI
 
 enum PlansLayout {
-    static let horizontalPadding: CGFloat = 18
-    static let headerToCalendarSpacing: CGFloat = 14
+    static func horizontalPadding(_ layout: PushAdaptiveLayout) -> CGFloat { layout.pageHorizontalPadding }
+    static func headerToCalendarSpacing(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 10, standard: 12, large: 14) }
     static let headerSubtitleSpacing: CGFloat = 3
     static let bottomPadding: CGFloat = 110
-    static let sectionSpacing: CGFloat = 10
-    static let calendarToYourPushesSpacing: CGFloat = 18
-    static let pushesModuleSpacing: CGFloat = 20
+    static func sectionSpacing(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 8, standard: 9, large: 10) }
+    static func calendarToYourPushesSpacing(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 12, standard: 15, large: 18) }
+    static func pushesModuleSpacing(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 14, standard: 17, large: 20) }
     static let startButtonTopSpacing: CGFloat = 18
     static let moduleTitleCardSpacing: CGFloat = 12
-    static let cardCornerRadius: CGFloat = 26
-    static let cardPadding: CGFloat = 15
-    static let cardRowSpacing: CGFloat = 6
-    static let pushCardHeight: CGFloat = 188
+    static func cardCornerRadius(_ layout: PushAdaptiveLayout) -> CGFloat { layout.cardCornerRadius }
+    static func cardPadding(_ layout: PushAdaptiveLayout) -> CGFloat { layout.denseCardPadding }
+    static func cardRowSpacing(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 5, standard: 6, large: 6) }
+    static func pushCardMinHeight(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 168, standard: 178, large: 188) }
     static let cardDividerOpacity: Double = 0.28
-    static let calendarCornerRadius: CGFloat = 26
-    static let calendarPadding: CGFloat = 14
+    static func calendarCornerRadius(_ layout: PushAdaptiveLayout) -> CGFloat { layout.cardCornerRadius }
+    static func calendarPadding(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 11, standard: 12, large: 14) }
     static let calendarCellSize: CGFloat = 28
     static let calendarCellSpacing: CGFloat = 4
     static let calendarHeaderSpacing: CGFloat = 8
@@ -35,8 +35,8 @@ enum PlansLayout {
     static let reviewAllButtonTopPadding: CGFloat = 4
     static let startPlanButtonHeight: CGFloat = 50
     static let startPlanButtonCornerRadius: CGFloat = 25
-    static let startPlanButtonBottomPadding: CGFloat = 28
-    static let startPlanButtonHorizontalPadding: CGFloat = 46
+    static func startPlanButtonBottomPadding(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 18, standard: 23, large: 28) }
+    static func startPlanButtonHorizontalPadding(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 34, standard: 40, large: 46) }
     static let headerTopPadding: CGFloat = 12
     static let deckCardPadding: CGFloat = 12
     static let swipeThreshold: CGFloat = 100

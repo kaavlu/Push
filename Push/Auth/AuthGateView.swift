@@ -6,6 +6,9 @@ import SwiftUI
 struct AuthGateView: View {
     @ObservedObject var model: AuthViewModel
     var onAuthenticated: (AuthedUser) -> Void
+    // Adaptive layout tier (main's responsive system); onboarding metrics are
+    // width-parameterized functions, so the gate reflows like the lab screens.
+    @Environment(\.pushLayout) private var layout
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -24,8 +27,8 @@ struct AuthGateView: View {
                 .opacity(model.canSubmit ? 1 : 0.5)
             Spacer(minLength: 24)
         }
-        .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding)
-        .padding(.top, OnboardingLabMetric.contentTopInset)
+        .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
+        .padding(.top, OnboardingLabMetric.contentTopInset(layout))
         .padding(.bottom, 26)
         // Single-parameter onChange: deployment target is iOS 16.4; the two-closure
         // onChange(of:_:) is iOS 17+ and would fail to compile here.
