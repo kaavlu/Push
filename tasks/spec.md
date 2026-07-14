@@ -31,6 +31,14 @@ incrementally.
 6. Focused tests, the full PushTests suite, and a generic simulator build pass; authenticated live
    smoke verification is recorded separately when credentials/session are available.
 
+## Live identity regression
+- Snapshot row order is never identity. Current-user and `UserProfile` reads must locate the row
+  matching the authenticated user ID case-insensitively.
+- Live preparation validates that the authenticated profile exists before installing the container;
+  a missing row routes to recoverable preparation failure instead of presenting partially valid data.
+- Tests must place the current user's profile after another visible profile to prevent accidental
+  dependence on PostgREST response order.
+
 ---
 
 # Issue #27 — Supabase Migration (Day 1)

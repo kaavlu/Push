@@ -153,7 +153,9 @@ Live social-graph rows are held in one memory-only, authenticated-session-scoped
 `ContentView` is created, `RootView` prepares a live container by fetching `profiles`, `groups`,
 `group_memberships`, and `sharing_policies` concurrently. Resource loads coalesce, so overlapping
 repository callers share an in-flight request and each table is fetched at most once per session.
-The one profiles response supplies the current person, friends, and `UserProfile`.
+The one profiles response supplies the current person, friends, and `UserProfile`. Current-person
+and `UserProfile` reads select the row matching the authenticated ID; response order is irrelevant.
+Preparation verifies that row exists before installing the container.
 
 Preparation is an all-or-nothing presentation boundary: the root shows branded progress while the
 snapshot warms, then installs the prepared container before screen ViewModels capture `.shared`.

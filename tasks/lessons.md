@@ -44,6 +44,9 @@ Durable, non-obvious learnings. Keep entries short; link code/docs rather than r
 - Enum raw values that are camelCase in Swift but snake_case in the DB
   (`FriendAvailabilityState.freeNow` vs `free_now`; `SharingPolicy.AudienceType.globalDefault`
   vs `global_default`) need an **explicit `switch`** map, not `EnumType(rawValue:)`.
+- A cached multi-profile response has no guaranteed row order. Never use `.first` for the
+  authenticated person/profile; select by the lowercased auth ID. Returning the first visible
+  friend as self duplicates that person in `(friends + [user])` and traps ID-keyed dictionaries.
 
 ### Shared-container refactor (`AppDataContainer`)
 - `DataLayerTests` accesses `container.database` and existing tests must stay

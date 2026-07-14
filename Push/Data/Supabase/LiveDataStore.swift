@@ -64,6 +64,13 @@ final class LiveDataStore {
         }
     }
 
+    func profile(userID: String) async throws -> ProfileRow {
+        guard let row = try await profiles().first(where: { $0.matches(id: userID) }) else {
+            throw SupabaseRepositoryError.notFound
+        }
+        return row
+    }
+
     func groups() async throws -> [GroupRow] {
         if let groupRows { return groupRows }
         if let groupsTask { return try await groupsTask.value }
@@ -123,6 +130,12 @@ private extension Array {
     func uniqued<Key: Hashable>(by keyPath: KeyPath<Element, Key>) -> [Element] {
         var seen = Set<Key>()
         return filter { seen.insert($0[keyPath: keyPath]).inserted }
+    }
+}
+
+private extension ProfileRow {
+    func matches(id otherID: String) -> Bool {
+        id.caseInsensitiveCompare(otherID) == .orderedSame
     }
 }
 

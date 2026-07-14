@@ -23,9 +23,7 @@ final class SupabaseProfileRepository: ProfileRepository {
     }
 
     func userProfile() async throws -> UserProfile {
-        let rows = try await store.profiles()
-        guard let row = rows.first else { throw SupabaseRepositoryError.notFound }
-        return row.userProfile()
+        try await store.profile(userID: currentUserID).userProfile()
     }
 
     // Profile settings are the user's own row (`profiles_update_self` RLS), so

@@ -1,5 +1,11 @@
 # Eliminate Visible Supabase Data Lag
 
+## Live-mode quit regression
+- [x] Reproduce the exit and inspect the symbolicated crash report.
+- [x] Restore authenticated-ID lookup for current person and profile snapshot reads.
+- [x] Validate the authenticated profile before installing a prepared live container.
+- [x] Add row-order regression coverage; focused tests and authenticated live launch pass.
+
 ## Completed
 - [x] Specify the session snapshot, bootstrap gating, write-through, and failure behavior.
 - [x] Add the coalescing concurrent live-data store and shared repository injection.

@@ -26,14 +26,21 @@ final class AppDataContainer {
 
     static func prepareLive(client: SupabaseClient, currentUserID: Person.ID) async throws -> AppDataContainer {
         let store = LiveDataStore(loader: SupabaseLiveDataLoader(client: client))
-        try await store.warm()
-        return live(store: store, currentUserID: currentUserID)
+        return try await preparedLive(store: store, currentUserID: currentUserID)
     }
 
     static func prepareLive(loader: LiveDataLoading, currentUserID: Person.ID) async throws -> AppDataContainer {
         let store = LiveDataStore(loader: loader)
+        return try await preparedLive(store: store, currentUserID: currentUserID)
+    }
+
+    private static func preparedLive(
+        store: LiveDataStore, currentUserID: Person.ID
+    ) async throws -> AppDataContainer {
         try await store.warm()
-        return live(store: store, currentUserID: currentUserID)
+        let container = live(store: store, currentUserID: currentUserID)
+        _ = try await container.friends.currentUser()
+        return container
     }
 
     static func installPreparedLive(_ container: AppDataContainer) {

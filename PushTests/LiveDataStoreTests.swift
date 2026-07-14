@@ -35,6 +35,30 @@ final class LiveDataStoreTests: XCTestCase {
         XCTAssertEqual(loader.loadCounts, [1, 1, 1, 1])
     }
 
+    func testCurrentUserAndProfileUseAuthenticatedIDNotRowOrder() async throws {
+        let loader = LiveDataLoaderSpy()
+        let container = try await AppDataContainer.prepareLive(loader: loader, currentUserID: "SELF")
+
+        let user = try await container.friends.currentUser()
+        let profile = try await container.profile.userProfile()
+        let friends = try await container.friends.friends()
+
+        XCTAssertEqual(user.id, "self")
+        XCTAssertEqual(profile.personID, "self")
+        XCTAssertEqual(friends.map(\.id), ["friend"])
+    }
+
+    func testPreparationFailsWhenAuthenticatedProfileIsMissing() async {
+        let loader = LiveDataLoaderSpy()
+
+        do {
+            _ = try await AppDataContainer.prepareLive(loader: loader, currentUserID: "missing")
+            XCTFail("Expected missing authenticated profile to fail preparation")
+        } catch {
+            XCTAssertTrue(error is SupabaseRepositoryError)
+        }
+    }
+
     func testSnapshotNormalizesDuplicatePrimaryKeys() async throws {
         let loader = LiveDataLoaderSpy()
         loader.duplicateProfiles = true
@@ -43,7 +67,7 @@ final class LiveDataStoreTests: XCTestCase {
         try await store.warm()
 
         let ids = try await store.profiles().map(\.id)
-        XCTAssertEqual(ids, ["self", "friend"])
+        XCTAssertEqual(ids, ["friend", "self"])
     }
 
     func testSuccessfulWriteUpdatesSnapshotAndPublishesOneRevision() async throws {
@@ -89,7 +113,7 @@ private final class LiveDataLoaderSpy: LiveDataLoading {
 
     func loadProfiles() async throws -> [ProfileRow] {
         try await load(index: 0)
-        var rows: [ProfileRow] = [.fixture(id: "self", name: "Self"), .fixture(id: "friend", name: "Friend")]
+        var rows: [ProfileRow] = [.fixture(id: "friend", name: "Friend"), .fixture(id: "self", name: "Self")]
         if duplicateProfiles { rows.append(.fixture(id: "friend", name: "Duplicate")) }
         return rows
     }

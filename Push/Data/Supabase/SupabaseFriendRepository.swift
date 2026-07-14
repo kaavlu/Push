@@ -16,9 +16,7 @@ final class SupabaseFriendRepository: FriendRepository {
     }
 
     func currentUser() async throws -> Person {
-        let rows = try await store.profiles()
-        guard let row = rows.first else { throw SupabaseRepositoryError.notFound }
-        return row.person()
+        try await store.profile(userID: currentUserID).person()
     }
 
     /// Friends = every profile RLS lets us read that isn't us. RLS already scopes
