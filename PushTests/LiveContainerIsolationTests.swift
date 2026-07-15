@@ -12,8 +12,10 @@ final class LiveContainerIsolationTests: XCTestCase {
         // No network is exercised here: these live repos return empty synchronously.
         let presence = try await container.friends.presenceStatuses()
         let events = try await container.feed.events()
+        let alerts = try await container.alerts.incomingFriendRequests()
         XCTAssertTrue(presence.isEmpty)
         XCTAssertTrue(events.isEmpty)
+        XCTAssertTrue(alerts.isEmpty)
         XCTAssertEqual(container.currentUserID, "11111111-1111-1111-1111-111111111111")
     }
 

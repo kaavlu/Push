@@ -26,7 +26,7 @@ SeedData → InMemoryDatabase → Repositories → ViewModels → (builders) →
 
 - **Domain** (`Push/Data/Domain/`): `Person`, `FriendGroup`, `GroupMembership`,
   `Place`, `PresenceStatus`, `SharingPolicy`, `PushPlan`, `PushResponse`,
-  `PastHangout`, `FeedEvent`, `UserProfile`. All are `Codable`, `Equatable`,
+  `PastHangout`, `FeedEvent`, `FriendRequest`, `UserProfile`. All are `Codable`, `Equatable`,
   and keyed by stable **opaque `String` IDs**. Seed IDs are readable slugs
   (`"chitty"`, `"michigan"`) for convenience; production IDs will be UUID/ULID.
   Never derive identity from display names outside `SeedData`.
@@ -38,11 +38,14 @@ SeedData → InMemoryDatabase → Repositories → ViewModels → (builders) →
   dictionary tables plus seed-ordered arrays for deterministic UI. The only
   mutation today is `setResponse(...)` (the swipe deck writes the current
   user's push response through it).
-- **Repositories** (`Push/Data/Repositories/`): six protocols — `FriendRepository`,
+- **Repositories** (`Push/Data/Repositories/`): protocols including `FriendRepository`,
   `GroupRepository`, `PushRepository`, `ProfileRepository`, `SharingRepository`,
-  `FeedRepository`. Every method is `async throws`. The `Local*` implementations
+  `FeedRepository`, and `AlertRepository`. Every method is `async throws`. The `Local*` implementations
   never throw, but the seam already supports failure so a backend won't force a
   rewrite. View models catch errors into `LoadState.failed`.
+- **Alerts**: mock accept/deny resolves `FriendRequest` rows in the store and
+  bumps its revision. Live uses `EmptyLiveAlertRepository` until friendship
+  writes are in scope.
 - **Derived** (`Push/Data/Derived/`): pure builders — `VisiblePresenceBuilder`,
   `MapContentBuilder`, `GroupContentBuilder`, `PlansContentBuilder`,
   `ProfileContentBuilder`, plus `RelativeTimeFormatter` and `PushTimingFormatter`.
@@ -180,8 +183,8 @@ ViewModel reloads keep their last loaded value visible while refreshing.
 - **Live repositories** (`Push/Data/Supabase/`) — `SupabaseProfileRepository`,
   `SupabaseFriendRepository`, `SupabaseGroupRepository`, `SupabaseSharingRepository`
   read via PostgREST behind RLS; pure `*Row` DTOs (`Rows/`) decode PostgREST JSON
-  and map to domain structs. `EmptyLivePushRepository`/`EmptyLiveFeedRepository`
-  return empty and friend presence is `[]` — **no mock presence/push/feed leaks
+  and map to domain structs. `EmptyLivePushRepository`/`EmptyLiveFeedRepository`/
+  `EmptyLiveAlertRepository` return empty and friend presence is `[]` — **no mock presence/push/feed/alert leaks
   into authenticated sessions** (Day-1 scope).
 - **Profile settings writes** — unlike the reads-only social graph, the profile
   screen writes to the user's own `profiles` row (`profiles_update_self` RLS):

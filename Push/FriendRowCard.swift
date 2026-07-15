@@ -12,15 +12,24 @@ struct FriendRowCard: View {
     @Environment(\.pushLayout) private var layout
     let row: FriendRowModel
     let showsGroupLabel: Bool
+    let fixedHeight: CGFloat?
+    let usesAvailabilityAppearance: Bool
+    let customTrailing: AnyView?
     let action: (() -> Void)?
 
     init(
         row: FriendRowModel,
         showsGroupLabel: Bool = true,
+        fixedHeight: CGFloat? = nil,
+        usesAvailabilityAppearance: Bool = true,
+        customTrailing: AnyView? = nil,
         action: (() -> Void)? = nil
     ) {
         self.row = row
         self.showsGroupLabel = showsGroupLabel
+        self.fixedHeight = fixedHeight
+        self.usesAvailabilityAppearance = usesAvailabilityAppearance
+        self.customTrailing = customTrailing
         self.action = action
     }
 
@@ -65,6 +74,7 @@ struct FriendRowCard: View {
         }
         .padding(FriendsLayout.cardPadding(layout))
         .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(height: fixedHeight)
         .friendsCard(cornerRadius: FriendsLayout.cardCornerRadius)
     }
 
@@ -81,7 +91,7 @@ struct FriendRowCard: View {
                     lineWidth: FriendsLayout.rowRingWidth
                 )
         }
-        .opacity(isHidden ? 0.72 : 1)
+        .opacity(usesAvailabilityAppearance && isHidden ? 0.72 : 1)
     }
 
     private var identity: some View {
@@ -119,17 +129,23 @@ struct FriendRowCard: View {
     }
 
     private var trailing: some View {
-        VStack(alignment: .trailing, spacing: FriendsLayout.rowTrailingSpacing) {
-            FriendsAvailabilityChip(availability: friend.availability)
+        Group {
+            if let customTrailing {
+                customTrailing
+            } else {
+                VStack(alignment: .trailing, spacing: FriendsLayout.rowTrailingSpacing) {
+                    FriendsAvailabilityChip(availability: friend.availability)
 
-            if !friend.lastUpdated.isEmpty {
-                HStack(spacing: FriendsLayout.liveTimestampSpacing) {
-                    Circle()
-                        .fill(friend.availability.accentColor)
-                        .frame(width: FriendsLayout.liveDotSize, height: FriendsLayout.liveDotSize)
-                    Text(friend.lastUpdated)
-                        .font(.caption2.weight(.medium))
-                        .foregroundStyle(PushControlColors.textTertiary)
+                    if !friend.lastUpdated.isEmpty {
+                        HStack(spacing: FriendsLayout.liveTimestampSpacing) {
+                            Circle()
+                                .fill(friend.availability.accentColor)
+                                .frame(width: FriendsLayout.liveDotSize, height: FriendsLayout.liveDotSize)
+                            Text(friend.lastUpdated)
+                                .font(.caption2.weight(.medium))
+                                .foregroundStyle(PushControlColors.textTertiary)
+                        }
+                    }
                 }
             }
         }

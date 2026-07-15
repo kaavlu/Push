@@ -12,6 +12,7 @@ import UIKit
 struct ContentView: View {
     @Environment(\.pushLayout) private var layout
     @StateObject private var viewModel = MapViewModel()
+    @StateObject private var alertsViewModel = AlertsViewModel()
     @State private var selectedNavigationItem: BottomNavigationItem = .map
     @State private var presentedRoute: MainMapRoute?
     @State private var isCreateMenuPresented = false
@@ -106,9 +107,14 @@ struct ContentView: View {
 
                 Spacer(minLength: 0)
 
-                // Mirror placeholder keeps dropdown centered
-                Color.clear
-                    .frame(width: TopControlLayout.iconButtonSize, height: TopControlLayout.iconButtonSize)
+                TopIconButton(
+                    systemImageName: MainMapRoute.alerts.systemImageName,
+                    accessibilityLabel: MainMapRoute.alerts.accessibilityLabel,
+                    showsIndicator: alertsViewModel.hasUnreadAlerts
+                ) {
+                    isFilterDropdownExpanded = false
+                    presentedRoute = .alerts
+                }
             }
             .padding(.horizontal, TopControlLayout.horizontalMargin(layout))
             .padding(.top, TopControlLayout.topMargin)
@@ -173,6 +179,8 @@ struct ContentView: View {
             ProfileView {
                 presentedRoute = nil
             }
+        case .alerts:
+            AlertsView(viewModel: alertsViewModel)
         case .startPlan:
             StartPushFlowView()
         case .addFriend:
@@ -361,18 +369,28 @@ private struct FriendGroupDropdownRow: View {
 private struct TopIconButton: View {
     let systemImageName: String
     let accessibilityLabel: String
+    var showsIndicator = false
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            Image(systemName: systemImageName)
-                .font(.system(size: TopControlLayout.iconSize, weight: .semibold))
-                .foregroundStyle(PushControlColors.activeForeground)
-                .frame(
-                    width: TopControlLayout.iconButtonSize,
-                    height: TopControlLayout.iconButtonSize
-                )
-                .topControlBackground(cornerRadius: TopControlLayout.cornerRadius, treatment: .profileButton)
+            ZStack(alignment: .topTrailing) {
+                Image(systemName: systemImageName)
+                    .font(.system(size: TopControlLayout.iconSize, weight: .semibold))
+                    .foregroundStyle(PushControlColors.activeForeground)
+                    .frame(width: TopControlLayout.iconButtonSize, height: TopControlLayout.iconButtonSize)
+                    .topControlBackground(cornerRadius: TopControlLayout.cornerRadius, treatment: .profileButton)
+
+                if showsIndicator {
+                    Circle()
+                        .fill(PushControlColors.activeFill)
+                        .frame(width: TopControlLayout.indicatorSize, height: TopControlLayout.indicatorSize)
+                        .overlay {
+                            Circle().stroke(PushControlColors.activeForeground, lineWidth: TopControlLayout.indicatorStrokeWidth)
+                        }
+                        .offset(x: TopControlLayout.indicatorOffset, y: -TopControlLayout.indicatorOffset)
+                }
+            }
         }
         .buttonStyle(.plain)
         .accessibilityLabel(accessibilityLabel)
@@ -550,6 +568,9 @@ private enum TopControlLayout {
     static let iconButtonSize: CGFloat = 44
     static let cornerRadius: CGFloat = iconButtonSize / 2
     static let iconSize: CGFloat = 17
+    static let indicatorSize: CGFloat = 10
+    static let indicatorStrokeWidth: CGFloat = 1
+    static let indicatorOffset: CGFloat = 1
     static let minimumTextScale = 0.78
     static let strokeWidth: CGFloat = 1
     static let profileRingWidth: CGFloat = 1.15
@@ -563,7 +584,6 @@ private enum TopControlLayout {
 
 private enum MapAttributionLayout {
     // Insets tell MapKit where to place the Apple logo and legal text.
-    // Compass is now a manually placed MKCompassButton — not driven by these margins.
     // Keep attribution low and discreet, visually below the floating bottom nav.
     static func top(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 104, standard: 112, large: 120) }
     static func bottom(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 12, standard: 14, large: 16) }

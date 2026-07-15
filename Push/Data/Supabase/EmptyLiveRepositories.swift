@@ -7,3 +7,13 @@ import Foundation
 final class EmptyLiveFeedRepository: FeedRepository {
     func events() async throws -> [FeedEvent] { [] }
 }
+
+final class EmptyLiveAlertRepository: AlertRepository {
+    func incomingFriendRequests() async throws -> [FriendRequest] { [] }
+    func acceptFriendRequest(id: FriendRequest.ID) async throws {
+        throw SupabaseRepositoryError.writeNotSupported
+    }
+    func denyFriendRequest(id: FriendRequest.ID) async throws {
+        throw SupabaseRepositoryError.writeNotSupported
+    }
+}
