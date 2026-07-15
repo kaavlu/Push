@@ -11,7 +11,7 @@ enum AlertsLayout {
     static let actionStrokeWidth: CGFloat = 0.8
     static let stateSpacing: CGFloat = 12
     static let stateIconSize: CGFloat = 34
-    static let stateTopPadding: CGFloat = 80
+    static let stateHorizontalPadding: CGFloat = 28
     static func horizontalPadding(_ layout: PushAdaptiveLayout) -> CGFloat { layout.pageHorizontalPadding }
     static func bottomPadding(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 82, standard: 90, large: 96) }
 }

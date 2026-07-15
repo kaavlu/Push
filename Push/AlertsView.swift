@@ -18,12 +18,12 @@ struct AlertsView: View {
     var body: some View {
         ZStack {
             FriendsBackground()
-            VStack(spacing: FriendsLayout.screenStackSpacing(layout)) {
-                header
-                content
-            }
-            .padding(.horizontal, AlertsLayout.horizontalPadding(layout))
-            .padding(.top, AlertsLayout.topPadding)
+            content
+        }
+        .safeAreaInset(edge: .top, spacing: 0) {
+            header
+                .padding(.horizontal, AlertsLayout.horizontalPadding(layout))
+                .padding(.top, AlertsLayout.topPadding)
         }
     }
 
@@ -75,6 +75,7 @@ struct AlertsView: View {
                     )
                 }
             }
+            .padding(.horizontal, AlertsLayout.horizontalPadding(layout))
             .padding(.bottom, AlertsLayout.bottomPadding(layout))
         }
     }
@@ -152,8 +153,8 @@ private enum AlertsStateView {
             accessory()
         }
         .multilineTextAlignment(.center)
-        .frame(maxWidth: .infinity)
-        .padding(.top, AlertsLayout.stateTopPadding)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+        .padding(.horizontal, AlertsLayout.stateHorizontalPadding)
     }
 }
 
