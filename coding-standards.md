@@ -136,9 +136,21 @@ After any correction from the user, capture the pattern in `tasks/lessons.md` im
 
 - Get a minimal working version first, then extend.
 - Avoid writing large amounts of code before testing any of it.
-- Run the full test suite after every file modification.
+- Run **scoped** verification after each logical change (matching suite via `scripts/test.sh suite <Class>` when working in Push). Run `scripts/test.sh full` before commit/PR or after cross-cutting changes — not after every single file edit.
 - Do not assume code is correct without execution.
 - Each increment = one red/green/refactor cycle. No second function before the first has a passing test.
+
+### Push verification tiers (this repo)
+
+| Change type | Command |
+|-------------|---------|
+| Single area (map, auth, plans, data, …) | `scripts/test.sh suite <ClassName>` |
+| Seed / domain integrity | `scripts/test.sh suite DataLayerTests` |
+| Cross-cutting / before commit or PR | `scripts/test.sh full` |
+| UI-only polish | `scripts/test.sh build` (+ visual sim reload) |
+| Docs / Q&A | No tests |
+
+Use `scripts/test.sh`, not ad-hoc long `xcodebuild` lines. Do not run `PushUITests` unless asked.
 
 ---
 

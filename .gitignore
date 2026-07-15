@@ -6,9 +6,13 @@ node_modules/
 .claude/*.log
 .claude/settings.local.json
 .claude/run-mode
+.claude/stop-hook.lock
+.claude/stop-hook.last-run
+.claude/stop-hook.last-head
 
 # Xcode local/build products
 DerivedData/
+DerivedData-Tests/
 build/
 *.xcresult
 *.moved-aside

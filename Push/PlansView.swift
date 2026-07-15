@@ -112,7 +112,7 @@ private struct YourPushesModule: View {
                 }
             }
 
-            if true {
+            if viewModel.showsYourPushesEmptyState {
                 PlansEmptyCard(
                     title: "No current pushes",
                     message: "Start a push and make your next move.",
@@ -214,6 +214,9 @@ struct YourPushesListView: View {
                                 managedPlan = plan
                             }, onCancel: {
                                 viewModel.cancel(plan: plan)
+                                if viewModel.yourPushes.isEmpty {
+                                    dismiss()
+                                }
                             })
                         }
                     }
@@ -228,8 +231,19 @@ struct YourPushesListView: View {
                 dismiss()
             }
         }
-        .fullScreenCover(item: $managedPlan) { plan in
+        .fullScreenCover(item: $managedPlan, onDismiss: dismissIfNoOwnedPushes) { plan in
             StartPushFlowView(context: .edit(plan: plan))
+        }
+        .onChange(of: viewModel.yourPushes.count) { count in
+            if count == 0 && managedPlan == nil {
+                dismiss()
+            }
+        }
+    }
+
+    private func dismissIfNoOwnedPushes() {
+        if viewModel.yourPushes.isEmpty {
+            dismiss()
         }
     }
 }

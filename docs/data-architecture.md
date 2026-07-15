@@ -223,8 +223,17 @@ DTO decoding/mapping), `LiveContainerIsolationTests` (live vs. mock isolation),
 the authenticated RLS path is proven separately against the real backend (see
 `supabase/README.md`).
 
-Run: `xcodebuild test -project Push.xcodeproj -scheme Push -destination
-'platform=iOS Simulator,name=iPhone 17' -only-testing:PushTests
--parallel-testing-enabled NO`. (Parallel testing intermittently drops the
-simulator runner connection in this environment; the serial flag avoids it.
-Use an installed simulator name — `iPhone 17` on the current Xcode.)
+Prefer the wrapper (separate `DerivedData-Tests/`, serial by default):
+
+```bash
+scripts/test.sh suite DataLayerTests   # one class
+scripts/test.sh full                   # entire PushTests
+scripts/test.sh build                  # compile only
+```
+
+Equivalent raw command: `xcodebuild test -project Push.xcodeproj -scheme Push
+-destination 'platform=iOS Simulator,name=iPhone 17' -only-testing:PushTests
+-parallel-testing-enabled NO -derivedDataPath DerivedData-Tests`. Parallel
+testing intermittently drops the simulator runner; keep serial unless you know
+it is stable. Stock `iPhone 17` is for tests; the visual app sim is
+`Push - main - iPhone 17` via `scripts/run-ios-sim.sh`.

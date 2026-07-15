@@ -14,25 +14,40 @@ PRO_MAX_DEVICE_NAME="iPhone 17 Pro Max"
 ACTION="run"
 DEVICE_MODE="default"
 APP_ARGS=()
+# When set (stop hook), never create devices and only reload a Booted preferred sim.
+RELOAD_IF_BOOTED=false
 
 usage() {
   cat <<EOF
-Usage: $0 [run|stop|restart|status] [--iphone-17|--iphone-17-pro-max|--all] [-- app args...]
+Usage: $0 [run|stop|restart|status|list|prune|reload-if-booted] [--iphone-17|--iphone-17-pro-max|--all] [-- app args...]
 
 Default run behavior:
   - If any Push simulators for this worktree are already booted, rebuild/reload all of them.
   - Otherwise, boot/create the regular iPhone 17 simulator for this worktree.
 
+Actions:
+  run                 Build + install + launch (default).
+  stop                Shutdown worktree sim(s).
+  restart             Shutdown then run.
+  status              Print matching simctl rows.
+  list                List all Push-prefixed sims (any worktree).
+  prune               Delete known-orphan Push sims (e.g. Push - Push - *).
+  reload-if-booted    Like run for --iphone-17, but exit 0 if preferred sim is not Booted (no create).
+
 Device flags:
   --iphone-17           Target the regular iPhone 17 simulator for this worktree.
   --iphone-17-pro-max   Target the iPhone 17 Pro Max simulator for this worktree.
   --all                 Target all existing Push simulators for this worktree.
+
+Worktree labels:
+  - Orca path .../orca/workspaces/Push/<name> → label <name>
+  - Primary / non-Orca checkout → always label main (stable across feature branches)
 EOF
 }
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
-    run|stop|restart|status)
+    run|stop|restart|status|list|prune|reload-if-booted)
       ACTION="$1"
       shift
       ;;
@@ -71,14 +86,18 @@ done
 
 # Worktree label:
 # - Orca worktrees: /Users/.../orca/workspaces/Push/rusalka -> rusalka
-# - Main worktree on main branch -> main
-BRANCH_NAME="$(git branch --show-current 2>/dev/null || true)"
+# - Primary checkout (Desktop, any feature branch) -> main so Stop/run reuse one sim
 WORKTREE_BASENAME="$(basename "$ROOT")"
 
-if [ "$BRANCH_NAME" = "main" ] || [ "$BRANCH_NAME" = "master" ]; then
-  WORKTREE_NAME="$BRANCH_NAME"
+if [[ "$ROOT" == *"/orca/workspaces/Push/"* ]] || [[ "$ROOT" == *"/orca/workspaces/Push" ]]; then
+  # .../orca/workspaces/Push/<card> or the Push workspace root itself
+  if [ "$WORKTREE_BASENAME" = "Push" ] && [[ "$ROOT" == *"/orca/workspaces/Push" ]]; then
+    WORKTREE_NAME="main"
+  else
+    WORKTREE_NAME="$WORKTREE_BASENAME"
+  fi
 else
-  WORKTREE_NAME="$WORKTREE_BASENAME"
+  WORKTREE_NAME="main"
 fi
 
 SAFE_WORKTREE_NAME="$(echo "$WORKTREE_NAME" | tr -cd '[:alnum:]_.-' | cut -c1-24)"
@@ -88,6 +107,14 @@ fi
 
 SIM_PREFIX="$APP_PREFIX - $SAFE_WORKTREE_NAME"
 STATUS_LABEL="$(echo "$SAFE_WORKTREE_NAME" | cut -c1-8)"
+
+if [ "$ACTION" = "reload-if-booted" ]; then
+  ACTION="run"
+  RELOAD_IF_BOOTED=true
+  if [ "$DEVICE_MODE" = "default" ]; then
+    DEVICE_MODE="iphone17"
+  fi
+fi
 
 device_name_for_mode() {
   case "$1" in
@@ -299,6 +326,20 @@ ensure_booted_sim_for_mode() {
 
 target_sims_for_run() {
   local booted
+  local preferred_name
+  local udid
+
+  if [ "$RELOAD_IF_BOOTED" = true ]; then
+    preferred_name="$(sim_name_for_device "$(device_name_for_mode "$DEVICE_MODE")")"
+    if udid="$(get_sim_udid_by_name "$preferred_name" 2>/dev/null)"; then
+      if xcrun simctl list devices | grep -F "$udid" | grep -F "(Booted)" >/dev/null; then
+        echo "$udid	$preferred_name"
+        return
+      fi
+    fi
+    echo "Skip reload: \"$preferred_name\" is not Booted (no create)." >&2
+    return 2
+  fi
 
   if [ "$DEVICE_MODE" = "iphone17" ] || [ "$DEVICE_MODE" = "iphone17_pro_max" ]; then
     ensure_booted_sim_for_mode "$DEVICE_MODE"
@@ -388,10 +429,27 @@ run_app() {
   local app
   local bundle_id
   local count=0
+  local target_status=0
 
+  set +e
   targets="$(target_sims_for_run)"
+  target_status=$?
+  set -e
+
+  # 2 = reload-if-booted and preferred sim not Booted (caller should not debounce as success).
+  if [ "$target_status" -eq 2 ]; then
+    exit 2
+  fi
+  if [ -z "$targets" ]; then
+    exit 0
+  fi
+  if [ "$target_status" -ne 0 ]; then
+    exit "$target_status"
+  fi
+
   first_udid="$(head -1 <<< "$targets" | cut -f1)"
 
+  # One focus call is enough; a second open can spawn extra Simulator windows under races.
   open -a Simulator --args -CurrentDeviceUDID "$first_udid" >/dev/null 2>&1 || open -a Simulator
 
   build_app "$first_udid"
@@ -405,12 +463,11 @@ run_app() {
   bundle_id="$(/usr/libexec/PlistBuddy -c 'Print CFBundleIdentifier' "$app/Info.plist")"
 
   while IFS=$'\t' read -r udid name; do
+    [ -z "$udid" ] && continue
     install_and_launch "$udid" "$app" "$bundle_id"
     echo "Reloaded $SCHEME on \"$name\""
     count=$((count + 1))
   done <<< "$targets"
-
-  open -a Simulator --args -CurrentDeviceUDID "$first_udid" >/dev/null 2>&1 || true
 
   echo "Reloaded $count simulator(s) for worktree \"$SAFE_WORKTREE_NAME\""
 }
@@ -472,6 +529,52 @@ status_sim() {
   done <<< "$targets"
 }
 
+list_all_push_sims() {
+  /usr/bin/python3 <<'PY'
+import json
+import subprocess
+
+data = json.loads(subprocess.check_output(["xcrun", "simctl", "list", "devices", "-j"]))
+for runtime, devices in data.get("devices", {}).items():
+    if "com.apple.CoreSimulator.SimRuntime.iOS" not in runtime:
+        continue
+    for device in devices:
+        name = device.get("name", "")
+        if not name.startswith("Push"):
+            continue
+        if not device.get("isAvailable", True):
+            continue
+        print(f"{device.get('udid')}\t{name}\t{device.get('state', '')}")
+PY
+}
+
+prune_orphan_sims() {
+  # Accidental labels from the old basename/branch heuristic and truncated Orca names
+  # that are clearly not intentional multi-worktree devices. Never delete stock Xcode sims.
+  local udid name state deleted=0
+
+  while IFS=$'\t' read -r udid name state; do
+    [ -z "$udid" ] && continue
+    case "$name" in
+      "Push - Push - "*|"Push - Push")
+        ;;
+      *)
+        continue
+        ;;
+    esac
+    xcrun simctl shutdown "$udid" >/dev/null 2>&1 || true
+    xcrun simctl delete "$udid" >/dev/null 2>&1 || true
+    echo "Pruned \"$name\" ($udid)"
+    deleted=$((deleted + 1))
+  done < <(list_all_push_sims)
+
+  if [ "$deleted" -eq 0 ]; then
+    echo "No orphan Push sims to prune (looked for Push - Push*)."
+  else
+    echo "Pruned $deleted orphan simulator(s)."
+  fi
+}
+
 case "$ACTION" in
   run)
     run_app
@@ -484,6 +587,12 @@ case "$ACTION" in
     ;;
   status)
     status_sim
+    ;;
+  list)
+    list_all_push_sims
+    ;;
+  prune)
+    prune_orphan_sims
     ;;
   *)
     usage >&2
