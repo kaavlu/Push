@@ -475,25 +475,17 @@ private struct PairActionRow: View {
     let onStartPlan: () -> Void
 
     var body: some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(spacing: FriendDetailSheetLayout.actionSpacing) {
-                actionCards
-            }
-            VStack(spacing: FriendDetailSheetLayout.actionSpacing) {
-                actionCards
-            }
+        // Match individual action layout: fixed HStack avoids ViewThatFits
+        // reflow mid-presentation (which made the three buttons pop early).
+        HStack(spacing: FriendDetailSheetLayout.actionSpacing) {
+            PrimaryActionCard(
+                label: "Directions",
+                symbolName: "arrow.triangle.turn.up.right.circle.fill",
+                action: onDirections
+            )
+            PrimaryActionCard(label: "Ask to join", symbolName: "figure.wave", action: onAskToJoin)
+            PrimaryActionCard(label: "Start push", symbolName: "calendar.badge.plus", action: onStartPlan)
         }
-    }
-
-    @ViewBuilder
-    private var actionCards: some View {
-        PrimaryActionCard(
-            label: "Directions",
-            symbolName: "arrow.triangle.turn.up.right.circle.fill",
-            action: onDirections
-        )
-        PrimaryActionCard(label: "Ask to join", symbolName: "figure.wave", action: onAskToJoin)
-        PrimaryActionCard(label: "Start push", symbolName: "calendar.badge.plus", action: onStartPlan)
     }
 }
 

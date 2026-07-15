@@ -121,6 +121,8 @@ enum FriendsColor {
     static let cardStrokeOpacity = 0.18
     static let cardStrokeWidth: CGFloat = 0.8
     static let ringOpacity = 0.9
+    /// Soft ring when a row has no availability (e.g. friend-request alerts).
+    static let neutralRingOpacity = 0.28
     static let chipStrokeOpacity = 0.30
 
     // Warm cream / ivory system — keeps the screen off the gray system material.

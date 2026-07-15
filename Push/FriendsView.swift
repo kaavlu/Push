@@ -175,39 +175,19 @@ struct FriendsView: View {
     }
 
     private func launchStartPush(_ context: StartPushLaunchContext) {
-        dismissSelectedFriend()
-        if groupsViewModel.presentedGroupID != nil {
-            startPushContext = context
-            return
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + FriendsPresentationTiming.sheetDismissalDelay) {
-            startPushContext = context
-        }
+        // FriendDetailBottomSheet already animated out and cleared selection
+        // before invoking this callback.
+        startPushContext = context
     }
 
     private func selectFriend(_ row: FriendRowModel) {
-        withAnimation(friendDetailSheetAnimation) {
-            viewModel.select(row)
-        }
+        // Sheet owns its slide animation (offset); keep identity unanimated.
+        viewModel.select(row)
     }
 
     private func dismissSelectedFriend() {
-        withAnimation(friendDetailSheetAnimation) {
-            viewModel.selectedFriend = nil
-        }
+        viewModel.selectedFriend = nil
     }
-
-    private var friendDetailSheetAnimation: Animation {
-        .interactiveSpring(
-            response: FriendDetailBottomSheetLayout.animationResponse,
-            dampingFraction: FriendDetailBottomSheetLayout.animationDamping,
-            blendDuration: FriendDetailBottomSheetLayout.animationBlendDuration
-        )
-    }
-}
-
-private enum FriendsPresentationTiming {
-    static let sheetDismissalDelay = 0.22
 }
 
 // MARK: - Header
