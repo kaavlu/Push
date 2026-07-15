@@ -1,11 +1,20 @@
 import Combine
 import Foundation
 
+/// Transient card chrome after Accept/Deny while the row still occupies the list.
+enum AlertCardPhase: Equatable {
+    /// Accept succeeded — show "Added" before removal.
+    case added
+    /// Deny succeeded — fade/collapse before removal.
+    case denying
+}
+
 @MainActor
 final class AlertsViewModel: ObservableObject {
     @Published private(set) var loadState: LoadState<[FriendRequestAlertModel]> = .idle
     @Published private(set) var requests: [FriendRequestAlertModel] = []
     @Published private(set) var resolvingIDs: Set<FriendRequest.ID> = []
+    @Published private(set) var cardPhases: [FriendRequest.ID: AlertCardPhase] = [:]
 
     private let repository: AlertRepository
     private var containerForRefresh: AppDataContainer?
@@ -31,6 +40,9 @@ final class AlertsViewModel: ObservableObject {
     }
 
     func load() async {
+        // Avoid wiping in-flight resolution chrome when the store mutates mid-animation.
+        guard resolvingIDs.isEmpty else { return }
+
         loadState = .loading
         do {
             let models = try await repository.incomingFriendRequests()
@@ -51,18 +63,36 @@ final class AlertsViewModel: ObservableObject {
         await resolve(request, accepting: false)
     }
 
+    func phase(for id: FriendRequest.ID) -> AlertCardPhase? {
+        cardPhases[id]
+    }
+
     private func resolve(_ request: FriendRequestAlertModel, accepting: Bool) async {
         guard resolvingIDs.insert(request.id).inserted else { return }
-        defer { resolvingIDs.remove(request.id) }
+        defer {
+            resolvingIDs.remove(request.id)
+            cardPhases.removeValue(forKey: request.id)
+        }
+
         do {
             if accepting {
                 try await repository.acceptFriendRequest(id: request.id)
+                cardPhases[request.id] = .added
+                try await Task.sleep(nanoseconds: AlertsLayout.addedHoldNanoseconds)
             } else {
                 try await repository.denyFriendRequest(id: request.id)
+                cardPhases[request.id] = .denying
+                try await Task.sleep(nanoseconds: AlertsLayout.denyCollapseNanoseconds)
             }
-            await load()
+            removeResolved(request.id)
+            lastSeenRevision = containerForRefresh?.storeRevision ?? lastSeenRevision
         } catch {
             loadState = .failed(error)
         }
+    }
+
+    private func removeResolved(_ id: FriendRequest.ID) {
+        requests.removeAll { $0.id == id }
+        loadState = .loaded(requests)
     }
 }

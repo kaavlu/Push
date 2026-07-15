@@ -230,30 +230,19 @@ struct ContentView: View {
     }
 
     private func presentSelectedPuck(_ puck: MapPuckData) {
-        withAnimation(friendDetailSheetAnimation) {
-            selectedPuck = puck
-        }
+        // Sheet owns its slide animation (offset), so identity changes stay
+        // unanimated — otherwise glass hangout actions paint before the chrome.
+        selectedPuck = puck
     }
 
     private func dismissSelectedPuck() {
-        withAnimation(friendDetailSheetAnimation) {
-            selectedPuck = nil
-        }
+        selectedPuck = nil
     }
 
     private func launchStartPush(_ context: StartPushLaunchContext) {
-        dismissSelectedPuck()
-        DispatchQueue.main.asyncAfter(deadline: .now() + MainMapPresentationTiming.sheetDismissalDelay) {
-            startPushContext = context
-        }
-    }
-
-    private var friendDetailSheetAnimation: Animation {
-        .interactiveSpring(
-            response: FriendDetailBottomSheetLayout.animationResponse,
-            dampingFraction: FriendDetailBottomSheetLayout.animationDamping,
-            blendDuration: FriendDetailBottomSheetLayout.animationBlendDuration
-        )
+        // FriendDetailBottomSheet already animated out and cleared selection
+        // before invoking this callback.
+        startPushContext = context
     }
 
     private func handleRegionChanged(_ span: MKCoordinateSpan) {
@@ -271,10 +260,6 @@ struct ContentView: View {
         viewModel.selectedFilterID = item.id
         isFilterDropdownExpanded = false
     }
-}
-
-private enum MainMapPresentationTiming {
-    static let sheetDismissalDelay = 0.22
 }
 
 private struct FriendGroupDropdownButton: View {
@@ -374,23 +359,25 @@ private struct TopIconButton: View {
 
     var body: some View {
         Button(action: action) {
-            ZStack(alignment: .topTrailing) {
-                Image(systemName: systemImageName)
-                    .font(.system(size: TopControlLayout.iconSize, weight: .semibold))
-                    .foregroundStyle(PushControlColors.activeForeground)
-                    .frame(width: TopControlLayout.iconButtonSize, height: TopControlLayout.iconButtonSize)
-                    .topControlBackground(cornerRadius: TopControlLayout.cornerRadius, treatment: .profileButton)
-
-                if showsIndicator {
-                    Circle()
-                        .fill(PushControlColors.activeFill)
-                        .frame(width: TopControlLayout.indicatorSize, height: TopControlLayout.indicatorSize)
-                        .overlay {
-                            Circle().stroke(PushControlColors.activeForeground, lineWidth: TopControlLayout.indicatorStrokeWidth)
-                        }
-                        .offset(x: TopControlLayout.indicatorOffset, y: -TopControlLayout.indicatorOffset)
+            Image(systemName: systemImageName)
+                .font(.system(size: TopControlLayout.iconSize, weight: .semibold))
+                .foregroundStyle(PushControlColors.activeForeground)
+                .frame(width: TopControlLayout.iconButtonSize, height: TopControlLayout.iconButtonSize)
+                .topControlBackground(cornerRadius: TopControlLayout.cornerRadius, treatment: .profileButton)
+                .overlay(alignment: .topTrailing) {
+                    if showsIndicator {
+                        Circle()
+                            .fill(PushControlColors.activeFill)
+                            .frame(width: TopControlLayout.indicatorSize, height: TopControlLayout.indicatorSize)
+                            .overlay {
+                                Circle().stroke(
+                                    PushControlColors.activeForeground,
+                                    lineWidth: TopControlLayout.indicatorStrokeWidth
+                                )
+                            }
+                            .padding(TopControlLayout.indicatorInset)
+                    }
                 }
-            }
         }
         .buttonStyle(.plain)
         .accessibilityLabel(accessibilityLabel)
@@ -570,7 +557,8 @@ private enum TopControlLayout {
     static let iconSize: CGFloat = 17
     static let indicatorSize: CGFloat = 10
     static let indicatorStrokeWidth: CGFloat = 1
-    static let indicatorOffset: CGFloat = 1
+    /// Insets the unread badge from the control edge so it sits on the icon, not outside the button.
+    static let indicatorInset: CGFloat = 9
     static let minimumTextScale = 0.78
     static let strokeWidth: CGFloat = 1
     static let profileRingWidth: CGFloat = 1.15

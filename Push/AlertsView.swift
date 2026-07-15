@@ -18,18 +18,19 @@ struct AlertsView: View {
     var body: some View {
         ZStack {
             FriendsBackground()
-            content
-        }
-        .safeAreaInset(edge: .top, spacing: 0) {
-            header
-                .padding(.horizontal, AlertsLayout.horizontalPadding(layout))
-                .padding(.top, AlertsLayout.topPadding)
+
+            VStack(spacing: FriendsLayout.screenStackSpacing(layout)) {
+                header
+                content
+            }
+            .padding(.horizontal, FriendsLayout.horizontalPadding(layout))
+            .padding(.top, FriendsLayout.topPadding)
         }
     }
 
     private var header: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: AlertsLayout.headerSpacing) {
+        HStack(alignment: .center) {
+            VStack(alignment: .leading, spacing: FriendsLayout.headerSubtitleSpacing) {
                 Text("Alerts")
                     .font(.largeTitle.weight(.bold))
                     .foregroundStyle(PushControlColors.activeForeground)
@@ -64,47 +65,120 @@ struct AlertsView: View {
 
     private var requestList: some View {
         ScrollView(showsIndicators: false) {
-            LazyVStack(spacing: AlertsLayout.listSpacing) {
+            LazyVStack(alignment: .leading, spacing: FriendsLayout.listSpacing) {
+                FriendsSectionHeader(
+                    title: AlertsCopy.sectionTitle,
+                    count: viewModel.requests.count
+                )
+                .padding(.top, AlertsLayout.contentTopSpacing)
+
                 ForEach(viewModel.requests) { request in
-                    FriendRowCard(
-                        row: request.row,
-                        showsGroupLabel: false,
-                        fixedHeight: AlertsLayout.cardHeight,
-                        usesAvailabilityAppearance: false,
-                        customTrailing: AnyView(actions(for: request))
-                    )
+                    requestCard(for: request)
                 }
             }
-            .padding(.horizontal, AlertsLayout.horizontalPadding(layout))
-            .padding(.bottom, AlertsLayout.bottomPadding(layout))
+            .padding(.bottom, FriendsLayout.bottomPadding(layout))
+            .animation(
+                .easeInOut(duration: AlertsLayout.removeDuration),
+                value: viewModel.requests.map(\.id)
+            )
         }
     }
 
-    private func actions(for request: FriendRequestAlertModel) -> some View {
+    private func requestCard(for request: FriendRequestAlertModel) -> some View {
+        let phase = viewModel.phase(for: request.id)
+        let isDenying = phase == .denying
+
+        return FriendRowCard(
+            row: request.row,
+            showsGroupLabel: false,
+            showsStatusDetail: true,
+            usesAvailabilityAppearance: false,
+            customTrailing: AnyView(trailing(for: request, phase: phase))
+        )
+        .opacity(isDenying ? 0 : 1)
+        .scaleEffect(isDenying ? 0.96 : 1, anchor: .center)
+        .animation(
+            .easeOut(duration: AlertsLayout.denyCollapseDuration),
+            value: isDenying
+        )
+        .transition(
+            .asymmetric(
+                insertion: .opacity,
+                removal: .opacity.combined(with: .move(edge: .top))
+            )
+        )
+    }
+
+    @ViewBuilder
+    private func trailing(for request: FriendRequestAlertModel, phase: AlertCardPhase?) -> some View {
         let isResolving = viewModel.resolvingIDs.contains(request.id)
-        return HStack(spacing: AlertsLayout.actionSpacing) {
-            actionButton("Deny", requesterName: request.request.requester.displayName, isPrimary: false, disabled: isResolving) {
-                Task { await viewModel.deny(request) }
-            }
-            actionButton("Accept", requesterName: request.request.requester.displayName, isPrimary: true, disabled: isResolving) {
-                Task { await viewModel.accept(request) }
+        let name = request.request.requester.displayName
+
+        Group {
+            if phase == .added {
+                addedBadge
+            } else {
+                HStack(spacing: AlertsLayout.actionSpacing) {
+                    actionButton(
+                        "Deny",
+                        requesterName: name,
+                        style: .deny,
+                        disabled: isResolving
+                    ) {
+                        Task { await viewModel.deny(request) }
+                    }
+                    actionButton(
+                        "Accept",
+                        requesterName: name,
+                        style: .accept,
+                        disabled: isResolving
+                    ) {
+                        Task { await viewModel.accept(request) }
+                    }
+                }
             }
         }
+        .animation(
+            .easeInOut(duration: AlertsLayout.addedTransitionDuration),
+            value: phase
+        )
+    }
+
+    private var addedBadge: some View {
+        Text(AlertsCopy.addedLabel)
+            .font(.caption.weight(.bold))
+            .foregroundStyle(PushControlColors.activeForeground)
+            .padding(.horizontal, AlertsLayout.actionHorizontalPadding)
+            .padding(.vertical, AlertsLayout.actionVerticalPadding)
+            .background(
+                PushColorPalette.Accent.mintFoam.opacity(AlertsColor.addedFillOpacity),
+                in: Capsule()
+            )
+            .accessibilityLabel(AlertsCopy.addedLabel)
+    }
+
+    private enum ActionStyle {
+        case accept
+        case deny
     }
 
     private func actionButton(
-        _ title: String, requesterName: String, isPrimary: Bool, disabled: Bool,
+        _ title: String,
+        requesterName: String,
+        style: ActionStyle,
+        disabled: Bool,
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
             Text(title)
                 .font(.caption.weight(.bold))
-                .foregroundStyle(isPrimary ? PushControlColors.activeForeground : PushControlColors.textSecondary)
+                .foregroundStyle(PushControlColors.activeForeground)
+                .frame(minWidth: AlertsLayout.actionMinWidth)
                 .padding(.horizontal, AlertsLayout.actionHorizontalPadding)
                 .padding(.vertical, AlertsLayout.actionVerticalPadding)
-                .background(isPrimary ? PushControlColors.activeFill : FriendsColor.cardCream, in: Capsule())
+                .background(actionBackground(style), in: Capsule())
                 .overlay {
-                    if !isPrimary {
+                    if style == .deny {
                         Capsule().stroke(
                             PushColorPalette.Accent.walnut.opacity(AlertsColor.denyStrokeOpacity),
                             lineWidth: AlertsLayout.actionStrokeWidth
@@ -117,40 +191,57 @@ struct AlertsView: View {
         .opacity(disabled ? AlertsColor.disabledOpacity : 1)
         .accessibilityLabel("\(title) friend request from \(requesterName)")
     }
+
+    private func actionBackground(_ style: ActionStyle) -> Color {
+        switch style {
+        case .accept:
+            return PushControlColors.activeFill
+        case .deny:
+            return FriendsColor.cardCream.opacity(AlertsColor.denyFillOpacity)
+        }
+    }
 }
+
+// MARK: - States
 
 private enum AlertsStateView {
     static var loading: some View {
-        state(symbol: "bell", title: "Checking alerts", message: "One moment…") {
-            ProgressView().tint(PushControlColors.activeForeground)
+        VStack(spacing: AlertsLayout.stateSpacing) {
+            ProgressView()
+                .tint(PushControlColors.activeForeground)
+            Text("Checking alerts")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(PushControlColors.textSecondary)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
     }
 
+    /// Restrained empty state — title only, centered on the cream page.
     static var empty: some View {
-        state(symbol: "bell.badge", title: "You're all caught up", message: "New friend requests will show up here.") {
-            EmptyView()
-        }
+        Text(AlertsCopy.emptyTitle)
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(PushControlColors.textSecondary)
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+            .padding(.horizontal, AlertsLayout.stateHorizontalPadding)
+            .padding(.top, AlertsLayout.contentTopSpacing)
     }
 
     static func error(retry: @escaping () -> Void) -> some View {
-        state(symbol: "exclamationmark.triangle", title: "Couldn't load alerts", message: "Try again in a moment.") {
+        VStack(spacing: AlertsLayout.stateSpacing) {
+            Image(systemName: "exclamationmark.triangle")
+                .font(.system(size: AlertsLayout.stateIconSize, weight: .semibold))
+                .foregroundStyle(PushControlColors.textSecondary)
+            Text("Couldn't load alerts")
+                .font(.headline.weight(.semibold))
+                .foregroundStyle(PushControlColors.textEspresso)
+            Text("Try again in a moment.")
+                .font(.subheadline)
+                .foregroundStyle(PushControlColors.textSecondary)
             Button("Try again", action: retry)
                 .buttonStyle(.borderedProminent)
                 .tint(PushControlColors.activeFill)
                 .foregroundStyle(PushControlColors.activeForeground)
-        }
-    }
-
-    private static func state<Accessory: View>(
-        symbol: String, title: String, message: String, @ViewBuilder accessory: () -> Accessory
-    ) -> some View {
-        VStack(spacing: AlertsLayout.stateSpacing) {
-            Image(systemName: symbol)
-                .font(.system(size: AlertsLayout.stateIconSize, weight: .semibold))
-                .foregroundStyle(PushControlColors.textSecondary)
-            Text(title).font(.headline).foregroundStyle(PushControlColors.textEspresso)
-            Text(message).font(.subheadline).foregroundStyle(PushControlColors.textSecondary)
-            accessory()
         }
         .multilineTextAlignment(.center)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)

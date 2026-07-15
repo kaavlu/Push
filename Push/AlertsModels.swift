@@ -5,6 +5,7 @@ struct FriendRequestAlertModel: Identifiable, Equatable {
 
     var id: String { request.id }
 
+    /// Presentation row for the shared Friends card shell — name, avatar, and request subtitle.
     var row: FriendRowModel {
         let person = request.requester
         let friend = FriendPuckData(
@@ -12,13 +13,20 @@ struct FriendRequestAlertModel: Identifiable, Equatable {
             name: person.displayName,
             avatarPlaceholder: person.initials,
             profileImageAssetName: person.imageAssetPath,
-            activity: "Friend request",
-            activitySymbolName: "person.badge.plus",
-            activityDisplayText: "Sent you a friend request",
+            activity: "",
+            activitySymbolName: "",
+            activityDisplayText: "",
             availability: .unavailable,
-            venueStatusText: "Sent you a friend request",
+            venueStatusText: AlertsCopy.requestSubtitle,
             lastUpdated: ""
         )
         return FriendRowModel(id: request.id, friend: friend, groupLabel: nil)
     }
+}
+
+enum AlertsCopy {
+    static let requestSubtitle = "Sent you a friend request."
+    static let emptyTitle = "You're all caught up."
+    static let sectionTitle = "Friend Requests"
+    static let addedLabel = "Added"
 }

@@ -16,6 +16,9 @@ enum FriendDetailSheetLayout {
     static let heroInnerSpacing: CGFloat = 4
     static let dividerVerticalPadding: CGFloat = 20
     static let actionHorizontalPadding: CGFloat = 20
+    /// Shared gap from the bottom of the action row to the content floor
+    /// (above the home-indicator inset). Kept identical for individual and
+    /// hangout/group sheets so map popups feel standardized.
     static let actionBottomPadding: CGFloat = 14
     static let actionSpacing: CGFloat = 10
 
@@ -75,8 +78,11 @@ enum FriendDetailSheetLayout {
 
     // MARK: - Individual: Sheet Presentation
 
+    /// Content is top-aligned; extra height falls below the action row.
+    /// Sized tightly to content so single-friend button-to-floor spacing matches
+    /// hangout/group (`actionBottomPadding` + safe-area inset).
     static func individualSheetHeight(_ layout: PushAdaptiveLayout) -> CGFloat {
-        layout.value(compact: 270, standard: 258, large: 250)
+        layout.value(compact: 260, standard: 254, large: 252)
     }
     static let sheetCornerRadius: CGFloat = 32
 
@@ -89,6 +95,8 @@ enum FriendDetailSheetLayout {
 
     // MARK: - Hangout (pair + small group)
 
+    /// Tall enough for pair/small-group/friend-group stacks. Content is
+    /// top-aligned so extra height sits under the action row.
     static func hangoutSheetHeight(_ layout: PushAdaptiveLayout) -> CGFloat {
         layout.value(compact: 390, standard: 356, large: 336)
     }

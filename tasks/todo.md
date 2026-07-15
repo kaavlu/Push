@@ -43,6 +43,16 @@
 
 ---
 
+# Alerts Page Polish (Friends parity)
+
+- [x] Match Friends page chrome: spacing, section header, card shell, margins.
+- [x] Friend request row: secondary subtitle, compact Accept (sunbeam) / Deny (ghost) pills.
+- [x] Accept → brief "Added" state then remove; Deny → fade/collapse then remove.
+- [x] Restrained empty state: "You're all caught up."
+- [x] Focused `AlertsTests` (4 tests, 0 failures).
+
+---
+
 # Profile Settings Live Writes  ✅ COMPLETE
 
 Wire the profile screen's settings/options to persist to the Supabase `profiles` table in

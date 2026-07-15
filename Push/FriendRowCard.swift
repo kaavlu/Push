@@ -12,6 +12,8 @@ struct FriendRowCard: View {
     @Environment(\.pushLayout) private var layout
     let row: FriendRowModel
     let showsGroupLabel: Bool
+    /// When false, only the person's name is shown (no activity, venue, or group).
+    let showsStatusDetail: Bool
     let fixedHeight: CGFloat?
     let usesAvailabilityAppearance: Bool
     let customTrailing: AnyView?
@@ -20,6 +22,7 @@ struct FriendRowCard: View {
     init(
         row: FriendRowModel,
         showsGroupLabel: Bool = true,
+        showsStatusDetail: Bool = true,
         fixedHeight: CGFloat? = nil,
         usesAvailabilityAppearance: Bool = true,
         customTrailing: AnyView? = nil,
@@ -27,6 +30,7 @@ struct FriendRowCard: View {
     ) {
         self.row = row
         self.showsGroupLabel = showsGroupLabel
+        self.showsStatusDetail = showsStatusDetail
         self.fixedHeight = fixedHeight
         self.usesAvailabilityAppearance = usesAvailabilityAppearance
         self.customTrailing = customTrailing
@@ -43,12 +47,16 @@ struct FriendRowCard: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel(friend.name)
-            .accessibilityValue(friend.venueStatusText)
+            .accessibilityValue(showsStatusDetail ? friend.venueStatusText : "")
+        } else if customTrailing != nil {
+            // Keep interactive trailing controls (e.g. Accept/Deny) as separate elements.
+            rowContent
+                .accessibilityElement(children: .contain)
         } else {
             rowContent
                 .accessibilityElement(children: .combine)
                 .accessibilityLabel(friend.name)
-                .accessibilityValue(friend.venueStatusText)
+                .accessibilityValue(showsStatusDetail ? friend.venueStatusText : "")
         }
     }
 
@@ -67,9 +75,11 @@ struct FriendRowCard: View {
                     avatar
                     identity
                         .layoutPriority(1)
+                    Spacer(minLength: 0)
                 }
                 trailing
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    // Keep actions/chips on the trailing edge when the row wraps.
+                    .frame(maxWidth: .infinity, alignment: .trailing)
             }
         }
         .padding(FriendsLayout.cardPadding(layout))
@@ -86,12 +96,16 @@ struct FriendRowCard: View {
         .frame(width: FriendsLayout.rowAvatarSize(layout), height: FriendsLayout.rowAvatarSize(layout))
         .overlay {
             Circle()
-                .stroke(
-                    friend.availability.accentColor.opacity(FriendsColor.ringOpacity),
-                    lineWidth: FriendsLayout.rowRingWidth
-                )
+                .stroke(avatarRingColor, lineWidth: FriendsLayout.rowRingWidth)
         }
         .opacity(usesAvailabilityAppearance && isHidden ? 0.72 : 1)
+    }
+
+    private var avatarRingColor: Color {
+        if usesAvailabilityAppearance {
+            return friend.availability.accentColor.opacity(FriendsColor.ringOpacity)
+        }
+        return PushColorPalette.Accent.walnut.opacity(FriendsColor.neutralRingOpacity)
     }
 
     private var identity: some View {
@@ -101,18 +115,23 @@ struct FriendRowCard: View {
                 .foregroundStyle(PushControlColors.textEspresso)
                 .lineLimit(1)
 
-            HStack(spacing: FriendsLayout.rowSubtitleSpacing) {
-                Image(systemName: friend.activitySymbolName)
-                    .font(.system(size: FriendsLayout.rowSubtitleIconSize, weight: .semibold))
-                    .foregroundStyle(friend.availability.accentColor)
-                Text(friend.venueStatusText)
-                    .font(.subheadline)
-                    .foregroundStyle(PushControlColors.textSecondary)
-                    .lineLimit(1)
-            }
+            if showsStatusDetail, !friend.venueStatusText.isEmpty {
+                HStack(spacing: FriendsLayout.rowSubtitleSpacing) {
+                    // Text-only secondary lines (e.g. friend-request alerts) omit the activity glyph.
+                    if !friend.activitySymbolName.isEmpty {
+                        Image(systemName: friend.activitySymbolName)
+                            .font(.system(size: FriendsLayout.rowSubtitleIconSize, weight: .semibold))
+                            .foregroundStyle(friend.availability.accentColor)
+                    }
+                    Text(friend.venueStatusText)
+                        .font(.subheadline)
+                        .foregroundStyle(PushControlColors.textSecondary)
+                        .lineLimit(1)
+                }
 
-            if showsGroupLabel, let groupLabel = row.groupLabel {
-                groupTag(groupLabel)
+                if showsGroupLabel, let groupLabel = row.groupLabel {
+                    groupTag(groupLabel)
+                }
             }
         }
     }
