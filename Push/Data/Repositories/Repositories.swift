@@ -66,3 +66,9 @@ protocol SharingRepository {
 protocol FeedRepository {
     func events() async throws -> [FeedEvent]
 }
+
+protocol AlertRepository {
+    func incomingFriendRequests() async throws -> [FriendRequest]
+    func acceptFriendRequest(id: FriendRequest.ID) async throws
+    func denyFriendRequest(id: FriendRequest.ID) async throws
+}

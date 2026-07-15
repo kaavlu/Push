@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		746E64604F10D8010B2C4BF3 /* AlertsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2CBC79515DE75EE6C9F245D /* AlertsTests.swift */; };
+		8D8A86A4053F8D1982CCB58E /* AlertsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5F1351CE5E299BBEF50885 /* AlertsView.swift */; };
+		31D209D2F7442BD8EFD20E23 /* AlertsStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2224906D0FF2F6511B76E0E5 /* AlertsStyle.swift */; };
+		EA02C994718081976948159B /* AlertsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8F92476708126A3638B5384 /* AlertsViewModel.swift */; };
+		30529FCD7AA654D7CF4A7BAF /* AlertsModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = E39D87E22FFCA42CE1768394 /* AlertsModels.swift */; };
+		7AD3DA6B1D075D9225A0D087 /* FriendRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D9CBDB3D8A61C0769AB46F4 /* FriendRequest.swift */; };
 		63DDF65C805D9ADE5FAF7758 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2027ECABEABD4D3AC10D25EF /* RootView.swift */; };
 		AC2768F1A9F6F29F9431BF68 /* AuthBootstrapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 955A5BD19D517681C759DB69 /* AuthBootstrapTests.swift */; };
 		D13F6E0E7291BC407C3A364D /* AuthGateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE45157A4EDC1A01A29AA5B9 /* AuthGateView.swift */; };
@@ -165,6 +171,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B2CBC79515DE75EE6C9F245D /* AlertsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AlertsTests.swift"; sourceTree = "<group>"; };
+		FA5F1351CE5E299BBEF50885 /* AlertsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AlertsView.swift"; sourceTree = "<group>"; };
+		2224906D0FF2F6511B76E0E5 /* AlertsStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AlertsStyle.swift"; sourceTree = "<group>"; };
+		B8F92476708126A3638B5384 /* AlertsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AlertsViewModel.swift"; sourceTree = "<group>"; };
+		E39D87E22FFCA42CE1768394 /* AlertsModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AlertsModels.swift"; sourceTree = "<group>"; };
+		8D9CBDB3D8A61C0769AB46F4 /* FriendRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "FriendRequest.swift"; path = "Data/Domain/FriendRequest.swift"; sourceTree = "<group>"; };
 		2027ECABEABD4D3AC10D25EF /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RootView.swift"; sourceTree = "<group>"; };
 		955A5BD19D517681C759DB69 /* AuthBootstrapTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AuthBootstrapTests.swift"; sourceTree = "<group>"; };
 		EE45157A4EDC1A01A29AA5B9 /* AuthGateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "AuthGateView.swift"; path = "Auth/AuthGateView.swift"; sourceTree = "<group>"; };
@@ -360,6 +372,11 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				FA5F1351CE5E299BBEF50885 /* AlertsView.swift */,
+				2224906D0FF2F6511B76E0E5 /* AlertsStyle.swift */,
+				B8F92476708126A3638B5384 /* AlertsViewModel.swift */,
+				E39D87E22FFCA42CE1768394 /* AlertsModels.swift */,
+				8D9CBDB3D8A61C0769AB46F4 /* FriendRequest.swift */,
 				2027ECABEABD4D3AC10D25EF /* RootView.swift */,
 				EE45157A4EDC1A01A29AA5B9 /* AuthGateView.swift */,
 				0E0849236F8CF96B8A004FC7 /* AuthFormModel.swift */,
@@ -495,6 +512,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				B2CBC79515DE75EE6C9F245D /* AlertsTests.swift */,
 				955A5BD19D517681C759DB69 /* AuthBootstrapTests.swift */,
 				885A1F84A62285FB4D6AB4A3 /* LiveContainerIsolationTests.swift */,
 				E97C71E27B15A6EFADCF1AB3 /* SupabaseMappingTests.swift */,
@@ -658,6 +676,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				8D8A86A4053F8D1982CCB58E /* AlertsView.swift in Sources */,
+				31D209D2F7442BD8EFD20E23 /* AlertsStyle.swift in Sources */,
+				EA02C994718081976948159B /* AlertsViewModel.swift in Sources */,
+				30529FCD7AA654D7CF4A7BAF /* AlertsModels.swift in Sources */,
+				7AD3DA6B1D075D9225A0D087 /* FriendRequest.swift in Sources */,
 				63DDF65C805D9ADE5FAF7758 /* RootView.swift in Sources */,
 				D13F6E0E7291BC407C3A364D /* AuthGateView.swift in Sources */,
 				3C81C8B4830CDDFF05F6A08A /* AuthFormModel.swift in Sources */,
@@ -784,6 +807,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				746E64604F10D8010B2C4BF3 /* AlertsTests.swift in Sources */,
 				AC2768F1A9F6F29F9431BF68 /* AuthBootstrapTests.swift in Sources */,
 				79E37ACBC7553EBF28EBF20D /* LiveContainerIsolationTests.swift in Sources */,
 				5CF19CE345D632CEBECD5099 /* SupabaseMappingTests.swift in Sources */,

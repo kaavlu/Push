@@ -33,6 +33,7 @@ final class AppDataContainer {
     let profile: ProfileRepository
     let sharing: SharingRepository
     let feed: FeedRepository
+    let alerts: AlertRepository
     let referenceDate: Date
 
     let currentUserID: Person.ID
@@ -63,6 +64,7 @@ final class AppDataContainer {
         self.profile = LocalProfileRepository(database: database)
         self.sharing = LocalSharingRepository(database: database)
         self.feed = LocalFeedRepository(database: database)
+        self.alerts = LocalAlertRepository(database: database)
     }
 
     /// LIVE: Supabase-backed reads; identity from the auth session.
@@ -76,17 +78,20 @@ final class AppDataContainer {
             pushes: EmptyLivePushRepository(),
             profile: SupabaseProfileRepository(client: client, currentUserID: currentUserID),
             sharing: SupabaseSharingRepository(client: client),
-            feed: EmptyLiveFeedRepository()
+            feed: EmptyLiveFeedRepository(),
+            alerts: EmptyLiveAlertRepository()
         )
     }
 
     private init(currentUserID: Person.ID, referenceDate: Date,
                  friends: FriendRepository, groups: GroupRepository, pushes: PushRepository,
-                 profile: ProfileRepository, sharing: SharingRepository, feed: FeedRepository) {
+                 profile: ProfileRepository, sharing: SharingRepository, feed: FeedRepository,
+                 alerts: AlertRepository) {
         self.database = nil
         self.currentUserID = currentUserID
         self.referenceDate = referenceDate
         self.friends = friends; self.groups = groups; self.pushes = pushes
         self.profile = profile; self.sharing = sharing; self.feed = feed
+        self.alerts = alerts
     }
 }

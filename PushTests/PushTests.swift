@@ -294,6 +294,7 @@ final class PushTests: XCTestCase {
             memberships: seed.memberships, places: seed.places, statuses: seed.statuses,
             policies: seed.policies, plans: seed.plans, responses: seed.responses,
             hangouts: seed.hangouts, feedEvents: seed.feedEvents,
+            friendRequests: seed.friendRequests,
             profile: UserProfile(
                 personID: seed.profile.personID, handle: seed.profile.handle,
                 chosenAvailability: .joinable, visibilityNote: seed.profile.visibilityNote,

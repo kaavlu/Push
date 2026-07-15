@@ -21,6 +21,7 @@ struct SeedData {
     let responses: [PushResponse]
     let hangouts: [PastHangout]
     let feedEvents: [FeedEvent]
+    let friendRequests: [FriendRequest]
     let profile: UserProfile
 
     static func standard(now: Date = Date()) -> SeedData {
@@ -37,8 +38,21 @@ struct SeedData {
             responses: standardResponses(now: now),
             hangouts: standardHangouts(now: now),
             feedEvents: standardFeedEvents(now: now),
+            friendRequests: standardFriendRequests(now: now),
             profile: standardProfile()
         )
+    }
+
+    private static func standardFriendRequests(now: Date) -> [FriendRequest] {
+        [
+            FriendRequest(
+                id: "request-austin",
+                requester: Person(id: "austin", firstName: "austin", imageAssetPath: nil),
+                createdAt: now.addingTimeInterval(-SeedTime.halfHour),
+                status: .pending,
+                isUnread: true
+            )
+        ]
     }
 
     // MARK: - People

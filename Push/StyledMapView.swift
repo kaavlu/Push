@@ -28,26 +28,7 @@ struct StyledMapView: UIViewRepresentable {
         mapView.layoutMargins = mapLayoutMargins
         applyStyle(to: mapView)
         syncAnnotations(on: mapView)
-        placeCompass(on: mapView)
         return mapView
-    }
-
-    private func placeCompass(on mapView: MKMapView) {
-        mapView.showsCompass = false
-        let compass = MKCompassButton(mapView: mapView)
-        compass.compassVisibility = .visible
-        compass.translatesAutoresizingMaskIntoConstraints = false
-        mapView.addSubview(compass)
-        NSLayoutConstraint.activate([
-            compass.trailingAnchor.constraint(
-                equalTo: mapView.safeAreaLayoutGuide.trailingAnchor,
-                constant: -CompassLayout.trailingMargin
-            ),
-            compass.topAnchor.constraint(
-                equalTo: mapView.safeAreaLayoutGuide.topAnchor,
-                constant: CompassLayout.topMargin
-            )
-        ])
     }
 
     func updateUIView(_ mapView: MKMapView, context: Context) {
@@ -59,6 +40,7 @@ struct StyledMapView: UIViewRepresentable {
     }
 
     private func applyStyle(to mapView: MKMapView) {
+        mapView.showsCompass = false
         if #available(iOS 16.0, *) {
             guard !(mapView.preferredConfiguration is MKImageryMapConfiguration) else { return }
             mapView.preferredConfiguration = MKImageryMapConfiguration(elevationStyle: .flat)
@@ -314,9 +296,4 @@ private enum SelfPuckAnnotationLayout {
     static func frameSize(_ layout: PushAdaptiveLayout) -> CGSize {
         CGSize(width: 132 * layout.puckScale, height: 124 * layout.puckScale)
     }
-}
-
-private enum CompassLayout {
-    static let trailingMargin: CGFloat = 16
-    static let topMargin: CGFloat = 10
 }

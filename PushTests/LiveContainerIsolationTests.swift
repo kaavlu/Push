@@ -13,9 +13,11 @@ final class LiveContainerIsolationTests: XCTestCase {
         let presence = try await container.friends.presenceStatuses()
         let plans = try await container.pushes.activePlans()
         let events = try await container.feed.events()
+        let alerts = try await container.alerts.incomingFriendRequests()
         XCTAssertTrue(presence.isEmpty)
         XCTAssertTrue(plans.isEmpty)
         XCTAssertTrue(events.isEmpty)
+        XCTAssertTrue(alerts.isEmpty)
         XCTAssertEqual(container.currentUserID, "11111111-1111-1111-1111-111111111111")
     }
 

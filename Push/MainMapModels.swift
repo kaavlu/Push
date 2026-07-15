@@ -58,6 +58,7 @@ enum BottomNavigationItem: String, CaseIterable, Identifiable {
 enum MainMapRoute: String, Identifiable, Equatable {
     case groups
     case profile
+    case alerts
     case startPlan
     case addFriend
     case feed
@@ -72,6 +73,8 @@ enum MainMapRoute: String, Identifiable, Equatable {
             return "Friends"
         case .profile:
             return "Profile"
+        case .alerts:
+            return "Alerts"
         case .startPlan:
             return "Start Push"
         case .addFriend:
@@ -91,6 +94,8 @@ enum MainMapRoute: String, Identifiable, Equatable {
             return "person.2.fill"
         case .profile:
             return "person.crop.circle.fill"
+        case .alerts:
+            return "bell.fill"
         case .startPlan:
             return "calendar.badge.plus"
         case .addFriend:
