@@ -16,7 +16,7 @@ Push is **not** a tracking app, not a generic map app, and not a chat app. It sh
 - **Framework:** SwiftUI
 - **Target:** iOS 17+
 - **Architecture:** MVVM
-- **Data:** Parallel mock/live `AppDataContainer` (DEBUG mock default, `--live` opt-in, Release live). Live auth paths warm a session-scoped `LiveDataStore` before `ContentView`. Day-1 Supabase social graph is reads-only; profile self-writes (basics, toggles, availability) are live write-through to that snapshot. No mock presence/push/feed in live sessions. See `AGENTS.md`, `tasks/spec.md`, `docs/data-architecture.md`.
+- **Data:** Parallel mock/live `AppDataContainer` (DEBUG mock default, `--live` opt-in, Release live). Live auth paths warm a session-scoped `LiveDataStore` before `ContentView`. Day-1 Supabase social graph is reads-only except push coordination (`SupabasePushRepository` — create/edit/cancel/delete, RSVP). Profile self-writes (basics, toggles, availability) are live write-through. No mock presence/feed in live sessions. See `AGENTS.md`, `tasks/spec.md`, `docs/data-architecture.md`.
 - **Maps:** MapKit
 
 This is a **high-fidelity prototype** that can become production later.
@@ -42,7 +42,7 @@ This is a **high-fidelity prototype** that can become production later.
 
 ## What NOT to Build Yet
 
-- Live writes to social graph (friends/groups/pushes/sharing), realtime/subscriptions — profile self-writes are allowed
+- Live writes to social graph (friends/groups/sharing), realtime/subscriptions — profile self-writes and push coordination (create/edit/cancel/delete, RSVP) are allowed
 - Real-time location sharing
 - Real activity inference
 - Push notifications
