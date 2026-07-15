@@ -28,6 +28,7 @@ final class InMemoryDatabase: ObservableObject {
     private(set) var hangouts: [PastHangout]
     private(set) var feedEvents: [FeedEvent]
     private(set) var friendRequests: [FriendRequest]
+    private(set) var acceptedFriendIDs: Set<Person.ID>
     private(set) var profile: UserProfile
 
     /// Seed order matters for deterministic UI (avatar stacks, card order).
@@ -51,6 +52,7 @@ final class InMemoryDatabase: ObservableObject {
         hangouts = seed.hangouts
         feedEvents = seed.feedEvents
         friendRequests = seed.friendRequests
+        acceptedFriendIDs = seed.acceptedFriendIDs
         profile = seed.profile
     }
 
@@ -64,11 +66,92 @@ final class InMemoryDatabase: ObservableObject {
         friendRequests[index] = FriendRequest(
             id: request.id,
             requester: request.requester,
+            recipientID: request.recipientID,
             createdAt: request.createdAt,
             status: status,
             isUnread: false
         )
+        if status == .accepted {
+            acceptedFriendIDs.insert(request.requester.id)
+            if peopleByID[request.requester.id] == nil {
+                peopleByID[request.requester.id] = request.requester
+                orderedPeople.append(request.requester)
+            }
+        }
         didMutate()
+    }
+
+    /// Sends an outgoing pending request. Guards self, existing friends, and
+    /// any pending row in either direction between the pair.
+    @discardableResult
+    func sendFriendRequest(to personID: Person.ID) -> FriendRequest? {
+        guard personID != currentUserID else { return nil }
+        guard let person = peopleByID[personID] else { return nil }
+        guard !acceptedFriendIDs.contains(personID) else { return nil }
+
+        if let existing = friendRequests.first(where: {
+            $0.status == .pending && involvesPair(personID, request: $0)
+        }) {
+            return existing
+        }
+
+        // Re-open a previously denied pair as a new outgoing pending request.
+        if let deniedIndex = friendRequests.firstIndex(where: {
+            $0.status == .denied && involvesPair(personID, request: $0)
+        }) {
+            let denied = friendRequests[deniedIndex]
+            let reopened = FriendRequest(
+                id: denied.id,
+                requester: peopleByID[currentUserID] ?? Person(id: currentUserID, firstName: "me", imageAssetPath: nil),
+                recipientID: personID,
+                createdAt: Date(),
+                status: .pending,
+                isUnread: true
+            )
+            friendRequests[deniedIndex] = reopened
+            didMutate()
+            return reopened
+        }
+
+        let me = peopleByID[currentUserID]
+            ?? Person(id: currentUserID, firstName: "me", imageAssetPath: nil)
+        let request = FriendRequest(
+            id: "request-\(UUID().uuidString)",
+            requester: me,
+            recipientID: personID,
+            createdAt: Date(),
+            status: .pending,
+            isUnread: true
+        )
+        // Keep person in the directory so the recipient can resolve them later.
+        _ = person
+        friendRequests.append(request)
+        didMutate()
+        return request
+    }
+
+    private func involvesPair(_ personID: Person.ID, request: FriendRequest) -> Bool {
+        let a = request.requester.id
+        let b = request.recipientID
+        return (a == currentUserID && b == personID) || (a == personID && b == currentUserID)
+    }
+
+    func relation(to personID: Person.ID) -> FriendshipRelation {
+        if personID == currentUserID { return .friends }
+        if acceptedFriendIDs.contains(personID) { return .friends }
+        if let pending = friendRequests.first(where: { $0.status == .pending && involvesPair(personID, request: $0) }) {
+            if pending.requester.id == currentUserID {
+                return .outgoingPending(requestID: pending.id)
+            }
+            return .incomingPending(requestID: pending.id)
+        }
+        return .none
+    }
+
+    /// Mock handles mirror the seed slug/display name lowercased.
+    func handle(for personID: Person.ID) -> String {
+        if personID == currentUserID { return profile.handle }
+        return (peopleByID[personID]?.firstName ?? personID).lowercased()
     }
 
     /// Atomic: inserts the plan and all its initial responses together, then

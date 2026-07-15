@@ -17,7 +17,18 @@ enum PushDateFormatting {
         return formatter
     }()
 
+    private static let plainFormatter: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
+        return formatter
+    }()
+
     static func string(_ date: Date) -> String {
         formatter.string(from: date)
+    }
+
+    /// Fractional-first, plain fallback — same strategy as row `parsedDate` helpers.
+    static func parse(_ raw: String) -> Date? {
+        formatter.date(from: raw) ?? plainFormatter.date(from: raw)
     }
 }

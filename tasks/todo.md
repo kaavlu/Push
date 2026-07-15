@@ -1,3 +1,21 @@
+# Add Friends UI + Friend Requests (Issue #29)
+
+- [x] Spec contract in `tasks/spec.md`
+- [x] Domain: `PersonSearchResult` / `FriendshipRelation`; `FriendRequest.recipientID`
+- [x] Mock store: accepted friends, send/resolve, discoverable seed people
+- [x] Repository protocols + Local implementations
+- [x] Live migration `0009_friend_requests` applied + Supabase repos + cache invalidation
+- [x] AddFriends View/ViewModel/Style/Models + navigation wiring
+- [x] Focused tests + pbxproj registration
+- [x] Build + focused suites (AddFriends/Alerts/Live isolation/store)
+
+## Verification
+- [x] `scripts/test.sh build` SUCCEEDED
+- [x] AddFriendsTests + AlertsTests + LiveContainerIsolationTests + LiveDataStoreTests: 20 tests, 0 failures
+- [x] Migration `0009_friend_requests` applied via MCP; security advisors: intentional WARN on public RPCs + existing auth password toggle
+
+---
+
 # Eliminate Visible Supabase Data Lag
 
 ## Live-mode quit regression

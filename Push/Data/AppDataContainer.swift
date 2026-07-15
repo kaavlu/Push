@@ -115,7 +115,7 @@ final class AppDataContainer {
             profile: SupabaseProfileRepository(store: store, currentUserID: currentUserID),
             sharing: SupabaseSharingRepository(store: store),
             feed: EmptyLiveFeedRepository(),
-            alerts: EmptyLiveAlertRepository()
+            alerts: SupabaseAlertRepository(store: store, currentUserID: currentUserID)
         )
     }
 

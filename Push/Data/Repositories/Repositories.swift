@@ -18,6 +18,10 @@ protocol FriendRepository {
     /// Writes the user's chosen availability to PresenceStatus and UserProfile,
     /// then bumps the store revision so view models reload.
     func setCurrentUserAvailability(_ availability: FriendAvailabilityState) async throws
+    /// Discover people by display name and/or handle. Never returns the current user.
+    func searchPeople(query: String) async throws -> [PersonSearchResult]
+    /// Creates (or re-opens) a pending outgoing request. No-op / throws on invalid targets.
+    func sendFriendRequest(to personID: Person.ID) async throws
 }
 
 protocol GroupRepository {

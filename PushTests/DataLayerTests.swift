@@ -70,7 +70,10 @@ final class DataLayerTests: XCTestCase {
         let seed = SeedData.standard()
         let statusPersonIDs = seed.statuses.map(\.personID)
         XCTAssertEqual(statusPersonIDs.count, Set(statusPersonIDs).count)
-        XCTAssertEqual(Set(statusPersonIDs), Set(seed.people.map(\.id)))
+        // Discoverable non-friends (Add Friends directory) intentionally have no
+        // presence — statuses cover accepted friends + the current user only.
+        let expected = seed.acceptedFriendIDs.union([seed.currentUserID])
+        XCTAssertEqual(Set(statusPersonIDs), expected)
     }
 
     func testSeedPoliciesAreFullVisibilityDefaults() {
@@ -393,6 +396,12 @@ struct ThrowingFriendRepository: FriendRepository {
     func currentUser() async throws -> Person { throw URLError(.badServerResponse) }
     func presenceStatuses() async throws -> [PresenceStatus] { throw URLError(.badServerResponse) }
     func setCurrentUserAvailability(_ availability: FriendAvailabilityState) async throws {
+        throw URLError(.badServerResponse)
+    }
+    func searchPeople(query: String) async throws -> [PersonSearchResult] {
+        throw URLError(.badServerResponse)
+    }
+    func sendFriendRequest(to personID: Person.ID) async throws {
         throw URLError(.badServerResponse)
     }
 }

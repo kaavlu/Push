@@ -19,12 +19,28 @@ final class SupabaseFriendRepository: FriendRepository {
         try await store.profile(userID: currentUserID).person()
     }
 
-    /// Friends = every profile RLS lets us read that isn't us. RLS already scopes
-    /// `profiles` reads to self + friends + co-members; excluding self yields friends
-    /// (co-members are also friends in the Day-1 seed).
+    /// Friends = accepted friendships (plus co-members still visible under group
+    /// RLS). Pending counterparty profiles are visible for Alerts but are not friends.
     func friends() async throws -> [Person] {
-        try await store.profiles()
+        let friendships = try await store.friendships()
+        let accepted = Set(
+            friendships
+                .filter { $0.isAccepted && $0.involves(currentUserID) }
+                .compactMap { $0.otherUserID(relativeTo: currentUserID)?.lowercased() }
+        )
+        let pendingOnly = Set(
+            friendships
+                .filter { $0.isPending && $0.involves(currentUserID) }
+                .compactMap { $0.otherUserID(relativeTo: currentUserID)?.lowercased() }
+        )
+        return try await store.profiles()
             .filter { $0.id.caseInsensitiveCompare(currentUserID) != .orderedSame }
+            .filter { row in
+                let id = row.id.lowercased()
+                if accepted.contains(id) { return true }
+                if pendingOnly.contains(id) { return false }
+                return true
+            }
             .map { $0.person() }
     }
 
@@ -35,6 +51,26 @@ final class SupabaseFriendRepository: FriendRepository {
     // Day-1 writes are supported here unlike the reads-only social graph.
     func setCurrentUserAvailability(_ availability: FriendAvailabilityState) async throws {
         try await store.updateAvailability(userID: currentUserID, rawValue: rawValue(for: availability))
+    }
+
+    func searchPeople(query: String) async throws -> [PersonSearchResult] {
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return [] }
+        let hits = try await store.searchProfiles(query: trimmed)
+        let friendships = try await store.friendships()
+        return hits
+            .filter { $0.id.caseInsensitiveCompare(currentUserID) != .orderedSame }
+            .map { row in
+                PersonSearchResult(
+                    person: row.person(),
+                    handle: row.handle,
+                    relation: relation(to: row.id, friendships: friendships)
+                )
+            }
+    }
+
+    func sendFriendRequest(to personID: Person.ID) async throws {
+        try await store.sendFriendRequest(targetUserID: personID)
     }
 
     // Mirror image of `ProfileRow.mapAvailability` — Swift's raw values are
@@ -50,5 +86,20 @@ final class SupabaseFriendRepository: FriendRepository {
         case .unavailable: return "unavailable"
         case .ghost: return "ghost"
         }
+    }
+
+    private func relation(to personID: String, friendships: [FriendshipRow]) -> FriendshipRelation {
+        let row = friendships.first {
+            $0.involves(currentUserID) && $0.involves(personID)
+        }
+        guard let row else { return .none }
+        if row.isAccepted { return .friends }
+        if row.isPending {
+            if row.isRequester(currentUserID) {
+                return .outgoingPending(requestID: row.id)
+            }
+            return .incomingPending(requestID: row.id)
+        }
+        return .none
     }
 }

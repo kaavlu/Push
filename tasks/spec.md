@@ -1,3 +1,49 @@
+# Add Friends + End-to-End Friend Requests (Issue #29)
+
+## Goal
+Ship a complete **Add Friends** page and wire live (and mock) friend-request
+search/send/accept/decline so mutual friendships update across Alerts, Friends,
+and map-related friendship surfaces without restart.
+
+## Product contract
+- One canonical **Add Friends** destination (cream Friends-page treatment).
+- Search by display name and/or username/handle.
+- Result rows: photo, display name, handle, relationship action.
+- Relationship states: **Add Friend**, **Request Sent**, **Accept / Decline**, **Friends**.
+- Initial (pre-search), loading, no-results, and error states.
+- Current user never appears in results.
+- Entry points: map create menu `MainMapRoute.addFriend`, Friends list “+” control.
+  Both open the same `AddFriendsView` (no second flow).
+- Incoming requests remain on **Alerts** (`AlertRepository`); Add Friends and Alerts
+  share the same request/friendship source of truth.
+- After accept: both users are friends; Friends list / friendship-scoped reads refresh
+  via store revision; state survives relaunch (live = Supabase).
+
+## Architecture
+- MVVM: View → ViewModel → `FriendRepository` / `AlertRepository` → local or Supabase.
+- No Supabase imports in Views/ViewModels.
+- **Search + send** live on `FriendRepository` (`searchPeople`, `sendFriendRequest`).
+- **Incoming accept/deny** stay on `AlertRepository` (existing Alerts surface).
+- Domain: `PersonSearchResult` + `FriendshipRelation`; `FriendRequest` gains `recipientID`.
+- Mock: `InMemoryDatabase` tracks `acceptedFriendIDs` + `friendRequests`; seed includes
+  discoverable non-friends; mutations call `didMutate()`.
+- Live: migration extends `friendships` with `requested_by` + pending/accepted/denied
+  writes via `SECURITY DEFINER` RPCs (`send_friend_request`, `resolve_friend_request`)
+  and `search_profiles` for discoverability beyond friend RLS. `LiveDataStore` invalidates
+  profile cache and bumps revision after friendship mutations so friends lists refresh.
+- Optimistic UI where safe; reconcile with backend result; prevent self, duplicate, and
+  opposite-direction duplicate pendings (unique pair + RPC guards).
+
+## Acceptance tests
+- Search excludes self; relations map correctly for none / outgoing / incoming / friends.
+- Send request → Request Sent; recipient sees Alerts entry.
+- Accept/deny from Alerts or Add Friends updates shared state.
+- Accept adds friend to `friends()` without restart (revision propagation).
+- Live isolation: no mock request leakage; real alert repo wired when live.
+- Mock mode + previews still work; focused unit tests pass.
+
+---
+
 # Eliminate Visible Supabase Data Lag
 
 ## Goal

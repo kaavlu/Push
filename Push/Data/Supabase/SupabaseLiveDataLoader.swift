@@ -1,0 +1,153 @@
+//
+//  SupabaseLiveDataLoader.swift
+//  Push
+//
+//  PostgREST I/O behind `LiveDataStore`. Views and ViewModels never import this.
+//
+
+import Foundation
+import Supabase
+
+@MainActor
+final class SupabaseLiveDataLoader: LiveDataLoading {
+    private let client: SupabaseClient
+    init(client: SupabaseClient) { self.client = client }
+
+    func loadProfiles() async throws -> [ProfileRow] {
+        try await client.from("profiles").select().execute().value
+    }
+
+    func loadGroups() async throws -> [GroupRow] {
+        try await client.from("groups").select().execute().value
+    }
+
+    func loadMemberships() async throws -> [GroupMembershipRow] {
+        try await client.from("group_memberships").select().execute().value
+    }
+
+    func loadPolicies() async throws -> [SharingPolicyRow] {
+        try await client.from("sharing_policies").select().execute().value
+    }
+
+    func updateBasics(userID: String, displayName: String, handle: String) async throws -> ProfileRow {
+        try await client.from("profiles")
+            .update(ProfileBasicsPayload(first_name: displayName, handle: handle))
+            .eq("id", value: userID).select().single().execute().value
+    }
+
+    func updatePrivacy(userID: String, payload: ProfileSettingsPayload) async throws -> ProfileRow {
+        try await client.from("profiles").update(payload)
+            .eq("id", value: userID).select().single().execute().value
+    }
+
+    func updateAvailability(userID: String, rawValue: String) async throws -> ProfileRow {
+        try await client.from("profiles").update(AvailabilityPayload(availability_choice: rawValue))
+            .eq("id", value: userID).select().single().execute().value
+    }
+
+    func loadPushes() async throws -> [PushRow] {
+        try await client.from("pushes").select().execute().value
+    }
+
+    func loadResponses() async throws -> [PushResponseRow] {
+        try await client.from("push_responses").select().execute().value
+    }
+
+    func insertPush(_ payload: PushInsertPayload) async throws -> PushRow {
+        try await client.from("pushes").insert(payload).select().single().execute().value
+    }
+
+    func updatePush(id: String, payload: PushUpdatePayload) async throws -> PushRow {
+        try await client.from("pushes").update(payload)
+            .eq("id", value: id).select().single().execute().value
+    }
+
+    func cancelPush(id: String, payload: PushCancelPayload) async throws -> PushRow {
+        try await client.from("pushes").update(payload)
+            .eq("id", value: id).select().single().execute().value
+    }
+
+    func deletePush(id: String) async throws {
+        try await client.from("pushes").delete().eq("id", value: id).execute()
+    }
+
+    func insertResponses(_ payloads: [PushResponsePayload]) async throws {
+        try await client.from("push_responses").insert(payloads).execute()
+    }
+
+    func upsertResponse(_ payload: PushResponsePayload) async throws {
+        try await client.from("push_responses")
+            .upsert(payload, onConflict: "push_id,person_id")
+            .execute()
+    }
+
+    func deleteResponses(pushID: String, personIDs: [String]) async throws {
+        try await client.from("push_responses").delete()
+            .eq("push_id", value: pushID)
+            .in("person_id", values: personIDs)
+            .execute()
+    }
+
+    func loadFriendships() async throws -> [FriendshipRow] {
+        try await client.from("friendships").select().execute().value
+    }
+
+    func searchProfiles(query: String, limit: Int) async throws -> [SearchProfileRow] {
+        try await client
+            .rpc(
+                "search_profiles",
+                params: SearchProfilesParams(search_query: query, result_limit: limit)
+            )
+            .execute()
+            .value
+    }
+
+    func sendFriendRequest(targetUserID: String) async throws -> FriendshipRow {
+        try await client
+            .rpc("send_friend_request", params: SendFriendRequestParams(target_user_id: targetUserID))
+            .execute()
+            .value
+    }
+
+    func resolveFriendRequest(id: String, accept: Bool) async throws -> FriendshipRow {
+        try await client
+            .rpc(
+                "resolve_friend_request",
+                params: ResolveFriendRequestParams(request_id: id, accept: accept)
+            )
+            .execute()
+            .value
+    }
+
+    func loadProfile(id: String) async throws -> ProfileRow {
+        try await client.from("profiles")
+            .select()
+            .eq("id", value: id)
+            .single()
+            .execute()
+            .value
+    }
+}
+
+private struct SearchProfilesParams: Encodable {
+    let search_query: String
+    let result_limit: Int
+}
+
+private struct SendFriendRequestParams: Encodable {
+    let target_user_id: String
+}
+
+private struct ResolveFriendRequestParams: Encodable {
+    let request_id: String
+    let accept: Bool
+}
+
+private struct ProfileBasicsPayload: Encodable {
+    let first_name: String
+    let handle: String
+}
+
+private struct AvailabilityPayload: Encodable {
+    let availability_choice: String
+}

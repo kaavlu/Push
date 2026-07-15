@@ -17,7 +17,9 @@ final class LocalAlertRepository: AlertRepository {
     }
 
     func incomingFriendRequests() async throws -> [FriendRequest] {
-        database.friendRequests.filter { $0.status == .pending }
+        database.friendRequests.filter {
+            $0.status == .pending && $0.recipientID == database.currentUserID
+        }
     }
 
     func acceptFriendRequest(id: FriendRequest.ID) async throws {
@@ -38,7 +40,7 @@ final class LocalFriendRepository: FriendRepository {
     }
 
     func friends() async throws -> [Person] {
-        database.orderedPeople.filter { $0.id != database.currentUserID }
+        database.orderedPeople.filter { database.acceptedFriendIDs.contains($0.id) }
     }
 
     func currentUser() async throws -> Person {
@@ -52,6 +54,27 @@ final class LocalFriendRepository: FriendRepository {
 
     func setCurrentUserAvailability(_ availability: FriendAvailabilityState) async throws {
         database.setAvailability(availability)
+    }
+
+    func searchPeople(query: String) async throws -> [PersonSearchResult] {
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !trimmed.isEmpty else { return [] }
+        return database.orderedPeople
+            .filter { $0.id != database.currentUserID }
+            .compactMap { person -> PersonSearchResult? in
+                let handle = database.handle(for: person.id)
+                let haystack = "\(person.firstName) \(person.displayName) \(handle)".lowercased()
+                guard haystack.contains(trimmed) else { return nil }
+                return PersonSearchResult(
+                    person: person,
+                    handle: handle,
+                    relation: database.relation(to: person.id)
+                )
+            }
+    }
+
+    func sendFriendRequest(to personID: Person.ID) async throws {
+        _ = database.sendFriendRequest(to: personID)
     }
 }
 

@@ -7,6 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		EDB45A1258432DBF99270700 /* SupabaseLiveDataLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 316F0384F2DAC8FABE08FD01 /* SupabaseLiveDataLoader.swift */; };
+		1DA8CBE0771B3102F0A0E81E /* AddFriendsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECA2C79204C1A37B4EE79B97 /* AddFriendsTests.swift */; };
+		CACE6741737057880FC5EAD7 /* SupabaseAlertRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBB185ED49BC09EF42647C81 /* SupabaseAlertRepository.swift */; };
+		2F1D4519E20D6516E0C0653A /* FriendshipRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB8729ABF9C6A739C33A37B /* FriendshipRow.swift */; };
+		64B5053339D2CF5DDF9935F5 /* AddFriendsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90B95911361B954F4A281EC0 /* AddFriendsView.swift */; };
+		69856DAE5FC9AFD121182A22 /* AddFriendsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31E1020E64E2CC83DB390523 /* AddFriendsViewModel.swift */; };
+		53B8A8D2D0F1FB5B184BAF20 /* AddFriendsStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3DA63A28029BF7D7834EB01 /* AddFriendsStyle.swift */; };
+		62646DC7C03E377386805041 /* AddFriendsModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F357820546BB044EC56D13D /* AddFriendsModels.swift */; };
 		C5C396284549E0436F2EF346 /* SupabasePushRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 323D73CFF6607601D92B9653 /* SupabasePushRepositoryTests.swift */; };
 		359E08AED8A94D2D87B851A1 /* PlansMetadataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FA8998DA00243F7A3045724 /* PlansMetadataTests.swift */; };
 		120E4D1F5A3049008FE0F766 /* PushTimingFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4AF63E6951B4E3D886D8B3D /* PushTimingFormatterTests.swift */; };
@@ -182,6 +190,14 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		316F0384F2DAC8FABE08FD01 /* SupabaseLiveDataLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SupabaseLiveDataLoader.swift"; path = "Data/Supabase/SupabaseLiveDataLoader.swift"; sourceTree = "<group>"; };
+		ECA2C79204C1A37B4EE79B97 /* AddFriendsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddFriendsTests.swift"; sourceTree = "<group>"; };
+		FBB185ED49BC09EF42647C81 /* SupabaseAlertRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SupabaseAlertRepository.swift"; path = "Data/Supabase/SupabaseAlertRepository.swift"; sourceTree = "<group>"; };
+		BBB8729ABF9C6A739C33A37B /* FriendshipRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "FriendshipRow.swift"; path = "Data/Supabase/Rows/FriendshipRow.swift"; sourceTree = "<group>"; };
+		90B95911361B954F4A281EC0 /* AddFriendsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddFriendsView.swift"; sourceTree = "<group>"; };
+		31E1020E64E2CC83DB390523 /* AddFriendsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddFriendsViewModel.swift"; sourceTree = "<group>"; };
+		C3DA63A28029BF7D7834EB01 /* AddFriendsStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddFriendsStyle.swift"; sourceTree = "<group>"; };
+		7F357820546BB044EC56D13D /* AddFriendsModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddFriendsModels.swift"; sourceTree = "<group>"; };
 		323D73CFF6607601D92B9653 /* SupabasePushRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SupabasePushRepositoryTests.swift"; sourceTree = "<group>"; };
 		5FA8998DA00243F7A3045724 /* PlansMetadataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PlansMetadataTests.swift"; sourceTree = "<group>"; };
 		D4AF63E6951B4E3D886D8B3D /* PushTimingFormatterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PushTimingFormatterTests.swift"; sourceTree = "<group>"; };
@@ -394,6 +410,13 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				316F0384F2DAC8FABE08FD01 /* SupabaseLiveDataLoader.swift */,
+				FBB185ED49BC09EF42647C81 /* SupabaseAlertRepository.swift */,
+				BBB8729ABF9C6A739C33A37B /* FriendshipRow.swift */,
+				90B95911361B954F4A281EC0 /* AddFriendsView.swift */,
+				31E1020E64E2CC83DB390523 /* AddFriendsViewModel.swift */,
+				C3DA63A28029BF7D7834EB01 /* AddFriendsStyle.swift */,
+				7F357820546BB044EC56D13D /* AddFriendsModels.swift */,
 				BA35217491014ABFD2BE87C8 /* PushRecipientResolver.swift */,
 				2ACF19BB1B281572BBE12BCB /* SupabasePushRepository.swift */,
 				2199B6CA970AEAA93B54776C /* PushDateFormatting.swift */,
@@ -541,6 +564,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				ECA2C79204C1A37B4EE79B97 /* AddFriendsTests.swift */,
 				323D73CFF6607601D92B9653 /* SupabasePushRepositoryTests.swift */,
 				09E3DC73CEF07CE2678CB944 /* LiveDataStoreTests.swift */,
 				B2CBC79515DE75EE6C9F245D /* AlertsTests.swift */,
@@ -709,6 +733,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				EDB45A1258432DBF99270700 /* SupabaseLiveDataLoader.swift in Sources */,
+				CACE6741737057880FC5EAD7 /* SupabaseAlertRepository.swift in Sources */,
+				2F1D4519E20D6516E0C0653A /* FriendshipRow.swift in Sources */,
+				64B5053339D2CF5DDF9935F5 /* AddFriendsView.swift in Sources */,
+				69856DAE5FC9AFD121182A22 /* AddFriendsViewModel.swift in Sources */,
+				53B8A8D2D0F1FB5B184BAF20 /* AddFriendsStyle.swift in Sources */,
+				62646DC7C03E377386805041 /* AddFriendsModels.swift in Sources */,
 				6124FFBAAD61B732B5C9B1A3 /* PushRecipientResolver.swift in Sources */,
 				9F141A7C9CB8C21D52A52C56 /* SupabasePushRepository.swift in Sources */,
 				CC12CA524DC01C1F8931A878 /* PushDateFormatting.swift in Sources */,
@@ -847,6 +878,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				1DA8CBE0771B3102F0A0E81E /* AddFriendsTests.swift in Sources */,
 				359E08AED8A94D2D87B851A1 /* PlansMetadataTests.swift in Sources */,
 				120E4D1F5A3049008FE0F766 /* PushTimingFormatterTests.swift in Sources */,
 				C5C396284549E0436F2EF346 /* SupabasePushRepositoryTests.swift in Sources */,

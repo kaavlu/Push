@@ -307,7 +307,8 @@ final class PushTests: XCTestCase {
     func testProfileHeaderReflectsAvailabilityOutsideQuickOptions() async throws {
         let seed = SeedData.standard()
         let widened = SeedData(
-            currentUserID: seed.currentUserID, people: seed.people, groups: seed.groups,
+            currentUserID: seed.currentUserID, people: seed.people,
+            acceptedFriendIDs: seed.acceptedFriendIDs, groups: seed.groups,
             memberships: seed.memberships, places: seed.places, statuses: seed.statuses,
             policies: seed.policies, plans: seed.plans, responses: seed.responses,
             hangouts: seed.hangouts, feedEvents: seed.feedEvents,

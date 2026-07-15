@@ -270,6 +270,75 @@ final class LiveDataLoaderSpy: LiveDataLoading {
         if let writeError { throw writeError }
         responseRows.removeAll { $0.push_id == pushID && personIDs.contains($0.person_id) }
     }
+
+    // MARK: - Friendships
+
+    var friendshipRows: [FriendshipRow] = [
+        FriendshipRow(
+            id: "friendship-self-friend",
+            user_low: "friend",
+            user_high: "self",
+            status: "accepted",
+            requested_by: nil,
+            created_at: "2026-07-14T00:00:00Z"
+        )
+    ]
+    var searchRows: [SearchProfileRow] = []
+
+    func loadFriendships() async throws -> [FriendshipRow] { friendshipRows }
+
+    func searchProfiles(query: String, limit: Int) async throws -> [SearchProfileRow] {
+        let q = query.lowercased()
+        return searchRows
+            .filter {
+                $0.handle.lowercased().contains(q) || $0.first_name.lowercased().contains(q)
+            }
+            .prefix(limit)
+            .map { $0 }
+    }
+
+    func sendFriendRequest(targetUserID: String) async throws -> FriendshipRow {
+        if let writeError { throw writeError }
+        if let existing = friendshipRows.first(where: {
+            $0.involves("self") && $0.involves(targetUserID)
+        }) {
+            return existing
+        }
+        let low = targetUserID < "self" ? targetUserID : "self"
+        let high = targetUserID < "self" ? "self" : targetUserID
+        let row = FriendshipRow(
+            id: "friendship-\(friendshipRows.count + 1)",
+            user_low: low,
+            user_high: high,
+            status: "pending",
+            requested_by: "self",
+            created_at: "2026-07-14T00:00:00Z"
+        )
+        friendshipRows.append(row)
+        return row
+    }
+
+    func resolveFriendRequest(id: String, accept: Bool) async throws -> FriendshipRow {
+        if let writeError { throw writeError }
+        guard let index = friendshipRows.firstIndex(where: { $0.id == id }) else {
+            throw SupabaseRepositoryError.notFound
+        }
+        let existing = friendshipRows[index]
+        let updated = FriendshipRow(
+            id: existing.id,
+            user_low: existing.user_low,
+            user_high: existing.user_high,
+            status: accept ? "accepted" : "denied",
+            requested_by: existing.requested_by,
+            created_at: existing.created_at
+        )
+        friendshipRows[index] = updated
+        return updated
+    }
+
+    func loadProfile(id: String) async throws -> ProfileRow {
+        .fixture(id: id, name: id.capitalized)
+    }
 }
 
 private enum TestFailure: Error { case expected }

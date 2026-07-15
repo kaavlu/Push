@@ -184,11 +184,7 @@ struct ContentView: View {
         case .startPlan:
             StartPushFlowView()
         case .addFriend:
-            CreatePlaceholderView(
-                title: "Add Friend",
-                subtitle: "Invite someone to Push.",
-                symbolName: route.systemImageName
-            )
+            AddFriendsView()
         case .feed:
             CreatePlaceholderView(
                 title: "Feed",

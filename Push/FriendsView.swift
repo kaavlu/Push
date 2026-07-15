@@ -106,12 +106,8 @@ struct FriendsView: View {
                 )
             }
         }
-        .sheet(isPresented: $isAddFriendPresented) {
-            CreatePlaceholderView(
-                title: "Add Friend",
-                subtitle: "Invite someone to Push.",
-                symbolName: "person.badge.plus"
-            )
+        .fullScreenCover(isPresented: $isAddFriendPresented) {
+            AddFriendsView()
         }
         .sheet(isPresented: $isAddGroupPresented) {
             CreatePlaceholderView(

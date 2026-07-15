@@ -22,6 +22,9 @@ of the files in order reproduces the schema.
   `settings_map_preferences`, `settings_close_friends` (`jsonb`, nullable) to `profiles`
   for the profile screen's toggle overrides. No RLS change: covered by the existing
   `profiles_update_self` policy.
+- `migrations/0009_friend_requests.sql` — `friendships.requested_by` + pending/accepted/denied
+  status checks; `search_profiles`, `send_friend_request`, and `resolve_friend_request`
+  RPCs; pending-pair profile SELECT policy for Alerts/Add Friends.
 - `seed.sql` — idempotent public-graph seed keyed off **real** auth IDs (resolved by email).
 
 ## Security model

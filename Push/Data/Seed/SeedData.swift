@@ -12,6 +12,8 @@ import Foundation
 struct SeedData {
     let currentUserID: Person.ID
     let people: [Person]
+    /// Accepted direct friends of the current user (subset of `people`, excludes self).
+    let acceptedFriendIDs: Set<Person.ID>
     let groups: [FriendGroup]
     let memberships: [GroupMembership]
     let places: [Place]
@@ -25,10 +27,14 @@ struct SeedData {
     let profile: UserProfile
 
     static func standard(now: Date = Date()) -> SeedData {
-        let people = standardPeople()
+        let friends = standardFriends()
+        let discoverable = standardDiscoverablePeople()
+        let people = friends + [standardCurrentUser()] + discoverable
+        let acceptedFriendIDs = Set(friends.map(\.id))
         return SeedData(
             currentUserID: SeedIDs.currentUser,
             people: people,
+            acceptedFriendIDs: acceptedFriendIDs,
             groups: standardGroups(),
             memberships: standardMemberships(now: now),
             places: standardPlaces(),
@@ -38,16 +44,19 @@ struct SeedData {
             responses: standardResponses(now: now),
             hangouts: standardHangouts(now: now),
             feedEvents: standardFeedEvents(now: now),
-            friendRequests: standardFriendRequests(now: now),
+            friendRequests: standardFriendRequests(now: now, people: people),
             profile: standardProfile()
         )
     }
 
-    private static func standardFriendRequests(now: Date) -> [FriendRequest] {
-        [
+    private static func standardFriendRequests(now: Date, people: [Person]) -> [FriendRequest] {
+        let austin = people.first { $0.id == "austin" }
+            ?? Person(id: "austin", firstName: "austin", imageAssetPath: nil)
+        return [
             FriendRequest(
                 id: "request-austin",
-                requester: Person(id: "austin", firstName: "austin", imageAssetPath: nil),
+                requester: austin,
+                recipientID: SeedIDs.currentUser,
                 createdAt: now.addingTimeInterval(-SeedTime.halfHour),
                 status: .pending,
                 isUnread: true
@@ -57,17 +66,28 @@ struct SeedData {
 
     // MARK: - People
 
-    private static func standardPeople() -> [Person] {
+    private static func standardFriends() -> [Person] {
         [
             friend("chitty"), friend("ishan"), friend("nitin"), friend("ohm"),
             friend("pranay"), friend("ram"), friend("roh"), friend("rohan"),
-            friend("ryan"), friend("viplove"),
-            Person(
-                id: SeedIDs.currentUser,
-                firstName: "manav",
-                imageAssetPath: "assets/profile/manav.jpeg"
-            )
+            friend("ryan"), friend("viplove")
         ]
+    }
+
+    /// Not yet friends — searchable for Add Friends (and austin seeds an incoming request).
+    private static func standardDiscoverablePeople() -> [Person] {
+        [
+            Person(id: "austin", firstName: "austin", imageAssetPath: nil),
+            Person(id: "jordan", firstName: "jordan", imageAssetPath: nil)
+        ]
+    }
+
+    private static func standardCurrentUser() -> Person {
+        Person(
+            id: SeedIDs.currentUser,
+            firstName: "manav",
+            imageAssetPath: "assets/profile/manav.jpeg"
+        )
     }
 
     private static func friend(_ slug: String) -> Person {

@@ -20,6 +20,11 @@ protocol LiveDataLoading: AnyObject {
     func insertResponses(_ payloads: [PushResponsePayload]) async throws
     func upsertResponse(_ payload: PushResponsePayload) async throws
     func deleteResponses(pushID: String, personIDs: [String]) async throws
+    func loadFriendships() async throws -> [FriendshipRow]
+    func searchProfiles(query: String, limit: Int) async throws -> [SearchProfileRow]
+    func sendFriendRequest(targetUserID: String) async throws -> FriendshipRow
+    func resolveFriendRequest(id: String, accept: Bool) async throws -> FriendshipRow
+    func loadProfile(id: String) async throws -> ProfileRow
 }
 
 struct ProfileSettingsPayload: Encodable {
@@ -268,6 +273,46 @@ final class LiveDataStore {
     func notifyPushesChanged() {
         revisionSubject.value += 1
     }
+
+    // MARK: - Friendships
+    //
+    // Like pushes: no long-lived friendship cache. Profile cache *is* session-
+    // scoped, so after accept we clear it so the new friend becomes visible via
+    // `profiles_select_friends` on the next read.
+
+    func friendships() async throws -> [FriendshipRow] {
+        try await loader.loadFriendships()
+    }
+
+    func searchProfiles(query: String, limit: Int = 20) async throws -> [SearchProfileRow] {
+        try await loader.searchProfiles(query: query, limit: limit)
+    }
+
+    func sendFriendRequest(targetUserID: String) async throws {
+        _ = try await loader.sendFriendRequest(targetUserID: targetUserID)
+        notifyFriendshipsChanged()
+    }
+
+    func resolveFriendRequest(id: String, accept: Bool) async throws {
+        _ = try await loader.resolveFriendRequest(id: id, accept: accept)
+        // Accept expands profile visibility; drop the warm cache so friends() refreshes.
+        profileRows = nil
+        profilesTask = nil
+        notifyFriendshipsChanged()
+    }
+
+    /// Fetches a single profile when it may not yet be in the warm snapshot
+    /// (e.g. a pending requester who isn't a friend yet).
+    func profileForFriendship(userID: String) async throws -> ProfileRow {
+        if let cached = try? await profiles().first(where: { $0.matches(id: userID) }) {
+            return cached
+        }
+        return try await loader.loadProfile(id: userID)
+    }
+
+    func notifyFriendshipsChanged() {
+        revisionSubject.value += 1
+    }
 }
 
 private extension Array {
@@ -281,94 +326,4 @@ private extension ProfileRow {
     func matches(id otherID: String) -> Bool {
         id.caseInsensitiveCompare(otherID) == .orderedSame
     }
-}
-
-@MainActor
-final class SupabaseLiveDataLoader: LiveDataLoading {
-    private let client: SupabaseClient
-    init(client: SupabaseClient) { self.client = client }
-
-    func loadProfiles() async throws -> [ProfileRow] {
-        try await client.from("profiles").select().execute().value
-    }
-
-    func loadGroups() async throws -> [GroupRow] {
-        try await client.from("groups").select().execute().value
-    }
-
-    func loadMemberships() async throws -> [GroupMembershipRow] {
-        try await client.from("group_memberships").select().execute().value
-    }
-
-    func loadPolicies() async throws -> [SharingPolicyRow] {
-        try await client.from("sharing_policies").select().execute().value
-    }
-
-    func updateBasics(userID: String, displayName: String, handle: String) async throws -> ProfileRow {
-        try await client.from("profiles")
-            .update(ProfileBasicsPayload(first_name: displayName, handle: handle))
-            .eq("id", value: userID).select().single().execute().value
-    }
-
-    func updatePrivacy(userID: String, payload: ProfileSettingsPayload) async throws -> ProfileRow {
-        try await client.from("profiles").update(payload)
-            .eq("id", value: userID).select().single().execute().value
-    }
-
-    func updateAvailability(userID: String, rawValue: String) async throws -> ProfileRow {
-        try await client.from("profiles").update(AvailabilityPayload(availability_choice: rawValue))
-            .eq("id", value: userID).select().single().execute().value
-    }
-
-    func loadPushes() async throws -> [PushRow] {
-        try await client.from("pushes").select().execute().value
-    }
-
-    func loadResponses() async throws -> [PushResponseRow] {
-        try await client.from("push_responses").select().execute().value
-    }
-
-    func insertPush(_ payload: PushInsertPayload) async throws -> PushRow {
-        try await client.from("pushes").insert(payload).select().single().execute().value
-    }
-
-    func updatePush(id: String, payload: PushUpdatePayload) async throws -> PushRow {
-        try await client.from("pushes").update(payload)
-            .eq("id", value: id).select().single().execute().value
-    }
-
-    func cancelPush(id: String, payload: PushCancelPayload) async throws -> PushRow {
-        try await client.from("pushes").update(payload)
-            .eq("id", value: id).select().single().execute().value
-    }
-
-    func deletePush(id: String) async throws {
-        try await client.from("pushes").delete().eq("id", value: id).execute()
-    }
-
-    func insertResponses(_ payloads: [PushResponsePayload]) async throws {
-        try await client.from("push_responses").insert(payloads).execute()
-    }
-
-    func upsertResponse(_ payload: PushResponsePayload) async throws {
-        try await client.from("push_responses")
-            .upsert(payload, onConflict: "push_id,person_id")
-            .execute()
-    }
-
-    func deleteResponses(pushID: String, personIDs: [String]) async throws {
-        try await client.from("push_responses").delete()
-            .eq("push_id", value: pushID)
-            .in("person_id", values: personIDs)
-            .execute()
-    }
-}
-
-private struct ProfileBasicsPayload: Encodable {
-    let first_name: String
-    let handle: String
-}
-
-private struct AvailabilityPayload: Encodable {
-    let availability_choice: String
 }
