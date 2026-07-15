@@ -3,20 +3,43 @@ import SwiftUI
 
 struct YourPushCard: View {
     @Environment(\.pushLayout) private var layout
+    @State private var isCancelConfirmationPresented = false
     let plan: PlanData
     let onManage: () -> Void
+    /// Optional so previews/tests that don't care about cancel can omit it.
+    var onCancel: (() -> Void)? = nil
+
+    private var groupLocationText: String {
+        PlansMetadata.joined([plan.group, plan.locationHint])
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: PlansLayout.cardRowSpacing(layout)) {
             headerRow
-            groupLocationRow
+            if !groupLocationText.isEmpty { groupLocationRow }
             Divider()
                 .background(PlansColor.creamBase.opacity(PlansLayout.cardDividerOpacity))
-            joinedSection
+            if !plan.participants.isEmpty { joinedSection }
             footerRow
         }
         .padding(PlansLayout.cardPadding(layout))
         .plansGlassCard(cornerRadius: PlansLayout.cardCornerRadius(layout))
+        .contextMenu {
+            if onCancel != nil {
+                Button("Cancel push", systemImage: "xmark.circle", role: .destructive) {
+                    isCancelConfirmationPresented = true
+                }
+                .accessibilityIdentifier("cancelPushButton")
+            }
+        }
+        .confirmationDialog(
+            "Cancel this push?",
+            isPresented: $isCancelConfirmationPresented,
+            titleVisibility: .visible
+        ) {
+            Button("Cancel push", role: .destructive) { onCancel?() }
+            Button("Keep push", role: .cancel) {}
+        }
     }
 
     private var headerRow: some View {
@@ -32,19 +55,14 @@ struct YourPushCard: View {
     }
 
     private var groupLocationRow: some View {
-        Text("\(plan.group) · \(plan.locationHint)")
+        Text(groupLocationText)
             .font(.subheadline.weight(.medium))
             .foregroundStyle(PlansColor.metadataTertiary)
             .lineLimit(1)
     }
 
     private var joinedSection: some View {
-        VStack(alignment: .leading, spacing: YourPushCardLayout.joinedLabelSpacing) {
-            Text("Joined:")
-                .font(.caption.weight(.medium))
-                .foregroundStyle(PlansColor.metadataSecondary)
-            YourPushAvatarRow(participants: plan.participants)
-        }
+        YourPushAvatarRow(participants: plan.participants)
     }
 
     private var footerRow: some View {
@@ -65,7 +83,7 @@ struct YourPushCard: View {
     }
 }
 
-private struct YourPushTimeChip: View {
+struct YourPushTimeChip: View {
     let timeSignal: String
 
     var body: some View {
@@ -74,6 +92,10 @@ private struct YourPushTimeChip: View {
             .foregroundStyle(PushControlColors.textEspresso)
             .padding(.horizontal, YourPushCardLayout.timeChipHorizontalPadding)
             .padding(.vertical, YourPushCardLayout.timeChipVerticalPadding)
+            .background {
+                Capsule()
+                    .fill(PushColorPalette.Accent.sunbeam)
+            }
             .overlay {
                 Capsule()
                     .stroke(

@@ -273,7 +273,9 @@ final class PushTests: XCTestCase {
             viewModel.visibilitySummary,
             "Hidden from friends' map and social context until you turn Ghost Mode off."
         )
-        XCTAssertEqual(viewModel.selectedAvailability, .maybeDown)
+        // Ghost Mode now persists as `.ghost`, the same `FriendAvailabilityState`
+        // write path as a real availability pick.
+        XCTAssertEqual(viewModel.selectedAvailability, .ghost)
         XCTAssertFalse(viewModel.isSelected(freeNow))
 
         viewModel.select(.availability(freeNow))
@@ -281,6 +283,21 @@ final class PushTests: XCTestCase {
         XCTAssertFalse(viewModel.isGhostModeEnabled)
         XCTAssertTrue(viewModel.isSelected(freeNow))
         XCTAssertEqual(viewModel.selectedAvailability, .freeNow)
+    }
+
+    @MainActor
+    func testProfileViewModelPersistsGhostModeAcrossReload() async throws {
+        let container = AppDataContainer(seed: .standard())
+        try await container.friends.setCurrentUserAvailability(.ghost)
+
+        let viewModel = ProfileViewModel(container: container)
+        await viewModel.load()
+
+        XCTAssertTrue(viewModel.isGhostModeEnabled)
+        XCTAssertEqual(
+            viewModel.visibilitySummary,
+            "Hidden from friends' map and social context until you turn Ghost Mode off."
+        )
     }
 
     /// A profile's `chosenAvailability` can be outside the 3 quick-pick

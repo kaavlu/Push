@@ -14,7 +14,7 @@ enum PlansLayout {
     static func cardCornerRadius(_ layout: PushAdaptiveLayout) -> CGFloat { layout.cardCornerRadius }
     static func cardPadding(_ layout: PushAdaptiveLayout) -> CGFloat { layout.denseCardPadding }
     static func cardRowSpacing(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 5, standard: 6, large: 6) }
-    static func pushCardMinHeight(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 168, standard: 178, large: 188) }
+    static func pushCardMinHeight(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 138, standard: 145, large: 152) }
     static let cardDividerOpacity: Double = 0.28
     static func calendarCornerRadius(_ layout: PushAdaptiveLayout) -> CGFloat { layout.cardCornerRadius }
     static func calendarPadding(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 11, standard: 12, large: 14) }
@@ -71,6 +71,14 @@ enum PlansColor {
     // as intentionally brown-accented against the liquid-glass fill.
     static let startButtonBorder = PushColorPalette.Accent.walnut.opacity(0.32)
     static let startButtonBorderWidth: CGFloat = 1.0
+
+    // "Maybe" status pill (responded maybe) — matches the Your Push card's time chip.
+    static let maybeBackground = PushColorPalette.Accent.sunbeam
+    static let maybeForeground = PushControlColors.textEspresso
+
+    // "Pass" status pill (responded no) — light red.
+    static let passBackground = Color(red: 0.96, green: 0.80, blue: 0.78)
+    static let passForeground = Color(red: 0.65, green: 0.20, blue: 0.16)
 }
 
 /// Tokens for the premium liquid-glass treatment on the Review deck card.
@@ -166,7 +174,7 @@ struct PlanStatusPill: View {
 
     var body: some View {
         Text(status.pill)
-            .font(.caption.weight(.semibold))
+            .font(.footnote.weight(.semibold))
             .foregroundStyle(foregroundColor)
             .padding(.horizontal, PlansLayout.statusPillHorizontalPadding)
             .padding(.vertical, PlansLayout.statusPillVerticalPadding)
@@ -177,8 +185,8 @@ struct PlanStatusPill: View {
         switch status {
         case .pending:   return PushColorPalette.Accent.walnut
         case .joined:    return PushColorPalette.Accent.sageGreen
-        case .open:      return PushControlColors.textSecondary
-        case .waiting:   return PushControlColors.textTertiary
+        case .open:      return PlansColor.maybeForeground
+        case .waiting:   return PlansColor.passForeground
         case .locked:    return PushColorPalette.Accent.walnut
         case .happening: return PushColorPalette.Accent.walnut
         }
@@ -188,8 +196,8 @@ struct PlanStatusPill: View {
         switch status {
         case .pending:   return PushColorPalette.Accent.sunbeam.opacity(0.7)
         case .joined:    return PushColorPalette.Accent.mintFoam
-        case .open:      return PushColorPalette.Accent.walnut.opacity(0.10)
-        case .waiting:   return PushColorPalette.Accent.walnut.opacity(0.06)
+        case .open:      return PlansColor.maybeBackground
+        case .waiting:   return PlansColor.passBackground
         case .locked:    return PushColorPalette.Accent.sunbeam
         case .happening: return PushColorPalette.Accent.sunbeam
         }
@@ -205,7 +213,6 @@ enum YourPushCardLayout {
     static let timeChipHorizontalPadding: CGFloat = 8
     static let timeChipVerticalPadding: CGFloat = 4
     static let timeChipStrokeOpacity: Double = 0.40
-    static let joinedLabelSpacing: CGFloat = 6
     static let footerTopPadding: CGFloat = 4
     static let overflowFontSize: CGFloat = 11
     static let headerSpacerMinLength: CGFloat = 8

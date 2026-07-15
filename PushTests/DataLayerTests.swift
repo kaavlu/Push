@@ -354,6 +354,14 @@ extension DataLayerTests {
     }
 
     @MainActor
+    func test_setAvailability_ghost_persistsToProfile() async throws {
+        let container = AppDataContainer(seed: .standard())
+        try await container.friends.setCurrentUserAvailability(.ghost)
+        let profile = try await container.profile.userProfile()
+        XCTAssertEqual(profile.chosenAvailability, .ghost)
+    }
+
+    @MainActor
     func test_updateBasics_persistsFirstNameAndHandle() async throws {
         let container = AppDataContainer(seed: .standard())
         try await container.profile.updateBasics(displayName: "Manny", handle: "@manny")

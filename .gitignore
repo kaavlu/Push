@@ -5,6 +5,7 @@ node_modules/
 .superpowers/
 .claude/*.log
 .claude/settings.local.json
+.claude/run-mode
 
 # Xcode local/build products
 DerivedData/

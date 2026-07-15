@@ -45,6 +45,10 @@ protocol PushRepository {
     func allPlaces() async throws -> [Place]
     func createPush(_ draft: PushDraft) async throws -> PushPlan.ID
     func updatePush(planID: PushPlan.ID, with draft: PushDraft) async throws
+    /// Soft-cancels an owned push (sets `cancelledAt`); no-op if `planID` isn't found.
+    func cancelPush(planID: PushPlan.ID) async throws
+    /// Hard-deletes an owned push (and its responses); no-op if `planID` isn't found.
+    func deletePush(planID: PushPlan.ID) async throws
 }
 
 protocol ProfileRepository {

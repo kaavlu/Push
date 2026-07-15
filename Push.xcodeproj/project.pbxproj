@@ -7,6 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C5C396284549E0436F2EF346 /* SupabasePushRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 323D73CFF6607601D92B9653 /* SupabasePushRepositoryTests.swift */; };
+		359E08AED8A94D2D87B851A1 /* PlansMetadataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FA8998DA00243F7A3045724 /* PlansMetadataTests.swift */; };
+		120E4D1F5A3049008FE0F766 /* PushTimingFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4AF63E6951B4E3D886D8B3D /* PushTimingFormatterTests.swift */; };
+		6124FFBAAD61B732B5C9B1A3 /* PushRecipientResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA35217491014ABFD2BE87C8 /* PushRecipientResolver.swift */; };
+		9F141A7C9CB8C21D52A52C56 /* SupabasePushRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ACF19BB1B281572BBE12BCB /* SupabasePushRepository.swift */; };
+		CC12CA524DC01C1F8931A878 /* PushDateFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2199B6CA970AEAA93B54776C /* PushDateFormatting.swift */; };
+		1ACA649CAEF8953FECF13148 /* PushResponseRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61D5C3C97D7F3BB75BA43B79 /* PushResponseRow.swift */; };
+		573E59AFE5AB0DB53D8BB214 /* PushRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDA5B353D1EBA03017D0230F /* PushRow.swift */; };
 		7ABF856C50043FE38E0C984E /* LiveDataStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09E3DC73CEF07CE2678CB944 /* LiveDataStoreTests.swift */; };
 		15046B4ADFAEE459F2E16551 /* LiveDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 731D450A77B07F13281CD345 /* LiveDataStore.swift */; };
 		63DDF65C805D9ADE5FAF7758 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2027ECABEABD4D3AC10D25EF /* RootView.swift */; };
@@ -49,6 +57,7 @@
 		B27C0FD8AEB589AA26360620 /* MapViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 093D311BC617336A56068266 /* MapViewModel.swift */; };
 		FEFF554378B10E3E5DFAB0CE /* PlansContentBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA18CAA53840E985E93C8FC /* PlansContentBuilder.swift */; };
 		AD8E0F77383DC14CA97255E8 /* PushTimingFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B35A9B47B2ABB3C566493555 /* PushTimingFormatter.swift */; };
+		0B5B1F542FD54EB8A1D70540 /* PlansMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCD50D335C6E434BA5C1076E /* PlansMetadata.swift */; };
 		E305DDB4AE5B0E28EA0B646E /* GroupContentBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1542E8988963723EDFA03603 /* GroupContentBuilder.swift */; };
 		8D12A61C455D7168CFA926F1 /* MapContentBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C6429DD2EC5B0BE4C45B13 /* MapContentBuilder.swift */; };
 		A80E9E12C81272A23675EB40 /* RelativeTimeFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0B7B78C8770DFBBD41596A4 /* RelativeTimeFormatter.swift */; };
@@ -167,6 +176,14 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		323D73CFF6607601D92B9653 /* SupabasePushRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SupabasePushRepositoryTests.swift"; sourceTree = "<group>"; };
+		5FA8998DA00243F7A3045724 /* PlansMetadataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PlansMetadataTests.swift"; sourceTree = "<group>"; };
+		D4AF63E6951B4E3D886D8B3D /* PushTimingFormatterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PushTimingFormatterTests.swift"; sourceTree = "<group>"; };
+		BA35217491014ABFD2BE87C8 /* PushRecipientResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushRecipientResolver.swift"; path = "Data/Repositories/PushRecipientResolver.swift"; sourceTree = "<group>"; };
+		2ACF19BB1B281572BBE12BCB /* SupabasePushRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SupabasePushRepository.swift"; path = "Data/Supabase/SupabasePushRepository.swift"; sourceTree = "<group>"; };
+		2199B6CA970AEAA93B54776C /* PushDateFormatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushDateFormatting.swift"; path = "Data/Supabase/PushDateFormatting.swift"; sourceTree = "<group>"; };
+		61D5C3C97D7F3BB75BA43B79 /* PushResponseRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushResponseRow.swift"; path = "Data/Supabase/Rows/PushResponseRow.swift"; sourceTree = "<group>"; };
+		FDA5B353D1EBA03017D0230F /* PushRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushRow.swift"; path = "Data/Supabase/Rows/PushRow.swift"; sourceTree = "<group>"; };
 		09E3DC73CEF07CE2678CB944 /* LiveDataStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LiveDataStoreTests.swift"; sourceTree = "<group>"; };
 		731D450A77B07F13281CD345 /* LiveDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "LiveDataStore.swift"; path = "Data/Supabase/LiveDataStore.swift"; sourceTree = "<group>"; };
 		2027ECABEABD4D3AC10D25EF /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RootView.swift"; sourceTree = "<group>"; };
@@ -214,6 +231,7 @@
 		093D311BC617336A56068266 /* MapViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MapViewModel.swift"; sourceTree = "<group>"; };
 		EDA18CAA53840E985E93C8FC /* PlansContentBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PlansContentBuilder.swift"; path = "Data/Derived/PlansContentBuilder.swift"; sourceTree = "<group>"; };
 		B35A9B47B2ABB3C566493555 /* PushTimingFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushTimingFormatter.swift"; path = "Data/Derived/PushTimingFormatter.swift"; sourceTree = "<group>"; };
+		CCD50D335C6E434BA5C1076E /* PlansMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PlansMetadata.swift"; path = "Data/Derived/PlansMetadata.swift"; sourceTree = "<group>"; };
 		1542E8988963723EDFA03603 /* GroupContentBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "GroupContentBuilder.swift"; path = "Data/Derived/GroupContentBuilder.swift"; sourceTree = "<group>"; };
 		F9C6429DD2EC5B0BE4C45B13 /* MapContentBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "MapContentBuilder.swift"; path = "Data/Derived/MapContentBuilder.swift"; sourceTree = "<group>"; };
 		A0B7B78C8770DFBBD41596A4 /* RelativeTimeFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "RelativeTimeFormatter.swift"; path = "Data/Derived/RelativeTimeFormatter.swift"; sourceTree = "<group>"; };
@@ -364,6 +382,11 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				BA35217491014ABFD2BE87C8 /* PushRecipientResolver.swift */,
+				2ACF19BB1B281572BBE12BCB /* SupabasePushRepository.swift */,
+				2199B6CA970AEAA93B54776C /* PushDateFormatting.swift */,
+				61D5C3C97D7F3BB75BA43B79 /* PushResponseRow.swift */,
+				FDA5B353D1EBA03017D0230F /* PushRow.swift */,
 				731D450A77B07F13281CD345 /* LiveDataStore.swift */,
 				2027ECABEABD4D3AC10D25EF /* RootView.swift */,
 				EE45157A4EDC1A01A29AA5B9 /* AuthGateView.swift */,
@@ -396,6 +419,7 @@
 				093D311BC617336A56068266 /* MapViewModel.swift */,
 				EDA18CAA53840E985E93C8FC /* PlansContentBuilder.swift */,
 				B35A9B47B2ABB3C566493555 /* PushTimingFormatter.swift */,
+				CCD50D335C6E434BA5C1076E /* PlansMetadata.swift */,
 				1542E8988963723EDFA03603 /* GroupContentBuilder.swift */,
 				F9C6429DD2EC5B0BE4C45B13 /* MapContentBuilder.swift */,
 				A0B7B78C8770DFBBD41596A4 /* RelativeTimeFormatter.swift */,
@@ -500,6 +524,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				323D73CFF6607601D92B9653 /* SupabasePushRepositoryTests.swift */,
 				09E3DC73CEF07CE2678CB944 /* LiveDataStoreTests.swift */,
 				955A5BD19D517681C759DB69 /* AuthBootstrapTests.swift */,
 				885A1F84A62285FB4D6AB4A3 /* LiveContainerIsolationTests.swift */,
@@ -513,6 +538,8 @@
 				B7F75D239D47EF653BF50EE2 /* DataLayerTests.swift */,
 				5217A2B92FF2FB000011F860 /* GroupsTests.swift */,
 				5217A2DF2FF340000011F860 /* PlansViewModelTests.swift */,
+				5FA8998DA00243F7A3045724 /* PlansMetadataTests.swift */,
+				D4AF63E6951B4E3D886D8B3D /* PushTimingFormatterTests.swift */,
 			);
 			path = PushTests;
 			sourceTree = "<group>";
@@ -664,6 +691,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				6124FFBAAD61B732B5C9B1A3 /* PushRecipientResolver.swift in Sources */,
+				9F141A7C9CB8C21D52A52C56 /* SupabasePushRepository.swift in Sources */,
+				CC12CA524DC01C1F8931A878 /* PushDateFormatting.swift in Sources */,
+				1ACA649CAEF8953FECF13148 /* PushResponseRow.swift in Sources */,
+				573E59AFE5AB0DB53D8BB214 /* PushRow.swift in Sources */,
 				15046B4ADFAEE459F2E16551 /* LiveDataStore.swift in Sources */,
 				63DDF65C805D9ADE5FAF7758 /* RootView.swift in Sources */,
 				D13F6E0E7291BC407C3A364D /* AuthGateView.swift in Sources */,
@@ -696,6 +728,7 @@
 				B27C0FD8AEB589AA26360620 /* MapViewModel.swift in Sources */,
 				FEFF554378B10E3E5DFAB0CE /* PlansContentBuilder.swift in Sources */,
 				AD8E0F77383DC14CA97255E8 /* PushTimingFormatter.swift in Sources */,
+				0B5B1F542FD54EB8A1D70540 /* PlansMetadata.swift in Sources */,
 				E305DDB4AE5B0E28EA0B646E /* GroupContentBuilder.swift in Sources */,
 				8D12A61C455D7168CFA926F1 /* MapContentBuilder.swift in Sources */,
 				A80E9E12C81272A23675EB40 /* RelativeTimeFormatter.swift in Sources */,
@@ -791,6 +824,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				359E08AED8A94D2D87B851A1 /* PlansMetadataTests.swift in Sources */,
+				120E4D1F5A3049008FE0F766 /* PushTimingFormatterTests.swift in Sources */,
+				C5C396284549E0436F2EF346 /* SupabasePushRepositoryTests.swift in Sources */,
 				7ABF856C50043FE38E0C984E /* LiveDataStoreTests.swift in Sources */,
 				AC2768F1A9F6F29F9431BF68 /* AuthBootstrapTests.swift in Sources */,
 				79E37ACBC7553EBF28EBF20D /* LiveContainerIsolationTests.swift in Sources */,

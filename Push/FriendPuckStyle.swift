@@ -11,20 +11,30 @@ struct ProfilePhotoAvatar: View {
     let fallbackInitials: String
 
     var body: some View {
-        Group {
-            if let image = PushImageAssets.image(named: imageAssetName) {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFill()
-            } else {
-                Text(fallbackInitials)
-                    .font(.system(size: FriendPuckLayout.fallbackInitialsSize, weight: .bold, design: .rounded))
-                    .foregroundStyle(PuckColorTokens.avatarForeground)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background {
-                        Circle()
-                            .fill(PuckColorTokens.avatarGradientBase)
-                    }
+        GeometryReader { proxy in
+            Group {
+                if let image = PushImageAssets.image(named: imageAssetName) {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFill()
+                } else {
+                    // Font must scale with the rendered size — callers range from
+                    // 28pt push-card avatars to 82pt map pucks, and a fixed point
+                    // size overflows/clips at the small end.
+                    Text(fallbackInitials)
+                        .font(.system(
+                            size: proxy.size.width * FriendPuckLayout.initialsScale,
+                            weight: .bold, design: .rounded
+                        ))
+                        .minimumScaleFactor(0.5)
+                        .lineLimit(1)
+                        .foregroundStyle(PuckColorTokens.avatarForeground)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background {
+                            Circle()
+                                .fill(PuckColorTokens.avatarGradientBase)
+                        }
+                }
             }
         }
         .clipShape(Circle())
@@ -103,7 +113,7 @@ extension FriendAvailabilityState {
             return PuckColorTokens.joinable
         case .driving:
             return PuckColorTokens.driving
-        case .unavailable:
+        case .unavailable, .ghost:
             return PuckColorTokens.unavailable
         }
     }
@@ -116,7 +126,7 @@ extension FriendAvailabilityState {
         case .busy:        return PuckColorTokens.busy.opacity(0.82)
         case .joinable:    return PuckColorTokens.joinable.opacity(0.88)
         case .driving:     return PuckColorTokens.driving.opacity(0.82)
-        case .unavailable: return PuckColorTokens.unavailable.opacity(0.55)
+        case .unavailable, .ghost: return PuckColorTokens.unavailable.opacity(0.55)
         }
     }
 
@@ -128,7 +138,7 @@ extension FriendAvailabilityState {
         case .busy:        return Color(red: 0.52, green: 0.15, blue: 0.02)
         case .joinable:    return Color.white
         case .driving:     return Color(red: 0.02, green: 0.30, blue: 0.42)
-        case .unavailable: return Color(red: 0.22, green: 0.24, blue: 0.28)
+        case .unavailable, .ghost: return Color(red: 0.22, green: 0.24, blue: 0.28)
         }
     }
 }
@@ -151,7 +161,6 @@ enum FriendPuckLayout {
     static let defaultClusterSize: CGFloat = 112
     static let cornerDivisor: CGFloat = 2
     static let initialsScale = 0.28
-    static let fallbackInitialsSize: CGFloat = 22
     static let statusRingWidth: CGFloat = 3
     static let clusterRingWidth: CGFloat = 3.5
     static let statusGlowOpacity = 0.36

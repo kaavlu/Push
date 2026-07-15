@@ -57,6 +57,9 @@ enum PushControlColors {
     static let activeForeground = PushColorPalette.Accent.walnut
     static let inactiveForeground = PushColorPalette.Accent.walnut.opacity(PushControlStyle.inactiveForegroundOpacity)
     static let activeFill = PushColorPalette.Accent.sunbeam.opacity(PushControlStyle.activeFillOpacity)
+    // Warm red for destructive actions (delete/cancel), kept out of the
+    // walnut/sunbeam palette on purpose so it reads unambiguously as danger.
+    static let destructive = Color(red: 0.76, green: 0.24, blue: 0.19)
 
     // Text hierarchy — walnut-based, no black
     static let textEspresso = Color(red: 0.22, green: 0.12, blue: 0.05) // deep warm dark for names/titles

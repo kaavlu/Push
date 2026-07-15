@@ -3,6 +3,10 @@ import SwiftUI
 
 struct ReviewPushesView: View {
     @ObservedObject var viewModel: PlansViewModel
+    /// When set, the deck shows only this push instead of the full
+    /// "needs response" queue — used by a card's Manage button to let the
+    /// user change a response they've already given.
+    var focusPlan: PlanData? = nil
     @Environment(\.dismiss) private var dismiss
     @Environment(\.pushLayout) private var layout
 
@@ -10,6 +14,7 @@ struct ReviewPushesView: View {
     @State private var dragOffset: CGSize = .zero
 
     private var currentPlan: PlanData? {
+        if let focusPlan { return deckIndex == 0 ? focusPlan : nil }
         let plans = viewModel.plansNeedingResponse
         guard deckIndex < plans.count else { return nil }
         return plans[deckIndex]
@@ -122,7 +127,11 @@ struct ReviewPushesView: View {
 
     private func commit(plan: PlanData, direction: SwipeDirection) {
         viewModel.respond(to: plan, with: direction)
-        deckIndex += 1
-        dragOffset = .zero
+        if focusPlan != nil {
+            dismiss()
+        } else {
+            deckIndex += 1
+            dragOffset = .zero
+        }
     }
 }

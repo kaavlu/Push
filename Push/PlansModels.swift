@@ -56,7 +56,16 @@ struct PlanData: Identifiable {
 enum PlanStatus: String, Equatable {
     case pending, joined, open, waiting, locked, happening
 
-    var pill: String { rawValue.capitalized }
+    /// `.open`/`.waiting` are internal names for "responded maybe" / "responded
+    /// no" (see `PlansContentBuilder.pill(for:)`); the chip reads "Maybe"/"Pass"
+    /// so the card reflects the friend's actual decision.
+    var pill: String {
+        switch self {
+        case .open:    return "Maybe"
+        case .waiting: return "Pass"
+        default:       return rawValue.capitalized
+        }
+    }
 }
 
 struct HangoutPerson: Identifiable {

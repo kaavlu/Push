@@ -103,12 +103,22 @@ final class LiveDataStoreTests: XCTestCase {
     }
 }
 
+// Not `private`: reused by `SupabasePushRepositoryTests` for stateful push
+// create/update/cancel/respond behavior.
 @MainActor
-private final class LiveDataLoaderSpy: LiveDataLoading {
+final class LiveDataLoaderSpy: LiveDataLoading {
     var loadCounts = [0, 0, 0, 0]
     var maximumConcurrentLoads = 0
     var writeError: Error?
     var duplicateProfiles = false
+    var pushRows: [PushRow] = []
+    var responseRows: [PushResponseRow] = []
+    /// Overridable so push-invitee tests can supply their own group rosters;
+    /// defaults to the fixture the pre-existing store tests expect.
+    var membershipRows = [GroupMembershipRow(
+        id: "membership", person_id: "self", group_id: "group", role: "owner",
+        membership_status: "active", joined_at: "2026-07-14T00:00:00Z"
+    )]
     private var activeLoads = 0
 
     func loadProfiles() async throws -> [ProfileRow] {
@@ -125,10 +135,7 @@ private final class LiveDataLoaderSpy: LiveDataLoading {
 
     func loadMemberships() async throws -> [GroupMembershipRow] {
         try await load(index: 2)
-        return [GroupMembershipRow(
-            id: "membership", person_id: "self", group_id: "group", role: "owner",
-            membership_status: "active", joined_at: "2026-07-14T00:00:00Z"
-        )]
+        return membershipRows
     }
 
     func loadPolicies() async throws -> [SharingPolicyRow] {
@@ -161,6 +168,107 @@ private final class LiveDataLoaderSpy: LiveDataLoading {
         maximumConcurrentLoads = max(maximumConcurrentLoads, activeLoads)
         try await Task.sleep(nanoseconds: 20_000_000)
         activeLoads -= 1
+    }
+
+    // MARK: - Pushes (stateful, so create/update/cancel/respond behavior can
+    // be exercised end-to-end via `SupabasePushRepository` in other tests).
+
+    func loadPushes() async throws -> [PushRow] { pushRows }
+    func loadResponses() async throws -> [PushResponseRow] { responseRows }
+
+    func insertPush(_ payload: PushInsertPayload) async throws -> PushRow {
+        if let writeError { throw writeError }
+        let row = PushRow(
+            id: "push-\(pushRows.count + 1)", title: payload.title, group_id: payload.group_id,
+            creator_id: payload.creator_id, created_at: "2026-07-14T00:00:00Z",
+            updated_at: "2026-07-14T00:00:00Z", starts_at: payload.starts_at,
+            has_explicit_time: payload.has_explicit_time, is_approximate_time: payload.is_approximate_time,
+            expires_at: payload.expires_at, cancelled_at: nil, place_id: nil, place_is_suggested: false,
+            state: "collecting", audience: payload.audience, note: payload.note,
+            location_text: payload.location_text
+        )
+        pushRows.append(row)
+        return row
+    }
+
+    func updatePush(id: String, payload: PushUpdatePayload) async throws -> PushRow {
+        if let writeError { throw writeError }
+        guard let index = pushRows.firstIndex(where: { $0.id == id }) else {
+            throw SupabaseRepositoryError.notFound
+        }
+        let existing = pushRows[index]
+        let updated = PushRow(
+            id: existing.id, title: payload.title, group_id: payload.group_id,
+            creator_id: existing.creator_id, created_at: existing.created_at, updated_at: payload.updated_at,
+            starts_at: payload.starts_at, has_explicit_time: existing.has_explicit_time,
+            is_approximate_time: existing.is_approximate_time, expires_at: payload.expires_at,
+            cancelled_at: existing.cancelled_at, place_id: existing.place_id,
+            place_is_suggested: existing.place_is_suggested, state: existing.state,
+            audience: payload.audience, note: payload.note, location_text: payload.location_text
+        )
+        pushRows[index] = updated
+        return updated
+    }
+
+    func cancelPush(id: String, payload: PushCancelPayload) async throws -> PushRow {
+        if let writeError { throw writeError }
+        guard let index = pushRows.firstIndex(where: { $0.id == id }) else {
+            throw SupabaseRepositoryError.notFound
+        }
+        let existing = pushRows[index]
+        let cancelled = PushRow(
+            id: existing.id, title: existing.title, group_id: existing.group_id,
+            creator_id: existing.creator_id, created_at: existing.created_at, updated_at: existing.updated_at,
+            starts_at: existing.starts_at, has_explicit_time: existing.has_explicit_time,
+            is_approximate_time: existing.is_approximate_time, expires_at: existing.expires_at,
+            cancelled_at: payload.cancelled_at, place_id: existing.place_id,
+            place_is_suggested: existing.place_is_suggested, state: existing.state,
+            audience: existing.audience, note: existing.note, location_text: existing.location_text
+        )
+        pushRows[index] = cancelled
+        return cancelled
+    }
+
+    func deletePush(id: String) async throws {
+        if let writeError { throw writeError }
+        pushRows.removeAll { $0.id == id }
+        responseRows.removeAll { $0.push_id == id }
+    }
+
+    func insertResponses(_ payloads: [PushResponsePayload]) async throws {
+        if let writeError { throw writeError }
+        for payload in payloads {
+            responseRows.append(PushResponseRow(
+                id: "\(payload.push_id)-\(payload.person_id)", push_id: payload.push_id,
+                person_id: payload.person_id, response: payload.response,
+                responded_at: payload.responded_at, ready_state: "unknown"
+            ))
+        }
+    }
+
+    func upsertResponse(_ payload: PushResponsePayload) async throws {
+        if let writeError { throw writeError }
+        if let index = responseRows.firstIndex(
+            where: { $0.push_id == payload.push_id && $0.person_id == payload.person_id }
+        ) {
+            let existing = responseRows[index]
+            responseRows[index] = PushResponseRow(
+                id: existing.id, push_id: existing.push_id, person_id: existing.person_id,
+                response: payload.response, responded_at: payload.responded_at,
+                ready_state: existing.ready_state
+            )
+        } else {
+            responseRows.append(PushResponseRow(
+                id: "\(payload.push_id)-\(payload.person_id)", push_id: payload.push_id,
+                person_id: payload.person_id, response: payload.response,
+                responded_at: payload.responded_at, ready_state: "unknown"
+            ))
+        }
+    }
+
+    func deleteResponses(pushID: String, personIDs: [String]) async throws {
+        if let writeError { throw writeError }
+        responseRows.removeAll { $0.push_id == pushID && personIDs.contains($0.person_id) }
     }
 }
 

@@ -75,9 +75,9 @@ final class PushEditTests: XCTestCase {
         await vm.load()
 
         XCTAssertEqual(vm.step, StartPushStep.recipients)
-        XCTAssertEqual(vm.selectedRecipientIDs, [
-            "friend_chitty", "friend_ishan", "friend_ram", "friend_viplove"
-        ])
+        // "Gym later" is still addressed to the Exec group, so Manage preselects
+        // the group itself rather than just the people who've already said in.
+        XCTAssertEqual(vm.selectedRecipientIDs, ["group_exec"])
         XCTAssertEqual(vm.pushText, "Gym later")
         XCTAssertEqual(vm.location, "Crunch Fitness")
 
@@ -94,14 +94,18 @@ final class PushEditTests: XCTestCase {
         XCTAssertFalse(plans.contains { $0.title == "Gym later" && $0.id != "gym-later" })
     }
 
-    func testDrinksFridayManageSelectsVisibleJoinedPeopleNotGroup() async throws {
+    func testDrinksFridayManagePreselectsGroupDespiteExistingRSVPs() async throws {
         let container = AppDataContainer(seed: .standard())
         let vm = StartPushViewModel(container: container, context: .edit(planID: "drinks-friday"))
         await vm.load()
 
         XCTAssertEqual(vm.step, StartPushStep.recipients)
-        XCTAssertEqual(vm.selectedRecipientIDs, ["friend_rohan", "friend_ryan"])
-        XCTAssertFalse(vm.selectedRecipientIDs.contains("group_michigan"))
+        // "Drinks Friday?" is still addressed to the Michigan group, so Manage
+        // preselects the group rather than just rohan/ryan, who happen to have
+        // already RSVP'd in. Regression coverage for the bug where Manage
+        // derived its selection from `.in` responses and silently dropped the
+        // group as soon as anyone accepted.
+        XCTAssertEqual(vm.selectedRecipientIDs, ["group_michigan"])
 
         vm.pushText = "Drinks Saturday?"
         vm.location = "Rooftop"
@@ -111,10 +115,40 @@ final class PushEditTests: XCTestCase {
         let plans = try await container.pushes.activePlans()
         let plan = try XCTUnwrap(plans.first { $0.id == "drinks-friday" })
         XCTAssertEqual(plan.title, "Drinks Saturday?")
-        XCTAssertNil(plan.groupID)
+        XCTAssertEqual(plan.groupID, "michigan")
         XCTAssertEqual(plan.locationText, "Rooftop")
 
+        // Saving with the group still selected keeps every Michigan member
+        // invited (existing RSVPs preserved, missing members added as pending).
         let responses = try await container.pushes.responses().filter { $0.pushID == "drinks-friday" }
-        XCTAssertEqual(Set(responses.map(\.personID)), ["manav", "rohan", "ryan"])
+        XCTAssertEqual(Set(responses.map(\.personID)), ["manav", "ram", "rohan", "ryan", "ohm", "pranay"])
+        XCTAssertEqual(responses.first { $0.personID == "rohan" }?.response, .in)
+        XCTAssertEqual(responses.first { $0.personID == "pranay" }?.response, .maybe)
+
+        // Reopening Manage again still shows the group, not individuals —
+        // the earlier fix must not have just been a one-time coincidence.
+        let vmReopened = StartPushViewModel(container: container, context: .edit(planID: "drinks-friday"))
+        await vmReopened.load()
+        XCTAssertEqual(vmReopened.selectedRecipientIDs, ["group_michigan"])
+    }
+
+    func testDrinksFridayManageNarrowedToFriendsPersistsOnReopen() async throws {
+        let container = AppDataContainer(seed: .standard())
+        let vm = StartPushViewModel(container: container, context: .edit(planID: "drinks-friday"))
+        await vm.load()
+
+        // Deliberately narrow from the group down to just rohan and ryan.
+        vm.selectedRecipientIDs = ["friend_rohan", "friend_ryan"]
+        await vm.submit()
+
+        let plans = try await container.pushes.activePlans()
+        let plan = try XCTUnwrap(plans.first { $0.id == "drinks-friday" })
+        XCTAssertNil(plan.groupID)
+
+        // Reopening Manage must reflect that choice, not bounce back to the
+        // group — this is the "correct data doesn't persist" half of the bug.
+        let vmReopened = StartPushViewModel(container: container, context: .edit(planID: "drinks-friday"))
+        await vmReopened.load()
+        XCTAssertEqual(vmReopened.selectedRecipientIDs, ["friend_rohan", "friend_ryan"])
     }
 }

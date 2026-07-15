@@ -88,22 +88,19 @@ final class LocalPushRepository: PushRepository {
     }
 
     func createPush(_ draft: PushDraft) async throws -> PushPlan.ID {
-        let recipientIDs = parsedRecipients(from: draft)
-        let groupIDs = recipientIDs.groupIDs
-        let friendIDs = recipientIDs.friendIDs
-        let singleGroupOnly = groupIDs.count == 1 && friendIDs.isEmpty
+        let parsed = PushRecipientResolver.parse(draft.recipientIDs)
         let planID = "push-\(UUID().uuidString)"
         let now = Date()
 
-        // Invitees: selected friends plus members of any selected groups,
-        // deduped, with the creator excluded (they get an explicit .in below).
-        let groupMemberIDs = database.memberships
-            .filter { $0.membershipStatus == .active && groupIDs.contains($0.groupID) }
-            .map(\.personID)
-        var invitees = Set(friendIDs).union(groupMemberIDs)
-        invitees.remove(draft.creatorID)
+        let invitees = PushRecipientResolver.invitees(
+            groupIDs: parsed.groupIDs, friendIDs: parsed.friendIDs,
+            memberships: database.memberships, creatorID: draft.creatorID
+        )
 
-        let plan = makePlan(planID: planID, draft: draft, singleGroupOnly: singleGroupOnly, groupIDs: groupIDs, now: now)
+        let plan = makePlan(
+            planID: planID, draft: draft,
+            singleGroupOnly: parsed.singleGroupOnly, groupIDs: parsed.groupIDs, now: now
+        )
         let responses = makeResponses(planID: planID, draft: draft, invitees: invitees, now: now)
         database.createPush(plan: plan, responses: responses)
         return planID
@@ -111,21 +108,27 @@ final class LocalPushRepository: PushRepository {
 
     func updatePush(planID: PushPlan.ID, with draft: PushDraft) async throws {
         guard let existing = database.plansByID[planID] else { return }
-        let recipientIDs = parsedRecipients(from: draft)
-        let singleGroupOnly = recipientIDs.groupIDs.count == 1 && recipientIDs.friendIDs.isEmpty
-        let invitees = invitees(
-            groupIDs: recipientIDs.groupIDs,
-            friendIDs: recipientIDs.friendIDs,
-            creatorID: existing.creatorID
+        let parsed = PushRecipientResolver.parse(draft.recipientIDs)
+        let invitees = PushRecipientResolver.invitees(
+            groupIDs: parsed.groupIDs, friendIDs: parsed.friendIDs,
+            memberships: database.memberships, creatorID: existing.creatorID
         )
         let plan = updatedPlan(
-            existing: existing, draft: draft, singleGroupOnly: singleGroupOnly,
-            groupIDs: recipientIDs.groupIDs, now: Date()
+            existing: existing, draft: draft, singleGroupOnly: parsed.singleGroupOnly,
+            groupIDs: parsed.groupIDs, now: Date()
         )
         let responses = updatedResponses(
             planID: planID, creatorID: existing.creatorID, invitees: invitees
         )
         database.updatePush(plan: plan, responses: responses)
+    }
+
+    func cancelPush(planID: PushPlan.ID) async throws {
+        database.cancelPush(planID: planID, at: Date())
+    }
+
+    func deletePush(planID: PushPlan.ID) async throws {
+        database.deletePush(planID: planID)
     }
 
     private func makePlan(
@@ -170,29 +173,6 @@ final class LocalPushRepository: PushRepository {
             )
         }
         return [creatorResponse] + inviteeResponses
-    }
-
-    private func parsedRecipients(from draft: PushDraft) -> (groupIDs: [String], friendIDs: [String]) {
-        let groupIDs = draft.recipientIDs.compactMap { token in
-            token.hasPrefix("group_") ? String(token.dropFirst("group_".count)) : nil
-        }
-        let friendIDs = draft.recipientIDs.compactMap { token in
-            token.hasPrefix("friend_") ? String(token.dropFirst("friend_".count)) : nil
-        }
-        return (groupIDs, friendIDs)
-    }
-
-    private func invitees(
-        groupIDs: [String],
-        friendIDs: [String],
-        creatorID: Person.ID
-    ) -> Set<Person.ID> {
-        let groupMemberIDs = database.memberships
-            .filter { $0.membershipStatus == .active && groupIDs.contains($0.groupID) }
-            .map(\.personID)
-        var invitees = Set(friendIDs).union(groupMemberIDs)
-        invitees.remove(creatorID)
-        return invitees
     }
 
     private func updatedPlan(

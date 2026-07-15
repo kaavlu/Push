@@ -89,4 +89,111 @@ final class SupabaseMappingTests: XCTestCase {
         XCTAssertEqual(p.locationVisibility, .exact)
         XCTAssertNil(p.audienceID)
     }
+
+    func testPushRowDecodesFractionalTimestampsAndBridgesAudience() throws {
+        let json = """
+        {"id":"push1","title":"Beach day","group_id":"g1","creator_id":"creator1",
+         "created_at":"2026-07-13T11:24:18.230123+00:00","updated_at":"2026-07-13T11:24:18.230123+00:00",
+         "starts_at":"2026-07-14T18:00:00+00:00","has_explicit_time":true,"is_approximate_time":false,
+         "expires_at":"2026-07-15T00:00:00+00:00","cancelled_at":null,"place_id":null,
+         "place_is_suggested":false,"state":"collecting","audience":"invitees_only",
+         "note":"Bring towels","location_text":"The pier"}
+        """.data(using: .utf8)!
+        let row = try JSONDecoder().decode(PushRow.self, from: json)
+        let plan = row.pushPlan()
+
+        // "invitees_only" isn't a valid Swift identifier, so this exercises
+        // the explicit audience bridge rather than `init(rawValue:)`.
+        XCTAssertEqual(plan.audience, .inviteesOnly)
+        XCTAssertEqual(plan.state, .collecting)
+        XCTAssertNil(plan.cancelledAt)
+        // Fractional-second timestamps must not fall back to the epoch sentinel.
+        XCTAssertNotEqual(plan.startsAt, Date(timeIntervalSince1970: 0))
+    }
+
+    func testPushRowMapsGroupAudienceAndCancelledAt() throws {
+        let json = """
+        {"id":"push2","title":"Movie night","group_id":null,"creator_id":"creator1",
+         "created_at":"2026-07-13T00:00:00Z","updated_at":"2026-07-13T00:00:00Z",
+         "starts_at":"2026-07-14T00:00:00Z","has_explicit_time":true,"is_approximate_time":false,
+         "expires_at":"2026-07-14T06:00:00Z","cancelled_at":"2026-07-13T12:00:00Z","place_id":null,
+         "place_is_suggested":false,"state":"locked","audience":"group",
+         "note":null,"location_text":null}
+        """.data(using: .utf8)!
+        let plan = try JSONDecoder().decode(PushRow.self, from: json).pushPlan()
+
+        XCTAssertEqual(plan.audience, .group)
+        XCTAssertEqual(plan.state, .locked)
+        XCTAssertNotNil(plan.cancelledAt)
+    }
+
+    func testPushResponseRowBridgesReadyStateAndHandlesNilRespondedAt() throws {
+        let json = """
+        {"id":"r1","push_id":"push1","person_id":"bob","response":"pending",
+         "responded_at":null,"ready_state":"needs_ride"}
+        """.data(using: .utf8)!
+        let response = try JSONDecoder().decode(PushResponseRow.self, from: json).pushResponse()
+
+        XCTAssertEqual(response.response, .pending)
+        XCTAssertNil(response.respondedAt)
+        // "needs_ride" isn't a valid Swift identifier, so this exercises the
+        // explicit readyState bridge rather than `init(rawValue:)`.
+        XCTAssertEqual(response.readyState, .needsRide)
+    }
+
+    // Regression guard: `LiveDataLoaderSpy`-based repository tests hand Swift
+    // structs directly to a fake loader and never touch `JSONEncoder`, so a
+    // bug in `Encodable` synthesis (e.g. an omitted vs. `null` key) would
+    // pass there but break the real PostgREST bulk insert. This encodes for
+    // real and checks the wire shape.
+    func testPushResponsePayloadAlwaysEmitsRespondedAtKeyEvenWhenNil() throws {
+        let responded = PushResponsePayload(
+            push_id: "push1", person_id: "creator1", response: "in", responded_at: "2026-07-14T00:00:00Z"
+        )
+        let pending = PushResponsePayload(
+            push_id: "push1", person_id: "invitee1", response: "pending", responded_at: nil
+        )
+        let data = try JSONEncoder().encode([responded, pending])
+        let objects = try JSONSerialization.jsonObject(with: data) as! [[String: Any]]
+
+        // PostgREST rejects a bulk insert (PGRST102) unless every object in
+        // the array has an identical key set — an omitted key (rather than
+        // an explicit `null`) for the pending row would break real requests
+        // even though this test's fake loader can't detect it.
+        XCTAssertEqual(Set(objects[0].keys), Set(objects[1].keys))
+        XCTAssertTrue(objects[1].keys.contains("responded_at"))
+        XCTAssertTrue(objects[1]["responded_at"] is NSNull)
+    }
+
+    // Regression guard: switching a managed push from a group to an
+    // individual sets `group_id` to nil in the draft. If `PushUpdatePayload`
+    // relies on synthesized `Encodable` (which uses `encodeIfPresent`), the
+    // key is *omitted* from the wire payload instead of sent as `null`, so
+    // PostgREST leaves the push's previous `group_id` untouched — the
+    // group→person switch silently fails to persist. Encoding for real (not
+    // handing the struct to a fake loader) is required to catch this.
+    func testPushUpdatePayloadEmitsNullGroupIDWhenClearingGroup() throws {
+        let payload = PushUpdatePayload(
+            title: "Dinner", group_id: nil, starts_at: "2026-07-15T17:00:00Z",
+            expires_at: "2026-07-15T23:00:00Z", audience: "invitees_only",
+            note: nil, location_text: nil, updated_at: "2026-07-15T17:09:00Z"
+        )
+        let data = try JSONEncoder().encode(payload)
+        let object = try JSONSerialization.jsonObject(with: data) as! [String: Any]
+
+        XCTAssertTrue(object.keys.contains("group_id"), "group_id must be sent explicitly, not omitted")
+        XCTAssertTrue(object["group_id"] is NSNull, "a cleared group must be written as null, not skipped")
+    }
+
+    func testPushResponseRowDecodesFractionalRespondedAt() throws {
+        let json = """
+        {"id":"r2","push_id":"push1","person_id":"carol","response":"in",
+         "responded_at":"2026-07-13T11:24:18.230123+00:00","ready_state":"ready_now"}
+        """.data(using: .utf8)!
+        let response = try JSONDecoder().decode(PushResponseRow.self, from: json).pushResponse()
+
+        XCTAssertEqual(response.response, .in)
+        XCTAssertEqual(response.readyState, .readyNow)
+        XCTAssertNotNil(response.respondedAt)
+    }
 }

@@ -36,6 +36,9 @@ struct PlansView: View {
         .fullScreenCover(item: $viewModel.managedPlan) { plan in
             StartPushFlowView(context: .edit(plan: plan))
         }
+        .fullScreenCover(item: $viewModel.reviewFocusPlan) { plan in
+            ReviewPushesView(viewModel: viewModel, focusPlan: plan)
+        }
     }
 
     private var pageContent: some View {
@@ -109,16 +112,18 @@ private struct YourPushesModule: View {
                 }
             }
 
-            if let first = viewModel.yourPushes.first {
-                YourPushCard(plan: first) {
-                    viewModel.openManage(plan: first)
-                }
-            } else if viewModel.showsYourPushesEmptyState {
+            if true {
                 PlansEmptyCard(
                     title: "No current pushes",
                     message: "Start a push and make your next move.",
                     messageColor: PlansColor.metadataTertiary
                 )
+            } else if let first = viewModel.yourPushes.first {
+                YourPushCard(plan: first, onManage: {
+                    viewModel.openManage(plan: first)
+                }, onCancel: {
+                    viewModel.cancel(plan: first)
+                })
             }
         }
     }
@@ -136,11 +141,11 @@ private struct ActivePushesModule: View {
 
                 Spacer(minLength: 0)
 
-                if viewModel.activePushes.count > 1 {
+                if viewModel.needsResponseCount > 0 {
                     Button {
                         viewModel.isReviewDeckPresented = true
                     } label: {
-                        Text("Review \(viewModel.activePushes.count) ›")
+                        Text("Review \(viewModel.needsResponseCount) ›")
                             .plansModuleActionText()
                     }
                     .buttonStyle(.plain)
@@ -148,7 +153,9 @@ private struct ActivePushesModule: View {
             }
 
             if let first = viewModel.activePushes.first {
-                ActivePlanCard(plan: first)
+                ActivePlanCard(plan: first, onManage: {
+                    viewModel.openReview(plan: first)
+                })
             } else if viewModel.showsActivePushesEmptyState {
                 PlansEmptyCard(
                     title: "No active pushes",
@@ -203,9 +210,11 @@ struct YourPushesListView: View {
                 ScrollView {
                     VStack(spacing: PlansLayout.currentPushesSpacing) {
                         ForEach(viewModel.yourPushes) { plan in
-                            YourPushCard(plan: plan) {
+                            YourPushCard(plan: plan, onManage: {
                                 managedPlan = plan
-                            }
+                            }, onCancel: {
+                                viewModel.cancel(plan: plan)
+                            })
                         }
                     }
                     .padding(.horizontal, PlansLayout.horizontalPadding(layout))

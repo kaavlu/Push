@@ -15,6 +15,7 @@ enum FriendAvailabilityState: String, Codable, CaseIterable, Equatable {
     case joinable
     case driving
     case unavailable
+    case ghost
 
     var title: String {
         switch self {
@@ -32,6 +33,8 @@ enum FriendAvailabilityState: String, Codable, CaseIterable, Equatable {
             return "Driving / ETA"
         case .unavailable:
             return "Unavailable"
+        case .ghost:
+            return "Ghost Mode"
         }
     }
 
@@ -51,6 +54,8 @@ enum FriendAvailabilityState: String, Codable, CaseIterable, Equatable {
             return "car.fill"
         case .unavailable:
             return "minus.circle.fill"
+        case .ghost:
+            return "eye.slash.fill"
         }
     }
 
@@ -66,7 +71,7 @@ enum FriendAvailabilityState: String, Codable, CaseIterable, Equatable {
             return "orange"
         case .driving:
             return "cyan"
-        case .unavailable:
+        case .unavailable, .ghost:
             return "gray"
         }
     }
@@ -87,6 +92,8 @@ enum FriendAvailabilityState: String, Codable, CaseIterable, Equatable {
             return 5
         case .unavailable:
             return 6
+        case .ghost:
+            return 7
         }
     }
 }

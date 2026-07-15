@@ -71,6 +71,7 @@ struct ProfileRow: Decodable {
         case "busy": return .busy
         case "joinable": return .joinable
         case "driving": return .driving
+        case "ghost": return .ghost
         default: return .freeNow
         }
     }

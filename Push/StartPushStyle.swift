@@ -31,6 +31,8 @@ enum StartPushLayout {
     static func primaryButtonHeight(_ layout: PushAdaptiveLayout) -> CGFloat { layout.primaryButtonHeight }
     static let closeButtonSize: CGFloat = 44
     static let closeIconSize: CGFloat = 14
+    static let trashIconSize: CGFloat = 14
+    static let trashCloseSpacing: CGFloat = 10
     static let backIconSize: CGFloat = 13
     static let backHorizontalPadding: CGFloat = 14
     static let textAreaMinHeight: CGFloat = 130

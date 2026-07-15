@@ -138,6 +138,36 @@ final class InMemoryDatabase: ObservableObject {
         didMutate()
     }
 
+    /// Soft-cancel: sets `cancelledAt` so `activePlans()` filters the push out,
+    /// while leaving its row (and responses) intact for history/audit.
+    func cancelPush(planID: PushPlan.ID, at date: Date) {
+        guard let existing = plansByID[planID] else { return }
+        let cancelled = PushPlan(
+            id: existing.id, title: existing.title, groupID: existing.groupID,
+            creatorID: existing.creatorID, createdAt: existing.createdAt, updatedAt: date,
+            startsAt: existing.startsAt, hasExplicitTime: existing.hasExplicitTime,
+            isApproximateTime: existing.isApproximateTime, expiresAt: existing.expiresAt,
+            cancelledAt: date, placeID: existing.placeID, placeIsSuggested: existing.placeIsSuggested,
+            state: existing.state, audience: existing.audience, note: existing.note,
+            locationText: existing.locationText
+        )
+        plansByID[planID] = cancelled
+        if let index = orderedPlans.firstIndex(where: { $0.id == planID }) {
+            orderedPlans[index] = cancelled
+        }
+        didMutate()
+    }
+
+    /// Hard-delete: removes the push row and its responses entirely,
+    /// mirroring the `on delete cascade` on `push_responses` in Supabase.
+    func deletePush(planID: PushPlan.ID) {
+        guard plansByID[planID] != nil else { return }
+        plansByID[planID] = nil
+        orderedPlans.removeAll { $0.id == planID }
+        responses.removeAll { $0.pushID == planID }
+        didMutate()
+    }
+
     func setResponse(
         pushID: PushPlan.ID,
         personID: Person.ID,

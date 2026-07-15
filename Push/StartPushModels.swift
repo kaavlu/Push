@@ -144,6 +144,11 @@ final class StartPushViewModel: ObservableObject {
     private let launchContext: StartPushLaunchContext
     // Prevents duplicate submissions if the user somehow triggers the flow twice.
     private var hasSubmitted = false
+    // The push behind this screen, if one already exists in Supabase: either
+    // the plan being edited, or the one just created by `submit()`. Nil for
+    // a brand-new draft that hasn't been submitted yet, so the trash button
+    // has nothing to delete.
+    @Published private(set) var persistedPushID: PushPlan.ID?
 
     var canAdvanceStep1: Bool { !selectedRecipientIDs.isEmpty }
     var canAdvanceStep2: Bool { !pushText.trimmingCharacters(in: .whitespaces).isEmpty }
@@ -151,6 +156,7 @@ final class StartPushViewModel: ObservableObject {
     var pushTextMaxCount: Int { pushTextMaxLength }
     var isEditMode: Bool { launchContext.editPlanID != nil }
     var submitButtonTitle: String { isEditMode ? "Save changes" : "Start push" }
+    var canDeletePush: Bool { persistedPushID != nil }
 
     var selectedRecipients: [PushRecipientItem] {
         (groups + friends).filter { selectedRecipientIDs.contains($0.id) }
@@ -195,6 +201,7 @@ final class StartPushViewModel: ObservableObject {
             notes = editNote
         }
         step = launchContext.initialStep
+        persistedPushID = launchContext.editPlanID
     }
 
     func load() async {
@@ -293,12 +300,20 @@ final class StartPushViewModel: ObservableObject {
             if let editPlanID = launchContext.editPlanID {
                 try await container.pushes.updatePush(planID: editPlanID, with: draft)
             } else {
-                _ = try await container.pushes.createPush(draft)
+                persistedPushID = try await container.pushes.createPush(draft)
             }
         } catch {
             // Local repo never throws; a real backend would surface this. Flag
             // stays true so a failed submit does not silently retry.
         }
+    }
+
+    /// Deletes the push behind this screen (edit mode, or a just-created
+    /// draft on the confirmation step). No-op if nothing has been
+    /// persisted yet, since there's nothing in Supabase to remove.
+    func deletePush() async {
+        guard let container, let persistedPushID else { return }
+        try? await container.pushes.deletePush(planID: persistedPushID)
     }
 
     private func applyEditContextIfNeeded(container: AppDataContainer) async throws {
@@ -321,17 +336,20 @@ final class StartPushViewModel: ObservableObject {
         return places.first { $0.id == placeID }?.name ?? ""
     }
 
+    // The push's actual audience (`groupID`/`audience`) is the source of truth for who
+    // it's addressed to, so it takes priority — deriving the selection from `.in`
+    // responses instead would drop the group as soon as a single member accepted,
+    // and re-picking the group in the edit UI would never stick on the next open.
     private func editRecipientTokens(for plan: PushPlan, responses: [PushResponse]) -> Set<String> {
-        let selectedPeople = responses.filter {
-            $0.pushID == plan.id && $0.personID != plan.creatorID && $0.response == .in
+        if let groupID = plan.groupID {
+            return ["group_\(groupID)"]
         }
-        if !selectedPeople.isEmpty {
-            return Set(selectedPeople.map { "friend_\($0.personID)" })
+        let invitedPeople = responses.filter {
+            $0.pushID == plan.id && $0.personID != plan.creatorID
         }
-        if !launchContext.editRecipientIDs.isEmpty {
-            return launchContext.editRecipientIDs
+        if !invitedPeople.isEmpty {
+            return Set(invitedPeople.map { "friend_\($0.personID)" })
         }
-        guard let groupID = plan.groupID else { return [] }
-        return ["group_\(groupID)"]
+        return launchContext.editRecipientIDs
     }
 }

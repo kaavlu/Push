@@ -48,6 +48,7 @@ final class SupabaseFriendRepository: FriendRepository {
         case .joinable: return "joinable"
         case .driving: return "driving"
         case .unavailable: return "unavailable"
+        case .ghost: return "ghost"
         }
     }
 }

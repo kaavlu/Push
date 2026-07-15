@@ -4,19 +4,22 @@ import SwiftUI
 struct ActivePlanCard: View {
     @Environment(\.pushLayout) private var layout
     let plan: PlanData
+    let onManage: () -> Void
+
+    private var groupLocationText: String {
+        PlansMetadata.joined([plan.group, plan.locationHint])
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: PlansLayout.cardRowSpacing(layout)) {
             headerRow
-            groupRow
+            if !groupLocationText.isEmpty { groupRow }
             Divider()
                 .background(PlansColor.creamBase.opacity(PlansLayout.cardDividerOpacity))
-            goingSection
-            socialProofRow
-            locationRow
+            if !plan.participants.isEmpty { goingSection }
+            footerRow
         }
         .padding(PlansLayout.cardPadding(layout))
-        .frame(minHeight: PlansLayout.pushCardMinHeight(layout), alignment: .top)
         .plansGlassCard(cornerRadius: PlansLayout.cardCornerRadius(layout))
     }
 
@@ -27,37 +30,42 @@ struct ActivePlanCard: View {
                 .foregroundStyle(PushControlColors.textEspresso)
                 .lineLimit(2)
             Spacer(minLength: 8)
-            PlanStatusPill(status: plan.status)
+            YourPushTimeChip(timeSignal: plan.timeSignal)
         }
     }
 
     private var groupRow: some View {
-        Text("\(plan.group) · \(plan.timeSignal)")
-            .font(.subheadline.weight(.medium))
-            .foregroundStyle(PlansColor.metadataSecondary)
-            .lineLimit(1)
-    }
-
-    private var socialProofRow: some View {
-        Text(plan.socialProof)
-            .font(.subheadline)
-            .foregroundStyle(PlansColor.metadataSecondary)
-            .lineLimit(2)
-    }
-
-    private var goingSection: some View {
-        VStack(alignment: .leading, spacing: YourPushCardLayout.joinedLabelSpacing) {
-            Text("Going:")
-                .font(.caption.weight(.medium))
-                .foregroundStyle(PlansColor.metadataSecondary)
-            YourPushAvatarRow(participants: plan.participants)
+        HStack(alignment: .top) {
+            if !groupLocationText.isEmpty {
+                Text(groupLocationText)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(PlansColor.metadataSecondary)
+                    .lineLimit(1)
+            }
         }
     }
 
-    private var locationRow: some View {
-        Text(plan.locationHint)
-            .font(.footnote.weight(.medium))
-            .foregroundStyle(PlansColor.metadataTertiary)
-            .lineLimit(1)
+    private var goingSection: some View {
+        YourPushAvatarRow(participants: plan.participants)
+    }
+
+    private var footerRow: some View {
+        HStack(alignment: .center) {
+            Text(plan.socialProof)
+                .font(.footnote)
+                .foregroundStyle(PlansColor.metadataSecondary)
+                .lineLimit(2)
+            Text(PlansMetadata.separator)
+                .font(.footnote)
+                .foregroundStyle(PlansColor.metadataTertiary)
+            PlanStatusPill(status: plan.status)
+            Spacer(minLength: YourPushCardLayout.headerSpacerMinLength)
+            Button(action: onManage) {
+                Text("Manage →")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(PushColorPalette.Accent.walnut)
+            }
+            .buttonStyle(.plain)
+        }
     }
 }

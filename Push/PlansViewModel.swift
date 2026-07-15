@@ -17,6 +17,7 @@ final class PlansViewModel: ObservableObject {
     @Published var isStartPushPresented: Bool = false
     @Published var isYourPushesPresented: Bool = false
     @Published var managedPlan: PlanData? = nil
+    @Published var reviewFocusPlan: PlanData? = nil
 
     private let container: AppDataContainer?
     private var referenceDate: Date
@@ -145,6 +146,12 @@ final class PlansViewModel: ObservableObject {
         managedPlan = plan
     }
 
+    /// Opens the swipe deck focused on a single push so the user can change
+    /// an existing response, bypassing the "needs response" queue.
+    func openReview(plan: PlanData) {
+        reviewFocusPlan = plan
+    }
+
     func moveWeek(by offset: Int) {
         guard let newDate = Calendar.current.date(
             byAdding: .day,
@@ -169,6 +176,28 @@ final class PlansViewModel: ObservableObject {
         if let container {
             Task {
                 try? await container.pushes.setCurrentUserResponse(planID: plan.id, response: response)
+            }
+        }
+    }
+
+    /// Owner-only. Removes the card immediately so the cancel feels instant,
+    /// then writes through to the canonical push row.
+    func cancel(plan: PlanData) {
+        plans.removeAll { $0.id == plan.id }
+        if let container {
+            Task {
+                try? await container.pushes.cancelPush(planID: plan.id)
+            }
+        }
+    }
+
+    /// Owner-only. Hard-deletes the push (and its responses). Removes the
+    /// card immediately, then writes through to the canonical push row.
+    func delete(plan: PlanData) {
+        plans.removeAll { $0.id == plan.id }
+        if let container {
+            Task {
+                try? await container.pushes.deletePush(planID: plan.id)
             }
         }
     }

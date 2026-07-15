@@ -109,7 +109,7 @@ final class AppDataContainer {
             liveStore: store,
             friends: SupabaseFriendRepository(store: store, currentUserID: currentUserID),
             groups: SupabaseGroupRepository(store: store),
-            pushes: EmptyLivePushRepository(),
+            pushes: SupabasePushRepository(store: store, currentUserID: currentUserID),
             profile: SupabaseProfileRepository(store: store, currentUserID: currentUserID),
             sharing: SupabaseSharingRepository(store: store),
             feed: EmptyLiveFeedRepository()

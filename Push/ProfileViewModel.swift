@@ -81,12 +81,15 @@ final class ProfileViewModel: ObservableObject {
         profile = data
         displayName = data.name
         handle = data.handle
-        // A store reload is authoritative: intentionally resets UI-only state
-        // (Ghost Mode selection, typed initials) that is deliberately not persisted.
+        // A store reload is authoritative: resets typed initials, which stay UI-only.
         initials = data.initials
         profileImageAssetName = data.imageAssetName
         selectedAvailability = data.availability
-        selectedStatusID = data.availability.title
+        // Ghost Mode is persisted as a `FriendAvailabilityState` case, so its id
+        // (not `.title`) is what round-trips through `selectedStatusID`.
+        selectedStatusID = data.availability == .ghost
+            ? ProfileStatusOption.ghostMode.id
+            : data.availability.title
         activityVisibility = userProfile.activityVisibility
         mapPreferences = userProfile.mapPreferences
         closeFriends = userProfile.closeFriends
@@ -163,13 +166,18 @@ final class ProfileViewModel: ObservableObject {
     func select(_ option: ProfileStatusOption) {
         selectedStatusID = option.id
 
-        // Ghost Mode is deliberately not persisted (see `apply(data:userProfile:)`);
-        // a real availability pick is the same write path as `select(_:ProfileAvailabilityOption)`.
-        if case .availability(let availabilityOption) = option {
-            selectedAvailability = availabilityOption.availability
-            guard let container else { return }
-            Task { try? await container.friends.setCurrentUserAvailability(availabilityOption.availability) }
+        // Ghost Mode persists as `.ghost`, the same `FriendAvailabilityState` write
+        // path as a real availability pick, so the toggle survives reload.
+        let availability: FriendAvailabilityState
+        switch option {
+        case .ghostMode:
+            availability = .ghost
+        case .availability(let availabilityOption):
+            availability = availabilityOption.availability
         }
+        selectedAvailability = availability
+        guard let container else { return }
+        Task { try? await container.friends.setCurrentUserAvailability(availability) }
     }
 
     func setProfileBasics(name: String, handle: String, initials: String) {

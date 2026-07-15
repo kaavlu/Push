@@ -12,6 +12,7 @@ struct StartPushFlowView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.pushLayout) private var layout
     @State private var movingForward = true
+    @State private var isDeleteConfirmationPresented = false
 
     @MainActor
     init(context: StartPushLaunchContext? = nil) {
@@ -54,6 +55,14 @@ struct StartPushFlowView: View {
             }
             .animation(.spring(response: 0.30, dampingFraction: 0.84), value: viewModel.step)
         }
+        .confirmationDialog(
+            "Delete this push?",
+            isPresented: $isDeleteConfirmationPresented,
+            titleVisibility: .visible
+        ) {
+            Button("Delete push", role: .destructive) { deleteAndDismiss() }
+            Button("Keep push", role: .cancel) {}
+        }
     }
 
     private var navBar: some View {
@@ -62,8 +71,24 @@ struct StartPushFlowView: View {
                 backButton
             }
             Spacer(minLength: 0)
+            if viewModel.canDeletePush {
+                trashButton
+                    .padding(.trailing, StartPushLayout.trashCloseSpacing)
+            }
             closeButton
         }
+    }
+
+    private var trashButton: some View {
+        Button { isDeleteConfirmationPresented = true } label: {
+            Image(systemName: "trash")
+                .font(.system(size: StartPushLayout.trashIconSize, weight: .bold))
+                .foregroundStyle(PushControlColors.destructive)
+                .frame(width: StartPushLayout.closeButtonSize, height: StartPushLayout.closeButtonSize)
+                .pushGlassBackground(cornerRadius: StartPushLayout.closeButtonSize / 2)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Delete push")
     }
 
     private var backButton: some View {
@@ -111,5 +136,12 @@ struct StartPushFlowView: View {
     private func goBack() {
         movingForward = false
         viewModel.goBack()
+    }
+
+    private func deleteAndDismiss() {
+        Task {
+            await viewModel.deletePush()
+            dismiss()
+        }
     }
 }
