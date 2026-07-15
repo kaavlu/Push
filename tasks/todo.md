@@ -23,6 +23,23 @@
 - [x] `--live`: restored the authenticated session, exercised preparation, and verified the Retry /
       Sign Out failure UI under simulator DNS failure. Snapshot primary-key normalization also fixed
       a live-only duplicate-key crash exposed by this smoke run.
+---
+
+# Alerts Surface (Issue #30)
+
+- [x] Inspect issue, navigation, map controls, Friends row, and data seams.
+- [x] Write the feature contract in `tasks/spec.md`.
+- [x] Add friend-request domain, seed/store, repositories, and container wiring.
+- [x] Build Alerts ViewModel, full-screen view, shared card treatment, and states.
+- [x] Replace the compass with an unread-aware bell route.
+- [x] Add focused tests and register new Swift files.
+- [x] Build and run the relevant test suite.
+
+## Verification
+- [x] Generic iOS Simulator build succeeded.
+- [x] Focused `AlertsTests` + `LiveContainerIsolationTests` passed.
+- [x] Full serial `PushTests` suite passed after one restart for the known
+      CoreSimulator `Mach -308` failure.
 
 ---
 

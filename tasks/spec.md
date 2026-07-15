@@ -38,6 +38,35 @@ incrementally.
   a missing row routes to recoverable preparation failure instead of presenting partially valid data.
 - Tests must place the current user's profile after another visible profile to prevent accidental
   dependence on PostgREST response order.
+---
+
+# Alerts Surface (Issue #30)
+
+## Goal
+Replace the map hero compass with a branded alerts button and add a full-screen
+Alerts page that supports incoming friend requests without introducing other
+notification types.
+
+## Product contract
+- The map top-right control is a bell using the profile control treatment. A subtle
+  unread dot appears when unread requests exist.
+- The UIKit `MKCompassButton` is removed while Apple map attribution remains intact.
+- Tapping the bell presents `AlertsView` through the full-screen route pattern.
+- Alerts contain only incoming friend requests. Cards reuse the Friends row shell and
+  a consistent height, replacing its availability area with Accept and Deny actions.
+- Resolving a request removes it. Accept does not synthesize presence in this prototype.
+- Loading, empty, failure, and retry states are explicit.
+
+## Architecture
+- `FriendRequest` is canonical; `AlertRepository` provides async read/accept/deny.
+- Mock uses `LocalAlertRepository` + `InMemoryDatabase`; mutations bump revision once.
+- Live uses `EmptyLiveAlertRepository`, returning no requests and no mock leakage.
+- `AlertsViewModel` owns load state, unread state, mutations, and errors.
+
+## Acceptance tests
+- Route metadata and unread state are stable.
+- Mock requests load and resolve through accept/deny.
+- Repository failures drive error state; live containers return no alerts.
 
 ---
 

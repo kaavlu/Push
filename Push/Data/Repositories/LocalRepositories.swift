@@ -9,6 +9,27 @@
 import Foundation
 
 @MainActor
+final class LocalAlertRepository: AlertRepository {
+    private let database: InMemoryDatabase
+
+    init(database: InMemoryDatabase) {
+        self.database = database
+    }
+
+    func incomingFriendRequests() async throws -> [FriendRequest] {
+        database.friendRequests.filter { $0.status == .pending }
+    }
+
+    func acceptFriendRequest(id: FriendRequest.ID) async throws {
+        database.resolveFriendRequest(id: id, status: .accepted)
+    }
+
+    func denyFriendRequest(id: FriendRequest.ID) async throws {
+        database.resolveFriendRequest(id: id, status: .denied)
+    }
+}
+
+@MainActor
 final class LocalFriendRepository: FriendRepository {
     private let database: InMemoryDatabase
 

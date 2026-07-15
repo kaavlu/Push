@@ -27,6 +27,7 @@ final class InMemoryDatabase: ObservableObject {
     private(set) var responses: [PushResponse]
     private(set) var hangouts: [PastHangout]
     private(set) var feedEvents: [FeedEvent]
+    private(set) var friendRequests: [FriendRequest]
     private(set) var profile: UserProfile
 
     /// Seed order matters for deterministic UI (avatar stacks, card order).
@@ -49,11 +50,25 @@ final class InMemoryDatabase: ObservableObject {
         responses = seed.responses
         hangouts = seed.hangouts
         feedEvents = seed.feedEvents
+        friendRequests = seed.friendRequests
         profile = seed.profile
     }
 
     private func didMutate() {
         revision += 1
+    }
+
+    func resolveFriendRequest(id: FriendRequest.ID, status: FriendRequest.Status) {
+        guard let index = friendRequests.firstIndex(where: { $0.id == id }) else { return }
+        let request = friendRequests[index]
+        friendRequests[index] = FriendRequest(
+            id: request.id,
+            requester: request.requester,
+            createdAt: request.createdAt,
+            status: status,
+            isUnread: false
+        )
+        didMutate()
     }
 
     /// Atomic: inserts the plan and all its initial responses together, then
