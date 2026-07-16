@@ -27,11 +27,13 @@ struct StyledMapView: UIViewRepresentable {
         mapView.setRegion(region, animated: false)
         mapView.layoutMargins = mapLayoutMargins
         applyStyle(to: mapView)
+        context.coordinator.installTapGesture(on: mapView)
         syncAnnotations(on: mapView)
         return mapView
     }
 
     func updateUIView(_ mapView: MKMapView, context: Context) {
+        context.coordinator.onPuckSelected = onPuckSelected
         context.coordinator.onRegionChanged = onRegionChanged
         mapView.layoutMargins = mapLayoutMargins
         applyStyle(to: mapView)
@@ -81,10 +83,12 @@ struct StyledMapView: UIViewRepresentable {
     }
 }
 
-final class Coordinator: NSObject, MKMapViewDelegate {
-    private let onPuckSelected: (MapPuckRenderModel) -> Void
+final class Coordinator: NSObject, MKMapViewDelegate, UIGestureRecognizerDelegate {
+    var onPuckSelected: (MapPuckRenderModel) -> Void
     var onRegionChanged: (MKCoordinateSpan) -> Void
     var lastFocusRequestID: UUID?
+    private weak var mapView: MKMapView?
+    private var tapGesture: UITapGestureRecognizer?
 
     init(
         onPuckSelected: @escaping (MapPuckRenderModel) -> Void,
@@ -92,6 +96,16 @@ final class Coordinator: NSObject, MKMapViewDelegate {
     ) {
         self.onPuckSelected = onPuckSelected
         self.onRegionChanged = onRegionChanged
+    }
+
+    func installTapGesture(on mapView: MKMapView) {
+        self.mapView = mapView
+        guard tapGesture == nil else { return }
+        let gesture = UITapGestureRecognizer(target: self, action: #selector(handleMapTap(_:)))
+        gesture.delegate = self
+        gesture.cancelsTouchesInView = true
+        mapView.addGestureRecognizer(gesture)
+        tapGesture = gesture
     }
 
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
@@ -119,14 +133,69 @@ final class Coordinator: NSObject, MKMapViewDelegate {
         return annotationView
     }
 
+    /// MapKit default selection is neutralized — custom hit-testing owns selection.
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
-        guard let annotation = view.annotation as? MapPuckAnnotation else { return }
-        mapView.deselectAnnotation(annotation, animated: false)
-        onPuckSelected(annotation.puck)
+        mapView.deselectAnnotation(view.annotation, animated: false)
     }
 
     func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
         onRegionChanged(mapView.region.span)
+    }
+
+    @objc
+    private func handleMapTap(_ gesture: UITapGestureRecognizer) {
+        guard
+            gesture.state == .ended,
+            let mapView
+        else { return }
+        let point = gesture.location(in: mapView)
+        guard let puck = resolvePuck(at: point, in: mapView) else { return }
+        onPuckSelected(puck)
+    }
+
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        guard
+            gestureRecognizer === tapGesture,
+            let mapView
+        else { return true }
+        let point = gestureRecognizer.location(in: mapView)
+        return resolvePuck(at: point, in: mapView) != nil
+    }
+
+    func gestureRecognizer(
+        _ gestureRecognizer: UIGestureRecognizer,
+        shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer
+    ) -> Bool {
+        // Claim puck taps exclusively so pan/zoom don't compete on hit targets.
+        false
+    }
+
+    private func resolvePuck(at point: CGPoint, in mapView: MKMapView) -> MapPuckRenderModel? {
+        var candidates: [MapPuckHitTesting.Candidate] = []
+        var pucksByID: [String: MapPuckRenderModel] = [:]
+
+        for annotation in mapView.annotations {
+            guard let puckAnnotation = annotation as? MapPuckAnnotation else { continue }
+            let center = mapView.convert(puckAnnotation.coordinate, toPointTo: mapView)
+            let radius = MapPuckHitTesting.hitRadius(
+                for: puckAnnotation.puck,
+                layout: puckAnnotation.layout
+            )
+            candidates.append(
+                MapPuckHitTesting.Candidate(
+                    id: puckAnnotation.id,
+                    center: center,
+                    radius: radius,
+                    zPriority: MapPuckHitTesting.zPriority(for: puckAnnotation.puck)
+                )
+            )
+            pucksByID[puckAnnotation.id] = puckAnnotation.puck
+        }
+
+        guard let winnerID = MapPuckHitTesting.preferredHit(among: candidates, at: point) else {
+            return nil
+        }
+        return pucksByID[winnerID]
     }
 }
 
@@ -150,6 +219,7 @@ private final class MapPuckAnnotationHostingView: MKAnnotationView {
     static let reuseIdentifier = "MapPuckAnnotationHostingView"
 
     private var hostingController: UIHostingController<MapPuckAnnotationView>?
+    private var hitRadius: CGFloat = 0
 
     func configure(with puck: MapPuckRenderModel, layout: PushAdaptiveLayout) {
         let rootView = MapPuckAnnotationView(puck: puck, layout: layout)
@@ -157,6 +227,10 @@ private final class MapPuckAnnotationHostingView: MKAnnotationView {
         bounds = CGRect(origin: .zero, size: size)
         centerOffset = .zero
         canShowCallout = false
+        hitRadius = MapPuckHitTesting.hitRadius(for: puck, layout: layout)
+        zPriority = MKAnnotationViewZPriority(
+            rawValue: MapPuckHitTesting.zPriority(for: puck)
+        )
 
         if let hostingController {
             hostingController.rootView = rootView
@@ -170,10 +244,18 @@ private final class MapPuckAnnotationHostingView: MKAnnotationView {
         }
     }
 
+    /// Only the visual puck circle (plus light padding) is tappable, not the full frame.
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        let dx = point.x - bounds.midX
+        let dy = point.y - bounds.midY
+        return (dx * dx + dy * dy) <= hitRadius * hitRadius
+    }
+
     override func prepareForReuse() {
         super.prepareForReuse()
         hostingController?.view.removeFromSuperview()
         hostingController = nil
+        hitRadius = 0
     }
 }
 
@@ -228,7 +310,7 @@ private struct MapPuckAnnotationView: View {
     }
 }
 
-private enum MapPuckAnnotationLayout {
+enum MapPuckAnnotationLayout {
     static func individualPuckSize(_ layout: PushAdaptiveLayout) -> CGFloat { 82 * layout.puckScale }
     static func clusterPuckSize(_ layout: PushAdaptiveLayout) -> CGFloat { 116 * layout.puckScale }
     static func friendGroupPuckSize(_ layout: PushAdaptiveLayout) -> CGFloat { 92 * layout.puckScale }
@@ -292,8 +374,13 @@ final class SelfPuckAnnotationView: MKAnnotationView {
     }
 }
 
-private enum SelfPuckAnnotationLayout {
+enum SelfPuckAnnotationLayout {
     static func frameSize(_ layout: PushAdaptiveLayout) -> CGSize {
         CGSize(width: 132 * layout.puckScale, height: 124 * layout.puckScale)
+    }
+
+    /// Drawn avatar core size (matches `SelfPuckLayout.puckSize`).
+    static func visualDiameter(_ layout: PushAdaptiveLayout) -> CGFloat {
+        58 * layout.puckScale
     }
 }
