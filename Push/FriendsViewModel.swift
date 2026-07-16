@@ -9,7 +9,6 @@
 //
 
 import Combine
-import CoreLocation
 import Foundation
 
 /// One friend list row: a presentation-ready friend plus optional circle
@@ -67,7 +66,12 @@ final class FriendsViewModel: ObservableObject {
     @Published private(set) var loadState: LoadState<[FriendRowModel]> = .idle
     @Published var searchText: String = ""
     @Published var selectedFilter: FriendsFilter = .all
-    @Published var selectedFriend: MapPuckData?
+    /// The single row expanded inline for its Directions/Start push/Remove actions.
+    @Published var expandedFriendID: String?
+    /// Friend IDs with an in-flight remove call, so the row can disable its button.
+    @Published private(set) var removingFriendIDs: Set<String> = []
+    /// Set when a remove call fails; surfaced as a toast by the view.
+    @Published var removeErrorMessage: String?
 
     private let friends: FriendRepository
     private let groups: GroupRepository
@@ -185,18 +189,27 @@ final class FriendsViewModel: ObservableObject {
         }
     }
 
-    /// Builds a detail puck for the tapped friend and drives the shared
-    /// `FriendDetailSheet`. Coordinate is unused by the individual layout.
-    func select(_ row: FriendRowModel) {
-        selectedFriend = MapPuckData(
-            id: "friend-\(row.id)",
-            kind: .individual,
-            people: [row.friend],
-            activity: row.friend.activity,
-            availability: row.friend.availability,
-            venueStatusText: row.friend.venueStatusText,
-            coordinate: CLLocationCoordinate2D(latitude: 0, longitude: 0)
-        )
+    /// Toggles inline expansion for `row`; expanding one row collapses any other.
+    func toggleExpanded(_ row: FriendRowModel) {
+        expandedFriendID = (expandedFriendID == row.id) ? nil : row.id
+    }
+
+    func collapse() {
+        expandedFriendID = nil
+    }
+
+    /// Hard-removes the friendship, then reloads so the row disappears from the list.
+    func removeFriend(_ row: FriendRowModel) async {
+        guard removingFriendIDs.insert(row.id).inserted else { return }
+        defer { removingFriendIDs.remove(row.id) }
+        do {
+            try await friends.removeFriend(row.friend.id)
+            lastSeenRevision = containerForRefresh?.storeRevision ?? lastSeenRevision
+            if expandedFriendID == row.id { expandedFriendID = nil }
+            await load()
+        } catch {
+            removeErrorMessage = "Couldn't remove \(row.friend.name). Try again."
+        }
     }
 
     // MARK: - Derivation helpers

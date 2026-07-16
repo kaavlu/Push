@@ -404,4 +404,7 @@ struct ThrowingFriendRepository: FriendRepository {
     func sendFriendRequest(to personID: Person.ID) async throws {
         throw URLError(.badServerResponse)
     }
+    func removeFriend(_ personID: Person.ID) async throws {
+        throw URLError(.badServerResponse)
+    }
 }

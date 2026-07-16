@@ -22,6 +22,9 @@ protocol FriendRepository {
     func searchPeople(query: String) async throws -> [PersonSearchResult]
     /// Creates (or re-opens) a pending outgoing request. No-op / throws on invalid targets.
     func sendFriendRequest(to personID: Person.ID) async throws
+    /// Hard-deletes the accepted friendship with `personID`, then bumps the
+    /// store revision so view models reload. No-op if not currently friends.
+    func removeFriend(_ personID: Person.ID) async throws
 }
 
 protocol GroupRepository {

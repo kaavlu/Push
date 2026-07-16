@@ -73,6 +73,10 @@ final class SupabaseFriendRepository: FriendRepository {
         try await store.sendFriendRequest(targetUserID: personID)
     }
 
+    func removeFriend(_ personID: Person.ID) async throws {
+        try await store.removeFriend(targetUserID: personID)
+    }
+
     // Mirror image of `ProfileRow.mapAvailability` — Swift's raw values are
     // camelCase while the DB column is snake_case, so this needs an explicit map.
     private func rawValue(for availability: FriendAvailabilityState) -> String {

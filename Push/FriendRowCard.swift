@@ -17,6 +17,9 @@ struct FriendRowCard: View {
     let fixedHeight: CGFloat?
     let usesAvailabilityAppearance: Bool
     let customTrailing: AnyView?
+    /// Off when an outer container (e.g. an expandable row) draws its own
+    /// card surface around this row plus extra content below it.
+    let showsCardBackground: Bool
     let action: (() -> Void)?
 
     init(
@@ -26,6 +29,7 @@ struct FriendRowCard: View {
         fixedHeight: CGFloat? = nil,
         usesAvailabilityAppearance: Bool = true,
         customTrailing: AnyView? = nil,
+        showsCardBackground: Bool = true,
         action: (() -> Void)? = nil
     ) {
         self.row = row
@@ -34,6 +38,7 @@ struct FriendRowCard: View {
         self.fixedHeight = fixedHeight
         self.usesAvailabilityAppearance = usesAvailabilityAppearance
         self.customTrailing = customTrailing
+        self.showsCardBackground = showsCardBackground
         self.action = action
     }
 
@@ -85,7 +90,8 @@ struct FriendRowCard: View {
         .padding(FriendsLayout.cardPadding(layout))
         .frame(maxWidth: .infinity, alignment: .leading)
         .frame(height: fixedHeight)
-        .friendsCard(cornerRadius: FriendsLayout.cardCornerRadius)
+        .contentShape(Rectangle())
+        .modifier(OptionalFriendsCardBackground(isEnabled: showsCardBackground))
     }
 
     private var avatar: some View {
@@ -167,6 +173,21 @@ struct FriendRowCard: View {
                     }
                 }
             }
+        }
+    }
+}
+
+/// Applies `friendsCard` only when `isEnabled`, so an outer container (e.g.
+/// `ExpandableFriendRow`) can own the card surface across the row plus
+/// whatever it reveals below it.
+private struct OptionalFriendsCardBackground: ViewModifier {
+    let isEnabled: Bool
+
+    func body(content: Content) -> some View {
+        if isEnabled {
+            content.friendsCard(cornerRadius: FriendsLayout.cardCornerRadius)
+        } else {
+            content
         }
     }
 }

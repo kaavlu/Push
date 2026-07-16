@@ -119,6 +119,12 @@ final class SupabaseLiveDataLoader: LiveDataLoading {
             .value
     }
 
+    func removeFriend(targetUserID: String) async throws {
+        try await client
+            .rpc("remove_friend", params: RemoveFriendParams(other_user_id: targetUserID))
+            .execute()
+    }
+
     func loadProfile(id: String) async throws -> ProfileRow {
         try await client.from("profiles")
             .select()
@@ -141,6 +147,10 @@ private struct SendFriendRequestParams: Encodable {
 private struct ResolveFriendRequestParams: Encodable {
     let request_id: String
     let accept: Bool
+}
+
+private struct RemoveFriendParams: Encodable {
+    let other_user_id: String
 }
 
 private struct ProfileBasicsPayload: Encodable {

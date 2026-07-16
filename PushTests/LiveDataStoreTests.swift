@@ -336,6 +336,14 @@ final class LiveDataLoaderSpy: LiveDataLoading {
         return updated
     }
 
+    func removeFriend(targetUserID: String) async throws {
+        if let writeError { throw writeError }
+        guard let index = friendshipRows.firstIndex(where: {
+            $0.involves("self") && $0.involves(targetUserID) && $0.isAccepted
+        }) else { return }
+        friendshipRows.remove(at: index)
+    }
+
     func loadProfile(id: String) async throws -> ProfileRow {
         .fixture(id: id, name: id.capitalized)
     }

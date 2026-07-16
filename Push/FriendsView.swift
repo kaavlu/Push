@@ -20,6 +20,7 @@ struct FriendsView: View {
     @State private var isAddGroupPresented = false
     @State private var startPushContext: StartPushLaunchContext?
     @State private var groupSearchText = ""
+    @State private var toastMessage: String?
 
     @MainActor
     init() {
@@ -98,12 +99,10 @@ struct FriendsView: View {
             .padding(.horizontal, FriendsLayout.horizontalPadding(layout))
             .padding(.top, FriendsLayout.topPadding)
 
-            if let selectedFriend = viewModel.selectedFriend {
-                FriendDetailBottomSheet(
-                    puck: selectedFriend,
-                    onDismiss: dismissSelectedFriend,
-                    onStartPush: launchStartPush
-                )
+            if let toastMessage {
+                FriendsToast(message: toastMessage)
+                    .padding(.top, FriendsLayout.topPadding)
+                    .transition(.move(edge: .top).combined(with: .opacity))
             }
         }
         .fullScreenCover(isPresented: $isAddFriendPresented) {
@@ -116,19 +115,33 @@ struct FriendsView: View {
                 symbolName: "person.3.fill"
             )
         }
+        .onChange(of: mode) { _ in viewModel.collapse() }
+        .onChange(of: viewModel.removeErrorMessage) { message in
+            guard let message else { return }
+            triggerToast(message)
+            viewModel.removeErrorMessage = nil
+        }
     }
 
     private var listContent: some View {
-        ScrollView(showsIndicators: false) {
-            LazyVStack(alignment: .leading, spacing: FriendsLayout.listSpacing) {
-                switch mode {
-                case .friends:
-                    friendsList
-                case .groups:
-                    groupsList
+        ScrollViewReader { proxy in
+            ScrollView(showsIndicators: false) {
+                LazyVStack(alignment: .leading, spacing: FriendsLayout.listSpacing) {
+                    switch mode {
+                    case .friends:
+                        friendsList
+                    case .groups:
+                        groupsList
+                    }
+                }
+                .padding(.bottom, FriendsLayout.bottomPadding(layout))
+            }
+            .onChange(of: viewModel.expandedFriendID) { expandedID in
+                guard let expandedID else { return }
+                withAnimation(.easeInOut(duration: 0.25)) {
+                    proxy.scrollTo(expandedID, anchor: .center)
                 }
             }
-            .padding(.bottom, FriendsLayout.bottomPadding(layout))
         }
     }
 
@@ -140,7 +153,16 @@ struct FriendsView: View {
         } else {
             FriendsSectionHeader(title: sectionTitle, count: rows.count)
             ForEach(rows) { row in
-                FriendRowCard(row: row) { selectFriend(row) }
+                ExpandableFriendRow(
+                    row: row,
+                    isExpanded: viewModel.expandedFriendID == row.id,
+                    isRemoving: viewModel.removingFriendIDs.contains(row.id),
+                    onToggle: { selectFriend(row) },
+                    onDirections: { triggerToast("Opening in Maps…") },
+                    onStartPush: { startPush(for: row) },
+                    onRemove: { Task { await viewModel.removeFriend(row) } }
+                )
+                .id(row.id)
             }
         }
     }
@@ -175,18 +197,27 @@ struct FriendsView: View {
     }
 
     private func launchStartPush(_ context: StartPushLaunchContext) {
-        // FriendDetailBottomSheet already animated out and cleared selection
-        // before invoking this callback.
         startPushContext = context
     }
 
     private func selectFriend(_ row: FriendRowModel) {
-        // Sheet owns its slide animation (offset); keep identity unanimated.
-        viewModel.select(row)
+        withAnimation { viewModel.toggleExpanded(row) }
     }
 
-    private func dismissSelectedFriend() {
-        viewModel.selectedFriend = nil
+    private func startPush(for row: FriendRowModel) {
+        viewModel.collapse()
+        launchStartPush(.friends([row.friend.id], locationHint: row.friend.placeName))
+    }
+
+    private func triggerToast(_ message: String) {
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
+            toastMessage = message
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
+                toastMessage = nil
+            }
+        }
     }
 }
 
@@ -308,70 +339,6 @@ private struct FriendsModeSwitch: View {
         .accessibilityLabel(item.title)
         .accessibilityValue("\(count(for: item))")
         .accessibilityAddTraits(isSelected ? .isSelected : [])
-    }
-}
-
-// MARK: - Search
-
-private struct FriendsSearchRow: View {
-    @Binding var text: String
-    let placeholder: String
-    let addSymbolName: String
-    let addAccessibilityLabel: String
-    let onAdd: () -> Void
-
-    var body: some View {
-        HStack(spacing: FriendsLayout.searchRowSpacing) {
-            FriendsSearchField(text: $text, placeholder: placeholder)
-            FriendsCircleButton(
-                systemImageName: addSymbolName,
-                accessibilityLabel: addAccessibilityLabel,
-                action: onAdd
-            )
-        }
-    }
-}
-
-private struct FriendsSearchField: View {
-    @Binding var text: String
-    let placeholder: String
-
-    var body: some View {
-        HStack(spacing: FriendsLayout.searchSpacing) {
-            Image(systemName: "magnifyingglass")
-                .font(.system(size: FriendsLayout.searchIconSize, weight: .semibold))
-                .foregroundStyle(PushControlColors.textTertiary)
-
-            TextField(placeholder, text: $text)
-                .font(.subheadline)
-                .foregroundStyle(PushControlColors.textPrimary)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-
-            if !text.isEmpty {
-                Button { text = "" } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: FriendsLayout.searchIconSize, weight: .semibold))
-                        .foregroundStyle(PushControlColors.textTertiary)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Clear search")
-            }
-        }
-        .padding(.horizontal, FriendsLayout.searchHorizontalPadding)
-        .padding(.vertical, FriendsLayout.searchVerticalPadding)
-        .frame(maxWidth: .infinity)
-        .background(
-            RoundedRectangle(cornerRadius: FriendsLayout.searchCornerRadius, style: .continuous)
-                .fill(FriendsColor.cardCream.opacity(FriendsColor.cardCreamOpacity))
-        )
-        .overlay {
-            RoundedRectangle(cornerRadius: FriendsLayout.searchCornerRadius, style: .continuous)
-                .stroke(
-                    PushColorPalette.Accent.walnut.opacity(FriendsColor.chipStrokeWalnutOpacity),
-                    lineWidth: FriendsColor.cardStrokeWidth
-                )
-        }
     }
 }
 

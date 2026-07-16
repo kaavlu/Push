@@ -76,6 +76,10 @@ final class LocalFriendRepository: FriendRepository {
     func sendFriendRequest(to personID: Person.ID) async throws {
         _ = database.sendFriendRequest(to: personID)
     }
+
+    func removeFriend(_ personID: Person.ID) async throws {
+        database.removeFriend(personID)
+    }
 }
 
 @MainActor

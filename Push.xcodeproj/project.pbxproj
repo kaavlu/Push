@@ -169,6 +169,8 @@
 		AA02000400000000AA020004 /* FriendsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA02000300000000AA020003 /* FriendsViewModel.swift */; };
 		AA02000600000000AA020006 /* FriendsStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA02000500000000AA020005 /* FriendsStyle.swift */; };
 		AA02000800000000AA020008 /* FriendsComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA02000700000000AA020007 /* FriendsComponents.swift */; };
+		6117CEA2248448E19317FEBD /* ExpandableFriendRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F358BB9D8D74591B1E88328 /* ExpandableFriendRow.swift */; };
+		97CB492E41974B21BF45D29A /* FriendsSearchRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = C69C82BD2F154893B45A2F5D /* FriendsSearchRow.swift */; };
 		AA02001000000000AA020010 /* FriendsContentBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA02000900000000AA020009 /* FriendsContentBuilder.swift */; };
 /* End PBXBuildFile section */
 
@@ -249,6 +251,8 @@
 		AA02000300000000AA020003 /* FriendsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsViewModel.swift; sourceTree = "<group>"; };
 		AA02000500000000AA020005 /* FriendsStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsStyle.swift; sourceTree = "<group>"; };
 		AA02000700000000AA020007 /* FriendsComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsComponents.swift; sourceTree = "<group>"; };
+		1F358BB9D8D74591B1E88328 /* ExpandableFriendRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpandableFriendRow.swift; sourceTree = "<group>"; };
+		C69C82BD2F154893B45A2F5D /* FriendsSearchRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsSearchRow.swift; sourceTree = "<group>"; };
 		AA02000900000000AA020009 /* FriendsContentBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FriendsContentBuilder.swift; path = "Data/Derived/FriendsContentBuilder.swift"; sourceTree = "<group>"; };
 		AE9275BF1B3723589A96B9B9 /* MapRenderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MapRenderTests.swift"; sourceTree = "<group>"; };
 		79592A0DE1B5691B233102F0 /* MapDisplayPuckBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "MapDisplayPuckBuilder.swift"; path = "Data/Derived/MapDisplayPuckBuilder.swift"; sourceTree = "<group>"; };
@@ -499,6 +503,8 @@
 				AA02000300000000AA020003 /* FriendsViewModel.swift */,
 				AA02000500000000AA020005 /* FriendsStyle.swift */,
 				AA02000700000000AA020007 /* FriendsComponents.swift */,
+				1F358BB9D8D74591B1E88328 /* ExpandableFriendRow.swift */,
+				C69C82BD2F154893B45A2F5D /* FriendsSearchRow.swift */,
 				AA02000900000000AA020009 /* FriendsContentBuilder.swift */,
 				5217A2DB2FF330000011F860 /* PlansModels.swift */,
 				5217A2DD2FF340000011F860 /* PlansViewModel.swift */,
@@ -824,6 +830,8 @@
 				AA02000400000000AA020004 /* FriendsViewModel.swift in Sources */,
 				AA02000600000000AA020006 /* FriendsStyle.swift in Sources */,
 				AA02000800000000AA020008 /* FriendsComponents.swift in Sources */,
+				6117CEA2248448E19317FEBD /* ExpandableFriendRow.swift in Sources */,
+				97CB492E41974B21BF45D29A /* FriendsSearchRow.swift in Sources */,
 				AA02001000000000AA020010 /* FriendsContentBuilder.swift in Sources */,
 				5217A2DC2FF330000011F860 /* PlansModels.swift in Sources */,
 				5217A2DE2FF340000011F860 /* PlansViewModel.swift in Sources */,

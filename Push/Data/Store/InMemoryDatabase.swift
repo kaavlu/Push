@@ -130,6 +130,14 @@ final class InMemoryDatabase: ObservableObject {
         return request
     }
 
+    /// Hard-deletes the friendship edge; removes any stale request row too so a
+    /// fresh `sendFriendRequest` between the pair inserts cleanly afterward.
+    func removeFriend(_ personID: Person.ID) {
+        guard acceptedFriendIDs.remove(personID) != nil else { return }
+        friendRequests.removeAll { involvesPair(personID, request: $0) }
+        didMutate()
+    }
+
     private func involvesPair(_ personID: Person.ID, request: FriendRequest) -> Bool {
         let a = request.requester.id
         let b = request.recipientID

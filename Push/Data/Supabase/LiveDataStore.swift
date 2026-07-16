@@ -24,6 +24,7 @@ protocol LiveDataLoading: AnyObject {
     func searchProfiles(query: String, limit: Int) async throws -> [SearchProfileRow]
     func sendFriendRequest(targetUserID: String) async throws -> FriendshipRow
     func resolveFriendRequest(id: String, accept: Bool) async throws -> FriendshipRow
+    func removeFriend(targetUserID: String) async throws
     func loadProfile(id: String) async throws -> ProfileRow
 }
 
@@ -296,6 +297,14 @@ final class LiveDataStore {
     func resolveFriendRequest(id: String, accept: Bool) async throws {
         _ = try await loader.resolveFriendRequest(id: id, accept: accept)
         // Accept expands profile visibility; drop the warm cache so friends() refreshes.
+        profileRows = nil
+        profilesTask = nil
+        notifyFriendshipsChanged()
+    }
+
+    func removeFriend(targetUserID: String) async throws {
+        try await loader.removeFriend(targetUserID: targetUserID)
+        // Removal narrows profile visibility; drop the warm cache so friends() refreshes.
         profileRows = nil
         profilesTask = nil
         notifyFriendshipsChanged()
