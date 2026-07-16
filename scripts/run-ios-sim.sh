@@ -19,7 +19,7 @@ RELOAD_IF_BOOTED=false
 
 usage() {
   cat <<EOF
-Usage: $0 [run|stop|restart|status|list|prune|reload-if-booted] [--iphone-17|--iphone-17-pro-max|--all] [-- app args...]
+Usage: $0 [run|stop|restart|status|list|prune|reload-if-booted|ensure-booted-udid] [--iphone-17|--iphone-17-pro-max|--all] [-- app args...]
 
 Default run behavior:
   - If any Push simulators for this worktree are already booted, rebuild/reload all of them.
@@ -33,6 +33,8 @@ Actions:
   list                List all Push-prefixed sims (any worktree).
   prune               Delete known-orphan Push sims (e.g. Push - Push - *).
   reload-if-booted    Like run for --iphone-17, but exit 0 if preferred sim is not Booted (no create).
+  ensure-booted-udid  Create/boot the preferred worktree sim; print its UDID on stdout
+                      (for scripts/test.sh — never uses stock unlabeled iPhone 17).
 
 Device flags:
   --iphone-17           Target the regular iPhone 17 simulator for this worktree.
@@ -47,7 +49,7 @@ EOF
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
-    run|stop|restart|status|list|prune|reload-if-booted)
+    run|stop|restart|status|list|prune|reload-if-booted|ensure-booted-udid)
       ACTION="$1"
       shift
       ;;
@@ -575,6 +577,27 @@ prune_orphan_sims() {
   fi
 }
 
+# Create/boot the preferred worktree-scoped sim and print only its UDID on stdout.
+# Used by scripts/test.sh so unit tests never spin up stock "iPhone 17" (unlabeled),
+# which races the visual sim and flakily dies with Mach -308 / Invalid device state.
+ensure_booted_udid() {
+  local mode="$DEVICE_MODE"
+  local target
+  local udid
+  local sim_name
+
+  if [ "$mode" = "default" ] || [ "$mode" = "all" ]; then
+    mode="iphone17"
+  fi
+
+  target="$(ensure_booted_sim_for_mode "$mode")"
+  udid="$(cut -f1 <<< "$target")"
+  sim_name="$(cut -f2- <<< "$target")"
+
+  echo "Using worktree simulator \"$sim_name\" ($udid)" >&2
+  printf '%s\n' "$udid"
+}
+
 case "$ACTION" in
   run)
     run_app
@@ -593,6 +616,9 @@ case "$ACTION" in
     ;;
   prune)
     prune_orphan_sims
+    ;;
+  ensure-booted-udid)
+    ensure_booted_udid
     ;;
   *)
     usage >&2

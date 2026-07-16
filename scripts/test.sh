@@ -8,10 +8,12 @@ cd "$ROOT"
 
 PROJECT="Push.xcodeproj"
 SCHEME="Push"
-# Stock Xcode device for unit tests (not the worktree-scoped Push - main - iPhone 17 visual sim).
-DESTINATION="${PUSH_TEST_DESTINATION:-platform=iOS Simulator,name=iPhone 17}"
+# Resolved lazily for suite/full/fast: worktree Push sim via run-ios-sim.sh
+# (not stock unlabeled "iPhone 17", which opens a second flaky Simulator).
+DESTINATION="${PUSH_TEST_DESTINATION:-}"
 DERIVED_DATA="${PUSH_TEST_DERIVED_DATA:-$ROOT/DerivedData-Tests}"
 PARALLEL="${PUSH_TEST_PARALLEL:-NO}"
+RUN_IOS_SIM="$ROOT/scripts/run-ios-sim.sh"
 
 usage() {
   cat <<EOF
@@ -24,12 +26,34 @@ Commands:
   fast                  Build + a small smoke set (AppEnvironment + AdaptiveLayout).
 
 Env:
-  PUSH_TEST_DESTINATION   xcodebuild -destination (default: $DESTINATION)
+  PUSH_TEST_DESTINATION   xcodebuild -destination override
+                          (default: worktree sim from run-ios-sim.sh ensure-booted-udid,
+                          e.g. Push - main - iPhone 17 — never stock "iPhone 17")
   PUSH_TEST_DERIVED_DATA  derived data path (default: DerivedData-Tests)
   PUSH_TEST_PARALLEL      YES/NO for -parallel-testing-enabled (default: NO)
+  PUSH_TEST_DEVICE        --iphone-17 (default) or --iphone-17-pro-max for ensure-booted-udid
 
 Do not run PushUITests unless explicitly asked.
 EOF
+}
+
+# Resolve destination to the labeled worktree simulator (create/boot via the
+# same script that owns visual sims). Explicit PUSH_TEST_DESTINATION wins.
+resolve_destination() {
+  if [ -n "${DESTINATION:-}" ]; then
+    echo "$DESTINATION"
+    return
+  fi
+
+  local device_flag="${PUSH_TEST_DEVICE:---iphone-17}"
+  local udid
+  # ensure-booted-udid logs the sim name on stderr; UDID only on stdout.
+  udid="$("$RUN_IOS_SIM" ensure-booted-udid "$device_flag")"
+  if [ -z "$udid" ]; then
+    echo "error: could not resolve worktree simulator UDID via $RUN_IOS_SIM" >&2
+    exit 1
+  fi
+  echo "platform=iOS Simulator,id=$udid"
 }
 
 run_xcode() {
@@ -55,10 +79,13 @@ cmd_suite() {
     exit 2
   fi
 
+  local dest
+  dest="$(resolve_destination)"
+
   run_xcode \
     -project "$PROJECT" \
     -scheme "$SCHEME" \
-    -destination "$DESTINATION" \
+    -destination "$dest" \
     -derivedDataPath "$DERIVED_DATA" \
     -only-testing:"PushTests/$class_name" \
     -parallel-testing-enabled "$PARALLEL" \
@@ -66,10 +93,13 @@ cmd_suite() {
 }
 
 cmd_full() {
+  local dest
+  dest="$(resolve_destination)"
+
   run_xcode \
     -project "$PROJECT" \
     -scheme "$SCHEME" \
-    -destination "$DESTINATION" \
+    -destination "$dest" \
     -derivedDataPath "$DERIVED_DATA" \
     -only-testing:PushTests \
     -parallel-testing-enabled "$PARALLEL" \
@@ -77,10 +107,13 @@ cmd_full() {
 }
 
 cmd_fast() {
+  local dest
+  dest="$(resolve_destination)"
+
   run_xcode \
     -project "$PROJECT" \
     -scheme "$SCHEME" \
-    -destination "$DESTINATION" \
+    -destination "$dest" \
     -derivedDataPath "$DERIVED_DATA" \
     -only-testing:PushTests/AppEnvironmentTests \
     -only-testing:PushTests/AdaptiveLayoutTests \

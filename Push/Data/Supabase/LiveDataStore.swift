@@ -122,10 +122,14 @@ final class LiveDataStore {
     private var groupRows: [GroupRow]?
     private var membershipRows: [GroupMembershipRow]?
     private var policyRows: [SharingPolicyRow]?
+    private var pushRows: [PushRow]?
+    private var responseRows: [PushResponseRow]?
     private var profilesTask: Task<[ProfileRow], Error>?
     private var groupsTask: Task<[GroupRow], Error>?
     private var membershipsTask: Task<[GroupMembershipRow], Error>?
     private var policiesTask: Task<[SharingPolicyRow], Error>?
+    private var pushesTask: Task<[PushRow], Error>?
+    private var responsesTask: Task<[PushResponseRow], Error>?
     private let revisionSubject = CurrentValueSubject<Int, Never>(0)
 
     init(loader: LiveDataLoading) { self.loader = loader }
@@ -141,7 +145,9 @@ final class LiveDataStore {
         async let groups = groups()
         async let memberships = memberships()
         async let policies = policies()
-        _ = try await (profiles, groups, memberships, policies)
+        async let pushes = pushes()
+        async let responses = pushResponses()
+        _ = try await (profiles, groups, memberships, policies, pushes, responses)
     }
 
     func profiles() async throws -> [ProfileRow] {
@@ -223,20 +229,29 @@ final class LiveDataStore {
 
     // MARK: - Pushes
     //
-    // Unlike profiles/groups/memberships/policies, pushes have no session
-    // cache: every read re-fetches from Supabase (Day-1 has no realtime
-    // subscription, so this is how friends' new/edited pushes show up when
-    // the Pushes tab reloads). Mutations call the loader directly and the
-    // repository calls `notifyPushesChanged()` once per logical write —
-    // which may span several loader calls (e.g. insert push + seed
-    // responses) — so ViewModels reload only after the write is complete.
+    // Session-cached like the social graph so the Pushes tab paints from the
+    // bootstrap snapshot instead of waiting on a network round-trip. Day-1
+    // still has no realtime: local writes invalidate via `notifyPushesChanged()`
+    // (one bump after multi-step create/edit) so the next read re-fetches.
+    // Remote friend edits surface on the next invalidate/re-warm, not every
+    // tab open — matching how profile/group reads already behave.
 
     func pushes() async throws -> [PushRow] {
-        try await loader.loadPushes()
+        if let pushRows { return pushRows }
+        if let pushesTask { return try await pushesTask.value }
+        let task = Task { try await loader.loadPushes().uniqued(by: \.id) }
+        pushesTask = task
+        return try await finish(task, cache: { pushRows = $0 }, clear: { pushesTask = nil })
     }
 
     func pushResponses() async throws -> [PushResponseRow] {
-        try await loader.loadResponses()
+        if let responseRows { return responseRows }
+        if let responsesTask { return try await responsesTask.value }
+        let task = Task { try await loader.loadResponses().uniqued(by: \.id) }
+        responsesTask = task
+        return try await finish(
+            task, cache: { responseRows = $0 }, clear: { responsesTask = nil }
+        )
     }
 
     func insertPush(_ payload: PushInsertPayload) async throws -> PushRow {
@@ -269,9 +284,13 @@ final class LiveDataStore {
         try await loader.deleteResponses(pushID: pushID, personIDs: personIDs)
     }
 
-    /// Pushes have no cached rows to `replace(_:)`, so callers bump
-    /// explicitly, once, after every step of a write succeeds.
+    /// Drop the push snapshot so the following ViewModel reload re-fetches,
+    /// then publish one revision after every step of a write has succeeded.
     func notifyPushesChanged() {
+        pushRows = nil
+        responseRows = nil
+        pushesTask = nil
+        responsesTask = nil
         revisionSubject.value += 1
     }
 

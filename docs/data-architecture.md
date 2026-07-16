@@ -231,9 +231,9 @@ scripts/test.sh full                   # entire PushTests
 scripts/test.sh build                  # compile only
 ```
 
-Equivalent raw command: `xcodebuild test -project Push.xcodeproj -scheme Push
--destination 'platform=iOS Simulator,name=iPhone 17' -only-testing:PushTests
--parallel-testing-enabled NO -derivedDataPath DerivedData-Tests`. Parallel
-testing intermittently drops the simulator runner; keep serial unless you know
-it is stable. Stock `iPhone 17` is for tests; the visual app sim is
-`Push - main - iPhone 17` via `scripts/run-ios-sim.sh`.
+`scripts/test.sh` resolves the worktree visual sim UDID via
+`run-ios-sim.sh ensure-booted-udid` (e.g. `Push - main - iPhone 17`) and
+passes `-destination platform=iOS Simulator,id=<udid>`. Do **not** use stock
+`name=iPhone 17` — that opens a second unlabeled Simulator and is flaky.
+Parallel testing intermittently drops the simulator runner; keep serial unless
+you know it is stable.

@@ -72,16 +72,16 @@ final class SupabasePushRepositoryTests: XCTestCase {
 
     func testUpdatePushPreservesExistingRsvpsForUntouchedInvitees() async throws {
         let loader = LiveDataLoaderSpy()
-        let (repo, _) = makeRepository(loader: loader, currentUserID: "creator1")
+        let (repo, store) = makeRepository(loader: loader, currentUserID: "creator1")
 
         let created = try await repo.createPush(PushDraft(
             title: "Hike", recipientIDs: ["friend_bob"],
             startsAt: Date(), locationText: "", notes: "", creatorID: "creator1"
         ))
         // bob RSVPs .in before the creator edits the push.
-        let bobRepo = SupabasePushRepository(
-            store: LiveDataStore(loader: loader), currentUserID: "bob"
-        )
+        // Same session store as production: one LiveDataStore per container so
+        // notifyPushesChanged() invalidates the snapshot both actors read.
+        let bobRepo = SupabasePushRepository(store: store, currentUserID: "bob")
         try await bobRepo.setCurrentUserResponse(planID: created, response: .in)
 
         // Editing the push (still inviting bob, plus a title change) must not
@@ -112,15 +112,15 @@ final class SupabasePushRepositoryTests: XCTestCase {
 
     func testSetCurrentUserResponseUpsertsRsvpAndClearsRespondedAtForPending() async throws {
         let loader = LiveDataLoaderSpy()
-        let (repo, _) = makeRepository(loader: loader, currentUserID: "creator1")
+        let (repo, store) = makeRepository(loader: loader, currentUserID: "creator1")
         let created = try await repo.createPush(PushDraft(
             title: "Game night", recipientIDs: ["friend_bob"],
             startsAt: Date(), locationText: "", notes: "", creatorID: "creator1"
         ))
 
-        let bobRepo = SupabasePushRepository(
-            store: LiveDataStore(loader: loader), currentUserID: "bob"
-        )
+        // Share the session store (mirrors AppDataContainer.live) so bob's
+        // notifyPushesChanged() drops the snapshot creator reads next.
+        let bobRepo = SupabasePushRepository(store: store, currentUserID: "bob")
         try await bobRepo.setCurrentUserResponse(planID: created, response: .maybe)
         var responses = try await repo.responses()
         let bobResponse = responses.first { $0.personID == "bob" }

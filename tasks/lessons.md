@@ -9,8 +9,11 @@ Durable, non-obvious learnings. Keep entries short; link code/docs rather than r
   "runtime profile not found", install one: `xcodebuild -downloadPlatform iOS`.
   It must run **unsandboxed** (writes to `/Library/Developer/CoreSimulator`); a
   sandboxed run fails silently with zero output.
-- Test/build destination is `platform=iOS Simulator,name=iPhone 17` (the plan's
-  older `iPhone 14` does not exist on Xcode 26).
+- Unit tests must target the **worktree-labeled** sim via
+  `scripts/test.sh` → `run-ios-sim.sh ensure-booted-udid` (e.g.
+  `Push - main - iPhone 17`). Never use stock `name=iPhone 17`: that boots an
+  unlabeled second Simulator that races CoreSimulator and often dies with
+  Mach `-308` / "Invalid device state".
 - SourceKit's live index frequently shows false "No such module 'Supabase'" /
   "cannot find type X" across files after edits. `xcodebuild` is the source of
   truth — trust a green build/test over live diagnostics.

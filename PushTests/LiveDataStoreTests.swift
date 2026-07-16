@@ -4,7 +4,7 @@ import XCTest
 
 @MainActor
 final class LiveDataStoreTests: XCTestCase {
-    func testWarmLoadsFourResourcesConcurrentlyAndOnlyOnce() async throws {
+    func testWarmLoadsSixResourcesConcurrentlyAndOnlyOnce() async throws {
         let loader = LiveDataLoaderSpy()
         let store = LiveDataStore(loader: loader)
 
@@ -12,12 +12,14 @@ final class LiveDataStoreTests: XCTestCase {
         async let second: Void = store.warm()
         _ = try await (first, second)
 
-        XCTAssertEqual(loader.loadCounts, [1, 1, 1, 1])
-        XCTAssertEqual(loader.maximumConcurrentLoads, 4)
+        XCTAssertEqual(loader.loadCounts, [1, 1, 1, 1, 1, 1])
+        XCTAssertEqual(loader.maximumConcurrentLoads, 6)
     }
 
     func testPreparedContainerRepositoriesShareSnapshotWithoutMoreReads() async throws {
         let loader = LiveDataLoaderSpy()
+        loader.pushRows = [Self.samplePushRow(id: "push-1", creator: "self")]
+        loader.responseRows = [Self.sampleResponseRow(pushID: "push-1", personID: "self")]
         let container = try await AppDataContainer.prepareLive(loader: loader, currentUserID: "self")
 
         let user = try await container.friends.currentUser()
@@ -26,13 +28,38 @@ final class LiveDataStoreTests: XCTestCase {
         let groups = try await container.groups.groups()
         let memberships = try await container.groups.memberships()
         let policies = try await container.sharing.allPolicies()
+        let plans = try await container.pushes.activePlans()
+        let responses = try await container.pushes.responses()
         XCTAssertEqual(user.id, "self")
         XCTAssertEqual(friends.map(\.id), ["friend"])
         XCTAssertEqual(profile.personID, "self")
         XCTAssertEqual(groups.count, 1)
         XCTAssertEqual(memberships.count, 1)
         XCTAssertEqual(policies.count, 1)
-        XCTAssertEqual(loader.loadCounts, [1, 1, 1, 1])
+        XCTAssertEqual(plans.map(\.id), ["push-1"])
+        XCTAssertEqual(responses.map(\.personID), ["self"])
+        // Warm already loaded all six; tab/repo reads must not re-hit the network.
+        XCTAssertEqual(loader.loadCounts, [1, 1, 1, 1, 1, 1])
+    }
+
+    func testNotifyPushesChangedInvalidatesPushSnapshot() async throws {
+        let loader = LiveDataLoaderSpy()
+        loader.pushRows = [Self.samplePushRow(id: "push-1", creator: "self")]
+        let store = LiveDataStore(loader: loader)
+        try await store.warm()
+        XCTAssertEqual(loader.loadCounts[4], 1)
+
+        _ = try await store.pushes()
+        XCTAssertEqual(loader.loadCounts[4], 1, "cached push read should not re-fetch")
+
+        store.notifyPushesChanged()
+        loader.pushRows = [
+            Self.samplePushRow(id: "push-1", creator: "self"),
+            Self.samplePushRow(id: "push-2", creator: "friend")
+        ]
+        let refreshed = try await store.pushes()
+        XCTAssertEqual(refreshed.map(\.id), ["push-1", "push-2"])
+        XCTAssertEqual(loader.loadCounts[4], 2)
     }
 
     func testCurrentUserAndProfileUseAuthenticatedIDNotRowOrder() async throws {
@@ -107,7 +134,8 @@ final class LiveDataStoreTests: XCTestCase {
 // create/update/cancel/respond behavior.
 @MainActor
 final class LiveDataLoaderSpy: LiveDataLoading {
-    var loadCounts = [0, 0, 0, 0]
+    /// profiles, groups, memberships, policies, pushes, responses
+    var loadCounts = [0, 0, 0, 0, 0, 0]
     var maximumConcurrentLoads = 0
     var writeError: Error?
     var duplicateProfiles = false
@@ -173,8 +201,15 @@ final class LiveDataLoaderSpy: LiveDataLoading {
     // MARK: - Pushes (stateful, so create/update/cancel/respond behavior can
     // be exercised end-to-end via `SupabasePushRepository` in other tests).
 
-    func loadPushes() async throws -> [PushRow] { pushRows }
-    func loadResponses() async throws -> [PushResponseRow] { responseRows }
+    func loadPushes() async throws -> [PushRow] {
+        try await load(index: 4)
+        return pushRows
+    }
+
+    func loadResponses() async throws -> [PushResponseRow] {
+        try await load(index: 5)
+        return responseRows
+    }
 
     func insertPush(_ payload: PushInsertPayload) async throws -> PushRow {
         if let writeError { throw writeError }
@@ -350,6 +385,27 @@ final class LiveDataLoaderSpy: LiveDataLoading {
 }
 
 private enum TestFailure: Error { case expected }
+
+@MainActor
+private extension LiveDataStoreTests {
+    static func samplePushRow(id: String, creator: String) -> PushRow {
+        PushRow(
+            id: id, title: "Hang", group_id: nil, creator_id: creator,
+            created_at: "2026-07-14T00:00:00Z", updated_at: "2026-07-14T00:00:00Z",
+            starts_at: "2026-07-14T18:00:00Z", has_explicit_time: true,
+            is_approximate_time: false, expires_at: "2026-07-15T00:00:00Z",
+            cancelled_at: nil, place_id: nil, place_is_suggested: false,
+            state: "collecting", audience: "invitees_only", note: nil, location_text: nil
+        )
+    }
+
+    static func sampleResponseRow(pushID: String, personID: String) -> PushResponseRow {
+        PushResponseRow(
+            id: "\(pushID)-\(personID)", push_id: pushID, person_id: personID,
+            response: "in", responded_at: "2026-07-14T00:00:00Z", ready_state: "unknown"
+        )
+    }
+}
 
 private extension ProfileRow {
     static func fixture(
