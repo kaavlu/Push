@@ -8,5 +8,17 @@
 	<string>$(SUPABASE_URL)</string>
 	<key>SupabaseAnonKey</key>
 	<string>$(SUPABASE_ANON_KEY)</string>
+	<!-- Custom scheme for password-recovery (and future auth) deep links. -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.manav.Push.auth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>pushapp</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

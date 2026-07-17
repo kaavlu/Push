@@ -128,7 +128,9 @@ struct OnboardingCredentialField: View {
     let systemImage: String
     let placeholder: String
     @Binding var text: String
-    let isSecure: Bool
+    var isSecure: Bool = false
+    var keyboardType: UIKeyboardType = .emailAddress
+    var textInputAutocapitalization: TextInputAutocapitalization = .never
 
     var body: some View {
         HStack(spacing: 12) {
@@ -153,8 +155,8 @@ struct OnboardingCredentialField: View {
                 SecureField(placeholder, text: $text)
             } else {
                 TextField(placeholder, text: $text)
-                    .textInputAutocapitalization(.never)
-                    .keyboardType(.emailAddress)
+                    .textInputAutocapitalization(textInputAutocapitalization)
+                    .keyboardType(keyboardType)
                     .autocorrectionDisabled()
             }
         }

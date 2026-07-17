@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		26DD739FC701FAE462A327DE /* AuthSetNewPasswordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98BF0E5EA25D79D33DA8776E /* AuthSetNewPasswordView.swift */; };
+		6CCB6648DA94CF019EBEA449 /* AuthForgotPasswordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D3F33F3BA8780F7AD73D7F7 /* AuthForgotPasswordView.swift */; };
+		CC5FF0444C8C530B217EABA9 /* AuthCheckEmailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6819B821B3F11A73FE2C0344 /* AuthCheckEmailView.swift */; };
+		81CBB42A6C30400F87DD7111 /* AuthSignUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6453682F810EE0C6BF16B743 /* AuthSignUpView.swift */; };
 		5FAB0B553AFFCA8F7157CCFD /* MapPuckHitTestingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30EC8288ED6D5DFC46693E12 /* MapPuckHitTestingTests.swift */; };
 		07CCE2B52DAC859603B5A453 /* MapPuckHitTesting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88BD1A7599AF82CCE11F237E /* MapPuckHitTesting.swift */; };
 		B00A9F868BBB73CD5878C563 /* GroupRequestCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D441287507AB63FE03C26733 /* GroupRequestCard.swift */; };
@@ -203,6 +207,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		98BF0E5EA25D79D33DA8776E /* AuthSetNewPasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "AuthSetNewPasswordView.swift"; path = "Auth/AuthSetNewPasswordView.swift"; sourceTree = "<group>"; };
+		6D3F33F3BA8780F7AD73D7F7 /* AuthForgotPasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "AuthForgotPasswordView.swift"; path = "Auth/AuthForgotPasswordView.swift"; sourceTree = "<group>"; };
+		6819B821B3F11A73FE2C0344 /* AuthCheckEmailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "AuthCheckEmailView.swift"; path = "Auth/AuthCheckEmailView.swift"; sourceTree = "<group>"; };
+		6453682F810EE0C6BF16B743 /* AuthSignUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "AuthSignUpView.swift"; path = "Auth/AuthSignUpView.swift"; sourceTree = "<group>"; };
 		30EC8288ED6D5DFC46693E12 /* MapPuckHitTestingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MapPuckHitTestingTests.swift"; sourceTree = "<group>"; };
 		88BD1A7599AF82CCE11F237E /* MapPuckHitTesting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MapPuckHitTesting.swift"; sourceTree = "<group>"; };
 		D441287507AB63FE03C26733 /* GroupRequestCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GroupRequestCard.swift"; sourceTree = "<group>"; };
@@ -436,6 +444,10 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				98BF0E5EA25D79D33DA8776E /* AuthSetNewPasswordView.swift */,
+				6D3F33F3BA8780F7AD73D7F7 /* AuthForgotPasswordView.swift */,
+				6819B821B3F11A73FE2C0344 /* AuthCheckEmailView.swift */,
+				6453682F810EE0C6BF16B743 /* AuthSignUpView.swift */,
 				88BD1A7599AF82CCE11F237E /* MapPuckHitTesting.swift */,
 				D441287507AB63FE03C26733 /* GroupRequestCard.swift */,
 				BB8CC3E7DC54B6D8F764187B /* AddGroupStep3ReviewView.swift */,
@@ -772,6 +784,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				26DD739FC701FAE462A327DE /* AuthSetNewPasswordView.swift in Sources */,
+				6CCB6648DA94CF019EBEA449 /* AuthForgotPasswordView.swift in Sources */,
+				CC5FF0444C8C530B217EABA9 /* AuthCheckEmailView.swift in Sources */,
+				81CBB42A6C30400F87DD7111 /* AuthSignUpView.swift in Sources */,
 				07CCE2B52DAC859603B5A453 /* MapPuckHitTesting.swift in Sources */,
 				B00A9F868BBB73CD5878C563 /* GroupRequestCard.swift in Sources */,
 				14F2A9AC97337702850AC6E1 /* AddGroupStep3ReviewView.swift in Sources */,
