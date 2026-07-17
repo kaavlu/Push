@@ -309,6 +309,23 @@ final class LocalProfileRepository: ProfileRepository {
             closeFriends: closeFriends
         )
     }
+
+    func updateProfilePhoto(jpegData: Data) async throws {
+        let previous = database.peopleByID[database.currentUserID]?.imageAssetPath
+        let url = try ProfilePhotoFileStore.save(
+            userID: database.currentUserID, jpegData: jpegData
+        )
+        database.updatePersonImage(id: database.currentUserID, imageAssetPath: url.path)
+        AvatarImageLoader.invalidate(path: previous)
+        AvatarImageLoader.invalidate(path: url.path)
+    }
+
+    func removeProfilePhoto() async throws {
+        let previous = database.peopleByID[database.currentUserID]?.imageAssetPath
+        database.updatePersonImage(id: database.currentUserID, imageAssetPath: nil)
+        ProfilePhotoFileStore.remove(userID: database.currentUserID)
+        AvatarImageLoader.invalidate(path: previous)
+    }
 }
 
 @MainActor

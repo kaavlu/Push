@@ -89,11 +89,14 @@ private struct ProfileEditScreen: View {
                     ProfileRowContent(
                         symbolName: "camera.fill",
                         title: "Profile photo",
-                        subtitle: "Open the local photo placeholder",
+                        subtitle: viewModel.hasProfilePhoto
+                            ? "Change or remove your photo"
+                            : "Add a photo from your library",
                         trailingSymbolName: "chevron.right"
                     )
                 }
                 .buttonStyle(.plain)
+                .disabled(viewModel.isPhotoBusy)
             }
         }
         // Fields bind directly to the view model's @Published state for a live

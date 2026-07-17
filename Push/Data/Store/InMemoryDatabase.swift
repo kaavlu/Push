@@ -188,11 +188,22 @@ final class InMemoryDatabase: ObservableObject {
     /// and initials derive from firstName, so callers never pass them explicitly.
     func updatePerson(id: Person.ID, firstName: String) {
         guard let existing = peopleByID[id] else { return }
-        let updated = Person(
+        replacePerson(Person(
             id: existing.id, firstName: firstName, imageAssetPath: existing.imageAssetPath
-        )
-        peopleByID[id] = updated
-        if let index = orderedPeople.firstIndex(where: { $0.id == id }) {
+        ))
+    }
+
+    /// Updates only the profile image path (bundle asset, local file, or remote URL).
+    func updatePersonImage(id: Person.ID, imageAssetPath: String?) {
+        guard let existing = peopleByID[id] else { return }
+        replacePerson(Person(
+            id: existing.id, firstName: existing.firstName, imageAssetPath: imageAssetPath
+        ))
+    }
+
+    private func replacePerson(_ updated: Person) {
+        peopleByID[updated.id] = updated
+        if let index = orderedPeople.firstIndex(where: { $0.id == updated.id }) {
             orderedPeople[index] = updated
         }
         didMutate()
