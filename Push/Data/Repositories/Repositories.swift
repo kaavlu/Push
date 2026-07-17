@@ -30,6 +30,10 @@ protocol FriendRepository {
 protocol GroupRepository {
     func groups() async throws -> [FriendGroup]
     func memberships() async throws -> [GroupMembership]
+    /// Creates a group, adds the caller as its accepted owner, and creates
+    /// pending (`invited`) memberships for each invitee — they become members
+    /// only after accepting via `AlertRepository.acceptGroupInvite`.
+    func createGroup(name: String, imageAssetPath: String?, inviteeIDs: [Person.ID]) async throws -> FriendGroup.ID
 }
 
 /// Start Push flow output. `recipientIDs` are the flow's tokens
@@ -82,4 +86,10 @@ protocol AlertRepository {
     func incomingFriendRequests() async throws -> [FriendRequest]
     func acceptFriendRequest(id: FriendRequest.ID) async throws
     func denyFriendRequest(id: FriendRequest.ID) async throws
+    /// Pending group invites addressed to the current user, newest first.
+    func incomingGroupInvites() async throws -> [GroupInvite]
+    /// Accepts a pending group invite, turning the caller into an active member.
+    func acceptGroupInvite(id: GroupInvite.ID) async throws
+    /// Declines a pending group invite; removes the row so a future re-invite is possible.
+    func denyGroupInvite(id: GroupInvite.ID) async throws
 }

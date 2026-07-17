@@ -17,4 +17,11 @@ final class EmptyLiveAlertRepository: AlertRepository {
     func denyFriendRequest(id: FriendRequest.ID) async throws {
         throw SupabaseRepositoryError.writeNotSupported
     }
+    func incomingGroupInvites() async throws -> [GroupInvite] { [] }
+    func acceptGroupInvite(id: GroupInvite.ID) async throws {
+        throw SupabaseRepositoryError.writeNotSupported
+    }
+    func denyGroupInvite(id: GroupInvite.ID) async throws {
+        throw SupabaseRepositoryError.writeNotSupported
+    }
 }

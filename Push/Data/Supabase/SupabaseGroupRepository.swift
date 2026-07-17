@@ -20,4 +20,13 @@ final class SupabaseGroupRepository: GroupRepository {
         let rows = try await store.memberships()
         return rows.map { $0.membership() }
     }
+
+    func createGroup(
+        name: String, imageAssetPath: String?, inviteeIDs: [Person.ID]
+    ) async throws -> FriendGroup.ID {
+        let row = try await store.createGroup(
+            name: name, imageAssetPath: imageAssetPath, inviteeIDs: inviteeIDs
+        )
+        return row.id
+    }
 }

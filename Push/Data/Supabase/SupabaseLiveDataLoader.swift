@@ -133,6 +133,32 @@ final class SupabaseLiveDataLoader: LiveDataLoading {
             .execute()
             .value
     }
+
+    func createGroup(name: String, imageAssetPath: String?, inviteeIDs: [String]) async throws -> GroupRow {
+        try await client
+            .rpc(
+                "create_group",
+                params: CreateGroupParams(
+                    group_name: name, image_path: imageAssetPath, invitee_ids: inviteeIDs
+                )
+            )
+            .execute()
+            .value
+    }
+
+    func incomingGroupInvites() async throws -> [GroupInviteRow] {
+        try await client.rpc("incoming_group_invites").execute().value
+    }
+
+    func resolveGroupInvite(membershipID: String, accept: Bool) async throws -> GroupMembershipRow {
+        try await client
+            .rpc(
+                "resolve_group_invite",
+                params: ResolveGroupInviteParams(membership_id: membershipID, accept: accept)
+            )
+            .execute()
+            .value
+    }
 }
 
 private struct SearchProfilesParams: Encodable {
@@ -151,6 +177,17 @@ private struct ResolveFriendRequestParams: Encodable {
 
 private struct RemoveFriendParams: Encodable {
     let other_user_id: String
+}
+
+private struct CreateGroupParams: Encodable {
+    let group_name: String
+    let image_path: String?
+    let invitee_ids: [String]
+}
+
+private struct ResolveGroupInviteParams: Encodable {
+    let membership_id: String
+    let accept: Bool
 }
 
 private struct ProfileBasicsPayload: Encodable {

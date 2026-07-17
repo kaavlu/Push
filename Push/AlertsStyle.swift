@@ -5,6 +5,8 @@ import SwiftUI
 enum AlertsLayout {
     /// Extra gap under the page subtitle before the section header / empty state.
     static let contentTopSpacing: CGFloat = 6
+    /// Gap between the Friend Requests and Group Requests sections.
+    static let sectionTopSpacing: CGFloat = 18
     static let actionSpacing: CGFloat = 8
     static let actionHorizontalPadding: CGFloat = 12
     static let actionVerticalPadding: CGFloat = 7
@@ -27,4 +29,69 @@ enum AlertsColor {
     static let denyFillOpacity = 0.42
     static let disabledOpacity = 0.55
     static let addedFillOpacity = 0.88
+}
+
+/// Which action an `AlertActionButton` renders — shared by friend-request and
+/// group-invite cards so accept/deny always look and feel identical.
+enum AlertActionStyle {
+    case accept
+    case deny
+}
+
+/// Extracted from `AlertsView` so `GroupRequestCard` renders pixel-identical
+/// accept/deny capsules without duplicating the styling constants.
+struct AlertActionButton: View {
+    let title: String
+    let style: AlertActionStyle
+    let disabled: Bool
+    let accessibilityLabel: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(.caption.weight(.bold))
+                .foregroundStyle(PushControlColors.activeForeground)
+                .frame(minWidth: AlertsLayout.actionMinWidth)
+                .padding(.horizontal, AlertsLayout.actionHorizontalPadding)
+                .padding(.vertical, AlertsLayout.actionVerticalPadding)
+                .background(backgroundFill, in: Capsule())
+                .overlay {
+                    if style == .deny {
+                        Capsule().stroke(
+                            PushColorPalette.Accent.walnut.opacity(AlertsColor.denyStrokeOpacity),
+                            lineWidth: AlertsLayout.actionStrokeWidth
+                        )
+                    }
+                }
+        }
+        .buttonStyle(.plain)
+        .disabled(disabled)
+        .opacity(disabled ? AlertsColor.disabledOpacity : 1)
+        .accessibilityLabel(accessibilityLabel)
+    }
+
+    private var backgroundFill: Color {
+        switch style {
+        case .accept: return PushControlColors.activeFill
+        case .deny: return FriendsColor.cardCream.opacity(AlertsColor.denyFillOpacity)
+        }
+    }
+}
+
+/// The post-accept "Added" pill, shown in place of the accept/deny pair
+/// while the card briefly holds before leaving the list.
+struct AlertAddedBadge: View {
+    var body: some View {
+        Text(AlertsCopy.addedLabel)
+            .font(.caption.weight(.bold))
+            .foregroundStyle(PushControlColors.activeForeground)
+            .padding(.horizontal, AlertsLayout.actionHorizontalPadding)
+            .padding(.vertical, AlertsLayout.actionVerticalPadding)
+            .background(
+                PushColorPalette.Accent.mintFoam.opacity(AlertsColor.addedFillOpacity),
+                in: Capsule()
+            )
+            .accessibilityLabel(AlertsCopy.addedLabel)
+    }
 }

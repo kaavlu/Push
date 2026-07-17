@@ -44,6 +44,11 @@ enum GroupContentBuilder {
         }
     }
 
+    /// Includes both active members and invited-but-not-yet-accepted invitees
+    /// (flagged `isPending`), so a group's roster reads as "who's really in
+    /// vs. who's been asked" without a second query. `memberCount` on
+    /// `PushGroupData` stays active-only (see `groupCards` above) — pending
+    /// rows are additive display only, never counted as members.
     static func members(
         groupID: FriendGroup.ID,
         memberships: [GroupMembership],
@@ -53,10 +58,11 @@ enum GroupContentBuilder {
         now: Date = Date()
     ) -> [PushGroupMemberData] {
         memberships
-            .filter { $0.groupID == groupID && $0.membershipStatus == .active }
+            .filter { $0.groupID == groupID && ($0.membershipStatus == .active || $0.membershipStatus == .invited) }
             .compactMap { membership in
                 guard let person = people[membership.personID] else { return nil }
-                let status = statuses[person.id]
+                let isPending = membership.membershipStatus == .invited
+                let status = isPending ? nil : statuses[person.id]
                 return PushGroupMemberData(
                     id: person.id,
                     name: person.displayName,
@@ -64,8 +70,9 @@ enum GroupContentBuilder {
                     profileImageAssetName: person.imageAssetPath,
                     availability: status?.availability,
                     activitySymbolName: status?.activity.symbolName ?? "moon.zzz.fill",
-                    venueStatusText: memberStatusText(status: status, places: places),
-                    lastUpdated: memberLastUpdated(status: status, now: now)
+                    venueStatusText: isPending ? "Invite pending" : memberStatusText(status: status, places: places),
+                    lastUpdated: memberLastUpdated(status: status, now: now),
+                    isPending: isPending
                 )
             }
     }
