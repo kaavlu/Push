@@ -13,15 +13,23 @@ enum AlertCardPhase: Equatable {
 final class AlertsViewModel: ObservableObject {
     @Published private(set) var loadState: LoadState<[FriendRequestAlertModel]> = .idle
     @Published private(set) var requests: [FriendRequestAlertModel] = []
-    @Published private(set) var resolvingIDs: Set<FriendRequest.ID> = []
-    @Published private(set) var cardPhases: [FriendRequest.ID: AlertCardPhase] = [:]
+    @Published private(set) var groupInvites: [GroupInvite] = []
+    // Keyed by String rather than FriendRequest.ID/GroupInvite.ID specifically —
+    // both resolve to String, and one shared guard covers friend requests and
+    // group invites so their accept/deny timing/chrome never diverges.
+    @Published private(set) var resolvingIDs: Set<String> = []
+    @Published private(set) var cardPhases: [String: AlertCardPhase] = [:]
 
     private let repository: AlertRepository
     private var containerForRefresh: AppDataContainer?
     private var storeChangeSub: AnyCancellable?
     private var lastSeenRevision = 0
 
-    var unreadCount: Int { requests.filter(\.request.isUnread).count }
+    /// Group invites carry no per-row read state, so every pending invite
+    /// counts toward the badge — matching how every pending friend request does.
+    var unreadCount: Int {
+        requests.filter(\.request.isUnread).count + groupInvites.count
+    }
     var hasUnreadAlerts: Bool { unreadCount > 0 }
 
     init(repository: AlertRepository) {
@@ -47,7 +55,9 @@ final class AlertsViewModel: ObservableObject {
         do {
             let models = try await repository.incomingFriendRequests()
                 .map(FriendRequestAlertModel.init)
+            let invites = try await repository.incomingGroupInvites()
             requests = models
+            groupInvites = invites
             loadState = .loaded(models)
             lastSeenRevision = containerForRefresh?.storeRevision ?? lastSeenRevision
         } catch {
@@ -56,43 +66,77 @@ final class AlertsViewModel: ObservableObject {
     }
 
     func accept(_ request: FriendRequestAlertModel) async {
-        await resolve(request, accepting: true)
+        await resolve(id: request.id, accepting: true) { [repository] in
+            try await repository.acceptFriendRequest(id: request.id)
+        } removeFromList: { [weak self] in
+            self?.removeResolvedFriendRequest(request.id)
+        }
     }
 
     func deny(_ request: FriendRequestAlertModel) async {
-        await resolve(request, accepting: false)
+        await resolve(id: request.id, accepting: false) { [repository] in
+            try await repository.denyFriendRequest(id: request.id)
+        } removeFromList: { [weak self] in
+            self?.removeResolvedFriendRequest(request.id)
+        }
     }
 
-    func phase(for id: FriendRequest.ID) -> AlertCardPhase? {
+    func acceptGroupInvite(_ invite: GroupInvite) async {
+        await resolve(id: invite.id, accepting: true) { [repository] in
+            try await repository.acceptGroupInvite(id: invite.id)
+        } removeFromList: { [weak self] in
+            self?.removeResolvedGroupInvite(invite.id)
+        }
+    }
+
+    func denyGroupInvite(_ invite: GroupInvite) async {
+        await resolve(id: invite.id, accepting: false) { [repository] in
+            try await repository.denyGroupInvite(id: invite.id)
+        } removeFromList: { [weak self] in
+            self?.removeResolvedGroupInvite(invite.id)
+        }
+    }
+
+    func phase(for id: String) -> AlertCardPhase? {
         cardPhases[id]
     }
 
-    private func resolve(_ request: FriendRequestAlertModel, accepting: Bool) async {
-        guard resolvingIDs.insert(request.id).inserted else { return }
+    /// Shared accept/deny machinery for both friend requests and group
+    /// invites: identical in-flight guard, "Added"/denying chrome, and
+    /// timing (`AlertsLayout.addedHoldNanoseconds`/`denyCollapseNanoseconds`)
+    /// so the two card types never feel different to use.
+    private func resolve(
+        id: String,
+        accepting: Bool,
+        perform: () async throws -> Void,
+        removeFromList: @escaping () -> Void
+    ) async {
+        guard resolvingIDs.insert(id).inserted else { return }
         defer {
-            resolvingIDs.remove(request.id)
-            cardPhases.removeValue(forKey: request.id)
+            resolvingIDs.remove(id)
+            cardPhases.removeValue(forKey: id)
         }
 
         do {
-            if accepting {
-                try await repository.acceptFriendRequest(id: request.id)
-                cardPhases[request.id] = .added
-                try await Task.sleep(nanoseconds: AlertsLayout.addedHoldNanoseconds)
-            } else {
-                try await repository.denyFriendRequest(id: request.id)
-                cardPhases[request.id] = .denying
-                try await Task.sleep(nanoseconds: AlertsLayout.denyCollapseNanoseconds)
-            }
-            removeResolved(request.id)
+            try await perform()
+            cardPhases[id] = accepting ? .added : .denying
+            let holdNanoseconds = accepting
+                ? AlertsLayout.addedHoldNanoseconds
+                : AlertsLayout.denyCollapseNanoseconds
+            try await Task.sleep(nanoseconds: holdNanoseconds)
+            removeFromList()
             lastSeenRevision = containerForRefresh?.storeRevision ?? lastSeenRevision
         } catch {
             loadState = .failed(error)
         }
     }
 
-    private func removeResolved(_ id: FriendRequest.ID) {
+    private func removeResolvedFriendRequest(_ id: String) {
         requests.removeAll { $0.id == id }
         loadState = .loaded(requests)
+    }
+
+    private func removeResolvedGroupInvite(_ id: String) {
+        groupInvites.removeAll { $0.id == id }
     }
 }

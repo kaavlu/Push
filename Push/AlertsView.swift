@@ -55,7 +55,7 @@ struct AlertsView: View {
         case .failed:
             AlertsStateView.error { Task { await viewModel.load() } }
         case .loaded:
-            if viewModel.requests.isEmpty {
+            if viewModel.requests.isEmpty && viewModel.groupInvites.isEmpty {
                 AlertsStateView.empty
             } else {
                 requestList
@@ -66,20 +66,44 @@ struct AlertsView: View {
     private var requestList: some View {
         ScrollView(showsIndicators: false) {
             LazyVStack(alignment: .leading, spacing: FriendsLayout.listSpacing) {
-                FriendsSectionHeader(
-                    title: AlertsCopy.sectionTitle,
-                    count: viewModel.requests.count
-                )
-                .padding(.top, AlertsLayout.contentTopSpacing)
+                if !viewModel.requests.isEmpty {
+                    FriendsSectionHeader(
+                        title: AlertsCopy.sectionTitle,
+                        count: viewModel.requests.count
+                    )
+                    .padding(.top, AlertsLayout.contentTopSpacing)
 
-                ForEach(viewModel.requests) { request in
-                    requestCard(for: request)
+                    ForEach(viewModel.requests) { request in
+                        requestCard(for: request)
+                    }
+                }
+
+                if !viewModel.groupInvites.isEmpty {
+                    FriendsSectionHeader(
+                        title: AlertsCopy.groupSectionTitle,
+                        count: viewModel.groupInvites.count
+                    )
+                    .padding(.top, viewModel.requests.isEmpty ? AlertsLayout.contentTopSpacing : AlertsLayout.sectionTopSpacing)
+
+                    ForEach(viewModel.groupInvites) { invite in
+                        GroupRequestCard(
+                            invite: invite,
+                            phase: viewModel.phase(for: invite.id),
+                            isResolving: viewModel.resolvingIDs.contains(invite.id),
+                            onAccept: { Task { await viewModel.acceptGroupInvite(invite) } },
+                            onDeny: { Task { await viewModel.denyGroupInvite(invite) } }
+                        )
+                    }
                 }
             }
             .padding(.bottom, FriendsLayout.bottomPadding(layout))
             .animation(
                 .easeInOut(duration: AlertsLayout.removeDuration),
                 value: viewModel.requests.map(\.id)
+            )
+            .animation(
+                .easeInOut(duration: AlertsLayout.removeDuration),
+                value: viewModel.groupInvites.map(\.id)
             )
         }
     }
@@ -116,25 +140,23 @@ struct AlertsView: View {
 
         Group {
             if phase == .added {
-                addedBadge
+                AlertAddedBadge()
             } else {
                 HStack(spacing: AlertsLayout.actionSpacing) {
-                    actionButton(
-                        "Deny",
-                        requesterName: name,
+                    AlertActionButton(
+                        title: "Deny",
                         style: .deny,
-                        disabled: isResolving
-                    ) {
-                        Task { await viewModel.deny(request) }
-                    }
-                    actionButton(
-                        "Accept",
-                        requesterName: name,
+                        disabled: isResolving,
+                        accessibilityLabel: "Deny friend request from \(name)",
+                        action: { Task { await viewModel.deny(request) } }
+                    )
+                    AlertActionButton(
+                        title: "Accept",
                         style: .accept,
-                        disabled: isResolving
-                    ) {
-                        Task { await viewModel.accept(request) }
-                    }
+                        disabled: isResolving,
+                        accessibilityLabel: "Accept friend request from \(name)",
+                        action: { Task { await viewModel.accept(request) } }
+                    )
                 }
             }
         }
@@ -142,63 +164,6 @@ struct AlertsView: View {
             .easeInOut(duration: AlertsLayout.addedTransitionDuration),
             value: phase
         )
-    }
-
-    private var addedBadge: some View {
-        Text(AlertsCopy.addedLabel)
-            .font(.caption.weight(.bold))
-            .foregroundStyle(PushControlColors.activeForeground)
-            .padding(.horizontal, AlertsLayout.actionHorizontalPadding)
-            .padding(.vertical, AlertsLayout.actionVerticalPadding)
-            .background(
-                PushColorPalette.Accent.mintFoam.opacity(AlertsColor.addedFillOpacity),
-                in: Capsule()
-            )
-            .accessibilityLabel(AlertsCopy.addedLabel)
-    }
-
-    private enum ActionStyle {
-        case accept
-        case deny
-    }
-
-    private func actionButton(
-        _ title: String,
-        requesterName: String,
-        style: ActionStyle,
-        disabled: Bool,
-        action: @escaping () -> Void
-    ) -> some View {
-        Button(action: action) {
-            Text(title)
-                .font(.caption.weight(.bold))
-                .foregroundStyle(PushControlColors.activeForeground)
-                .frame(minWidth: AlertsLayout.actionMinWidth)
-                .padding(.horizontal, AlertsLayout.actionHorizontalPadding)
-                .padding(.vertical, AlertsLayout.actionVerticalPadding)
-                .background(actionBackground(style), in: Capsule())
-                .overlay {
-                    if style == .deny {
-                        Capsule().stroke(
-                            PushColorPalette.Accent.walnut.opacity(AlertsColor.denyStrokeOpacity),
-                            lineWidth: AlertsLayout.actionStrokeWidth
-                        )
-                    }
-                }
-        }
-        .buttonStyle(.plain)
-        .disabled(disabled)
-        .opacity(disabled ? AlertsColor.disabledOpacity : 1)
-        .accessibilityLabel("\(title) friend request from \(requesterName)")
-    }
-
-    private func actionBackground(_ style: ActionStyle) -> Color {
-        switch style {
-        case .accept:
-            return PushControlColors.activeFill
-        case .deny:
-            return FriendsColor.cardCream.opacity(AlertsColor.denyFillOpacity)
-        }
     }
 }
 

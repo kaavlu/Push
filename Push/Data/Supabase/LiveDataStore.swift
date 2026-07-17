@@ -26,6 +26,9 @@ protocol LiveDataLoading: AnyObject {
     func resolveFriendRequest(id: String, accept: Bool) async throws -> FriendshipRow
     func removeFriend(targetUserID: String) async throws
     func loadProfile(id: String) async throws -> ProfileRow
+    func createGroup(name: String, imageAssetPath: String?, inviteeIDs: [String]) async throws -> GroupRow
+    func incomingGroupInvites() async throws -> [GroupInviteRow]
+    func resolveGroupInvite(membershipID: String, accept: Bool) async throws -> GroupMembershipRow
 }
 
 struct ProfileSettingsPayload: Encodable {
@@ -189,6 +192,41 @@ final class LiveDataStore {
         return try await finish(
             task, cache: { membershipRows = $0 }, clear: { membershipsTask = nil }
         )
+    }
+
+    // MARK: - Groups (writes)
+    //
+    // Like pushes: no long-lived cache for the write path itself, but the
+    // read caches above (`groupRows`/`membershipRows`) go stale the moment a
+    // group is created or an invite resolved, so both paths drop them via
+    // `notifyGroupsChanged()` before bumping the revision.
+
+    func createGroup(name: String, imageAssetPath: String?, inviteeIDs: [String]) async throws -> GroupRow {
+        let row = try await loader.createGroup(
+            name: name, imageAssetPath: imageAssetPath, inviteeIDs: inviteeIDs
+        )
+        notifyGroupsChanged()
+        return row
+    }
+
+    func incomingGroupInvites() async throws -> [GroupInviteRow] {
+        try await loader.incomingGroupInvites()
+    }
+
+    func resolveGroupInvite(id: String, accept: Bool) async throws {
+        _ = try await loader.resolveGroupInvite(membershipID: id, accept: accept)
+        notifyGroupsChanged()
+    }
+
+    /// Drop the group/membership snapshot so the next read re-fetches, then
+    /// bump the revision. Called after create (creator's list gains the new
+    /// group) and after accept (invitee's list gains it on their next load).
+    func notifyGroupsChanged() {
+        groupRows = nil
+        membershipRows = nil
+        groupsTask = nil
+        membershipsTask = nil
+        revisionSubject.value += 1
     }
 
     func policies() async throws -> [SharingPolicyRow] {
