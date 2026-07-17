@@ -16,7 +16,7 @@ Push is **not** a tracking app, not a generic map app, and not a chat app. It sh
 - **Framework:** SwiftUI
 - **Target:** iOS 17+
 - **Architecture:** MVVM
-- **Data:** Parallel mock/live `AppDataContainer` (DEBUG mock default, `--live` opt-in, Release live). Live auth paths warm a session-scoped `LiveDataStore` before `ContentView`. Day-1 Supabase social graph reads plus live write-through for profile basics/toggles/availability, push coordination (`SupabasePushRepository`), and friend-request coordination (`SupabaseAlertRepository` + `FriendRepository` search/send/remove; migrations `0009`/`0010`). Presence/feed stay empty in live — no mock data leaks. See `AGENTS.md`, `tasks/spec.md`, `docs/data-architecture.md`.
+- **Data:** Parallel mock/live `AppDataContainer` (DEBUG mock default, `--live` opt-in, Release live). Live auth paths warm a session-scoped `LiveDataStore` before `ContentView`. Day-1 Supabase social graph reads plus live write-through for profile basics/toggles/availability/photo (Storage `avatars`, `0012`), push coordination (`SupabasePushRepository`), and friend-request coordination (`SupabaseAlertRepository` + `FriendRepository` search/send/remove; migrations `0009`/`0010`). Presence/feed stay empty in live — no mock data leaks. See `AGENTS.md`, `tasks/spec.md`, `docs/data-architecture.md`.
 - **Maps:** MapKit
 
 This is a **high-fidelity prototype** that can become production later.
