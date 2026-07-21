@@ -1,3 +1,24 @@
+# Issue #52 — Block / Unblock
+
+- [x] Design + plan
+- [x] Migration 0013
+- [x] Mock store + FriendRepository
+- [x] Live RPC path
+- [x] Friends Block UI
+- [x] Soft-hide / pickers
+- [x] Profile Blocked list
+- [ ] Apply migration on remote (if not done)
+- [ ] Live smoke: block friend, search empty, unblock, re-request
+
+## Verification
+- [x] `scripts/test.sh suite BlockUserTests` — 11 tests, 0 failures
+- [x] `scripts/test.sh suite DataLayerTests` — 26 tests, 0 failures
+- [x] `scripts/test.sh suite LiveDataStoreTests` — 13 tests, 0 failures
+- [x] `scripts/test.sh suite AlertsTests` — 8 tests, 0 failures
+- [x] `scripts/test.sh build` — BUILD SUCCEEDED
+
+---
+
 # Legal Destinations (Issue #36)
 
 - [x] Define feature contract and replacement procedure.
