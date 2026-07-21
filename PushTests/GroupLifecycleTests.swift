@@ -263,6 +263,33 @@ final class GroupLifecycleTests: XCTestCase {
         GroupPhotoFileStore.remove(groupID: groupID)
     }
 
+    /// Add Group flow: create with nil path, then upload picked JPEG via `updateGroupPhoto`.
+    func testAddGroupViewModelSubmitPersistsPickedPhoto() async throws {
+        let container = AppDataContainer(seed: .standard())
+        let friends = try await container.friends.friends()
+        XCTAssertGreaterThanOrEqual(friends.count, 2)
+
+        let viewModel = AddGroupViewModel(container: container)
+        // Wait for friends load started in init.
+        for _ in 0..<20 where viewModel.loadState.value == nil {
+            try await Task.sleep(nanoseconds: 10_000_000)
+        }
+
+        viewModel.groupName = "VM Photo Crew"
+        viewModel.selectedFriendIDs = Set(friends.prefix(2).map(\.id))
+        viewModel.pickedImage = makeSolidImage(width: 40, height: 40, color: .systemOrange)
+
+        let submittedID = await viewModel.submit()
+        let groupID = try XCTUnwrap(submittedID)
+        XCTAssertNil(viewModel.actionError)
+
+        let group = try XCTUnwrap(container.database.groupsByID[groupID])
+        let path = try XCTUnwrap(group.imageAssetPath)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: path))
+
+        GroupPhotoFileStore.remove(groupID: groupID)
+    }
+
     // MARK: - Helpers
 
     /// Creates a group owned by the current user with one active (accepted) member.

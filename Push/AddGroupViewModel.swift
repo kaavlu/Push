@@ -128,21 +128,35 @@ final class AddGroupViewModel: ObservableObject {
         step = target
     }
 
-    /// Creates the group. Failure is retryable — name/photo/selection are left
-    /// intact so the user can just tap Create again rather than redo the flow.
+    /// Creates the group, then uploads a picked photo when present.
+    /// Create failure is retryable (form left intact). Photo failure after a
+    /// successful create still returns the group ID — the group without a
+    /// photo is honest; callers can dismiss while optionally showing a banner.
     func submit() async -> FriendGroup.ID? {
         guard let container, !isSubmitting else { return nil }
         isSubmitting = true
         defer { isSubmitting = false }
         do {
             let trimmedName = groupName.trimmingCharacters(in: .whitespacesAndNewlines)
-            // Photo is session-only by product decision — never uploaded to Storage.
             let groupID = try await container.groups.createGroup(
                 name: trimmedName,
                 imageAssetPath: nil,
                 inviteeIDs: Array(selectedFriendIDs)
             )
-            actionError = nil
+            if let image = pickedImage,
+               let jpeg = ProfilePhotoProcessor.jpegData(from: image) {
+                do {
+                    try await container.groups.updateGroupPhoto(groupID: groupID, jpegData: jpeg)
+                    actionError = nil
+                } catch {
+                    // Group exists; surface non-blocking photo error and still complete.
+                    actionError = ActionErrorState(
+                        message: "Group created, but the photo didn't save."
+                    )
+                }
+            } else {
+                actionError = nil
+            }
             return groupID
         } catch {
             actionError = ActionErrorState(message: "Couldn't create the group. Try again.")
