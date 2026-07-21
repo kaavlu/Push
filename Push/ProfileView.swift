@@ -16,6 +16,7 @@ struct ProfileView: View {
     @State private var navigationPath: [ProfileRoute] = []
     @State private var isSignOutConfirmationPresented = false
     @State private var isSigningOut = false
+    @State private var isBlockedListPresented = false
     private let onClose: (() -> Void)?
 
     @MainActor
@@ -97,6 +98,11 @@ struct ProfileView: View {
             Button("Sign Out", role: .destructive) { performSignOut() }
             Button("Cancel", role: .cancel) { }
         }
+        // Cream Blocked list uses its own chrome; path-based Profile destinations
+        // would leave the modal close bar up, so present as a cover instead.
+        .fullScreenCover(isPresented: $isBlockedListPresented) {
+            BlockedUsersView()
+        }
     }
 
     private var profileContent: some View {
@@ -116,6 +122,7 @@ struct ProfileView: View {
                 ProfileRoutesCard(title: "Settings", routes: viewModel.settingsRoutes)
                 ProfileRoutesCard(title: "Privacy", routes: viewModel.privacyRoutes)
                 ProfileConnectCard(viewModel: viewModel)
+                ProfileBlockedCard { isBlockedListPresented = true }
                 ProfileLegalCard(destinations: viewModel.legalDestinations)
                 if signOut.isAvailable {
                     SignOutButton(isBusy: isSigningOut) {
@@ -144,6 +151,28 @@ struct ProfileView: View {
         Task {
             await signOut()
             isSigningOut = false
+        }
+    }
+}
+
+/// Entry into the Blocked list — same GlassCard row chrome as Legal, but opens
+/// an internal cover (not an external `Link`).
+private struct ProfileBlockedCard: View {
+    let action: () -> Void
+
+    var body: some View {
+        GlassCard {
+            Button(action: action) {
+                ProfileRowContent(
+                    symbolName: "hand.raised",
+                    title: "Blocked",
+                    subtitle: "Manage blocked people",
+                    trailingSymbolName: "chevron.right"
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Blocked")
+            .accessibilityHint("Manage blocked people")
         }
     }
 }

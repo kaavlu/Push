@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		988AC7D5ED77DC3FCD8F0D13 /* BlockedUsersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB929B02E0B3E2993CFC1EE2 /* BlockedUsersView.swift */; };
+		9172C333127A78C4E86D2057 /* BlockedUsersViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5EB532A21B78CD3B43A9AFA /* BlockedUsersViewModel.swift */; };
 		B1EBA7BAEDD508D15FEB0980 /* BlockUserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD4FE2BC15FDEA7270058EB /* BlockUserTests.swift */; };
 		072819A00A31FCD7AAE53870 /* LegalDestinationsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B861E69CEF8CFCB3764C888D /* LegalDestinationsTests.swift */; };
 		EB2FE0A6BC8022F0F641F026 /* LegalDestinations.swift in Sources */ = {isa = PBXBuildFile; fileRef = A02315F8157A5D60D25725B1 /* LegalDestinations.swift */; };
@@ -218,6 +220,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		CB929B02E0B3E2993CFC1EE2 /* BlockedUsersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BlockedUsersView.swift"; sourceTree = "<group>"; };
+		C5EB532A21B78CD3B43A9AFA /* BlockedUsersViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BlockedUsersViewModel.swift"; sourceTree = "<group>"; };
 		8BD4FE2BC15FDEA7270058EB /* BlockUserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BlockUserTests.swift"; sourceTree = "<group>"; };
 		B861E69CEF8CFCB3764C888D /* LegalDestinationsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LegalDestinationsTests.swift"; sourceTree = "<group>"; };
 		A02315F8157A5D60D25725B1 /* LegalDestinations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LegalDestinations.swift"; sourceTree = "<group>"; };
@@ -466,6 +470,8 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				CB929B02E0B3E2993CFC1EE2 /* BlockedUsersView.swift */,
+				C5EB532A21B78CD3B43A9AFA /* BlockedUsersViewModel.swift */,
 				A02315F8157A5D60D25725B1 /* LegalDestinations.swift */,
 				7764BF65FABD8886A5CEF5BB /* ActionErrorBanner.swift */,
 				37A5623D7FF0B22A6AB8F5EF /* ActionErrorState.swift */,
@@ -817,6 +823,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				988AC7D5ED77DC3FCD8F0D13 /* BlockedUsersView.swift in Sources */,
+				9172C333127A78C4E86D2057 /* BlockedUsersViewModel.swift in Sources */,
 				EB2FE0A6BC8022F0F641F026 /* LegalDestinations.swift in Sources */,
 				441B0871A77B6D3A6EE02C12 /* ActionErrorBanner.swift in Sources */,
 				A90E4E210610C9F8847862B5 /* ActionErrorState.swift in Sources */,

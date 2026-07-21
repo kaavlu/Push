@@ -198,6 +198,52 @@ final class BlockUserTests: XCTestCase {
         XCTAssertFalse(viewModel.blockingFriendIDs.contains(row.id))
     }
 
+    func testUnblockRemovesFromList() async throws {
+        let container = AppDataContainer(seed: .standard())
+        let friendID = try await container.friends.friends().first!.id
+        try await container.friends.blockUser(friendID)
+        let vm = BlockedUsersViewModel(friends: container.friends, container: container)
+        await vm.load()
+        guard case .loaded(let people) = vm.loadState else {
+            return XCTFail("expected loaded blocked list")
+        }
+        XCTAssertTrue(people.contains { $0.id == friendID })
+        let person = people.first { $0.id == friendID }!
+        await vm.unblock(person)
+        guard case .loaded(let after) = vm.loadState else {
+            return XCTFail("expected loaded after unblock")
+        }
+        XCTAssertFalse(after.contains { $0.id == friendID })
+        XCTAssertNil(vm.actionError)
+    }
+
+    /// Failed unblock must keep the person on the list and surface a banner.
+    func testUnblockFailureKeepsPersonAndSurfacesError() async throws {
+        let container = AppDataContainer(seed: .standard())
+        let friendID = try await container.friends.friends().first!.id
+        try await container.friends.blockUser(friendID)
+        let failingFriends = UnblockFailingFriendRepository(backing: container.friends)
+        let vm = BlockedUsersViewModel(friends: failingFriends, container: container)
+        await vm.load()
+        guard case .loaded(let people) = vm.loadState else {
+            return XCTFail("expected loaded blocked list")
+        }
+        let person = try XCTUnwrap(people.first { $0.id == friendID })
+
+        await vm.unblock(person)
+
+        guard case .loaded(let after) = vm.loadState else {
+            return XCTFail("expected loaded after failed unblock")
+        }
+        XCTAssertTrue(after.contains { $0.id == friendID })
+        let displayName = person.firstName.prefix(1).uppercased() + person.firstName.dropFirst()
+        XCTAssertEqual(
+            vm.actionError?.message,
+            "Couldn't unblock \(displayName). Try again."
+        )
+        XCTAssertFalse(vm.unblockingIDs.contains(person.id))
+    }
+
     private func waitForFriendsLoad(_ viewModel: FriendsViewModel) async {
         for _ in 0..<50 {
             if viewModel.loadState.value != nil { return }
@@ -239,6 +285,45 @@ private final class BlockFailingFriendRepository: FriendRepository {
     }
     func unblockUser(_ personID: Person.ID) async throws {
         try await backing.unblockUser(personID)
+    }
+    func blockedUsers() async throws -> [BlockedPerson] {
+        try await backing.blockedUsers()
+    }
+}
+
+/// Forwards all friend reads/writes except `unblockUser`, which always throws.
+@MainActor
+private final class UnblockFailingFriendRepository: FriendRepository {
+    enum Failure: Error { case expected }
+
+    private let backing: FriendRepository
+
+    init(backing: FriendRepository) {
+        self.backing = backing
+    }
+
+    func friends() async throws -> [Person] { try await backing.friends() }
+    func currentUser() async throws -> Person { try await backing.currentUser() }
+    func presenceStatuses() async throws -> [PresenceStatus] {
+        try await backing.presenceStatuses()
+    }
+    func setCurrentUserAvailability(_ availability: FriendAvailabilityState) async throws {
+        try await backing.setCurrentUserAvailability(availability)
+    }
+    func searchPeople(query: String) async throws -> [PersonSearchResult] {
+        try await backing.searchPeople(query: query)
+    }
+    func sendFriendRequest(to personID: Person.ID) async throws {
+        try await backing.sendFriendRequest(to: personID)
+    }
+    func removeFriend(_ personID: Person.ID) async throws {
+        try await backing.removeFriend(personID)
+    }
+    func blockUser(_ personID: Person.ID) async throws {
+        try await backing.blockUser(personID)
+    }
+    func unblockUser(_ personID: Person.ID) async throws {
+        throw Failure.expected
     }
     func blockedUsers() async throws -> [BlockedPerson] {
         try await backing.blockedUsers()
