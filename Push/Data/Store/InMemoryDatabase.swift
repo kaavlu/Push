@@ -30,6 +30,8 @@ final class InMemoryDatabase: ObservableObject {
     private(set) var friendRequests: [FriendRequest]
     private(set) var acceptedFriendIDs: Set<Person.ID>
     private(set) var profile: UserProfile
+    /// Directed block rows (blocker → blocked). Soft-hide only — no hard delete of history.
+    private(set) var userBlocks: [UserBlock]
 
     /// Seed order matters for deterministic UI (avatar stacks, card order).
     private(set) var orderedPeople: [Person]
@@ -54,6 +56,7 @@ final class InMemoryDatabase: ObservableObject {
         friendRequests = seed.friendRequests
         acceptedFriendIDs = seed.acceptedFriendIDs
         profile = seed.profile
+        userBlocks = []
     }
 
     private func didMutate() {
@@ -81,13 +84,14 @@ final class InMemoryDatabase: ObservableObject {
         didMutate()
     }
 
-    /// Sends an outgoing pending request. Guards self, existing friends, and
-    /// any pending row in either direction between the pair.
+    /// Sends an outgoing pending request. Guards self, existing friends, block
+    /// pairs, and any pending row in either direction between the pair.
     @discardableResult
     func sendFriendRequest(to personID: Person.ID) -> FriendRequest? {
         guard personID != currentUserID else { return nil }
         guard let person = peopleByID[personID] else { return nil }
         guard !acceptedFriendIDs.contains(personID) else { return nil }
+        guard !isBlocked(currentUserID, personID) else { return nil }
 
         if let existing = friendRequests.first(where: {
             $0.status == .pending && involvesPair(personID, request: $0)
@@ -138,8 +142,53 @@ final class InMemoryDatabase: ObservableObject {
         didMutate()
     }
 
+    /// True if either direction of a block exists between `a` and `b`.
+    func isBlocked(_ a: Person.ID, _ b: Person.ID) -> Bool {
+        userBlocks.contains {
+            ($0.blockerID == a && $0.blockedID == b) || ($0.blockerID == b && $0.blockedID == a)
+        }
+    }
+
+    /// Outbound block from current user: tears down friendship + pending requests.
+    /// Shared group membership and historical pushes are preserved (soft-hide).
+    func blockUser(_ personID: Person.ID) {
+        guard personID != currentUserID else { return }
+        if !userBlocks.contains(where: {
+            $0.blockerID == currentUserID && $0.blockedID == personID
+        }) {
+            userBlocks.append(UserBlock(blockerID: currentUserID, blockedID: personID))
+        }
+        acceptedFriendIDs.remove(personID)
+        friendRequests.removeAll { involvesPair(personID, request: $0) }
+        didMutate()
+    }
+
+    /// Removes only the current user's outbound block; friendship stays gone.
+    func unblockUser(_ personID: Person.ID) {
+        userBlocks.removeAll {
+            $0.blockerID == currentUserID && $0.blockedID == personID
+        }
+        didMutate()
+    }
+
+    /// People the current user blocked, with public identity fields.
+    func blockedPeople() -> [BlockedPerson] {
+        userBlocks
+            .filter { $0.blockerID == currentUserID }
+            .compactMap { block -> BlockedPerson? in
+                guard let person = peopleByID[block.blockedID] else { return nil }
+                return BlockedPerson(
+                    id: person.id,
+                    firstName: person.firstName,
+                    handle: handle(for: person.id),
+                    imageAssetPath: person.imageAssetPath
+                )
+            }
+    }
+
     /// Creates a group: caller becomes its active owner, each invitee gets a
     /// pending (`invited`) membership row rather than an immediate one.
+    /// Blocked invitees are skipped (mirrors server `private.is_blocked` guard).
     @discardableResult
     func createGroup(name: String, imageAssetPath: String?, inviteeIDs: [Person.ID]) -> FriendGroup.ID {
         let groupID = "group-\(UUID().uuidString)"
@@ -153,7 +202,8 @@ final class InMemoryDatabase: ObservableObject {
             personID: currentUserID, groupID: groupID,
             role: .owner, sharingLevel: .full, membershipStatus: .active, joinedAt: now
         )
-        let inviteeMemberships = inviteeIDs.map { personID in
+        let allowedInvitees = inviteeIDs.filter { !isBlocked(currentUserID, $0) }
+        let inviteeMemberships = allowedInvitees.map { personID in
             GroupMembership(
                 id: "membership-\(groupID)-\(personID)",
                 personID: personID, groupID: groupID,

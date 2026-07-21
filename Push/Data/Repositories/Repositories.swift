@@ -25,6 +25,13 @@ protocol FriendRepository {
     /// Hard-deletes the accepted friendship with `personID`, then bumps the
     /// store revision so view models reload. No-op if not currently friends.
     func removeFriend(_ personID: Person.ID) async throws
+    /// Blocks `personID`: removes friendship + pending requests between the pair,
+    /// and hides them from search / alerts. Soft-hide for groups/pushes history.
+    func blockUser(_ personID: Person.ID) async throws
+    /// Removes an outbound block. Does **not** restore friendship.
+    func unblockUser(_ personID: Person.ID) async throws
+    /// People the current user has blocked, for settings UI.
+    func blockedUsers() async throws -> [BlockedPerson]
 }
 
 protocol GroupRepository {

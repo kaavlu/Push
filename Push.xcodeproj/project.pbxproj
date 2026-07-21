@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B1EBA7BAEDD508D15FEB0980 /* BlockUserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD4FE2BC15FDEA7270058EB /* BlockUserTests.swift */; };
 		072819A00A31FCD7AAE53870 /* LegalDestinationsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B861E69CEF8CFCB3764C888D /* LegalDestinationsTests.swift */; };
 		EB2FE0A6BC8022F0F641F026 /* LegalDestinations.swift in Sources */ = {isa = PBXBuildFile; fileRef = A02315F8157A5D60D25725B1 /* LegalDestinations.swift */; };
 		441B0871A77B6D3A6EE02C12 /* ActionErrorBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7764BF65FABD8886A5CEF5BB /* ActionErrorBanner.swift */; };
@@ -217,6 +218,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8BD4FE2BC15FDEA7270058EB /* BlockUserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BlockUserTests.swift"; sourceTree = "<group>"; };
 		B861E69CEF8CFCB3764C888D /* LegalDestinationsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LegalDestinationsTests.swift"; sourceTree = "<group>"; };
 		A02315F8157A5D60D25725B1 /* LegalDestinations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LegalDestinations.swift"; sourceTree = "<group>"; };
 		7764BF65FABD8886A5CEF5BB /* ActionErrorBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ActionErrorBanner.swift"; sourceTree = "<group>"; };
@@ -642,6 +644,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				8BD4FE2BC15FDEA7270058EB /* BlockUserTests.swift */,
 				B861E69CEF8CFCB3764C888D /* LegalDestinationsTests.swift */,
 				3F0D61EC00365754BEEB241C /* ProfilePhotoTests.swift */,
 				30EC8288ED6D5DFC46693E12 /* MapPuckHitTestingTests.swift */,
@@ -983,6 +986,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				B1EBA7BAEDD508D15FEB0980 /* BlockUserTests.swift in Sources */,
 				072819A00A31FCD7AAE53870 /* LegalDestinationsTests.swift in Sources */,
 				CBC87FDFB9F7E0EE36A72F25 /* ProfilePhotoTests.swift in Sources */,
 				5FAB0B553AFFCA8F7157CCFD /* MapPuckHitTestingTests.swift in Sources */,
