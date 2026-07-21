@@ -12,10 +12,15 @@ struct ProfileView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.pushLayout) private var layout
     @Environment(\.signOut) private var signOut
+    @Environment(\.deleteAccount) private var deleteAccount
     @StateObject private var viewModel: ProfileViewModel
     @State private var navigationPath: [ProfileRoute] = []
     @State private var isSignOutConfirmationPresented = false
     @State private var isSigningOut = false
+    @State private var isBlockedListPresented = false
+    @State private var isDeleteAccountConfirmationPresented = false
+    @State private var isDeletingAccount = false
+    @State private var deleteAccountError: ActionErrorState?
     private let onClose: (() -> Void)?
 
     @MainActor
@@ -97,6 +102,21 @@ struct ProfileView: View {
             Button("Sign Out", role: .destructive) { performSignOut() }
             Button("Cancel", role: .cancel) { }
         }
+        .confirmationDialog(
+            "Delete Account?",
+            isPresented: $isDeleteAccountConfirmationPresented,
+            titleVisibility: .visible
+        ) {
+            Button("Delete Account", role: .destructive) { performDeleteAccount() }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text(ProfileCopy.deleteAccountConfirmationMessage)
+        }
+        // Cream Blocked list uses its own chrome; path-based Profile destinations
+        // would leave the modal close bar up, so present as a cover instead.
+        .fullScreenCover(isPresented: $isBlockedListPresented) {
+            BlockedUsersView()
+        }
     }
 
     private var profileContent: some View {
@@ -116,12 +136,24 @@ struct ProfileView: View {
                 ProfileRoutesCard(title: "Settings", routes: viewModel.settingsRoutes)
                 ProfileRoutesCard(title: "Privacy", routes: viewModel.privacyRoutes)
                 ProfileConnectCard(viewModel: viewModel)
+                ProfileBlockedCard { isBlockedListPresented = true }
                 ProfileLegalCard(destinations: viewModel.legalDestinations)
-                if signOut.isAvailable {
-                    SignOutButton(isBusy: isSigningOut) {
-                        isSignOutConfirmationPresented = true
-                    }
-                    .padding(.top, ProfileLayout.signOutTopPadding)
+                if let deleteAccountError {
+                    ActionErrorBanner(
+                        message: deleteAccountError.message,
+                        onRetry: { performDeleteAccount() },
+                        onDismiss: { self.deleteAccountError = nil }
+                    )
+                }
+                if signOut.isAvailable || deleteAccount.isAvailable {
+                    ProfileAccountActionsCard(
+                        showSignOut: signOut.isAvailable,
+                        isSigningOut: isSigningOut,
+                        onSignOut: { isSignOutConfirmationPresented = true },
+                        showDeleteAccount: deleteAccount.isAvailable,
+                        isDeletingAccount: isDeletingAccount,
+                        onDeleteAccount: { isDeleteAccountConfirmationPresented = true }
+                    )
                 }
             }
             .padding(.horizontal, ProfileLayout.horizontalPadding(layout))
@@ -144,6 +176,51 @@ struct ProfileView: View {
         Task {
             await signOut()
             isSigningOut = false
+        }
+    }
+
+    /// RPC must succeed before RootView leaves `.app`. Failures stay signed in
+    /// and surface a recoverable banner (never optimistic dismiss).
+    private func performDeleteAccount() {
+        guard !isDeletingAccount else { return }
+        isDeletingAccount = true
+        deleteAccountError = nil
+        Task {
+            do {
+                try await deleteAccount()
+            } catch {
+                deleteAccountError = ActionErrorState(
+                    message: AuthUserMessage.message(for: error, context: .deleteAccount)
+                )
+            }
+            isDeletingAccount = false
+        }
+    }
+}
+
+private enum ProfileCopy {
+    static let deleteAccountConfirmationMessage =
+        "This permanently deletes your account, profile, friend connections, group membership, and pushes you created. This cannot be undone."
+}
+
+/// Entry into the Blocked list — same GlassCard row chrome as Legal, but opens
+/// an internal cover (not an external `Link`).
+private struct ProfileBlockedCard: View {
+    let action: () -> Void
+
+    var body: some View {
+        GlassCard {
+            Button(action: action) {
+                ProfileRowContent(
+                    symbolName: "hand.raised",
+                    title: "Blocked",
+                    subtitle: "Manage blocked people",
+                    trailingSymbolName: "chevron.right"
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Blocked")
+            .accessibilityHint("Manage blocked people")
         }
     }
 }
@@ -281,36 +358,13 @@ private struct ProfileConnectorRow: View {
     }
 }
 
-private struct SignOutButton: View {
-    let isBusy: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: ProfileLayout.signOutSpacing) {
-                if isBusy {
-                    ProgressView()
-                } else {
-                    Text("Sign Out")
-                        .font(.subheadline.weight(.bold))
-                }
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, ProfileLayout.signOutVerticalPadding)
-        }
-        .buttonStyle(.plain)
-        .foregroundStyle(.red)
-        .disabled(isBusy)
-        .accessibilityLabel("Sign out")
-    }
-}
-
 #if DEBUG
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
         PushPreviewMatrix {
             ProfileView()
                 .environment(\.signOut, SignOutAction { })
+                .environment(\.deleteAccount, DeleteAccountAction { })
         }
     }
 }

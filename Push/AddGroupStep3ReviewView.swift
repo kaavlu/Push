@@ -14,6 +14,10 @@ struct AddGroupStep3ReviewView: View {
     let onEditPhoto: () -> Void
     let onEditMembers: () -> Void
     let onSubmit: () async -> Void
+    /// Retry only the photo upload after create already succeeded.
+    let onRetryPhoto: () async -> Void
+    /// Dismiss with the created group and no session photo.
+    let onContinueWithoutPhoto: () -> Void
 
     var body: some View {
         ScrollView {
@@ -24,9 +28,33 @@ struct AddGroupStep3ReviewView: View {
                 if let actionError = viewModel.actionError {
                     ActionErrorBanner(
                         message: actionError.message,
-                        onRetry: { Task { await onSubmit() } },
-                        onDismiss: { viewModel.dismissActionError() }
+                        onRetry: {
+                            Task {
+                                if viewModel.lastCreatedGroupID != nil {
+                                    await onRetryPhoto()
+                                } else {
+                                    await onSubmit()
+                                }
+                            }
+                        },
+                        onDismiss: {
+                            if viewModel.lastCreatedGroupID != nil {
+                                onContinueWithoutPhoto()
+                            } else {
+                                viewModel.dismissActionError()
+                            }
+                        }
                     )
+                    if viewModel.lastCreatedGroupID != nil {
+                        Button(action: onContinueWithoutPhoto) {
+                            Text("Continue without photo")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(PushControlColors.textEspresso)
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Continue without photo")
+                    }
                 }
             }
             .padding(.horizontal, StartPushLayout.horizontalPadding(layout))

@@ -20,7 +20,9 @@ final class SupabaseFriendRepository: FriendRepository {
     }
 
     /// Friends = accepted friendships (plus co-members still visible under group
-    /// RLS). Pending counterparty profiles are visible for Alerts but are not friends.
+    /// RLS). Pending counterparty profiles are visible for Alerts but are not
+    /// friends. Outbound blocks are excluded so soft-hidden co-members never
+    /// appear on Friends / Start Push / Add Group pickers.
     func friends() async throws -> [Person] {
         let friendships = try await store.friendships()
         let accepted = Set(
@@ -33,10 +35,14 @@ final class SupabaseFriendRepository: FriendRepository {
                 .filter { $0.isPending && $0.involves(currentUserID) }
                 .compactMap { $0.otherUserID(relativeTo: currentUserID)?.lowercased() }
         )
+        let blockedIDs = Set(
+            (try await store.listBlockedUsers()).map { $0.id.lowercased() }
+        )
         return try await store.profiles()
             .filter { $0.id.caseInsensitiveCompare(currentUserID) != .orderedSame }
             .filter { row in
                 let id = row.id.lowercased()
+                if blockedIDs.contains(id) { return false }
                 if accepted.contains(id) { return true }
                 if pendingOnly.contains(id) { return false }
                 return true
@@ -69,12 +75,29 @@ final class SupabaseFriendRepository: FriendRepository {
             }
     }
 
-    func sendFriendRequest(to personID: Person.ID) async throws {
+    @discardableResult
+    func sendFriendRequest(to personID: Person.ID) async throws -> FriendRequest.ID {
         try await store.sendFriendRequest(targetUserID: personID)
+    }
+
+    func cancelFriendRequest(id: FriendRequest.ID) async throws {
+        try await store.cancelFriendRequest(id: id)
     }
 
     func removeFriend(_ personID: Person.ID) async throws {
         try await store.removeFriend(targetUserID: personID)
+    }
+
+    func blockUser(_ personID: Person.ID) async throws {
+        try await store.blockUser(targetUserID: personID)
+    }
+
+    func unblockUser(_ personID: Person.ID) async throws {
+        try await store.unblockUser(targetUserID: personID)
+    }
+
+    func blockedUsers() async throws -> [BlockedPerson] {
+        try await store.listBlockedUsers()
     }
 
     // Mirror image of `ProfileRow.mapAvailability` — Swift's raw values are

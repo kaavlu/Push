@@ -25,10 +25,23 @@ of the files in order reproduces the schema.
 - `migrations/0009_friend_requests.sql` — `friendships.requested_by` + pending/accepted/denied
   status checks; `search_profiles`, `send_friend_request`, and `resolve_friend_request`
   RPCs; pending-pair profile SELECT policy for Alerts/Add Friends.
+- `migrations/0013_friend_relationship_lifecycle.sql` — `cancel_friend_request` (requester,
+  pending only, hard-delete); race-safe `send_friend_request` (unique_violation re-read);
+  `remove_friend` deletes any status between the pair so re-request starts clean.
+  Applied remotely via MCP (`list_migrations` includes `0013_friend_relationship_lifecycle`).
 - `migrations/0012_profile_photos.sql` (+ `0012b_…_select_own`) — public `avatars`
   Storage bucket; owner-only SELECT/INSERT/UPDATE/DELETE under `{auth.uid()}/…`.
   No listable public SELECT (public object URLs still work). App stores the public
   object URL on existing `profiles.image_asset_path`.
+- `migrations/0016_user_blocks.sql` — directed `user_blocks`, `private.is_blocked`,
+  `block_user` / `unblock_user` / `list_blocked_users`; guards friend request, search,
+  group invite, and creator-seeded push_responses; soft-hide policy (no hard-delete of
+  historical pushes/groups). Shared group membership unchanged on block.
+- `migrations/0014_delete_account.sql` — parameterless `delete_account()` RPC
+  (`SECURITY DEFINER`, `authenticated` only): best-effort avatars cleanup, group
+  ownership transfer (earliest other active member) or group delete when sole
+  active, remove memberships/friendships, then `DELETE FROM auth.users` for
+  `auth.uid()` (profiles and cascading FKs follow). No target-user argument.
 - `seed.sql` — idempotent public-graph seed keyed off **real** auth IDs (resolved by email).
 
 ## Security model

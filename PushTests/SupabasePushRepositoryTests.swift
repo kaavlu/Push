@@ -110,6 +110,49 @@ final class SupabasePushRepositoryTests: XCTestCase {
         XCTAssertEqual(loader.pushRows.first?.cancelled_at != nil, true)
     }
 
+    func testPastHangoutsDerivesCompletedPushAndSkipsCancelled() async throws {
+        let loader = LiveDataLoaderSpy()
+        let calendar = Calendar.current
+        let now = Date()
+        let monthStart = calendar.date(from: calendar.dateComponents([.year, .month], from: now))!
+        let startsAt = calendar.date(byAdding: .day, value: 2, to: monthStart)!
+        let expiresAt = startsAt.addingTimeInterval(6 * 60 * 60)
+        // Force completed by writing rows with past expiry via the spy after create.
+        let (repo, store) = makeRepository(loader: loader, currentUserID: "creator1")
+        let created = try await repo.createPush(PushDraft(
+            title: "Past dinner", recipientIDs: ["friend_bob"],
+            startsAt: startsAt, locationText: "North Park", notes: "", creatorID: "creator1"
+        ))
+        try await repo.setCurrentUserResponse(planID: created, response: .in)
+
+        // Rewrite expiry into the past so the push becomes historical.
+        guard let index = loader.pushRows.firstIndex(where: { $0.id == created }) else {
+            return XCTFail("missing created push")
+        }
+        let existing = loader.pushRows[index]
+        loader.pushRows[index] = PushRow(
+            id: existing.id, title: existing.title, group_id: existing.group_id,
+            creator_id: existing.creator_id, created_at: existing.created_at,
+            updated_at: existing.updated_at,
+            starts_at: PushDateFormatting.string(startsAt),
+            has_explicit_time: true, is_approximate_time: false,
+            expires_at: PushDateFormatting.string(expiresAt.addingTimeInterval(-7 * 24 * 60 * 60)),
+            cancelled_at: nil, place_id: nil, place_is_suggested: false,
+            state: existing.state, audience: existing.audience, note: existing.note,
+            location_text: existing.location_text
+        )
+        store.notifyPushesChanged()
+
+        let hangouts = try await repo.pastHangouts(forMonthContaining: now)
+        XCTAssertTrue(hangouts.contains { $0.id == created && $0.note == "Past dinner" })
+        XCTAssertTrue(hangouts.contains { $0.id == created && $0.participantIDs.contains("creator1") })
+
+        let historical = try await repo.historicalPlans(forMonthContaining: now)
+        XCTAssertTrue(historical.contains { $0.id == created })
+        let active = try await repo.activePlans()
+        XCTAssertTrue(active.allSatisfy { $0.id != created })
+    }
+
     func testSetCurrentUserResponseUpsertsRsvpAndClearsRespondedAtForPending() async throws {
         let loader = LiveDataLoaderSpy()
         let (repo, store) = makeRepository(loader: loader, currentUserID: "creator1")
@@ -153,5 +196,47 @@ final class SupabasePushRepositoryTests: XCTestCase {
             memberships: memberships, creatorID: "creator1"
         )
         XCTAssertEqual(invitees, ["bob"], "bob is deduped (friend + group member) and the creator is excluded")
+    }
+
+    /// Blocked direct friend tokens are filtered; group co-members stay inviteable.
+    func testCreatePushFiltersBlockedDirectFriendsButKeepsGroupCoMembers() async throws {
+        let loader = LiveDataLoaderSpy()
+        loader.blockedRows = [
+            SearchProfileRow(
+                id: "blocked-peer", first_name: "Blocked", handle: "blocked", image_asset_path: nil
+            )
+        ]
+        loader.membershipRows = [
+            GroupMembershipRow(
+                id: "m1", person_id: "blocked-peer", group_id: "g1", role: "member",
+                membership_status: "active", joined_at: "2026-07-14T00:00:00Z"
+            ),
+            GroupMembershipRow(
+                id: "m2", person_id: "ok-friend", group_id: "g1", role: "member",
+                membership_status: "active", joined_at: "2026-07-14T00:00:00Z"
+            )
+        ]
+        let (repo, _) = makeRepository(loader: loader, currentUserID: "creator1")
+
+        let groupID = try await repo.createPush(PushDraft(
+            title: "Group hang",
+            recipientIDs: ["group_g1"],
+            startsAt: Date(), locationText: "", notes: "", creatorID: "creator1"
+        ))
+        let groupResponses = try await repo.responses().filter { $0.pushID == groupID }
+        XCTAssertTrue(
+            groupResponses.contains { $0.personID == "blocked-peer" && $0.response == .pending },
+            "blocked co-member still gets a group-audience pending row"
+        )
+        XCTAssertTrue(groupResponses.contains { $0.personID == "ok-friend" })
+
+        let directID = try await repo.createPush(PushDraft(
+            title: "Direct",
+            recipientIDs: ["friend_blocked-peer", "friend_ok-friend"],
+            startsAt: Date(), locationText: "", notes: "", creatorID: "creator1"
+        ))
+        let direct = try await repo.responses().filter { $0.pushID == directID }
+        XCTAssertFalse(direct.contains { $0.personID == "blocked-peer" })
+        XCTAssertTrue(direct.contains { $0.personID == "ok-friend" && $0.response == .pending })
     }
 }

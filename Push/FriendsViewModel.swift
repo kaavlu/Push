@@ -66,11 +66,13 @@ final class FriendsViewModel: ObservableObject {
     @Published private(set) var loadState: LoadState<[FriendRowModel]> = .idle
     @Published var searchText: String = ""
     @Published var selectedFilter: FriendsFilter = .all
-    /// The single row expanded inline for its Directions/Start push/Remove actions.
+    /// The single row expanded inline for its compact action rail.
     @Published var expandedFriendID: String?
     /// Friend IDs with an in-flight remove call, so the row can disable its button.
     @Published private(set) var removingFriendIDs: Set<String> = []
-    /// Recoverable mutation error (remove friend) with Retry via `retryLastAction`.
+    /// Friend IDs with an in-flight block call, so the row can disable its button.
+    @Published private(set) var blockingFriendIDs: Set<String> = []
+    /// Recoverable mutation error (remove / block) with Retry via `retryLastAction`.
     @Published private(set) var actionError: ActionErrorState?
 
     private let friends: FriendRepository
@@ -84,6 +86,13 @@ final class FriendsViewModel: ObservableObject {
     // Tracks the last revision we loaded so the subscription skips redundant reloads.
     private var lastSeenRevision = 0
     private var pendingRemove: FriendRowModel?
+    private var pendingBlock: FriendRowModel?
+    private var lastPendingAction: PendingFriendAction?
+
+    private enum PendingFriendAction {
+        case remove
+        case block
+    }
 
     init(
         friends: FriendRepository,
@@ -224,8 +233,16 @@ final class FriendsViewModel: ObservableObject {
     }
 
     func retryLastAction() async {
-        guard let pendingRemove else { return }
-        await removeFriend(pendingRemove)
+        switch lastPendingAction {
+        case .remove:
+            guard let pendingRemove else { return }
+            await removeFriend(pendingRemove)
+        case .block:
+            guard let pendingBlock else { return }
+            await blockFriend(pendingBlock)
+        case .none:
+            return
+        }
     }
 
     /// Pull-to-refresh: re-warm live snapshot, then reload the friends list.
@@ -244,11 +261,35 @@ final class FriendsViewModel: ObservableObject {
             if expandedFriendID == row.id { expandedFriendID = nil }
             actionError = nil
             pendingRemove = nil
+            lastPendingAction = nil
             await load()
         } catch {
             pendingRemove = row
+            lastPendingAction = .remove
             actionError = ActionErrorState(
                 message: "Couldn't remove \(row.friend.name). Try again."
+            )
+        }
+    }
+
+    /// Blocks the person (soft-hide + tear down friendship), then reloads.
+    /// The row stays until the write succeeds — never optimistic remove.
+    func blockFriend(_ row: FriendRowModel) async {
+        guard blockingFriendIDs.insert(row.id).inserted else { return }
+        defer { blockingFriendIDs.remove(row.id) }
+        do {
+            try await friends.blockUser(row.friend.id)
+            lastSeenRevision = containerForRefresh?.storeRevision ?? lastSeenRevision
+            if expandedFriendID == row.id { expandedFriendID = nil }
+            actionError = nil
+            pendingBlock = nil
+            lastPendingAction = nil
+            await load()
+        } catch {
+            pendingBlock = row
+            lastPendingAction = .block
+            actionError = ActionErrorState(
+                message: "Couldn't block \(row.friend.name). Try again."
             )
         }
     }

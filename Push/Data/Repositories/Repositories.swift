@@ -20,11 +20,35 @@ protocol FriendRepository {
     func setCurrentUserAvailability(_ availability: FriendAvailabilityState) async throws
     /// Discover people by display name and/or handle. Never returns the current user.
     func searchPeople(query: String) async throws -> [PersonSearchResult]
-    /// Creates (or re-opens) a pending outgoing request. No-op / throws on invalid targets.
-    func sendFriendRequest(to personID: Person.ID) async throws
-    /// Hard-deletes the accepted friendship with `personID`, then bumps the
-    /// store revision so view models reload. No-op if not currently friends.
+    /// Creates (or re-opens) a pending outgoing request.
+    /// Returns the active request id (existing or newly created).
+    @discardableResult
+    func sendFriendRequest(to personID: Person.ID) async throws -> FriendRequest.ID
+    /// Cancels an outgoing pending request the current user started.
+    /// No-op / throws when the id is missing, not pending, or not owned by the caller.
+    func cancelFriendRequest(id: FriendRequest.ID) async throws
+    /// Hard-deletes the relationship with `personID` (any status), then bumps the
+    /// store revision so view models reload. No-op if no row exists for the pair.
     func removeFriend(_ personID: Person.ID) async throws
+    /// Blocks `personID`: removes friendship + pending requests between the pair,
+    /// and hides them from search / alerts. Soft-hide for groups/pushes history.
+    func blockUser(_ personID: Person.ID) async throws
+    /// Removes an outbound block. Does **not** restore friendship.
+    func unblockUser(_ personID: Person.ID) async throws
+    /// People the current user has blocked, for settings UI.
+    func blockedUsers() async throws -> [BlockedPerson]
+}
+
+/// Errors from group lifecycle mutations (create, rename, photo, invite, leave, etc.).
+/// Maps to 0015 RPC exception strings for mock parity with live.
+enum GroupRepositoryError: Error, Equatable {
+    case notAuthenticated
+    case notOwner
+    case notMember
+    case invalidName
+    case invalidTarget
+    case transferRequired
+    case notPending
 }
 
 protocol GroupRepository {
@@ -34,6 +58,15 @@ protocol GroupRepository {
     /// pending (`invited`) memberships for each invitee — they become members
     /// only after accepting via `AlertRepository.acceptGroupInvite`.
     func createGroup(name: String, imageAssetPath: String?, inviteeIDs: [Person.ID]) async throws -> FriendGroup.ID
+    func renameGroup(groupID: FriendGroup.ID, name: String) async throws
+    func updateGroupPhoto(groupID: FriendGroup.ID, jpegData: Data) async throws
+    func removeGroupPhoto(groupID: FriendGroup.ID) async throws
+    func inviteToGroup(groupID: FriendGroup.ID, inviteeIDs: [Person.ID]) async throws
+    func cancelGroupInvite(membershipID: GroupMembership.ID) async throws
+    func removeMember(groupID: FriendGroup.ID, personID: Person.ID) async throws
+    func leaveGroup(groupID: FriendGroup.ID) async throws
+    func transferOwnership(groupID: FriendGroup.ID, newOwnerID: Person.ID) async throws
+    func deleteGroup(groupID: FriendGroup.ID) async throws
 }
 
 /// Start Push flow output. `recipientIDs` are the flow's tokens
@@ -48,8 +81,10 @@ struct PushDraft {
 }
 
 protocol PushRepository {
-    /// Non-cancelled plans in seed order.
+    /// Non-cancelled, not-yet-expired plans (time-derived active window).
     func activePlans() async throws -> [PushPlan]
+    /// Completed non-cancelled plans whose `startsAt` falls in the given month.
+    func historicalPlans(forMonthContaining date: Date) async throws -> [PushPlan]
     func responses() async throws -> [PushResponse]
     func setCurrentUserResponse(planID: PushPlan.ID, response: PushResponse.Response) async throws
     func pastHangouts(forMonthContaining date: Date) async throws -> [PastHangout]

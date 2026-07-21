@@ -37,6 +37,22 @@ final class GroupsTests: XCTestCase {
         XCTAssertEqual(members.map(\.name), ["Chitty", "Nitin", "Ishan", "Viplove", "Roh"])
         XCTAssertEqual(members.first?.profileImageAssetName, "assets/friends/chitty.png")
         XCTAssertEqual(members.first { $0.id == "nitin" }?.availability, .maybeDown)
+        XCTAssertEqual(members.first?.membershipID, "membership-india-chitty")
+        XCTAssertTrue(members.first?.isOwner == true)
+    }
+
+    func testOwnerAndInviteHelpersUseCachedMemberships() async throws {
+        let viewModel = await loadedViewModel()
+        // Seed current user is not in India (chitty owns it).
+        XCTAssertFalse(viewModel.isCurrentUserOwner(of: "india"))
+        XCTAssertNil(viewModel.currentUserMembership(in: "india"))
+        // Pending invites to exec/michigan are not active memberships.
+        XCTAssertNil(viewModel.currentUserMembership(in: "exec"))
+        // All non-self friends on India roster are occupied; candidates exclude them.
+        let indiaOccupied = Set(try XCTUnwrap(viewModel.groups.first { $0.id == "india" }).memberIDs)
+        let candidates = viewModel.inviteCandidates(for: "india")
+        XCTAssertFalse(candidates.contains { indiaOccupied.contains($0.id) })
+        XCTAssertFalse(candidates.isEmpty)
     }
 
     func testGroupsViewModelUpdatesSelectedGroupLocally() async throws {

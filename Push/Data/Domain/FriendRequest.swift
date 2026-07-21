@@ -31,3 +31,17 @@ struct PersonSearchResult: Identifiable, Equatable {
 
     var id: Person.ID { person.id }
 }
+
+/// Someone the current user has blocked — identity only (no presence / status).
+struct BlockedPerson: Identifiable, Equatable {
+    let id: Person.ID
+    let firstName: String
+    let handle: String
+    let imageAssetPath: String?
+}
+
+/// Directed block edge. Mock store only; live uses `user_blocks` via RPCs (Task 3).
+struct UserBlock: Equatable {
+    let blockerID: Person.ID
+    let blockedID: Person.ID
+}

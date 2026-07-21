@@ -452,12 +452,50 @@ final class LiveDataLoaderSpy: LiveDataLoading {
         return updated
     }
 
-    func removeFriend(targetUserID: String) async throws {
+    func cancelFriendRequest(id: String) async throws {
         if let writeError { throw writeError }
         guard let index = friendshipRows.firstIndex(where: {
-            $0.involves("self") && $0.involves(targetUserID) && $0.isAccepted
-        }) else { return }
+            $0.id == id && $0.isPending && $0.isRequester("self")
+        }) else {
+            throw SupabaseRepositoryError.notFound
+        }
         friendshipRows.remove(at: index)
+    }
+
+    var blockedRows: [SearchProfileRow] = []
+
+    func removeFriend(targetUserID: String) async throws {
+        if let writeError { throw writeError }
+        friendshipRows.removeAll {
+            $0.involves("self") && $0.involves(targetUserID)
+        }
+    }
+
+    func blockUser(targetUserID: String) async throws {
+        if let writeError { throw writeError }
+        friendshipRows.removeAll {
+            $0.involves("self") && $0.involves(targetUserID)
+        }
+        if !blockedRows.contains(where: { $0.id.caseInsensitiveCompare(targetUserID) == .orderedSame }) {
+            blockedRows.append(SearchProfileRow(
+                id: targetUserID,
+                first_name: targetUserID.capitalized,
+                handle: targetUserID,
+                image_asset_path: nil
+            ))
+        }
+    }
+
+    func unblockUser(targetUserID: String) async throws {
+        if let writeError { throw writeError }
+        blockedRows.removeAll {
+            $0.id.caseInsensitiveCompare(targetUserID) == .orderedSame
+        }
+    }
+
+    func listBlockedUsers() async throws -> [SearchProfileRow] {
+        if let writeError { throw writeError }
+        return blockedRows
     }
 
     func loadProfile(id: String) async throws -> ProfileRow {
@@ -495,6 +533,42 @@ final class LiveDataLoaderSpy: LiveDataLoading {
         membershipRows.remove(at: index)
         return existing
     }
+
+    // MARK: - Group lifecycle (0015)
+
+    func renameGroup(groupID: String, name: String) async throws -> GroupRow {
+        if let writeError { throw writeError }
+        return GroupRow(id: groupID, name: name, image_asset_path: nil)
+    }
+
+    func setGroupImage(groupID: String, imagePath: String?) async throws -> GroupRow {
+        if let writeError { throw writeError }
+        return GroupRow(id: groupID, name: "Crew", image_asset_path: imagePath)
+    }
+
+    func inviteToGroup(groupID: String, inviteeIDs: [String]) async throws {
+        if let writeError { throw writeError }
+    }
+
+    func cancelGroupInvite(membershipID: String) async throws {
+        if let writeError { throw writeError }
+    }
+
+    func removeGroupMember(groupID: String, personID: String) async throws {
+        if let writeError { throw writeError }
+    }
+
+    func leaveGroup(groupID: String) async throws {
+        if let writeError { throw writeError }
+    }
+
+    func transferGroupOwnership(groupID: String, newOwnerID: String) async throws {
+        if let writeError { throw writeError }
+    }
+
+    func deleteGroup(groupID: String) async throws {
+        if let writeError { throw writeError }
+    }
 }
 
 private enum TestFailure: Error { case expected }
@@ -502,11 +576,13 @@ private enum TestFailure: Error { case expected }
 @MainActor
 private extension LiveDataStoreTests {
     static func samplePushRow(id: String, creator: String) -> PushRow {
+        // Far-future expiry so time-derived `activePlans()` still includes the
+        // fixture regardless of when the suite runs.
         PushRow(
             id: id, title: "Hang", group_id: nil, creator_id: creator,
-            created_at: "2026-07-14T00:00:00Z", updated_at: "2026-07-14T00:00:00Z",
-            starts_at: "2026-07-14T18:00:00Z", has_explicit_time: true,
-            is_approximate_time: false, expires_at: "2026-07-15T00:00:00Z",
+            created_at: "2030-01-01T00:00:00Z", updated_at: "2030-01-01T00:00:00Z",
+            starts_at: "2030-01-02T18:00:00Z", has_explicit_time: true,
+            is_approximate_time: false, expires_at: "2030-01-03T00:00:00Z",
             cancelled_at: nil, place_id: nil, place_is_suggested: false,
             state: "collecting", audience: "invitees_only", note: nil, location_text: nil
         )

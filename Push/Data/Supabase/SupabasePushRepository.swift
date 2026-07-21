@@ -21,7 +21,19 @@ final class SupabasePushRepository: PushRepository {
     }
 
     func activePlans() async throws -> [PushPlan] {
-        try await store.pushes().map { $0.pushPlan() }.filter { $0.cancelledAt == nil }
+        let now = Date()
+        return try await store.pushes()
+            .map { $0.pushPlan() }
+            .filter { PushLifecycle.isActive($0, now: now) }
+    }
+
+    func historicalPlans(forMonthContaining date: Date) async throws -> [PushPlan] {
+        let now = Date()
+        let calendar = Calendar.current
+        return try await store.pushes()
+            .map { $0.pushPlan() }
+            .filter { PushLifecycle.isHistorical($0, now: now) }
+            .filter { calendar.isDate($0.startsAt, equalTo: date, toGranularity: .month) }
     }
 
     func responses() async throws -> [PushResponse] {
@@ -39,17 +51,29 @@ final class SupabasePushRepository: PushRepository {
         await store.notifyPushesChanged()
     }
 
-    // Calendar and map places are out of scope for pushes persistence (see
-    // plan); live mode has no backing table for either yet.
-    func pastHangouts(forMonthContaining date: Date) async throws -> [PastHangout] { [] }
+    // History/calendar derive from completed pushes; places remain out of
+    // scope for live (no places table) — free-text location still surfaces
+    // via HistoryContentBuilder + location_text on the push row.
+    func pastHangouts(forMonthContaining date: Date) async throws -> [PastHangout] {
+        let now = Date()
+        let plans = try await store.pushes().map { $0.pushPlan() }
+        let responses = try await store.pushResponses().map { $0.pushResponse() }
+        return PastHangoutBuilder.hangouts(
+            plans: plans,
+            responses: responses,
+            monthContaining: date,
+            now: now
+        )
+    }
+
     func allPlaces() async throws -> [Place] { [] }
 
     func createPush(_ draft: PushDraft) async throws -> PushPlan.ID {
         let parsed = PushRecipientResolver.parse(draft.recipientIDs)
         let memberships = try await store.memberships().map { $0.membership() }
-        let invitees = PushRecipientResolver.invitees(
-            groupIDs: parsed.groupIDs, friendIDs: parsed.friendIDs,
-            memberships: memberships, creatorID: draft.creatorID
+        let invitees = try await nonBlockedInvitees(
+            groupIDs: parsed.groupIDs, friendIDs: parsed.friendIDs, creatorID: draft.creatorID,
+            memberships: memberships
         )
         let now = Date()
         let expiresAt = draft.startsAt.addingTimeInterval(PushWriteConstants.expiryWindow)
@@ -89,9 +113,9 @@ final class SupabasePushRepository: PushRepository {
         }
         let parsed = PushRecipientResolver.parse(draft.recipientIDs)
         let memberships = try await store.memberships().map { $0.membership() }
-        let invitees = PushRecipientResolver.invitees(
-            groupIDs: parsed.groupIDs, friendIDs: parsed.friendIDs,
-            memberships: memberships, creatorID: existing.creatorID
+        let invitees = try await nonBlockedInvitees(
+            groupIDs: parsed.groupIDs, friendIDs: parsed.friendIDs, creatorID: existing.creatorID,
+            memberships: memberships
         )
         let expiresAt = draft.startsAt.addingTimeInterval(PushWriteConstants.expiryWindow)
         let updatePayload = PushUpdatePayload(
@@ -146,6 +170,27 @@ final class SupabasePushRepository: PushRepository {
         }
         try await store.insertResponses(newRows)
         try await store.deleteResponses(pushID: planID, personIDs: Array(toRemove))
+    }
+
+    /// Drops blocked **direct** friend tokens only; group-expanded members stay
+    /// (group membership rules apply, not soft-hide) — mirrors
+    /// `LocalPushRepository.nonBlockedInvitees`.
+    private func nonBlockedInvitees(
+        groupIDs: [FriendGroup.ID],
+        friendIDs: [Person.ID],
+        creatorID: Person.ID,
+        memberships: [GroupMembership]
+    ) async throws -> Set<Person.ID> {
+        let blockedIDs = Set(
+            (try await store.listBlockedUsers()).map { $0.id.lowercased() }
+        )
+        let allowedFriendIDs = friendIDs.filter {
+            !blockedIDs.contains($0.lowercased())
+        }
+        return PushRecipientResolver.invitees(
+            groupIDs: groupIDs, friendIDs: allowedFriendIDs,
+            memberships: memberships, creatorID: creatorID
+        )
     }
 }
 

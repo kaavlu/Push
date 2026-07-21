@@ -48,8 +48,20 @@ final class SupabaseAlertRepository: AlertRepository {
     }
 
     func incomingGroupInvites() async throws -> [GroupInvite] {
-        let rows = try await store.incomingGroupInvites()
-        return rows.map { $0.groupInvite() }.sorted { $0.createdAt > $1.createdAt }
+        let invites = try await store.incomingGroupInvites().map { $0.groupInvite() }
+        // Soft-hide invites from blocked inviters. Friendship rows are deleted
+        // server-side on block, but group membership invites remain; resolve is
+        // also guarded by private.is_blocked. Skip the list RPC when empty.
+        guard !invites.isEmpty else { return [] }
+        let blockedIDs = Set(
+            (try await store.listBlockedUsers()).map { $0.id.lowercased() }
+        )
+        return invites
+            .filter { invite in
+                let inviter = invite.inviterID.lowercased()
+                return inviter.isEmpty || !blockedIDs.contains(inviter)
+            }
+            .sorted { $0.createdAt > $1.createdAt }
     }
 
     func acceptGroupInvite(id: GroupInvite.ID) async throws {

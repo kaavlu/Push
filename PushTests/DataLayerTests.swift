@@ -401,10 +401,22 @@ struct ThrowingFriendRepository: FriendRepository {
     func searchPeople(query: String) async throws -> [PersonSearchResult] {
         throw URLError(.badServerResponse)
     }
-    func sendFriendRequest(to personID: Person.ID) async throws {
+    func sendFriendRequest(to personID: Person.ID) async throws -> FriendRequest.ID {
+        throw URLError(.badServerResponse)
+    }
+    func cancelFriendRequest(id: FriendRequest.ID) async throws {
         throw URLError(.badServerResponse)
     }
     func removeFriend(_ personID: Person.ID) async throws {
+        throw URLError(.badServerResponse)
+    }
+    func blockUser(_ personID: Person.ID) async throws {
+        throw URLError(.badServerResponse)
+    }
+    func unblockUser(_ personID: Person.ID) async throws {
+        throw URLError(.badServerResponse)
+    }
+    func blockedUsers() async throws -> [BlockedPerson] {
         throw URLError(.badServerResponse)
     }
 }
