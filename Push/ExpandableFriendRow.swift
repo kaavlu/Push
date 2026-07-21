@@ -129,10 +129,6 @@ private struct ExpandableFriendRowPrimaryButton: View {
     let symbolName: String
     let action: () -> Void
 
-    private var shape: RoundedRectangle {
-        RoundedRectangle(cornerRadius: ExpandableFriendRowLayout.railCornerRadius, style: .continuous)
-    }
-
     var body: some View {
         Button(action: action) {
             HStack(spacing: ExpandableFriendRowLayout.primaryLabelSpacing) {
@@ -146,13 +142,7 @@ private struct ExpandableFriendRowPrimaryButton: View {
             .foregroundStyle(ExpandableFriendRowColor.startPushText)
             .frame(maxWidth: .infinity)
             .frame(height: ExpandableFriendRowLayout.railHeight)
-            .pushGlassBackground(cornerRadius: ExpandableFriendRowLayout.railCornerRadius)
-            .overlay {
-                shape.stroke(
-                    ExpandableFriendRowColor.primaryStroke,
-                    lineWidth: ExpandableFriendRowLayout.primaryStrokeWidth
-                )
-            }
+            .expandableFriendRailSurface()
         }
         .buttonStyle(.plain)
         .accessibilityLabel(label)
@@ -164,10 +154,6 @@ private struct ExpandableFriendRowSecondaryButton: View {
     let label: String
     let symbolName: String
     let action: () -> Void
-
-    private var shape: RoundedRectangle {
-        RoundedRectangle(cornerRadius: ExpandableFriendRowLayout.railCornerRadius, style: .continuous)
-    }
 
     var body: some View {
         Button(action: action) {
@@ -182,13 +168,7 @@ private struct ExpandableFriendRowSecondaryButton: View {
             .foregroundStyle(PushControlColors.textSecondary)
             .padding(.horizontal, ExpandableFriendRowLayout.secondaryHorizontalPadding)
             .frame(height: ExpandableFriendRowLayout.railHeight)
-            .pushGlassBackground(cornerRadius: ExpandableFriendRowLayout.railCornerRadius)
-            .overlay {
-                shape.stroke(
-                    Color.white.opacity(PushGlassStyle.strokeOpacity),
-                    lineWidth: ExpandableFriendRowLayout.emphasisStrokeWidth
-                )
-            }
+            .expandableFriendRailSurface()
         }
         .buttonStyle(.plain)
         .fixedSize(horizontal: true, vertical: false)
@@ -200,10 +180,6 @@ private struct ExpandableFriendRowOverflowMenu: View {
     let isBusy: Bool
     let onRemove: () -> Void
     let onBlock: () -> Void
-
-    private var shape: RoundedRectangle {
-        RoundedRectangle(cornerRadius: ExpandableFriendRowLayout.railCornerRadius, style: .continuous)
-    }
 
     var body: some View {
         Menu {
@@ -221,17 +197,28 @@ private struct ExpandableFriendRowOverflowMenu: View {
                 }
             }
             .frame(width: ExpandableFriendRowLayout.overflowWidth, height: ExpandableFriendRowLayout.railHeight)
-            .pushGlassBackground(cornerRadius: ExpandableFriendRowLayout.railCornerRadius)
-            .overlay {
-                shape.stroke(
-                    Color.white.opacity(PushGlassStyle.strokeOpacity),
-                    lineWidth: ExpandableFriendRowLayout.emphasisStrokeWidth
-                )
-            }
+            .expandableFriendRailSurface()
         }
         .disabled(isBusy)
         .accessibilityLabel("More actions")
         .accessibilityHint("Remove friend or block")
+    }
+}
+
+/// Flat cream fill + thin walnut rim — no glass shadow so the rail sits flush on the card.
+private extension View {
+    func expandableFriendRailSurface() -> some View {
+        let shape = RoundedRectangle(
+            cornerRadius: ExpandableFriendRowLayout.railCornerRadius,
+            style: .continuous
+        )
+        return background(shape.fill(FriendsColor.pageIvory))
+            .overlay {
+                shape.stroke(
+                    ExpandableFriendRowColor.railBorder,
+                    lineWidth: ExpandableFriendRowLayout.railBorderWidth
+                )
+            }
     }
 }
 
@@ -247,7 +234,6 @@ enum ExpandableFriendRowLayout {
 
     static let primaryIconSize: CGFloat = 15
     static let primaryLabelSpacing: CGFloat = 6
-    static let primaryStrokeWidth: CGFloat = 1.0
 
     static let secondaryIconSize: CGFloat = 13
     static let secondaryLabelSpacing: CGFloat = 4
@@ -256,14 +242,16 @@ enum ExpandableFriendRowLayout {
     static let overflowWidth: CGFloat = 40
     static let overflowIconSize: CGFloat = 15
 
+    /// Thin walnut rim (1–2pt) — no glass shadow.
+    static let railBorderWidth: CGFloat = 1.5
+
     static let animationResponse = 0.40
     static let animationDamping = 0.86
-    static let emphasisStrokeWidth: CGFloat = 0.8
 }
 
 enum ExpandableFriendRowColor {
     /// Darker brown than default walnut so Start push reads as primary.
     static let startPushText = Color(red: 0.32, green: 0.18, blue: 0.06)
-    /// Warm rim slightly stronger than plain glass so primary stands out.
-    static let primaryStroke = Color.white.opacity(0.55)
+    /// Soft brand brown rim on rail controls.
+    static let railBorder = PushColorPalette.Accent.walnut.opacity(0.40)
 }
