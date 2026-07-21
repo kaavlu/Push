@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		717902E7743E6D3E257F275E /* SupabaseConfigTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 933F958D948C4473B10E96C8 /* SupabaseConfigTests.swift */; };
 		44783BD3ECF7F1E99ADDB479 /* CrashReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E6FD1D8078C709BE7196DE1 /* CrashReporter.swift */; };
 		DDD8F2ADBCB8163E5E309330 /* PushLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB35D36CF6C0B2BDE78E32C1 /* PushLog.swift */; };
 		3F270BF6B8E608671A598363 /* PushLogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F5079F08567887D86C3291B /* PushLogTests.swift */; };
@@ -198,6 +199,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		933F958D948C4473B10E96C8 /* SupabaseConfigTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SupabaseConfigTests.swift"; sourceTree = "<group>"; };
 		5E6FD1D8078C709BE7196DE1 /* CrashReporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "CrashReporter.swift"; path = "Diagnostics/CrashReporter.swift"; sourceTree = "<group>"; };
 		FB35D36CF6C0B2BDE78E32C1 /* PushLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushLog.swift"; path = "Diagnostics/PushLog.swift"; sourceTree = "<group>"; };
 		2F5079F08567887D86C3291B /* PushLogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PushLogTests.swift"; sourceTree = "<group>"; };
@@ -585,6 +587,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				933F958D948C4473B10E96C8 /* SupabaseConfigTests.swift */,
 				2F5079F08567887D86C3291B /* PushLogTests.swift */,
 				30EC8288ED6D5DFC46693E12 /* MapPuckHitTestingTests.swift */,
 				ECA2C79204C1A37B4EE79B97 /* AddFriendsTests.swift */,
@@ -909,6 +912,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				717902E7743E6D3E257F275E /* SupabaseConfigTests.swift in Sources */,
 				3F270BF6B8E608671A598363 /* PushLogTests.swift in Sources */,
 				5FAB0B553AFFCA8F7157CCFD /* MapPuckHitTestingTests.swift in Sources */,
 				1DA8CBE0771B3102F0A0E81E /* AddFriendsTests.swift in Sources */,
