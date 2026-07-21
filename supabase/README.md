@@ -25,6 +25,10 @@ of the files in order reproduces the schema.
 - `migrations/0009_friend_requests.sql` — `friendships.requested_by` + pending/accepted/denied
   status checks; `search_profiles`, `send_friend_request`, and `resolve_friend_request`
   RPCs; pending-pair profile SELECT policy for Alerts/Add Friends.
+- `migrations/0013_friend_relationship_lifecycle.sql` — `cancel_friend_request` (requester,
+  pending only, hard-delete); race-safe `send_friend_request` (unique_violation re-read);
+  `remove_friend` deletes any status between the pair so re-request starts clean.
+  Applied remotely via MCP (`list_migrations` includes `0013_friend_relationship_lifecycle`).
 - `migrations/0012_profile_photos.sql` (+ `0012b_…_select_own`) — public `avatars`
   Storage bucket; owner-only SELECT/INSERT/UPDATE/DELETE under `{auth.uid()}/…`.
   No listable public SELECT (public object URLs still work). App stores the public

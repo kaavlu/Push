@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		42B08C7AAD8183A4B720AA38 /* FriendRelationshipTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCD184701E575A8AEB5BCFC7 /* FriendRelationshipTests.swift */; };
 		717902E7743E6D3E257F275E /* SupabaseConfigTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 933F958D948C4473B10E96C8 /* SupabaseConfigTests.swift */; };
 		44783BD3ECF7F1E99ADDB479 /* CrashReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E6FD1D8078C709BE7196DE1 /* CrashReporter.swift */; };
 		DDD8F2ADBCB8163E5E309330 /* PushLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB35D36CF6C0B2BDE78E32C1 /* PushLog.swift */; };
@@ -222,6 +223,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		FCD184701E575A8AEB5BCFC7 /* FriendRelationshipTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FriendRelationshipTests.swift"; sourceTree = "<group>"; };
 		933F958D948C4473B10E96C8 /* SupabaseConfigTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SupabaseConfigTests.swift"; sourceTree = "<group>"; };
 		5E6FD1D8078C709BE7196DE1 /* CrashReporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "CrashReporter.swift"; path = "Diagnostics/CrashReporter.swift"; sourceTree = "<group>"; };
 		FB35D36CF6C0B2BDE78E32C1 /* PushLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushLog.swift"; path = "Diagnostics/PushLog.swift"; sourceTree = "<group>"; };
@@ -654,6 +656,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				FCD184701E575A8AEB5BCFC7 /* FriendRelationshipTests.swift */,
 				933F958D948C4473B10E96C8 /* SupabaseConfigTests.swift */,
 				2F5079F08567887D86C3291B /* PushLogTests.swift */,
 				B861E69CEF8CFCB3764C888D /* LegalDestinationsTests.swift */,
@@ -1002,6 +1005,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				42B08C7AAD8183A4B720AA38 /* FriendRelationshipTests.swift in Sources */,
 				717902E7743E6D3E257F275E /* SupabaseConfigTests.swift in Sources */,
 				3F270BF6B8E608671A598363 /* PushLogTests.swift in Sources */,
 				072819A00A31FCD7AAE53870 /* LegalDestinationsTests.swift in Sources */,

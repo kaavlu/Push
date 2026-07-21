@@ -20,10 +20,15 @@ protocol FriendRepository {
     func setCurrentUserAvailability(_ availability: FriendAvailabilityState) async throws
     /// Discover people by display name and/or handle. Never returns the current user.
     func searchPeople(query: String) async throws -> [PersonSearchResult]
-    /// Creates (or re-opens) a pending outgoing request. No-op / throws on invalid targets.
-    func sendFriendRequest(to personID: Person.ID) async throws
-    /// Hard-deletes the accepted friendship with `personID`, then bumps the
-    /// store revision so view models reload. No-op if not currently friends.
+    /// Creates (or re-opens) a pending outgoing request.
+    /// Returns the active request id (existing or newly created).
+    @discardableResult
+    func sendFriendRequest(to personID: Person.ID) async throws -> FriendRequest.ID
+    /// Cancels an outgoing pending request the current user started.
+    /// No-op / throws when the id is missing, not pending, or not owned by the caller.
+    func cancelFriendRequest(id: FriendRequest.ID) async throws
+    /// Hard-deletes the relationship with `personID` (any status), then bumps the
+    /// store revision so view models reload. No-op if no row exists for the pair.
     func removeFriend(_ personID: Person.ID) async throws
 }
 
