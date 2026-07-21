@@ -18,12 +18,13 @@ final class InMemoryDatabase: ObservableObject {
     @Published private(set) var revision: Int = 0
 
     private(set) var peopleByID: [Person.ID: Person]
-    private(set) var groupsByID: [FriendGroup.ID: FriendGroup]
-    private(set) var memberships: [GroupMembership]
+    /// Writable by store extensions in this module; callers outside treat as read-only.
+    var groupsByID: [FriendGroup.ID: FriendGroup]
+    var memberships: [GroupMembership]
     private(set) var placesByID: [Place.ID: Place]
     private(set) var statusesByPersonID: [Person.ID: PresenceStatus]
     private(set) var policies: [SharingPolicy]
-    private(set) var plansByID: [PushPlan.ID: PushPlan]
+    var plansByID: [PushPlan.ID: PushPlan]
     private(set) var responses: [PushResponse]
     private(set) var hangouts: [PastHangout]
     private(set) var feedEvents: [FeedEvent]
@@ -33,8 +34,8 @@ final class InMemoryDatabase: ObservableObject {
 
     /// Seed order matters for deterministic UI (avatar stacks, card order).
     private(set) var orderedPeople: [Person]
-    private(set) var orderedGroups: [FriendGroup]
-    private(set) var orderedPlans: [PushPlan]
+    var orderedGroups: [FriendGroup]
+    var orderedPlans: [PushPlan]
 
     init(seed: SeedData) {
         currentUserID = seed.currentUserID
@@ -56,7 +57,8 @@ final class InMemoryDatabase: ObservableObject {
         profile = seed.profile
     }
 
-    private func didMutate() {
+    /// Internal so lifecycle extensions in sibling files can notify once per write.
+    func didMutate() {
         revision += 1
     }
 

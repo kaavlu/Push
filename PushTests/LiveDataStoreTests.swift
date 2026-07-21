@@ -504,6 +504,42 @@ final class LiveDataLoaderSpy: LiveDataLoading {
         membershipRows.remove(at: index)
         return existing
     }
+
+    // MARK: - Group lifecycle (0015)
+
+    func renameGroup(groupID: String, name: String) async throws -> GroupRow {
+        if let writeError { throw writeError }
+        return GroupRow(id: groupID, name: name, image_asset_path: nil)
+    }
+
+    func setGroupImage(groupID: String, imagePath: String?) async throws -> GroupRow {
+        if let writeError { throw writeError }
+        return GroupRow(id: groupID, name: "Crew", image_asset_path: imagePath)
+    }
+
+    func inviteToGroup(groupID: String, inviteeIDs: [String]) async throws {
+        if let writeError { throw writeError }
+    }
+
+    func cancelGroupInvite(membershipID: String) async throws {
+        if let writeError { throw writeError }
+    }
+
+    func removeGroupMember(groupID: String, personID: String) async throws {
+        if let writeError { throw writeError }
+    }
+
+    func leaveGroup(groupID: String) async throws {
+        if let writeError { throw writeError }
+    }
+
+    func transferGroupOwnership(groupID: String, newOwnerID: String) async throws {
+        if let writeError { throw writeError }
+    }
+
+    func deleteGroup(groupID: String) async throws {
+        if let writeError { throw writeError }
+    }
 }
 
 private enum TestFailure: Error { case expected }

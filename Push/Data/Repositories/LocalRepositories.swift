@@ -126,6 +126,58 @@ final class LocalGroupRepository: GroupRepository {
     ) async throws -> FriendGroup.ID {
         database.createGroup(name: name, imageAssetPath: imageAssetPath, inviteeIDs: inviteeIDs)
     }
+
+    func renameGroup(groupID: FriendGroup.ID, name: String) async throws {
+        try database.renameGroup(groupID: groupID, name: name)
+    }
+
+    func updateGroupPhoto(groupID: FriendGroup.ID, jpegData: Data) async throws {
+        let previous = database.groupsByID[groupID]?.imageAssetPath
+        let url = try GroupPhotoFileStore.save(groupID: groupID, jpegData: jpegData)
+        try database.setGroupImagePath(groupID: groupID, imageAssetPath: url.path)
+        AvatarImageLoader.invalidate(path: previous)
+        AvatarImageLoader.invalidate(path: url.path)
+    }
+
+    func removeGroupPhoto(groupID: FriendGroup.ID) async throws {
+        let previous = database.groupsByID[groupID]?.imageAssetPath
+        try database.setGroupImagePath(groupID: groupID, imageAssetPath: nil)
+        GroupPhotoFileStore.remove(groupID: groupID)
+        AvatarImageLoader.invalidate(path: previous)
+    }
+
+    func inviteToGroup(groupID: FriendGroup.ID, inviteeIDs: [Person.ID]) async throws {
+        try database.inviteToGroup(groupID: groupID, inviteeIDs: inviteeIDs)
+    }
+
+    func cancelGroupInvite(membershipID: GroupMembership.ID) async throws {
+        try database.cancelGroupInvite(membershipID: membershipID)
+    }
+
+    func removeMember(groupID: FriendGroup.ID, personID: Person.ID) async throws {
+        try database.removeMember(groupID: groupID, personID: personID)
+    }
+
+    func leaveGroup(groupID: FriendGroup.ID) async throws {
+        let previousPath = database.groupsByID[groupID]?.imageAssetPath
+        try database.leaveGroup(groupID: groupID)
+        // Sole-owner leave purges the group — clean mock photo file like delete.
+        if database.groupsByID[groupID] == nil {
+            GroupPhotoFileStore.remove(groupID: groupID)
+            AvatarImageLoader.invalidate(path: previousPath)
+        }
+    }
+
+    func transferOwnership(groupID: FriendGroup.ID, newOwnerID: Person.ID) async throws {
+        try database.transferOwnership(groupID: groupID, newOwnerID: newOwnerID)
+    }
+
+    func deleteGroup(groupID: FriendGroup.ID) async throws {
+        let previousPath = database.groupsByID[groupID]?.imageAssetPath
+        try database.deleteGroup(groupID: groupID)
+        GroupPhotoFileStore.remove(groupID: groupID)
+        AvatarImageLoader.invalidate(path: previousPath)
+    }
 }
 
 @MainActor

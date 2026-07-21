@@ -7,6 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		85DAC058D34F49CD87BC2CB6 /* GroupManageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AABA368F2FCCAE6A226132A /* GroupManageView.swift */; };
+		4246F5B2B47B04C3F7BC4BF0 /* GroupListAvatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBB91281B4FDBEB4200E53AE /* GroupListAvatar.swift */; };
+		8F7E56FFC11CB99D0AB3A000 /* GroupDetailHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752E7BDA0403ABDCF49693B9 /* GroupDetailHost.swift */; };
+		1289A8F9D2A3F220F1BC1790 /* GroupDetailSheets.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFE3B5725FB0A3CDD544E54C /* GroupDetailSheets.swift */; };
+		4CB2A72284A6B87CA61BA674 /* GroupDetailManageViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F4317903BF3371CC8FEB1D /* GroupDetailManageViews.swift */; };
+		B09184B45A2F199F704FDE82 /* GroupsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CCC97BC34B987E4477716B9 /* GroupsViewModel.swift */; };
+		EDDCACAA80E4405F903DBF31 /* GroupPhotoFileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60EED318024ABC7E2B3FDF27 /* GroupPhotoFileStore.swift */; };
+		5FB6C20A375CDF8F5B078ED5 /* InMemoryDatabase+GroupLifecycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1805E47125FE669081B952 /* InMemoryDatabase+GroupLifecycle.swift */; };
+		A756BA0079C06B309FD4CF54 /* GroupLifecycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 495DA5007C746FA1C7F586EC /* GroupLifecycleTests.swift */; };
+		26D68ADB8C76ED66B4376227 /* GroupPhotoStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CD80E224F6DA6D4584EE3A1 /* GroupPhotoStorage.swift */; };
 		7B15E35B1D189974D674E9FA /* DayDetailBottomSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 175B3CE0BF6D9E3C2CC407E6 /* DayDetailBottomSheet.swift */; };
 		792092478018022614F60D19 /* PlansWeekSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A09A374313A10652B29401CE /* PlansWeekSummary.swift */; };
 		8A22FA01E2AD9E5F9C800325 /* PlansHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D737A2A60B2CF9B1B21D0E5 /* PlansHistoryView.swift */; };
@@ -231,6 +241,16 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1AABA368F2FCCAE6A226132A /* GroupManageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GroupManageView.swift"; sourceTree = "<group>"; };
+		CBB91281B4FDBEB4200E53AE /* GroupListAvatar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GroupListAvatar.swift"; sourceTree = "<group>"; };
+		752E7BDA0403ABDCF49693B9 /* GroupDetailHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GroupDetailHost.swift"; sourceTree = "<group>"; };
+		CFE3B5725FB0A3CDD544E54C /* GroupDetailSheets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GroupDetailSheets.swift"; sourceTree = "<group>"; };
+		B5F4317903BF3371CC8FEB1D /* GroupDetailManageViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GroupDetailManageViews.swift"; sourceTree = "<group>"; };
+		9CCC97BC34B987E4477716B9 /* GroupsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GroupsViewModel.swift"; sourceTree = "<group>"; };
+		60EED318024ABC7E2B3FDF27 /* GroupPhotoFileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "GroupPhotoFileStore.swift"; path = "Data/GroupPhotoFileStore.swift"; sourceTree = "<group>"; };
+		3E1805E47125FE669081B952 /* InMemoryDatabase+GroupLifecycle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "InMemoryDatabase+GroupLifecycle.swift"; path = "Data/Store/InMemoryDatabase+GroupLifecycle.swift"; sourceTree = "<group>"; };
+		495DA5007C746FA1C7F586EC /* GroupLifecycleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GroupLifecycleTests.swift"; sourceTree = "<group>"; };
+		6CD80E224F6DA6D4584EE3A1 /* GroupPhotoStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "GroupPhotoStorage.swift"; path = "Data/Supabase/GroupPhotoStorage.swift"; sourceTree = "<group>"; };
 		175B3CE0BF6D9E3C2CC407E6 /* DayDetailBottomSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DayDetailBottomSheet.swift"; sourceTree = "<group>"; };
 		A09A374313A10652B29401CE /* PlansWeekSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PlansWeekSummary.swift"; path = "Data/Derived/PlansWeekSummary.swift"; sourceTree = "<group>"; };
 		3D737A2A60B2CF9B1B21D0E5 /* PlansHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PlansHistoryView.swift"; sourceTree = "<group>"; };
@@ -492,6 +512,15 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				1AABA368F2FCCAE6A226132A /* GroupManageView.swift */,
+				CBB91281B4FDBEB4200E53AE /* GroupListAvatar.swift */,
+				752E7BDA0403ABDCF49693B9 /* GroupDetailHost.swift */,
+				CFE3B5725FB0A3CDD544E54C /* GroupDetailSheets.swift */,
+				B5F4317903BF3371CC8FEB1D /* GroupDetailManageViews.swift */,
+				9CCC97BC34B987E4477716B9 /* GroupsViewModel.swift */,
+				60EED318024ABC7E2B3FDF27 /* GroupPhotoFileStore.swift */,
+				3E1805E47125FE669081B952 /* InMemoryDatabase+GroupLifecycle.swift */,
+				6CD80E224F6DA6D4584EE3A1 /* GroupPhotoStorage.swift */,
 				175B3CE0BF6D9E3C2CC407E6 /* DayDetailBottomSheet.swift */,
 				A09A374313A10652B29401CE /* PlansWeekSummary.swift */,
 				3D737A2A60B2CF9B1B21D0E5 /* PlansHistoryView.swift */,
@@ -678,6 +707,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				495DA5007C746FA1C7F586EC /* GroupLifecycleTests.swift */,
 				EF214D5F7E6E0B089AA57659 /* PushLifecycleTests.swift */,
 				E4734F794A8EED0CD4F006BE /* DeleteAccountTests.swift */,
 				FCD184701E575A8AEB5BCFC7 /* FriendRelationshipTests.swift */,
@@ -858,6 +888,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				85DAC058D34F49CD87BC2CB6 /* GroupManageView.swift in Sources */,
+				4246F5B2B47B04C3F7BC4BF0 /* GroupListAvatar.swift in Sources */,
+				8F7E56FFC11CB99D0AB3A000 /* GroupDetailHost.swift in Sources */,
+				1289A8F9D2A3F220F1BC1790 /* GroupDetailSheets.swift in Sources */,
+				4CB2A72284A6B87CA61BA674 /* GroupDetailManageViews.swift in Sources */,
+				B09184B45A2F199F704FDE82 /* GroupsViewModel.swift in Sources */,
+				EDDCACAA80E4405F903DBF31 /* GroupPhotoFileStore.swift in Sources */,
+				5FB6C20A375CDF8F5B078ED5 /* InMemoryDatabase+GroupLifecycle.swift in Sources */,
+				26D68ADB8C76ED66B4376227 /* GroupPhotoStorage.swift in Sources */,
 				7B15E35B1D189974D674E9FA /* DayDetailBottomSheet.swift in Sources */,
 				792092478018022614F60D19 /* PlansWeekSummary.swift in Sources */,
 				8A22FA01E2AD9E5F9C800325 /* PlansHistoryView.swift in Sources */,
@@ -1035,6 +1074,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				A756BA0079C06B309FD4CF54 /* GroupLifecycleTests.swift in Sources */,
 				29BA0D453583C0FB14C4B60F /* PushLifecycleTests.swift in Sources */,
 				D3D467B07433EB01B843EC35 /* DeleteAccountTests.swift in Sources */,
 				42B08C7AAD8183A4B720AA38 /* FriendRelationshipTests.swift in Sources */,

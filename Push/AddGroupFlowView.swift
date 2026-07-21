@@ -51,7 +51,9 @@ struct AddGroupFlowView: View {
                             viewModel: viewModel,
                             onEditPhoto: { goToStep(1) },
                             onEditMembers: { goToStep(2) },
-                            onSubmit: submitAndFinish
+                            onSubmit: submitAndFinish,
+                            onRetryPhoto: retryPhotoAndFinish,
+                            onContinueWithoutPhoto: continueWithoutPhoto
                         )
                     }
                 }
@@ -136,7 +138,22 @@ struct AddGroupFlowView: View {
 
     private func submitAndFinish() async {
         guard let groupID = await viewModel.submit() else { return }
+        // Photo failure: stay on review so the user can Retry or continue without.
+        if viewModel.actionError != nil { return }
         onCreated(groupID, viewModel.pickedImage)
+        dismiss()
+    }
+
+    private func retryPhotoAndFinish() async {
+        let success = await viewModel.retryPhotoUpload()
+        guard success, let groupID = viewModel.lastCreatedGroupID else { return }
+        onCreated(groupID, viewModel.pickedImage)
+        dismiss()
+    }
+
+    private func continueWithoutPhoto() {
+        guard let groupID = viewModel.continueWithoutPhoto() else { return }
+        onCreated(groupID, nil)
         dismiss()
     }
 }

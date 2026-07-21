@@ -1,3 +1,25 @@
+# Complete Group Lifecycle (Issue #43)
+
+## Goal
+Finish live group lifecycle after create + invite accept/deny (`0011`): owners/members
+manage groups from Group Detail; photos persist via Storage; backend-enforced permissions.
+
+## Contract (summary)
+- Design: `docs/superpowers/specs/2026-07-20-complete-group-lifecycle-design.md`
+- Plan: `docs/superpowers/plans/2026-07-20-complete-group-lifecycle.md`
+- Migration `0015_group_lifecycle`: `SECURITY DEFINER` RPCs (rename/photo/invite/cancel/
+  remove/leave/transfer/delete) + public `group-photos` bucket; no broad client writes
+  on `groups` / `group_memberships`.
+- Client: `GroupRepository` lifecycle methods; mock mirrors `0015` rules; live via
+  `SupabaseGroupRepository` → `LiveDataStore` → RPCs + `GroupPhotoStoring` (orphan rollback).
+- UI: Group Detail management hub; `GroupsViewModel` mutations + `ActionErrorBanner`.
+- Hard delete groups; `pushes.group_id` SET NULL; owner leave requires transfer if others remain.
+
+## Acceptance
+See design doc acceptance 1–16; unit coverage in `GroupLifecycleTests` / related suites.
+
+---
+
 # Spec: Complete the Push Lifecycle and Live History (Issue #45)
 
 **Design:** `docs/superpowers/specs/2026-07-20-complete-push-lifecycle-design.md`  
