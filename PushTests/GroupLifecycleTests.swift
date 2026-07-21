@@ -159,6 +159,43 @@ final class GroupLifecycleTests: XCTestCase {
         XCTAssertFalse(container.database.orderedGroups.contains { $0.id == groupID })
     }
 
+    /// Sole-owner leave purges the group and removes the mock photo file (parity with delete).
+    func testOwnerLeaveWhenSoleMemberRemovesPhotoFile() async throws {
+        let container = AppDataContainer(seed: .standard())
+        let groupID = try await container.groups.createGroup(
+            name: "Solo Photo", imageAssetPath: nil, inviteeIDs: []
+        )
+        let jpeg = try XCTUnwrap(
+            ProfilePhotoProcessor.jpegData(from: makeSolidImage(width: 32, height: 32, color: .red))
+        )
+        try await container.groups.updateGroupPhoto(groupID: groupID, jpegData: jpeg)
+        let path = try XCTUnwrap(container.database.groupsByID[groupID]?.imageAssetPath)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: path))
+
+        try await container.groups.leaveGroup(groupID: groupID)
+
+        XCTAssertNil(container.database.groupsByID[groupID])
+        XCTAssertFalse(FileManager.default.fileExists(atPath: path))
+    }
+
+    func testDeleteGroupRemovesPhotoFile() async throws {
+        let container = AppDataContainer(seed: .standard())
+        let groupID = try await container.groups.createGroup(
+            name: "Delete Photo", imageAssetPath: nil, inviteeIDs: []
+        )
+        let jpeg = try XCTUnwrap(
+            ProfilePhotoProcessor.jpegData(from: makeSolidImage(width: 32, height: 32, color: .purple))
+        )
+        try await container.groups.updateGroupPhoto(groupID: groupID, jpegData: jpeg)
+        let path = try XCTUnwrap(container.database.groupsByID[groupID]?.imageAssetPath)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: path))
+
+        try await container.groups.deleteGroup(groupID: groupID)
+
+        XCTAssertNil(container.database.groupsByID[groupID])
+        XCTAssertFalse(FileManager.default.fileExists(atPath: path))
+    }
+
     // MARK: - Transfer / delete
 
     func testTransferOwnershipIsAtomic() async throws {
@@ -282,12 +319,39 @@ final class GroupLifecycleTests: XCTestCase {
         let submittedID = await viewModel.submit()
         let groupID = try XCTUnwrap(submittedID)
         XCTAssertNil(viewModel.actionError)
+        XCTAssertEqual(viewModel.lastCreatedGroupID, groupID)
 
         let group = try XCTUnwrap(container.database.groupsByID[groupID])
         let path = try XCTUnwrap(group.imageAssetPath)
         XCTAssertTrue(FileManager.default.fileExists(atPath: path))
 
         GroupPhotoFileStore.remove(groupID: groupID)
+    }
+
+    /// After create succeeds, continueWithoutPhoto clears the photo error and returns the group ID.
+    func testAddGroupContinueWithoutPhotoReturnsCreatedID() async throws {
+        let container = AppDataContainer(seed: .standard())
+        let friends = try await container.friends.friends()
+        XCTAssertGreaterThanOrEqual(friends.count, 2)
+
+        let viewModel = AddGroupViewModel(container: container)
+        for _ in 0..<20 where viewModel.loadState.value == nil {
+            try await Task.sleep(nanoseconds: 10_000_000)
+        }
+
+        viewModel.groupName = "No Photo Crew"
+        viewModel.selectedFriendIDs = Set(friends.prefix(2).map(\.id))
+        // No pickedImage — submit succeeds without photo.
+        let submittedID = await viewModel.submit()
+        let groupID = try XCTUnwrap(submittedID)
+        XCTAssertEqual(viewModel.lastCreatedGroupID, groupID)
+        XCTAssertNil(viewModel.actionError)
+
+        // Simulate photo-failure residual error then continue without photo.
+        viewModel.dismissActionError()
+        let continued = viewModel.continueWithoutPhoto()
+        XCTAssertEqual(continued, groupID)
+        XCTAssertNil(viewModel.actionError)
     }
 
     // MARK: - GroupsViewModel mutations

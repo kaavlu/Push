@@ -53,6 +53,9 @@ final class AddGroupViewModel: ObservableObject {
     @Published private(set) var loadState: LoadState<[Person]> = .idle
     @Published private(set) var isSubmitting = false
     @Published private(set) var actionError: ActionErrorState?
+    /// Set after create succeeds when a subsequent photo upload fails, so
+    /// Retry can re-upload without re-creating the group.
+    @Published private(set) var lastCreatedGroupID: FriendGroup.ID?
 
     private let container: AppDataContainer?
 
@@ -130,9 +133,14 @@ final class AddGroupViewModel: ObservableObject {
 
     /// Creates the group, then uploads a picked photo when present.
     /// Create failure is retryable (form left intact). Photo failure after a
-    /// successful create still returns the group ID — the group without a
-    /// photo is honest; callers can dismiss while optionally showing a banner.
+    /// successful create returns the group ID with `actionError` set and
+    /// `lastCreatedGroupID` retained so the flow can retry photo or continue.
+    /// If create already succeeded (photo retry path), only re-uploads.
     func submit() async -> FriendGroup.ID? {
+        if lastCreatedGroupID != nil {
+            _ = await retryPhotoUpload()
+            return lastCreatedGroupID
+        }
         guard let container, !isSubmitting else { return nil }
         isSubmitting = true
         defer { isSubmitting = false }
@@ -148,20 +156,56 @@ final class AddGroupViewModel: ObservableObject {
                 do {
                     try await container.groups.updateGroupPhoto(groupID: groupID, jpegData: jpeg)
                     actionError = nil
+                    lastCreatedGroupID = groupID
                 } catch {
-                    // Group exists; surface non-blocking photo error and still complete.
+                    // Group exists; keep ID so Retry can re-upload without re-create.
+                    lastCreatedGroupID = groupID
                     actionError = ActionErrorState(
                         message: "Group created, but the photo didn't save."
                     )
                 }
             } else {
                 actionError = nil
+                lastCreatedGroupID = groupID
             }
             return groupID
         } catch {
             actionError = ActionErrorState(message: "Couldn't create the group. Try again.")
             return nil
         }
+    }
+
+    /// Re-uploads the picked photo for `lastCreatedGroupID`. Returns true on success.
+    @discardableResult
+    func retryPhotoUpload() async -> Bool {
+        guard let container, let groupID = lastCreatedGroupID, !isSubmitting else {
+            return false
+        }
+        guard let image = pickedImage,
+              let jpeg = ProfilePhotoProcessor.jpegData(from: image) else {
+            // Nothing to upload — treat as success so the flow can finish.
+            actionError = nil
+            return true
+        }
+        isSubmitting = true
+        defer { isSubmitting = false }
+        do {
+            try await container.groups.updateGroupPhoto(groupID: groupID, jpegData: jpeg)
+            actionError = nil
+            return true
+        } catch {
+            actionError = ActionErrorState(
+                message: "Group created, but the photo didn't save."
+            )
+            return false
+        }
+    }
+
+    /// Clears the photo error so the flow can finish with the created group and no photo.
+    func continueWithoutPhoto() -> FriendGroup.ID? {
+        let id = lastCreatedGroupID
+        actionError = nil
+        return id
     }
 
     func dismissActionError() {

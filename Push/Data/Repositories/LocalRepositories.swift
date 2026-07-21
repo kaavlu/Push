@@ -148,7 +148,13 @@ final class LocalGroupRepository: GroupRepository {
     }
 
     func leaveGroup(groupID: FriendGroup.ID) async throws {
+        let previousPath = database.groupsByID[groupID]?.imageAssetPath
         try database.leaveGroup(groupID: groupID)
+        // Sole-owner leave purges the group — clean mock photo file like delete.
+        if database.groupsByID[groupID] == nil {
+            GroupPhotoFileStore.remove(groupID: groupID)
+            AvatarImageLoader.invalidate(path: previousPath)
+        }
     }
 
     func transferOwnership(groupID: FriendGroup.ID, newOwnerID: Person.ID) async throws {
@@ -156,7 +162,10 @@ final class LocalGroupRepository: GroupRepository {
     }
 
     func deleteGroup(groupID: FriendGroup.ID) async throws {
+        let previousPath = database.groupsByID[groupID]?.imageAssetPath
         try database.deleteGroup(groupID: groupID)
+        GroupPhotoFileStore.remove(groupID: groupID)
+        AvatarImageLoader.invalidate(path: previousPath)
     }
 }
 

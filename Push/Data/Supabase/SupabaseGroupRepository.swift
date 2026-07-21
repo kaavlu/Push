@@ -86,7 +86,15 @@ final class SupabaseGroupRepository: GroupRepository {
     }
 
     func leaveGroup(groupID: FriendGroup.ID) async throws {
+        // Sole-owner leave deletes the group (same as deleteGroup) — capture the
+        // image path before the cache is cleared so we can best-effort Storage cleanup.
+        let previousPath = await store.cachedGroupImagePath(groupID: groupID)
+        let previousObject = GroupPhotoPath.storageObjectPath(from: previousPath)
         try await store.leaveGroup(groupID: groupID)
+        AvatarImageLoader.invalidate(path: previousPath)
+        if let previousObject {
+            try? await photoStorage?.delete(objectPath: previousObject)
+        }
     }
 
     func transferOwnership(groupID: FriendGroup.ID, newOwnerID: Person.ID) async throws {
