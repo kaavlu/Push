@@ -38,6 +38,10 @@ struct ContentView: View {
             )
             .ignoresSafeArea()
 
+            if viewModel.surfacePhase == .empty || viewModel.surfacePhase == .failed {
+                mapSurfaceOverlay
+            }
+
             if isCreateMenuPresented {
                 createMenuBackdrop
                     .transition(.opacity)
@@ -101,6 +105,30 @@ struct ContentView: View {
         default:
             break
         }
+    }
+
+    /// Lower-middle map card for empty/failed friend presence — below top controls and above bottom nav.
+    /// Spacers pass hits through so the map stays pannable; only the card receives taps.
+    private var mapSurfaceOverlay: some View {
+        VStack(spacing: 0) {
+            Spacer(minLength: 0)
+                .allowsHitTesting(false)
+            MapEmptyOverlay(
+                phase: viewModel.surfacePhase,
+                onAddFriends: {
+                    isFilterDropdownExpanded = false
+                    presentedRoute = .addFriend
+                },
+                onRetry: { Task { await viewModel.load() } }
+            )
+            .padding(.horizontal, MapEmptyOverlayLayout.horizontalPadding)
+            .allowsHitTesting(true)
+            Spacer()
+                .frame(height: MapEmptyOverlayLayout.bottomClearance(layout))
+                .allowsHitTesting(false)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .allowsHitTesting(true)
     }
 
     private var topControlsLayer: some View {
@@ -206,11 +234,7 @@ struct ContentView: View {
         case .addFriend:
             AddFriendsView()
         case .feed:
-            CreatePlaceholderView(
-                title: "Feed",
-                subtitle: "What's happening with your friends.",
-                symbolName: route.systemImageName
-            )
+            FeedDeferredView()
         case .plans:
             PlansView()
         case .startPush:

@@ -158,6 +158,26 @@ final class StartPushViewModel: ObservableObject {
     var submitButtonTitle: String { isEditMode ? "Save changes" : "Start push" }
     var canDeletePush: Bool { persistedPushID != nil }
 
+    /// True when the graph has at least one friend or group to invite.
+    var hasInviteesAvailable: Bool { !friends.isEmpty || !groups.isEmpty }
+
+    /// Step-1 presentation: empty only when load succeeded with no friends and no groups.
+    /// Search no-match keeps `.content` (filtered lists may be empty).
+    var surfacePhase: SurfaceContentPhase {
+        switch loadState {
+        case .idle, .loading:
+            return loadState.value == nil ? .loading : phaseForLoadedRecipients()
+        case .failed:
+            return loadState.value == nil ? .failed : phaseForLoadedRecipients()
+        case .loaded:
+            return phaseForLoadedRecipients()
+        }
+    }
+
+    private func phaseForLoadedRecipients() -> SurfaceContentPhase {
+        hasInviteesAvailable ? .content : .empty
+    }
+
     var selectedRecipients: [PushRecipientItem] {
         (groups + friends).filter { selectedRecipientIDs.contains($0.id) }
     }

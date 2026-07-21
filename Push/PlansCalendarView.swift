@@ -38,15 +38,17 @@ struct PlansCalendarView: View {
 
             Spacer(minLength: WeeklyRecapCardLayout.headerSpacerMinLength)
 
-            Button {
-                viewModel.openHistory()
-            } label: {
-                Text("History ›")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(PushColorPalette.Accent.walnut)
+            if viewModel.showsHistoryLink {
+                Button {
+                    viewModel.openHistory()
+                } label: {
+                    Text("History ›")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(PushColorPalette.Accent.walnut)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Open history")
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel("Open history")
         }
     }
 
@@ -86,13 +88,15 @@ struct PlansCalendarView: View {
 
     private var calendarFooter: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("\(viewModel.totalPushesThisWeek) Pushes this week")
+            Text(viewModel.weekFooterPrimaryText)
                 .font(.footnote.weight(.semibold))
                 .foregroundStyle(PushControlColors.textEspresso)
-            Text("Most active: \(viewModel.mostActiveGroup)")
-                .font(.footnote)
-                .foregroundStyle(PlansColor.metadata)
-            if let bestDay = viewModel.bestDayThisWeek {
+            if viewModel.showsMostActiveGroup {
+                Text("Most active: \(viewModel.mostActiveGroup)")
+                    .font(.footnote)
+                    .foregroundStyle(PlansColor.metadata)
+            }
+            if viewModel.showsBestDay, let bestDay = viewModel.bestDayThisWeek {
                 Text("Best day: \(bestDay)")
                     .font(.caption)
                     .foregroundStyle(PlansColor.metadataSecondary)

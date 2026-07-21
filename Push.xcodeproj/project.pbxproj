@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		11281DC2A4345BAFE89579C1 /* FeedDeferredView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E7D640EAC9375F965E3D9B /* FeedDeferredView.swift */; };
+		D16A4EA302ECBC5BB7B704C7 /* MapEmptyOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA963421CE09159A29FCE55A /* MapEmptyOverlay.swift */; };
+		117AA115D49FD170A614EDD6 /* EmptySurfaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84123F72AC63382EDA610127 /* EmptySurfaceView.swift */; };
+		5E64B61FCD74C989AE6A113F /* EmptySurfaceModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4B96E9283F20FF6B2DC41D6 /* EmptySurfaceModels.swift */; };
+		43012B6BF8D27F4028176FD5 /* EmptySurfaceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ABD426A9B011973748F5AC9 /* EmptySurfaceTests.swift */; };
 		988AC7D5ED77DC3FCD8F0D13 /* BlockedUsersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB929B02E0B3E2993CFC1EE2 /* BlockedUsersView.swift */; };
 		9172C333127A78C4E86D2057 /* BlockedUsersViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5EB532A21B78CD3B43A9AFA /* BlockedUsersViewModel.swift */; };
 		B1EBA7BAEDD508D15FEB0980 /* BlockUserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD4FE2BC15FDEA7270058EB /* BlockUserTests.swift */; };
@@ -189,7 +194,6 @@
 		5217A2B82FF2FA000011F860 /* GroupDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2B72FF2FA000011F860 /* GroupDetailView.swift */; };
 		5217A2BE2FF300000011F860 /* CreateActionModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2BD2FF300000011F860 /* CreateActionModels.swift */; };
 		5217A2C02FF300000011F860 /* CreateActionMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2BF2FF300000011F860 /* CreateActionMenuView.swift */; };
-		5217A2C22FF300000011F860 /* CreatePlaceholderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2C12FF300000011F860 /* CreatePlaceholderView.swift */; };
 		5217A2C42FF300000011F860 /* BottomNavigationBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2C32FF300000011F860 /* BottomNavigationBar.swift */; };
 		5217A2D02FF320000011F860 /* assets in Resources */ = {isa = PBXBuildFile; fileRef = 5217A2CF2FF320000011F860 /* assets */; };
 		5217A2D42FF330000011F860 /* FriendPuckStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2D32FF330000011F860 /* FriendPuckStyle.swift */; };
@@ -244,6 +248,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		D3E7D640EAC9375F965E3D9B /* FeedDeferredView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedDeferredView.swift"; sourceTree = "<group>"; };
+		FA963421CE09159A29FCE55A /* MapEmptyOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MapEmptyOverlay.swift"; sourceTree = "<group>"; };
+		84123F72AC63382EDA610127 /* EmptySurfaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EmptySurfaceView.swift"; sourceTree = "<group>"; };
+		F4B96E9283F20FF6B2DC41D6 /* EmptySurfaceModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EmptySurfaceModels.swift"; sourceTree = "<group>"; };
+		3ABD426A9B011973748F5AC9 /* EmptySurfaceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EmptySurfaceTests.swift"; sourceTree = "<group>"; };
 		CB929B02E0B3E2993CFC1EE2 /* BlockedUsersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BlockedUsersView.swift"; sourceTree = "<group>"; };
 		C5EB532A21B78CD3B43A9AFA /* BlockedUsersViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BlockedUsersViewModel.swift"; sourceTree = "<group>"; };
 		8BD4FE2BC15FDEA7270058EB /* BlockUserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BlockUserTests.swift"; sourceTree = "<group>"; };
@@ -435,7 +444,6 @@
 		5217A2B72FF2FA000011F860 /* GroupDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupDetailView.swift; sourceTree = "<group>"; };
 		5217A2BD2FF300000011F860 /* CreateActionModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateActionModels.swift; sourceTree = "<group>"; };
 		5217A2BF2FF300000011F860 /* CreateActionMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateActionMenuView.swift; sourceTree = "<group>"; };
-		5217A2C12FF300000011F860 /* CreatePlaceholderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatePlaceholderView.swift; sourceTree = "<group>"; };
 		5217A2C32FF300000011F860 /* BottomNavigationBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomNavigationBar.swift; sourceTree = "<group>"; };
 		5217A2CF2FF320000011F860 /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; path = assets; sourceTree = "<group>"; };
 		5217A2D32FF330000011F860 /* FriendPuckStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendPuckStyle.swift; sourceTree = "<group>"; };
@@ -518,6 +526,10 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				D3E7D640EAC9375F965E3D9B /* FeedDeferredView.swift */,
+				FA963421CE09159A29FCE55A /* MapEmptyOverlay.swift */,
+				84123F72AC63382EDA610127 /* EmptySurfaceView.swift */,
+				F4B96E9283F20FF6B2DC41D6 /* EmptySurfaceModels.swift */,
 				CB929B02E0B3E2993CFC1EE2 /* BlockedUsersView.swift */,
 				C5EB532A21B78CD3B43A9AFA /* BlockedUsersViewModel.swift */,
 				1AABA368F2FCCAE6A226132A /* GroupManageView.swift */,
@@ -641,7 +653,6 @@
 				5217A2AF2FF2F1000011F860 /* MainMapModels.swift */,
 				5217A2BD2FF300000011F860 /* CreateActionModels.swift */,
 				5217A2BF2FF300000011F860 /* CreateActionMenuView.swift */,
-				5217A2C12FF300000011F860 /* CreatePlaceholderView.swift */,
 				5217A2B32FF2F8000011F860 /* GroupsModels.swift */,
 				5217A2B52FF2F8000011F860 /* GroupsView.swift */,
 				5217A2B72FF2FA000011F860 /* GroupDetailView.swift */,
@@ -715,6 +726,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				3ABD426A9B011973748F5AC9 /* EmptySurfaceTests.swift */,
 				8BD4FE2BC15FDEA7270058EB /* BlockUserTests.swift */,
 				495DA5007C746FA1C7F586EC /* GroupLifecycleTests.swift */,
 				EF214D5F7E6E0B089AA57659 /* PushLifecycleTests.swift */,
@@ -897,6 +909,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				11281DC2A4345BAFE89579C1 /* FeedDeferredView.swift in Sources */,
+				D16A4EA302ECBC5BB7B704C7 /* MapEmptyOverlay.swift in Sources */,
+				117AA115D49FD170A614EDD6 /* EmptySurfaceView.swift in Sources */,
+				5E64B61FCD74C989AE6A113F /* EmptySurfaceModels.swift in Sources */,
 				988AC7D5ED77DC3FCD8F0D13 /* BlockedUsersView.swift in Sources */,
 				9172C333127A78C4E86D2057 /* BlockedUsersViewModel.swift in Sources */,
 				85DAC058D34F49CD87BC2CB6 /* GroupManageView.swift in Sources */,
@@ -1022,7 +1038,6 @@
 				5217A2B02FF2F1000011F860 /* MainMapModels.swift in Sources */,
 				5217A2BE2FF300000011F860 /* CreateActionModels.swift in Sources */,
 				5217A2C02FF300000011F860 /* CreateActionMenuView.swift in Sources */,
-				5217A2C22FF300000011F860 /* CreatePlaceholderView.swift in Sources */,
 				5217A2B42FF2F8000011F860 /* GroupsModels.swift in Sources */,
 				5217A2B62FF2F8000011F860 /* GroupsView.swift in Sources */,
 				5217A2B82FF2FA000011F860 /* GroupDetailView.swift in Sources */,
@@ -1085,6 +1100,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				43012B6BF8D27F4028176FD5 /* EmptySurfaceTests.swift in Sources */,
 				B1EBA7BAEDD508D15FEB0980 /* BlockUserTests.swift in Sources */,
 				A756BA0079C06B309FD4CF54 /* GroupLifecycleTests.swift in Sources */,
 				29BA0D453583C0FB14C4B60F /* PushLifecycleTests.swift in Sources */,

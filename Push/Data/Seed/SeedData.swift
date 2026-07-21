@@ -49,6 +49,52 @@ struct SeedData {
         )
     }
 
+    /// Current user only — no friends, groups, presence, or plans.
+    static func emptyGraph(now: Date = Date()) -> SeedData {
+        let user = Person(
+            id: SeedIDs.currentUser,
+            firstName: "manav",
+            imageAssetPath: "assets/profile/manav.jpeg"
+        )
+        return SeedData(
+            currentUserID: SeedIDs.currentUser,
+            people: [user],
+            acceptedFriendIDs: [],
+            groups: [],
+            memberships: [],
+            places: [],
+            statuses: [],
+            policies: [],
+            plans: [],
+            responses: [],
+            hangouts: [],
+            feedEvents: [],
+            friendRequests: [],
+            profile: standardProfile()
+        )
+    }
+
+    /// Direct friends exist but no PresenceStatus rows — list shows "Hidden right now".
+    static func friendsWithoutPresence(now: Date = Date()) -> SeedData {
+        let seed = standard(now: now)
+        return SeedData(
+            currentUserID: seed.currentUserID,
+            people: seed.people,
+            acceptedFriendIDs: seed.acceptedFriendIDs,
+            groups: seed.groups,
+            memberships: seed.memberships,
+            places: seed.places,
+            statuses: [],
+            policies: seed.policies,
+            plans: seed.plans,
+            responses: seed.responses,
+            hangouts: seed.hangouts,
+            feedEvents: seed.feedEvents,
+            friendRequests: seed.friendRequests,
+            profile: seed.profile
+        )
+    }
+
     private static func standardFriendRequests(now: Date, people: [Person]) -> [FriendRequest] {
         let austin = people.first { $0.id == "austin" }
             ?? Person(id: "austin", firstName: "austin", imageAssetPath: nil)

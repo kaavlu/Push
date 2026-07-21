@@ -254,6 +254,19 @@ final class PlansViewModelTests: XCTestCase {
         XCTAssertEqual(sunday?.hangouts.count, 3)
     }
 
+    /// Fixed July reference so hangouts land in the current week (seed days 6–12).
+    func testPlansStandardSeedKeepsHistorySummary() async throws {
+        let vm = try await loadedViewModel(referenceDate: julyDate(day: 12))
+        XCTAssertTrue(vm.hasWeekHangoutSummary)
+        XCTAssertTrue(vm.showsHistoryLink)
+        XCTAssertEqual(vm.weekFooterPrimaryText, "\(vm.totalPushesThisWeek) Pushes this week")
+        XCTAssertNotEqual(vm.weekFooterPrimaryText, EmptySurfaceCopy.calendarEmptyFooter)
+        XCTAssertTrue(vm.showsMostActiveGroup)
+        XCTAssertFalse(vm.mostActiveGroup.isEmpty)
+        XCTAssertTrue(vm.showsBestDay)
+        XCTAssertNotNil(vm.bestDayThisWeek)
+    }
+
     // MARK: - Cross-screen refresh subscription
 
     @MainActor

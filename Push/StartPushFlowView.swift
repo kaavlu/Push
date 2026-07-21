@@ -13,6 +13,7 @@ struct StartPushFlowView: View {
     @Environment(\.pushLayout) private var layout
     @State private var movingForward = true
     @State private var isDeleteConfirmationPresented = false
+    @State private var isAddFriendPresented = false
 
     @MainActor
     init(context: StartPushLaunchContext? = nil) {
@@ -34,7 +35,11 @@ struct StartPushFlowView: View {
                 Group {
                     switch viewModel.step {
                     case 1:
-                        StartPushStep1View(viewModel: viewModel, onNext: advance)
+                        StartPushStep1View(
+                            viewModel: viewModel,
+                            onNext: advance,
+                            onAddFriends: { isAddFriendPresented = true }
+                        )
                     case 2:
                         StartPushStep2View(viewModel: viewModel, onNext: advance)
                     case 3:
@@ -54,6 +59,11 @@ struct StartPushFlowView: View {
                 ))
             }
             .animation(.spring(response: 0.30, dampingFraction: 0.84), value: viewModel.step)
+        }
+        .fullScreenCover(isPresented: $isAddFriendPresented, onDismiss: {
+            Task { await viewModel.load() }
+        }) {
+            AddFriendsView()
         }
         .confirmationDialog(
             "Delete this push?",

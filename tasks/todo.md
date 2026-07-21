@@ -1,3 +1,26 @@
+# Honest Empty States (Issue #49)
+
+Design: `docs/superpowers/specs/2026-07-20-honest-empty-states-design.md`
+Plan: `docs/superpowers/plans/2026-07-20-honest-empty-states.md`
+
+- [x] Shared empty-surface kit (`SurfaceContentPhase`, `EmptySurfaceCopy`, cream empty view)
+- [x] Map empty/failed overlay + `MapViewModel.surfacePhase` (Add friends CTA; self-only → empty)
+- [x] Friends empty + Add friends CTA; hide filter chips when zero friends; loading/failed phases
+- [x] Friends hidden-presence rows remain `.content` (not empty)
+- [x] Feed deferred full-screen (copy only, no CTA; not CreatePlaceholder)
+- [x] Calendar honest empty footer; hide History when empty; suppress most-active / best-day
+- [x] Keep Your/Active push empty cards unchanged
+- [x] Seed helpers + focused `EmptySurfaceTests`; mock populated seed preserved
+- [x] Out of scope: presence/Feed/History backends, offline detector
+
+## Verification
+- [x] `scripts/test.sh build` SUCCEEDED
+- [x] `scripts/test.sh suite EmptySurfaceTests` — 11/11, 0 failures
+- [x] `scripts/test.sh suite DataLayerTests` — 26/26, 0 failures
+- [x] `scripts/test.sh suite PlansViewModelTests` — 25/25, 0 failures
+
+---
+
 # Issue #52 — Block / Unblock
 
 - [x] Design + plan
