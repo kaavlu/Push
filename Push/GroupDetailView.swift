@@ -51,8 +51,9 @@ struct GroupDetailView: View {
     }
 
     var body: some View {
-        Group {
-            if isManagePresented {
+        detailContent
+            // Nested cover so Manage slides up/down like Profile / group detail.
+            .fullScreenCover(isPresented: $isManagePresented) {
                 GroupManageView(
                     isOwner: isOwner,
                     canTransfer: canTransfer,
@@ -67,10 +68,7 @@ struct GroupDetailView: View {
                     onLeave: onLeave,
                     onDelete: onDelete
                 )
-            } else {
-                detailContent
             }
-        }
     }
 
     private var detailContent: some View {

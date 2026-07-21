@@ -34,23 +34,39 @@ struct FriendsView: View {
     }
 
     var body: some View {
-        content
+        mainScreen
+            // Same system slide-up / slide-down as Profile (fullScreenCover).
+            .fullScreenCover(item: presentedGroupBinding) { group in
+                GroupDetailHost(
+                    viewModel: groupsViewModel,
+                    group: group,
+                    onStartPush: { launchStartPush(.group(group.id)) }
+                )
+            }
             .fullScreenCover(item: $startPushContext) { context in
                 StartPushFlowView(context: context)
             }
+            .onChange(of: mode) { newMode in
+                // Detail only exists in Groups mode; leaving the tab dismisses it.
+                if newMode != .groups {
+                    groupsViewModel.closeDetail()
+                }
+            }
     }
 
-    @ViewBuilder
-    private var content: some View {
-        if mode == .groups, let group = groupsViewModel.group(for: groupsViewModel.presentedGroupID) {
-            GroupDetailHost(
-                viewModel: groupsViewModel,
-                group: group,
-                onStartPush: { launchStartPush(.group(group.id)) }
-            )
-        } else {
-            mainScreen
-        }
+    /// Drives profile-style cover presentation for group detail.
+    private var presentedGroupBinding: Binding<PushGroupData?> {
+        Binding(
+            get: {
+                guard mode == .groups else { return nil }
+                return groupsViewModel.group(for: groupsViewModel.presentedGroupID)
+            },
+            set: { newValue in
+                if newValue == nil {
+                    groupsViewModel.closeDetail()
+                }
+            }
+        )
     }
 
     private var mainScreen: some View {

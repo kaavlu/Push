@@ -10,16 +10,19 @@ import SwiftUI
 
 struct GroupDetailHost: View {
     @ObservedObject var viewModel: GroupsViewModel
+    /// Seed identity for the cover; live fields re-resolve from the view model
+    /// after renames / photo updates so the open cover stays fresh.
     let group: PushGroupData
     let onStartPush: () -> Void
 
     var body: some View {
-        let groupID = group.id
+        let resolved = viewModel.group(for: group.id) ?? group
+        let groupID = resolved.id
         GroupDetailView(
-            group: group,
-            members: viewModel.members(for: group),
+            group: resolved,
+            members: viewModel.members(for: resolved),
             isOwner: viewModel.isCurrentUserOwner(of: groupID),
-            sessionImage: viewModel.sessionImage(for: group),
+            sessionImage: viewModel.sessionImage(for: resolved),
             inviteCandidates: viewModel.inviteCandidates(for: groupID),
             actionError: viewModel.actionError,
             onStartPush: onStartPush,

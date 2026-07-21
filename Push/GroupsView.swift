@@ -23,23 +23,29 @@ struct GroupsView: View {
     }
 
     var body: some View {
-        content
+        groupsList
+            // Same system slide-up / slide-down as Profile (fullScreenCover).
+            .fullScreenCover(item: presentedGroupBinding) { group in
+                GroupDetailHost(
+                    viewModel: viewModel,
+                    group: group,
+                    onStartPush: { startPushContext = .group(group.id) }
+                )
+            }
             .fullScreenCover(item: $startPushContext) { context in
                 StartPushFlowView(context: context)
             }
     }
 
-    @ViewBuilder
-    private var content: some View {
-        if let group = viewModel.group(for: viewModel.presentedGroupID) {
-            GroupDetailHost(
-                viewModel: viewModel,
-                group: group,
-                onStartPush: { startPushContext = .group(group.id) }
-            )
-        } else {
-            groupsList
-        }
+    private var presentedGroupBinding: Binding<PushGroupData?> {
+        Binding(
+            get: { viewModel.group(for: viewModel.presentedGroupID) },
+            set: { newValue in
+                if newValue == nil {
+                    viewModel.closeDetail()
+                }
+            }
+        )
     }
 
     private var groupsList: some View {
