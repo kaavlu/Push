@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B09184B45A2F199F704FDE82 /* GroupsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CCC97BC34B987E4477716B9 /* GroupsViewModel.swift */; };
 		EDDCACAA80E4405F903DBF31 /* GroupPhotoFileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60EED318024ABC7E2B3FDF27 /* GroupPhotoFileStore.swift */; };
 		5FB6C20A375CDF8F5B078ED5 /* InMemoryDatabase+GroupLifecycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1805E47125FE669081B952 /* InMemoryDatabase+GroupLifecycle.swift */; };
 		A756BA0079C06B309FD4CF54 /* GroupLifecycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 495DA5007C746FA1C7F586EC /* GroupLifecycleTests.swift */; };
@@ -221,6 +222,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		9CCC97BC34B987E4477716B9 /* GroupsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GroupsViewModel.swift"; sourceTree = "<group>"; };
 		60EED318024ABC7E2B3FDF27 /* GroupPhotoFileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "GroupPhotoFileStore.swift"; path = "Data/GroupPhotoFileStore.swift"; sourceTree = "<group>"; };
 		3E1805E47125FE669081B952 /* InMemoryDatabase+GroupLifecycle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "InMemoryDatabase+GroupLifecycle.swift"; path = "Data/Store/InMemoryDatabase+GroupLifecycle.swift"; sourceTree = "<group>"; };
 		495DA5007C746FA1C7F586EC /* GroupLifecycleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GroupLifecycleTests.swift"; sourceTree = "<group>"; };
@@ -472,6 +474,7 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				9CCC97BC34B987E4477716B9 /* GroupsViewModel.swift */,
 				60EED318024ABC7E2B3FDF27 /* GroupPhotoFileStore.swift */,
 				3E1805E47125FE669081B952 /* InMemoryDatabase+GroupLifecycle.swift */,
 				6CD80E224F6DA6D4584EE3A1 /* GroupPhotoStorage.swift */,
@@ -826,6 +829,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				B09184B45A2F199F704FDE82 /* GroupsViewModel.swift in Sources */,
 				EDDCACAA80E4405F903DBF31 /* GroupPhotoFileStore.swift in Sources */,
 				5FB6C20A375CDF8F5B078ED5 /* InMemoryDatabase+GroupLifecycle.swift in Sources */,
 				26D68ADB8C76ED66B4376227 /* GroupPhotoStorage.swift in Sources */,

@@ -290,6 +290,44 @@ final class GroupLifecycleTests: XCTestCase {
         GroupPhotoFileStore.remove(groupID: groupID)
     }
 
+    // MARK: - GroupsViewModel mutations
+
+    func testRemoveMemberFailureSetsActionError() async {
+        let fixture = PushGroupData(
+            id: "g1", name: "Crew", memberCount: 2, memberIDs: ["a", "b"],
+            status: .quiet, activeNowCount: 0, nearbyCount: 0, planCount: 0,
+            imageAssetName: nil, fallbackSymbol: "C", fallbackInitials: "C"
+        )
+        let viewModel = GroupsViewModel(
+            groups: [fixture],
+            groupsRepository: ThrowingGroupRepository()
+        )
+
+        await viewModel.removeMember(groupID: "g1", personID: "b")
+
+        XCTAssertEqual(viewModel.actionError?.message, "Couldn't remove that member. Try again.")
+        // Wait-for-success: list unchanged on failure.
+        XCTAssertEqual(viewModel.groups.map(\.id), ["g1"])
+    }
+
+    func testLeaveGroupSuccessClosesDetail() async throws {
+        let container = AppDataContainer(seed: .standard())
+        let inviteID = "membership-exec-\(container.currentUserID)"
+        try await container.alerts.acceptGroupInvite(id: inviteID)
+
+        let viewModel = GroupsViewModel(container: container)
+        await viewModel.load()
+        let exec = try XCTUnwrap(viewModel.groups.first { $0.id == "exec" })
+        viewModel.openDetail(for: exec)
+        XCTAssertEqual(viewModel.presentedGroupID, "exec")
+
+        await viewModel.leaveGroup(groupID: "exec")
+
+        XCTAssertNil(viewModel.actionError)
+        XCTAssertNil(viewModel.presentedGroupID)
+        XCTAssertNil(viewModel.currentUserMembership(in: "exec"))
+    }
+
     // MARK: - Helpers
 
     /// Creates a group owned by the current user with one active (accepted) member.
@@ -317,4 +355,36 @@ final class GroupLifecycleTests: XCTestCase {
             context.fill(CGRect(origin: .zero, size: size))
         }
     }
+}
+
+/// All group writes throw — mutation failure tests for `GroupsViewModel`.
+private struct ThrowingGroupRepository: GroupRepository {
+    enum Failure: Error { case expected }
+
+    func groups() async throws -> [FriendGroup] { [] }
+    func memberships() async throws -> [GroupMembership] { [] }
+    func createGroup(
+        name: String, imageAssetPath: String?, inviteeIDs: [Person.ID]
+    ) async throws -> FriendGroup.ID { throw Failure.expected }
+    func renameGroup(groupID: FriendGroup.ID, name: String) async throws {
+        throw Failure.expected
+    }
+    func updateGroupPhoto(groupID: FriendGroup.ID, jpegData: Data) async throws {
+        throw Failure.expected
+    }
+    func removeGroupPhoto(groupID: FriendGroup.ID) async throws { throw Failure.expected }
+    func inviteToGroup(groupID: FriendGroup.ID, inviteeIDs: [Person.ID]) async throws {
+        throw Failure.expected
+    }
+    func cancelGroupInvite(membershipID: GroupMembership.ID) async throws {
+        throw Failure.expected
+    }
+    func removeMember(groupID: FriendGroup.ID, personID: Person.ID) async throws {
+        throw Failure.expected
+    }
+    func leaveGroup(groupID: FriendGroup.ID) async throws { throw Failure.expected }
+    func transferOwnership(groupID: FriendGroup.ID, newOwnerID: Person.ID) async throws {
+        throw Failure.expected
+    }
+    func deleteGroup(groupID: FriendGroup.ID) async throws { throw Failure.expected }
 }
