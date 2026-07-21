@@ -49,7 +49,6 @@ This is a **high-fidelity prototype** that can become production later.
 - iMessage extension
 - Ghost Mode
 - Large groups
-- Weekly recap history (History › stub)
 - Dating / social graph features
 
 ---
