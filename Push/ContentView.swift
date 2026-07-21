@@ -38,6 +38,10 @@ struct ContentView: View {
             )
             .ignoresSafeArea()
 
+            if viewModel.surfacePhase == .empty || viewModel.surfacePhase == .failed {
+                mapSurfaceOverlay
+            }
+
             if isCreateMenuPresented {
                 createMenuBackdrop
                     .transition(.opacity)
@@ -101,6 +105,25 @@ struct ContentView: View {
         default:
             break
         }
+    }
+
+    /// Lower-middle map card for empty/failed friend presence — below top controls and above bottom nav.
+    private var mapSurfaceOverlay: some View {
+        VStack(spacing: 0) {
+            Spacer(minLength: 0)
+            MapEmptyOverlay(
+                phase: viewModel.surfacePhase,
+                onAddFriends: {
+                    isFilterDropdownExpanded = false
+                    presentedRoute = .addFriend
+                },
+                onRetry: { Task { await viewModel.load() } }
+            )
+            .padding(.horizontal, MapEmptyOverlayLayout.horizontalPadding)
+            Spacer()
+                .frame(height: MapEmptyOverlayLayout.bottomClearance(layout))
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var topControlsLayer: some View {

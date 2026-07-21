@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D16A4EA302ECBC5BB7B704C7 /* MapEmptyOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA963421CE09159A29FCE55A /* MapEmptyOverlay.swift */; };
 		117AA115D49FD170A614EDD6 /* EmptySurfaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84123F72AC63382EDA610127 /* EmptySurfaceView.swift */; };
 		5E64B61FCD74C989AE6A113F /* EmptySurfaceModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4B96E9283F20FF6B2DC41D6 /* EmptySurfaceModels.swift */; };
 		43012B6BF8D27F4028176FD5 /* EmptySurfaceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ABD426A9B011973748F5AC9 /* EmptySurfaceTests.swift */; };
@@ -220,6 +221,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		FA963421CE09159A29FCE55A /* MapEmptyOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MapEmptyOverlay.swift"; sourceTree = "<group>"; };
 		84123F72AC63382EDA610127 /* EmptySurfaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EmptySurfaceView.swift"; sourceTree = "<group>"; };
 		F4B96E9283F20FF6B2DC41D6 /* EmptySurfaceModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EmptySurfaceModels.swift"; sourceTree = "<group>"; };
 		3ABD426A9B011973748F5AC9 /* EmptySurfaceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EmptySurfaceTests.swift"; sourceTree = "<group>"; };
@@ -470,6 +472,7 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				FA963421CE09159A29FCE55A /* MapEmptyOverlay.swift */,
 				84123F72AC63382EDA610127 /* EmptySurfaceView.swift */,
 				F4B96E9283F20FF6B2DC41D6 /* EmptySurfaceModels.swift */,
 				A02315F8157A5D60D25725B1 /* LegalDestinations.swift */,
@@ -823,6 +826,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				D16A4EA302ECBC5BB7B704C7 /* MapEmptyOverlay.swift in Sources */,
 				117AA115D49FD170A614EDD6 /* EmptySurfaceView.swift in Sources */,
 				5E64B61FCD74C989AE6A113F /* EmptySurfaceModels.swift in Sources */,
 				EB2FE0A6BC8022F0F641F026 /* LegalDestinations.swift in Sources */,

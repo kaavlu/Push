@@ -123,6 +123,27 @@ final class MapViewModel: ObservableObject {
         filters.first { $0.id == selectedFilterID }?.title ?? GroupFilterItem.allFriends.title
     }
 
+    /// Friend-derived map content only — self-only does not count.
+    var hasFriendMapContent: Bool {
+        let pucks = loadState.value ?? []
+        return !pucks.isEmpty || !vagueRegionalSources.isEmpty
+    }
+
+    var surfacePhase: SurfaceContentPhase {
+        switch loadState {
+        case .idle, .loading:
+            return loadState.value == nil ? .loading : phaseForLoadedContent()
+        case .failed:
+            return loadState.value == nil ? .failed : phaseForLoadedContent()
+        case .loaded:
+            return phaseForLoadedContent()
+        }
+    }
+
+    private func phaseForLoadedContent() -> SurfaceContentPhase {
+        hasFriendMapContent ? .content : .empty
+    }
+
     func load() async {
         if loadState.value == nil { loadState = .loading }
         do {
