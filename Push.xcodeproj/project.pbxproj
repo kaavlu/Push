@@ -7,6 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7B15E35B1D189974D674E9FA /* DayDetailBottomSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 175B3CE0BF6D9E3C2CC407E6 /* DayDetailBottomSheet.swift */; };
+		792092478018022614F60D19 /* PlansWeekSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A09A374313A10652B29401CE /* PlansWeekSummary.swift */; };
+		8A22FA01E2AD9E5F9C800325 /* PlansHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D737A2A60B2CF9B1B21D0E5 /* PlansHistoryView.swift */; };
+		C06AA80BBD32256753462BF3 /* HistoryContentBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA7B0839579D318CE9A998AF /* HistoryContentBuilder.swift */; };
+		29BA0D453583C0FB14C4B60F /* PushLifecycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF214D5F7E6E0B089AA57659 /* PushLifecycleTests.swift */; };
+		BC11E7FB0617C8B0C426EE68 /* PastHangoutBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE56B7F040C1B42083A8A60E /* PastHangoutBuilder.swift */; };
+		817B0429E87AA79935FFE845 /* PushLifecycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D30BC34017B5A8300B3496E /* PushLifecycle.swift */; };
 		E3176B6B38ECE0284BCB193C /* ProfileAccountActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12187C13380877BA7D3E9D92 /* ProfileAccountActions.swift */; };
 		D3D467B07433EB01B843EC35 /* DeleteAccountTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4734F794A8EED0CD4F006BE /* DeleteAccountTests.swift */; };
 		42B08C7AAD8183A4B720AA38 /* FriendRelationshipTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCD184701E575A8AEB5BCFC7 /* FriendRelationshipTests.swift */; };
@@ -197,7 +204,6 @@
 		31CE692EDFCE0B5ECDC4C1DD /* StartPushStep4View.swift in Sources */ = {isa = PBXBuildFile; fileRef = 640CA4B8601EE8D9224ECDE3 /* StartPushStep4View.swift */; };
 		AA01000100000000AA010001 /* YourPushCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA01000200000000AA010002 /* YourPushCard.swift */; };
 		AA01000700000000AA010007 /* ReviewPushCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA01000800000000AA010008 /* ReviewPushCard.swift */; };
-		AA01000300000000AA010003 /* ManagePushView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA01000400000000AA010004 /* ManagePushView.swift */; };
 		AA02000200000000AA020002 /* FriendsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA02000100000000AA020001 /* FriendsView.swift */; };
 		AA02000400000000AA020004 /* FriendsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA02000300000000AA020003 /* FriendsViewModel.swift */; };
 		AA02000600000000AA020006 /* FriendsStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA02000500000000AA020005 /* FriendsStyle.swift */; };
@@ -225,6 +231,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		175B3CE0BF6D9E3C2CC407E6 /* DayDetailBottomSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DayDetailBottomSheet.swift"; sourceTree = "<group>"; };
+		A09A374313A10652B29401CE /* PlansWeekSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PlansWeekSummary.swift"; path = "Data/Derived/PlansWeekSummary.swift"; sourceTree = "<group>"; };
+		3D737A2A60B2CF9B1B21D0E5 /* PlansHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PlansHistoryView.swift"; sourceTree = "<group>"; };
+		BA7B0839579D318CE9A998AF /* HistoryContentBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "HistoryContentBuilder.swift"; path = "Data/Derived/HistoryContentBuilder.swift"; sourceTree = "<group>"; };
+		EF214D5F7E6E0B089AA57659 /* PushLifecycleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PushLifecycleTests.swift"; sourceTree = "<group>"; };
+		DE56B7F040C1B42083A8A60E /* PastHangoutBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PastHangoutBuilder.swift"; path = "Data/Derived/PastHangoutBuilder.swift"; sourceTree = "<group>"; };
+		9D30BC34017B5A8300B3496E /* PushLifecycle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushLifecycle.swift"; path = "Data/Derived/PushLifecycle.swift"; sourceTree = "<group>"; };
 		12187C13380877BA7D3E9D92 /* ProfileAccountActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ProfileAccountActions.swift"; sourceTree = "<group>"; };
 		E4734F794A8EED0CD4F006BE /* DeleteAccountTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeleteAccountTests.swift"; sourceTree = "<group>"; };
 		FCD184701E575A8AEB5BCFC7 /* FriendRelationshipTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FriendRelationshipTests.swift"; sourceTree = "<group>"; };
@@ -424,7 +437,6 @@
 		640CA4B8601EE8D9224ECDE3 /* StartPushStep4View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartPushStep4View.swift; sourceTree = "<group>"; };
 		AA01000200000000AA010002 /* YourPushCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YourPushCard.swift; sourceTree = "<group>"; };
 		AA01000800000000AA010008 /* ReviewPushCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewPushCard.swift; sourceTree = "<group>"; };
-		AA01000400000000AA010004 /* ManagePushView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManagePushView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -480,6 +492,12 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				175B3CE0BF6D9E3C2CC407E6 /* DayDetailBottomSheet.swift */,
+				A09A374313A10652B29401CE /* PlansWeekSummary.swift */,
+				3D737A2A60B2CF9B1B21D0E5 /* PlansHistoryView.swift */,
+				BA7B0839579D318CE9A998AF /* HistoryContentBuilder.swift */,
+				DE56B7F040C1B42083A8A60E /* PastHangoutBuilder.swift */,
+				9D30BC34017B5A8300B3496E /* PushLifecycle.swift */,
 				12187C13380877BA7D3E9D92 /* ProfileAccountActions.swift */,
 				5E6FD1D8078C709BE7196DE1 /* CrashReporter.swift */,
 				FB35D36CF6C0B2BDE78E32C1 /* PushLog.swift */,
@@ -607,7 +625,6 @@
 				5217A2E92FF380000011F860 /* ReviewPushesView.swift */,
 				AA01000200000000AA010002 /* YourPushCard.swift */,
 				AA01000800000000AA010008 /* ReviewPushCard.swift */,
-				AA01000400000000AA010004 /* ManagePushView.swift */,
 				A043BAE1603803A839C0CB52 /* StartPushModels.swift */,
 				A5534EA92B26FA8ADC30543F /* StartPushStyle.swift */,
 				F8FD0BA84A167FE482ED4A92 /* StartPushFlowView.swift */,
@@ -661,6 +678,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				EF214D5F7E6E0B089AA57659 /* PushLifecycleTests.swift */,
 				E4734F794A8EED0CD4F006BE /* DeleteAccountTests.swift */,
 				FCD184701E575A8AEB5BCFC7 /* FriendRelationshipTests.swift */,
 				933F958D948C4473B10E96C8 /* SupabaseConfigTests.swift */,
@@ -840,6 +858,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				7B15E35B1D189974D674E9FA /* DayDetailBottomSheet.swift in Sources */,
+				792092478018022614F60D19 /* PlansWeekSummary.swift in Sources */,
+				8A22FA01E2AD9E5F9C800325 /* PlansHistoryView.swift in Sources */,
+				C06AA80BBD32256753462BF3 /* HistoryContentBuilder.swift in Sources */,
+				BC11E7FB0617C8B0C426EE68 /* PastHangoutBuilder.swift in Sources */,
+				817B0429E87AA79935FFE845 /* PushLifecycle.swift in Sources */,
 				E3176B6B38ECE0284BCB193C /* ProfileAccountActions.swift in Sources */,
 				44783BD3ECF7F1E99ADDB479 /* CrashReporter.swift in Sources */,
 				DDD8F2ADBCB8163E5E309330 /* PushLog.swift in Sources */,
@@ -969,7 +993,6 @@
 				5217A2EA2FF380000011F860 /* ReviewPushesView.swift in Sources */,
 				AA01000100000000AA010001 /* YourPushCard.swift in Sources */,
 				AA01000700000000AA010007 /* ReviewPushCard.swift in Sources */,
-				AA01000300000000AA010003 /* ManagePushView.swift in Sources */,
 				F511D9CB8F68D9D9B0341314 /* StartPushModels.swift in Sources */,
 				E5A6E743849E63F8101AC616 /* StartPushStyle.swift in Sources */,
 				C8C8050EED40EF171CC2784D /* StartPushFlowView.swift in Sources */,
@@ -1012,6 +1035,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				29BA0D453583C0FB14C4B60F /* PushLifecycleTests.swift in Sources */,
 				D3D467B07433EB01B843EC35 /* DeleteAccountTests.swift in Sources */,
 				42B08C7AAD8183A4B720AA38 /* FriendRelationshipTests.swift in Sources */,
 				717902E7743E6D3E257F275E /* SupabaseConfigTests.swift in Sources */,

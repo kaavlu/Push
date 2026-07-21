@@ -212,7 +212,13 @@ final class PlansViewModelTests: XCTestCase {
         } else {
             date = try julyDate(day: 6)
         }
-        let container = AppDataContainer(seed: .standard(now: date), referenceDate: date)
+        // Freeze lifecycle clock to the seed timeline so active/historical
+        // filters match the July fixture (wall clock would expire every plan).
+        let container = AppDataContainer(
+            seed: .standard(now: date),
+            referenceDate: date,
+            clock: { date }
+        )
         let vm = PlansViewModel(container: container, referenceDate: date)
         await vm.load()
         return vm
@@ -295,7 +301,11 @@ final class PlansViewModelTests: XCTestCase {
 
     func testRespondWritesThroughToRepository() async throws {
         let date = try julyDate(day: 6)
-        let container = AppDataContainer(seed: .standard(now: date), referenceDate: date)
+        let container = AppDataContainer(
+            seed: .standard(now: date),
+            referenceDate: date,
+            clock: { date }
+        )
         let vm = PlansViewModel(container: container, referenceDate: date)
         await vm.load()
         let pending = try XCTUnwrap(vm.plans.first { $0.id == "food-tonight" })
@@ -320,6 +330,7 @@ final class ControllablePushRepository: PushRepository {
     var setResponseCalls: [(PushPlan.ID, PushResponse.Response)] = []
 
     func activePlans() async throws -> [PushPlan] { [] }
+    func historicalPlans(forMonthContaining date: Date) async throws -> [PushPlan] { [] }
     func responses() async throws -> [PushResponse] { [] }
     func pastHangouts(forMonthContaining date: Date) async throws -> [PastHangout] { [] }
     func allPlaces() async throws -> [Place] { [] }

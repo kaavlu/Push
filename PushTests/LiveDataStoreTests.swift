@@ -511,11 +511,13 @@ private enum TestFailure: Error { case expected }
 @MainActor
 private extension LiveDataStoreTests {
     static func samplePushRow(id: String, creator: String) -> PushRow {
+        // Far-future expiry so time-derived `activePlans()` still includes the
+        // fixture regardless of when the suite runs.
         PushRow(
             id: id, title: "Hang", group_id: nil, creator_id: creator,
-            created_at: "2026-07-14T00:00:00Z", updated_at: "2026-07-14T00:00:00Z",
-            starts_at: "2026-07-14T18:00:00Z", has_explicit_time: true,
-            is_approximate_time: false, expires_at: "2026-07-15T00:00:00Z",
+            created_at: "2030-01-01T00:00:00Z", updated_at: "2030-01-01T00:00:00Z",
+            starts_at: "2030-01-02T18:00:00Z", has_explicit_time: true,
+            is_approximate_time: false, expires_at: "2030-01-03T00:00:00Z",
             cancelled_at: nil, place_id: nil, place_is_suggested: false,
             state: "collecting", audience: "invitees_only", note: nil, location_text: nil
         )

@@ -24,6 +24,15 @@ struct PlansView: View {
             .refreshable {
                 await viewModel.refresh()
             }
+
+            // Full-bleed bottom popup (edge-to-edge width), not a nested system sheet.
+            if let day = viewModel.selectedDay {
+                DayDetailBottomSheet(day: day) {
+                    viewModel.selectedDay = nil
+                }
+                .transition(.identity)
+                .zIndex(1)
+            }
         }
         .safeAreaInset(edge: .top, spacing: 0) {
             PlansPageHeader(dismissAction: { dismiss() })
@@ -54,6 +63,9 @@ struct PlansView: View {
         }
         .fullScreenCover(item: $viewModel.reviewFocusPlan) { plan in
             ReviewPushesView(viewModel: viewModel, focusPlan: plan)
+        }
+        .fullScreenCover(isPresented: $viewModel.isHistoryPresented) {
+            PlansHistoryView(viewModel: viewModel)
         }
     }
 

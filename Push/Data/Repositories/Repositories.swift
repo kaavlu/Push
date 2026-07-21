@@ -53,8 +53,10 @@ struct PushDraft {
 }
 
 protocol PushRepository {
-    /// Non-cancelled plans in seed order.
+    /// Non-cancelled, not-yet-expired plans (time-derived active window).
     func activePlans() async throws -> [PushPlan]
+    /// Completed non-cancelled plans whose `startsAt` falls in the given month.
+    func historicalPlans(forMonthContaining date: Date) async throws -> [PushPlan]
     func responses() async throws -> [PushResponse]
     func setCurrentUserResponse(planID: PushPlan.ID, response: PushResponse.Response) async throws
     func pastHangouts(forMonthContaining date: Date) async throws -> [PastHangout]

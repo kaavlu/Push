@@ -90,7 +90,12 @@ final class AppDataContainer {
     }
 
     /// MOCK: unchanged behavior — InMemoryDatabase + Local* repos.
-    init(seed: SeedData, referenceDate: Date = Date()) {
+    /// `clock` is for lifecycle filtering in tests that freeze seed time; app uses wall clock.
+    init(
+        seed: SeedData,
+        referenceDate: Date = Date(),
+        clock: (@Sendable () -> Date)? = nil
+    ) {
         let database = InMemoryDatabase(seed: seed)
         self.database = database
         self.currentUserID = database.currentUserID
@@ -98,7 +103,8 @@ final class AppDataContainer {
         self.liveStore = nil
         self.friends = LocalFriendRepository(database: database)
         self.groups = LocalGroupRepository(database: database)
-        self.pushes = LocalPushRepository(database: database)
+        let resolvedClock = clock ?? { Date() }
+        self.pushes = LocalPushRepository(database: database, clock: resolvedClock)
         self.profile = LocalProfileRepository(database: database)
         self.sharing = LocalSharingRepository(database: database)
         self.feed = LocalFeedRepository(database: database)

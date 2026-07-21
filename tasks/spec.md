@@ -1,50 +1,34 @@
-# Complete Friend Relationship Lifecycle (Issue #44)
+# Spec: Complete the Push Lifecycle and Live History (Issue #45)
+
+**Design:** `docs/superpowers/specs/2026-07-20-complete-push-lifecycle-design.md`  
+**Issue:** https://github.com/kaavlu/Push/issues/45
 
 ## Goal
-Harden the live friend system so every relationship state is consistent across
-search, requests, Alerts, Friends list, and backend authorization — without
-rebuilding the existing send/accept/deny/remove flows.
 
-## Canonical states
-One relationship state per pair, derived from the single `friendships` row
-(`user_low < user_high`):
+Finish live Push lifecycle (active → happening → completed), derive History/calendar from real push rows, and wire History › to a month list + read-only detail — without rebuilding create/edit/RSVP/cancel/delete.
 
-| State | Row | Surfaces |
-|---|---|---|
-| No relationship | no row, or `denied` | search: Add Friend |
-| Outgoing request | `pending` + `requested_by` = me | search: Cancel; Alerts: hidden |
-| Incoming request | `pending` + `requested_by` ≠ me | search Accept/Decline; Alerts |
-| Friends | `accepted` | Friends list; search: Friends |
+## Locked decisions
 
-Closed states (`denied`, cancelled/deleted) never appear as active relationships.
+1. **Derive History on read** from `pushes` + `push_responses` (no hangout table).
+2. **Active** while `cancelledAt == nil && now < expiresAt` (time-only).
+3. **Cancelled** excluded from Active, History, and calendar.
+4. **Lifecycle phases** derived on read; DB `state` not list source of truth.
+5. **Edit + RSVP** allowed until expiry (including after `startsAt`).
+6. **History ›** opens month History list → item detail.
+7. Participants in History = `.in` respondents (not physical attendance).
+8. Mock keeps seed hangouts; live never uses them.
 
-## Backend contract (migration `0013`)
-- **`send_friend_request`**: idempotent on active pending; rejects already-friends;
-  re-opens `denied` as new pending; race-safe on unique pair (unique_violation
-  re-reads and applies the same rules).
-- **`resolve_friend_request`**: recipient only; pending only (stale IDs rejected).
-- **`cancel_friend_request`**: requester only; pending only; hard-deletes the row
-  so Alerts and search clear, and a later send inserts cleanly.
-- **`remove_friend`**: either participant; deletes the pair row for any status
-  (accepted/pending/denied) so removal always clears incompatible request state;
-  group memberships and historical pushes are untouched.
+## Deliverables
 
-Authorization stays in SECURITY DEFINER RPCs — no raw table writes from clients.
-
-## Client contract
-- `FriendRepository.cancelFriendRequest(id:)` (mock + live).
-- Search maps the same relation enum already used by Add Friends.
-- Add Friends: Cancel on outgoing; mutation failures use `ActionErrorBanner` +
-  optimistic rollback (do not wipe search results into full-screen failed).
-- Successful mutations bump friendship revision / clear profile cache as today
-  so Friends, Alerts, and search agree after reload.
+- [x] `PushLifecycle` + history/hangout builder (pure), unit tests
+- [x] `activePlans` / `historicalPlans` / `pastHangouts` in Local + Supabase repos
+- [x] `PushTimingFormatter` uses derived happening for “now”
+- [x] PlansViewModel: month-change reload; History route/state
+- [x] History list + read-only detail UI; wire History ›
+- [x] Remove/unwire `ManagePushView` stub
+- [x] Focused tests + build
+- [ ] Manual two-account checklist (live env)
 
 ## Out of scope
-Blocking, suggestions, contact import, presence beyond existing friend access,
-realtime beyond current refresh, UI redesigns.
 
-## Acceptance
-Live two-account scenarios 1–17 in GitHub issue #44; unit coverage for
-duplicate/reciprocal send, cancel, deny re-request, remove + re-add, search
-mapping, optimistic rollback, and unauthorized/stale resolve paths (mock +
-loader fakes).
+Presence/places backend, attendance, feed, realtime, notifications, weekly recap storytelling, materialized hangouts, cron.
