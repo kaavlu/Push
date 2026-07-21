@@ -67,6 +67,10 @@ struct RootView: View {
                 enter(initial)
                 if case .preparing(let user) = initial { await prepare(user) }
             }
+            .onOpenURL { url in
+                guard mode == .live else { return }
+                Task { await handleOpenURL(url) }
+            }
     }
 
     @ViewBuilder private var content: some View {
@@ -113,6 +117,17 @@ struct RootView: View {
         // otherwise look unchanged and never re-trigger `onAuthenticated`).
         authModel.signOutReset()
         enter(.gate)
+    }
+
+    /// Recovery emails open `pushapp://auth/reset…`. Establish the recovery
+    /// session on the service, show set-password on the gate, and leave `.app`
+    /// if the user was already signed in.
+    @MainActor
+    private func handleOpenURL(_ url: URL) async {
+        let handled = await authModel.handleOpenURL(url)
+        if handled {
+            enter(.gate)
+        }
     }
 
     @MainActor

@@ -108,4 +108,7 @@ private struct ThrowingAlertRepository: AlertRepository {
     func incomingFriendRequests() async throws -> [FriendRequest] { throw Failure.unavailable }
     func acceptFriendRequest(id: FriendRequest.ID) async throws { throw Failure.unavailable }
     func denyFriendRequest(id: FriendRequest.ID) async throws { throw Failure.unavailable }
+    func incomingGroupInvites() async throws -> [GroupInvite] { throw Failure.unavailable }
+    func acceptGroupInvite(id: GroupInvite.ID) async throws { throw Failure.unavailable }
+    func denyGroupInvite(id: GroupInvite.ID) async throws { throw Failure.unavailable }
 }

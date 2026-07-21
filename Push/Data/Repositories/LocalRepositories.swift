@@ -29,6 +29,18 @@ final class LocalAlertRepository: AlertRepository {
     func denyFriendRequest(id: FriendRequest.ID) async throws {
         database.resolveFriendRequest(id: id, status: .denied)
     }
+
+    func incomingGroupInvites() async throws -> [GroupInvite] {
+        database.pendingGroupInvites(for: database.currentUserID)
+    }
+
+    func acceptGroupInvite(id: GroupInvite.ID) async throws {
+        database.resolveGroupInvite(id: id, accept: true)
+    }
+
+    func denyGroupInvite(id: GroupInvite.ID) async throws {
+        database.resolveGroupInvite(id: id, accept: false)
+    }
 }
 
 @MainActor
@@ -96,6 +108,12 @@ final class LocalGroupRepository: GroupRepository {
 
     func memberships() async throws -> [GroupMembership] {
         database.memberships
+    }
+
+    func createGroup(
+        name: String, imageAssetPath: String?, inviteeIDs: [Person.ID]
+    ) async throws -> FriendGroup.ID {
+        database.createGroup(name: name, imageAssetPath: imageAssetPath, inviteeIDs: inviteeIDs)
     }
 }
 
@@ -308,6 +326,23 @@ final class LocalProfileRepository: ProfileRepository {
             mapPreferences: mapPreferences,
             closeFriends: closeFriends
         )
+    }
+
+    func updateProfilePhoto(jpegData: Data) async throws {
+        let previous = database.peopleByID[database.currentUserID]?.imageAssetPath
+        let url = try ProfilePhotoFileStore.save(
+            userID: database.currentUserID, jpegData: jpegData
+        )
+        database.updatePersonImage(id: database.currentUserID, imageAssetPath: url.path)
+        AvatarImageLoader.invalidate(path: previous)
+        AvatarImageLoader.invalidate(path: url.path)
+    }
+
+    func removeProfilePhoto() async throws {
+        let previous = database.peopleByID[database.currentUserID]?.imageAssetPath
+        database.updatePersonImage(id: database.currentUserID, imageAssetPath: nil)
+        ProfilePhotoFileStore.remove(userID: database.currentUserID)
+        AvatarImageLoader.invalidate(path: previous)
     }
 }
 

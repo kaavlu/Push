@@ -128,6 +128,80 @@ final class LiveDataStoreTests: XCTestCase {
         XCTAssertEqual(profile.chosenAvailability, .freeNow)
         XCTAssertEqual(container.storeRevision, 0)
     }
+
+    func testRefreshClearsCachesAndRefetchesOnce() async throws {
+        let loader = LiveDataLoaderSpy()
+        loader.pushRows = [Self.samplePushRow(id: "push-1", creator: "self")]
+        let store = LiveDataStore(loader: loader)
+        try await store.warm()
+        XCTAssertEqual(loader.loadCounts, [1, 1, 1, 1, 1, 1])
+
+        loader.pushRows = [
+            Self.samplePushRow(id: "push-1", creator: "self"),
+            Self.samplePushRow(id: "push-2", creator: "friend")
+        ]
+        var revisions: [Int] = []
+        let sub = store.onChange { revisions.append($0) }
+
+        try await store.refresh()
+
+        let pushes = try await store.pushes()
+        XCTAssertEqual(pushes.map(\.id), ["push-1", "push-2"])
+        XCTAssertEqual(loader.loadCounts, [2, 2, 2, 2, 2, 2])
+        XCTAssertEqual(revisions, [1])
+        XCTAssertEqual(store.revision, 1)
+        _ = sub
+    }
+
+    func testConcurrentRefreshSharesOneInFlight() async throws {
+        let loader = LiveDataLoaderSpy()
+        let store = LiveDataStore(loader: loader)
+        try await store.warm()
+        loader.loadCounts = [0, 0, 0, 0, 0, 0]
+
+        async let a: Void = store.refresh()
+        async let b: Void = store.refresh()
+        _ = try await (a, b)
+
+        XCTAssertEqual(loader.loadCounts, [1, 1, 1, 1, 1, 1])
+        XCTAssertEqual(store.revision, 1)
+    }
+
+    func testFailedRefreshLeavesCacheAndRevisionUntouched() async throws {
+        let loader = LiveDataLoaderSpy()
+        loader.pushRows = [Self.samplePushRow(id: "push-1", creator: "self")]
+        let store = LiveDataStore(loader: loader)
+        try await store.warm()
+        let before = store.revision
+        loader.shouldFailLoads = true
+
+        do {
+            try await store.refresh()
+            XCTFail("expected throw")
+        } catch {
+            // expected
+        }
+
+        loader.shouldFailLoads = false
+        let pushes = try await store.pushes()
+        XCTAssertEqual(pushes.map(\.id), ["push-1"])
+        XCTAssertEqual(store.revision, before)
+    }
+
+    func testRefreshSessionOnPreparedContainerRefetches() async throws {
+        let loader = LiveDataLoaderSpy()
+        let container = try await AppDataContainer.prepareLive(loader: loader, currentUserID: "self")
+        XCTAssertEqual(loader.loadCounts, [1, 1, 1, 1, 1, 1])
+        try await container.refreshSession()
+        XCTAssertEqual(loader.loadCounts, [2, 2, 2, 2, 2, 2])
+    }
+
+    func testRefreshSessionOnMockIsNoOp() async throws {
+        let container = AppDataContainer(seed: .standard())
+        let before = container.storeRevision
+        try await container.refreshSession()
+        XCTAssertEqual(container.storeRevision, before)
+    }
 }
 
 // Not `private`: reused by `SupabasePushRepositoryTests` for stateful push
@@ -138,6 +212,7 @@ final class LiveDataLoaderSpy: LiveDataLoading {
     var loadCounts = [0, 0, 0, 0, 0, 0]
     var maximumConcurrentLoads = 0
     var writeError: Error?
+    var shouldFailLoads = false
     var duplicateProfiles = false
     var pushRows: [PushRow] = []
     var responseRows: [PushResponseRow] = []
@@ -190,7 +265,13 @@ final class LiveDataLoaderSpy: LiveDataLoading {
         return .fixture(id: userID, name: "Self", availability: rawValue)
     }
 
+    func updateImagePath(userID: String, imageAssetPath: String?) async throws -> ProfileRow {
+        if let writeError { throw writeError }
+        return .fixture(id: userID, name: "Self", imagePath: imageAssetPath)
+    }
+
     private func load(index: Int) async throws {
+        if shouldFailLoads { throw TestFailure.expected }
         loadCounts[index] += 1
         activeLoads += 1
         maximumConcurrentLoads = max(maximumConcurrentLoads, activeLoads)
@@ -382,6 +463,38 @@ final class LiveDataLoaderSpy: LiveDataLoading {
     func loadProfile(id: String) async throws -> ProfileRow {
         .fixture(id: id, name: id.capitalized)
     }
+
+    // MARK: - Group invites
+
+    var createdGroupRows: [GroupRow] = []
+    var groupInviteRows: [GroupInviteRow] = []
+
+    func createGroup(name: String, imageAssetPath: String?, inviteeIDs: [String]) async throws -> GroupRow {
+        if let writeError { throw writeError }
+        let row = GroupRow(id: "group-\(createdGroupRows.count + 1)", name: name, image_asset_path: imageAssetPath)
+        createdGroupRows.append(row)
+        return row
+    }
+
+    func incomingGroupInvites() async throws -> [GroupInviteRow] { groupInviteRows }
+
+    func resolveGroupInvite(membershipID: String, accept: Bool) async throws -> GroupMembershipRow {
+        if let writeError { throw writeError }
+        guard let index = membershipRows.firstIndex(where: { $0.id == membershipID }) else {
+            throw SupabaseRepositoryError.notFound
+        }
+        let existing = membershipRows[index]
+        if accept {
+            let updated = GroupMembershipRow(
+                id: existing.id, person_id: existing.person_id, group_id: existing.group_id,
+                role: existing.role, membership_status: "active", joined_at: existing.joined_at
+            )
+            membershipRows[index] = updated
+            return updated
+        }
+        membershipRows.remove(at: index)
+        return existing
+    }
 }
 
 private enum TestFailure: Error { case expected }
@@ -409,10 +522,14 @@ private extension LiveDataStoreTests {
 
 private extension ProfileRow {
     static func fixture(
-        id: String, name: String, handle: String = "@test", availability: String = "free_now"
+        id: String,
+        name: String,
+        handle: String = "@test",
+        availability: String = "free_now",
+        imagePath: String? = nil
     ) -> ProfileRow {
         ProfileRow(
-            id: id, first_name: name, handle: handle, image_asset_path: nil,
+            id: id, first_name: name, handle: handle, image_asset_path: imagePath,
             availability_choice: availability, visibility_note: "Visible",
             settings_activity_visibility: nil, settings_map_preferences: nil,
             settings_close_friends: nil

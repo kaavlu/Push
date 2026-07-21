@@ -25,6 +25,10 @@ of the files in order reproduces the schema.
 - `migrations/0009_friend_requests.sql` — `friendships.requested_by` + pending/accepted/denied
   status checks; `search_profiles`, `send_friend_request`, and `resolve_friend_request`
   RPCs; pending-pair profile SELECT policy for Alerts/Add Friends.
+- `migrations/0012_profile_photos.sql` (+ `0012b_…_select_own`) — public `avatars`
+  Storage bucket; owner-only SELECT/INSERT/UPDATE/DELETE under `{auth.uid()}/…`.
+  No listable public SELECT (public object URLs still work). App stores the public
+  object URL on existing `profiles.image_asset_path`.
 - `seed.sql` — idempotent public-graph seed keyed off **real** auth IDs (resolved by email).
 
 ## Security model
@@ -36,8 +40,17 @@ of the files in order reproduces the schema.
 
 ## Test identities (created via REAL Supabase Auth — never SQL-inserted)
 `.test`/`.example` TLDs are rejected by GoTrue's validator, so real-TLD emails are used.
-The project must have **"Confirm email" OFF** (`mailer_autoconfirm = true`) so signups are
-immediately usable without sending email.
+The project may have **"Confirm email" OFF** (`mailer_autoconfirm = true`) for immediate
+sessions, or ON for a confirmation email — the iOS client handles both via `SignUpResult`
+(`.authenticated` vs `.confirmationRequired`).
+
+### Auth deep links (Issue #32)
+- Custom URL scheme: `pushapp`
+- Password recovery redirect: `pushapp://auth/reset`
+- Add that URL under Authentication → URL Configuration → Redirect URLs in the
+  Supabase dashboard (and keep it in sync if the scheme changes).
+- The shared `SupabaseClient` sets `redirectToURL` to the same value so recovery and
+  related auth emails open the app.
 
 | Role | Email | Password | In graph? |
 |---|---|---|---|

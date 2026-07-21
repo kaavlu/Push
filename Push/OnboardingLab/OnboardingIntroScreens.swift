@@ -74,22 +74,10 @@ struct OnboardingWelcomeScreen: View {
                 action: "Sign in"
             ) { model.goToSignIn() }
             .padding(.top, 2)
-            terms
+            LegalConsentText()
         }
     }
 
-    private var terms: some View {
-        (Text("By continuing you agree to Push's ")
-            + Text("Terms").foregroundColor(OnboardingLabColor.walnut).bold()
-            + Text(" & ")
-            + Text("Privacy").foregroundColor(OnboardingLabColor.walnut).bold()
-            + Text("."))
-            .font(OnboardingLabFont.text(12, .regular))
-            .foregroundStyle(OnboardingLabColor.textTertiary)
-            .multilineTextAlignment(.center)
-            .padding(.horizontal, 12)
-            .padding(.top, 6)
-    }
 }
 
 private enum OnboardingWelcomeHeroLayout {

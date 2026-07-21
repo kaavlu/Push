@@ -63,6 +63,14 @@ final class SupabaseLiveDataLoader: LiveDataLoading {
         }
     }
 
+    func updateImagePath(userID: String, imageAssetPath: String?) async throws -> ProfileRow {
+        try await PushLog.logged("updateImagePath") {
+            try await client.from("profiles")
+                .update(ProfileImagePayload(image_asset_path: imageAssetPath))
+                .eq("id", value: userID).select().single().execute().value
+        }
+    }
+
     func loadPushes() async throws -> [PushRow] {
         try await PushLog.logged("loadPushes") {
             try await client.from("pushes").select().execute().value
@@ -181,6 +189,38 @@ final class SupabaseLiveDataLoader: LiveDataLoading {
                 .value
         }
     }
+
+    func createGroup(name: String, imageAssetPath: String?, inviteeIDs: [String]) async throws -> GroupRow {
+        try await PushLog.logged("createGroup") {
+            try await client
+                .rpc(
+                    "create_group",
+                    params: CreateGroupParams(
+                        group_name: name, image_path: imageAssetPath, invitee_ids: inviteeIDs
+                    )
+                )
+                .execute()
+                .value
+        }
+    }
+
+    func incomingGroupInvites() async throws -> [GroupInviteRow] {
+        try await PushLog.logged("incomingGroupInvites") {
+            try await client.rpc("incoming_group_invites").execute().value
+        }
+    }
+
+    func resolveGroupInvite(membershipID: String, accept: Bool) async throws -> GroupMembershipRow {
+        try await PushLog.logged("resolveGroupInvite") {
+            try await client
+                .rpc(
+                    "resolve_group_invite",
+                    params: ResolveGroupInviteParams(membership_id: membershipID, accept: accept)
+                )
+                .execute()
+                .value
+        }
+    }
 }
 
 private struct SearchProfilesParams: Encodable {
@@ -201,6 +241,17 @@ private struct RemoveFriendParams: Encodable {
     let other_user_id: String
 }
 
+private struct CreateGroupParams: Encodable {
+    let group_name: String
+    let image_path: String?
+    let invitee_ids: [String]
+}
+
+private struct ResolveGroupInviteParams: Encodable {
+    let membership_id: String
+    let accept: Bool
+}
+
 private struct ProfileBasicsPayload: Encodable {
     let first_name: String
     let handle: String
@@ -208,4 +259,19 @@ private struct ProfileBasicsPayload: Encodable {
 
 private struct AvailabilityPayload: Encodable {
     let availability_choice: String
+}
+
+/// Explicit null encoding so remove-photo clears the column (default Optional
+/// synthesis uses encodeIfPresent and would omit the key entirely).
+private struct ProfileImagePayload: Encodable {
+    let image_asset_path: String?
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(image_asset_path, forKey: .image_asset_path)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case image_asset_path
+    }
 }

@@ -113,7 +113,7 @@ struct SeedData {
 
     private static func standardMemberships(now: Date) -> [GroupMembership] {
         let joinedAt = now.addingTimeInterval(-SeedTime.ninetyDays)
-        return groupRosters.flatMap { roster in
+        let activeMemberships = groupRosters.flatMap { roster in
             roster.memberIDs.enumerated().map { index, personID in
                 GroupMembership(
                     id: "membership-\(roster.groupID)-\(personID)",
@@ -126,6 +126,34 @@ struct SeedData {
                 )
             }
         }
+        return activeMemberships + standardPendingGroupInvites(now: now)
+    }
+
+    /// Two pending invites addressed to the current user so Alerts' "Group
+    /// Requests" section has something to show out of the box in DEBUG,
+    /// mirroring `standardFriendRequests`. Both existing groups already have
+    /// an owner (ram), so no new group/roster is needed just for this.
+    private static func standardPendingGroupInvites(now: Date) -> [GroupMembership] {
+        [
+            GroupMembership(
+                id: "membership-exec-\(SeedIDs.currentUser)",
+                personID: SeedIDs.currentUser,
+                groupID: "exec",
+                role: .member,
+                sharingLevel: .full,
+                membershipStatus: .invited,
+                joinedAt: now.addingTimeInterval(-SeedTime.halfHour)
+            ),
+            GroupMembership(
+                id: "membership-michigan-\(SeedIDs.currentUser)",
+                personID: SeedIDs.currentUser,
+                groupID: "michigan",
+                role: .member,
+                sharingLevel: .full,
+                membershipStatus: .invited,
+                joinedAt: now.addingTimeInterval(-SeedTime.hour)
+            )
+        ]
     }
 
     // MARK: - Places

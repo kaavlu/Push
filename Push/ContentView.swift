@@ -11,6 +11,7 @@ import UIKit
 
 struct ContentView: View {
     @Environment(\.pushLayout) private var layout
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var viewModel = MapViewModel()
     @StateObject private var alertsViewModel = AlertsViewModel()
     @State private var selectedNavigationItem: BottomNavigationItem = .map
@@ -21,6 +22,8 @@ struct ContentView: View {
     @State private var startPushContext: StartPushLaunchContext?
     @State private var mapSpan = MapDefaults.region.span
     @State private var forcedRenderSpan: MKCoordinateSpan?
+    /// Skip the first `.active` after launch — bootstrap already warms the live store.
+    @State private var hasEnteredBackground = false
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -80,6 +83,23 @@ struct ContentView: View {
         }
         .fullScreenCover(item: $startPushContext) { context in
             StartPushFlowView(context: context)
+        }
+        .onChange(of: scenePhase) { newPhase in
+            handleScenePhase(newPhase)
+        }
+    }
+
+    private func handleScenePhase(_ phase: ScenePhase) {
+        switch phase {
+        case .background:
+            hasEnteredBackground = true
+        case .active:
+            guard hasEnteredBackground else { return }
+            hasEnteredBackground = false
+            // Foreground re-warm failures stay silent; pull-to-refresh can surface errors.
+            Task { try? await AppDataContainer.shared.refreshSession() }
+        default:
+            break
         }
     }
 

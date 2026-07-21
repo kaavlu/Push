@@ -16,7 +16,7 @@ Push is **not** a tracking app, not a generic map app, and not a chat app. It sh
 - **Framework:** SwiftUI
 - **Target:** iOS 17+
 - **Architecture:** MVVM
-- **Data:** Parallel mock/live `AppDataContainer` (DEBUG mock default, `--live` opt-in, Release live). Live auth paths warm a session-scoped `LiveDataStore` before `ContentView`. Day-1 Supabase social graph reads plus live write-through for profile basics/toggles/availability, push coordination (`SupabasePushRepository`), and friend-request coordination (`SupabaseAlertRepository` + `FriendRepository` search/send/remove; migrations `0009`/`0010`). Presence/feed stay empty in live — no mock data leaks. See `AGENTS.md`, `tasks/spec.md`, `docs/data-architecture.md`.
+- **Data:** Parallel mock/live `AppDataContainer` (DEBUG mock default, `--live` opt-in, Release live). Live auth paths warm a session-scoped `LiveDataStore` before `ContentView`. Day-1 Supabase social graph reads plus live write-through for profile basics/toggles/availability/photo (Storage `avatars`, `0012`), push coordination (`SupabasePushRepository`), friend-request coordination (`SupabaseAlertRepository` + `FriendRepository` search/send/remove; `0009`/`0010`), and group creation + group-invite coordination (`GroupRepository.createGroup` + `AlertRepository`; `0011`). Presence/feed stay empty in live — no mock data leaks. See `AGENTS.md`, `tasks/spec.md`, `docs/data-architecture.md`.
 - **Maps:** MapKit
 
 This is a **high-fidelity prototype** that can become production later.
@@ -42,7 +42,7 @@ This is a **high-fidelity prototype** that can become production later.
 
 ## What NOT to Build Yet
 
-- Live writes to social graph (friends/groups/sharing), realtime/subscriptions — profile self-writes, push coordination (create/edit/cancel/delete, RSVP), and friend-request coordination (search/send/accept/deny via `0009`; remove via `0010`) are allowed
+- Live writes to social graph (friends/groups/sharing), realtime/subscriptions — profile self-writes (basics, toggles, availability, photo), push coordination (create/edit/cancel/delete, RSVP), friend-request coordination (search/send/accept/deny via `0009`; remove via `0010`), and group creation + group-invite coordination (`0011`) are allowed
 - Real-time location sharing
 - Real activity inference
 - Push notifications
@@ -81,6 +81,7 @@ See `coding-standards.md` for the full reference. Key rules for this project:
 |---|---|
 | `tasks/todo.md` | Current plan and progress tracking |
 | `tasks/spec.md` | Feature spec (write before implementation) |
+| `docs/app-store-privacy.md` | App Store Connect privacy disclosure inventory |
 | `tasks/lessons.md` | Project-specific learnings and gotchas |
 
 ### Session Resume Protocol

@@ -26,19 +26,25 @@ final class AppDataContainer {
 
     static func prepareLive(client: SupabaseClient, currentUserID: Person.ID) async throws -> AppDataContainer {
         let store = LiveDataStore(loader: SupabaseLiveDataLoader(client: client))
-        return try await preparedLive(store: store, currentUserID: currentUserID)
+        return try await preparedLive(
+            store: store,
+            currentUserID: currentUserID,
+            photoStorage: SupabaseProfilePhotoStorage(client: client)
+        )
     }
 
     static func prepareLive(loader: LiveDataLoading, currentUserID: Person.ID) async throws -> AppDataContainer {
         let store = LiveDataStore(loader: loader)
-        return try await preparedLive(store: store, currentUserID: currentUserID)
+        return try await preparedLive(store: store, currentUserID: currentUserID, photoStorage: nil)
     }
 
     private static func preparedLive(
-        store: LiveDataStore, currentUserID: Person.ID
+        store: LiveDataStore,
+        currentUserID: Person.ID,
+        photoStorage: ProfilePhotoStoring?
     ) async throws -> AppDataContainer {
         try await store.warm()
-        let container = live(store: store, currentUserID: currentUserID)
+        let container = live(store: store, currentUserID: currentUserID, photoStorage: photoStorage)
         _ = try await container.friends.currentUser()
         return container
     }
@@ -77,6 +83,12 @@ final class AppDataContainer {
         return liveRevision.dropFirst().sink(receiveValue: handler)
     }
 
+    /// Live: re-warm the session snapshot. Mock: no-op success.
+    func refreshSession() async throws {
+        guard let liveStore else { return }
+        try await liveStore.refresh()
+    }
+
     /// MOCK: unchanged behavior — InMemoryDatabase + Local* repos.
     init(seed: SeedData, referenceDate: Date = Date()) {
         let database = InMemoryDatabase(seed: seed)
@@ -99,12 +111,17 @@ final class AppDataContainer {
         live(
             store: LiveDataStore(loader: SupabaseLiveDataLoader(client: client)),
             currentUserID: currentUserID,
-            referenceDate: referenceDate
+            referenceDate: referenceDate,
+            photoStorage: SupabaseProfilePhotoStorage(client: client)
         )
     }
 
-    private static func live(store: LiveDataStore, currentUserID: Person.ID,
-                             referenceDate: Date = Date()) -> AppDataContainer {
+    private static func live(
+        store: LiveDataStore,
+        currentUserID: Person.ID,
+        referenceDate: Date = Date(),
+        photoStorage: ProfilePhotoStoring? = nil
+    ) -> AppDataContainer {
         AppDataContainer(
             currentUserID: currentUserID,
             referenceDate: referenceDate,
@@ -112,7 +129,9 @@ final class AppDataContainer {
             friends: SupabaseFriendRepository(store: store, currentUserID: currentUserID),
             groups: SupabaseGroupRepository(store: store),
             pushes: SupabasePushRepository(store: store, currentUserID: currentUserID),
-            profile: SupabaseProfileRepository(store: store, currentUserID: currentUserID),
+            profile: SupabaseProfileRepository(
+                store: store, currentUserID: currentUserID, photoStorage: photoStorage
+            ),
             sharing: SupabaseSharingRepository(store: store),
             feed: EmptyLiveFeedRepository(),
             alerts: SupabaseAlertRepository(store: store, currentUserID: currentUserID)

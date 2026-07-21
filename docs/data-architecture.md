@@ -170,6 +170,17 @@ replaces the cached profile and emits one live store revision, causing active Vi
 from the same snapshot. Failed writes leave both snapshot and revision unchanged. Subsequent
 ViewModel reloads keep their last loaded value visible while refreshing.
 
+### Session re-warm (Issue #33)
+
+`AppDataContainer.refreshSession()` re-warms the live snapshot via `LiveDataStore.refresh()`:
+clear session caches, concurrent `warm()`, publish one revision on success. Concurrent callers
+share one in-flight task; a new scheduled refresh within
+`SessionRefreshConstants.minimumInterval` (2s) after a success is a no-op. Failed re-warms restore
+the prior cache and do not bump revision. Mock `refreshSession` is a no-op. Call sites: return to
+foreground from `ContentView` (skip first active; silent failure) and pull-to-refresh on Friends,
+Alerts, and Pushes. User-initiated mutation failures use `ActionErrorState` + `ActionErrorBanner`
+with Retry (and optimistic rollback for push RSVP/cancel/delete).
+
 - **Mode selection** — `AppEnvironment.resolve(isDebugBuild:arguments:)`: DEBUG
   defaults to `.mock`; DEBUG opts into `.live` via the `--live` launch argument;
   Release is always `.live`.
