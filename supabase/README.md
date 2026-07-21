@@ -25,6 +25,10 @@ of the files in order reproduces the schema.
 - `migrations/0009_friend_requests.sql` — `friendships.requested_by` + pending/accepted/denied
   status checks; `search_profiles`, `send_friend_request`, and `resolve_friend_request`
   RPCs; pending-pair profile SELECT policy for Alerts/Add Friends.
+- `migrations/0012_profile_photos.sql` (+ `0012b_…_select_own`) — public `avatars`
+  Storage bucket; owner-only SELECT/INSERT/UPDATE/DELETE under `{auth.uid()}/…`.
+  No listable public SELECT (public object URLs still work). App stores the public
+  object URL on existing `profiles.image_asset_path`.
 - `seed.sql` — idempotent public-graph seed keyed off **real** auth IDs (resolved by email).
 
 ## Security model

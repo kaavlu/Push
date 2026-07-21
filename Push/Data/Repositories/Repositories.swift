@@ -72,6 +72,11 @@ protocol ProfileRepository {
         mapPreferences: [ProfileToggleItem],
         closeFriends: [ProfileToggleItem]
     ) async throws
+    /// Uploads a processed JPEG and points `Person.imageAssetPath` at it.
+    /// Callers must resize/compress first via `ProfilePhotoProcessor`.
+    func updateProfilePhoto(jpegData: Data) async throws
+    /// Clears the profile photo path and removes the stored image when possible.
+    func removeProfilePhoto() async throws
 }
 
 protocol SharingRepository {
