@@ -89,7 +89,8 @@ struct ExpandableFriendRow: View {
 
 // MARK: - Compact action rail
 
-/// Single horizontal rail: optional Directions · primary Start push · overflow.
+/// Single horizontal rail: optional Directions · Start push · fixed overflow.
+/// Directions and Start push share remaining width equally and match in style.
 private struct ExpandableFriendRowActionRail: View {
     let showsDirections: Bool
     let isBusy: Bool
@@ -101,14 +102,14 @@ private struct ExpandableFriendRowActionRail: View {
     var body: some View {
         HStack(spacing: ExpandableFriendRowLayout.railSpacing) {
             if showsDirections {
-                ExpandableFriendRowSecondaryButton(
+                ExpandableFriendRowActionButton(
                     label: "Directions",
                     symbolName: "arrow.triangle.turn.up.right.circle.fill",
                     action: onDirections
                 )
             }
 
-            ExpandableFriendRowPrimaryButton(
+            ExpandableFriendRowActionButton(
                 label: "Start push",
                 symbolName: "calendar.badge.plus",
                 action: onStartPush
@@ -124,54 +125,29 @@ private struct ExpandableFriendRowActionRail: View {
     }
 }
 
-private struct ExpandableFriendRowPrimaryButton: View {
+/// Uniform action control — equal share of remaining rail width after overflow.
+private struct ExpandableFriendRowActionButton: View {
     let label: String
     let symbolName: String
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: ExpandableFriendRowLayout.primaryLabelSpacing) {
+            HStack(spacing: ExpandableFriendRowLayout.actionLabelSpacing) {
                 Image(systemName: symbolName)
-                    .font(.system(size: ExpandableFriendRowLayout.primaryIconSize, weight: .semibold))
-                Text(label)
-                    .font(.subheadline.weight(.semibold))
-                    .lineLimit(1)
-                    .minimumScaleFactor(FriendsLayout.minimumTextScale)
-            }
-            .foregroundStyle(ExpandableFriendRowColor.startPushText)
-            .frame(maxWidth: .infinity)
-            .frame(height: ExpandableFriendRowLayout.railHeight)
-            .expandableFriendRailSurface()
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(label)
-        .accessibilityAddTraits(.isButton)
-    }
-}
-
-private struct ExpandableFriendRowSecondaryButton: View {
-    let label: String
-    let symbolName: String
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: ExpandableFriendRowLayout.secondaryLabelSpacing) {
-                Image(systemName: symbolName)
-                    .font(.system(size: ExpandableFriendRowLayout.secondaryIconSize, weight: .semibold))
+                    .font(.system(size: ExpandableFriendRowLayout.actionIconSize, weight: .semibold))
                 Text(label)
                     .font(.caption.weight(.semibold))
                     .lineLimit(1)
                     .minimumScaleFactor(FriendsLayout.minimumTextScale)
             }
             .foregroundStyle(PushControlColors.textSecondary)
-            .padding(.horizontal, ExpandableFriendRowLayout.secondaryHorizontalPadding)
+            .frame(maxWidth: .infinity)
             .frame(height: ExpandableFriendRowLayout.railHeight)
             .expandableFriendRailSurface()
         }
         .buttonStyle(.plain)
-        .fixedSize(horizontal: true, vertical: false)
+        .frame(maxWidth: .infinity)
         .accessibilityLabel(label)
     }
 }
@@ -232,12 +208,9 @@ enum ExpandableFriendRowLayout {
     static let railHeight: CGFloat = 40
     static let railCornerRadius: CGFloat = 12
 
-    static let primaryIconSize: CGFloat = 15
-    static let primaryLabelSpacing: CGFloat = 6
-
-    static let secondaryIconSize: CGFloat = 13
-    static let secondaryLabelSpacing: CGFloat = 4
-    static let secondaryHorizontalPadding: CGFloat = 10
+    /// Shared type for Directions and Start push (uniform pair).
+    static let actionIconSize: CGFloat = 13
+    static let actionLabelSpacing: CGFloat = 4
 
     static let overflowWidth: CGFloat = 40
     static let overflowIconSize: CGFloat = 15
@@ -250,8 +223,6 @@ enum ExpandableFriendRowLayout {
 }
 
 enum ExpandableFriendRowColor {
-    /// Darker brown than default walnut so Start push reads as primary.
-    static let startPushText = Color(red: 0.32, green: 0.18, blue: 0.06)
     /// Soft brand brown rim on rail controls.
     static let railBorder = PushColorPalette.Accent.walnut.opacity(0.40)
 }
