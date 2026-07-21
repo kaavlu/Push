@@ -16,7 +16,7 @@ Push is **not** a tracking app, not a generic map app, and not a chat app. It sh
 - **Framework:** SwiftUI
 - **Target:** iOS 17+
 - **Architecture:** MVVM
-- **Data:** Parallel mock/live `AppDataContainer` (DEBUG mock default, `--live` opt-in, Release live). Live auth paths warm a session-scoped `LiveDataStore` before `ContentView`. Day-1 Supabase social graph reads plus live write-through for profile basics/toggles/availability/photo (Storage `avatars`, `0012`), push coordination (`SupabasePushRepository`), friend-request coordination (`SupabaseAlertRepository` + `FriendRepository` search/send/cancel/remove; `0009`/`0010`/`0013`), and group creation + group-invite coordination (`GroupRepository.createGroup` + `AlertRepository`; `0011`); mock group lifecycle via `LocalGroupRepository`/`InMemoryDatabase+GroupLifecycle` (mock photos via `GroupPhotoFileStore`); live group lifecycle + photos via `SupabaseGroupRepository`/`0015` RPCs + `GroupPhotoStoring` (`group-photos` Storage). Presence/feed stay empty in live — no mock data leaks. See `AGENTS.md`, `tasks/spec.md`, `docs/data-architecture.md`.
+- **Data:** Parallel mock/live `AppDataContainer` (DEBUG mock default, `--live` opt-in, Release live). Live auth paths warm a session-scoped `LiveDataStore` before `ContentView`. Day-1 Supabase social graph reads plus live write-through for profile basics/toggles/availability/photo (Storage `avatars`, `0012`), push coordination (`SupabasePushRepository`), friend-request coordination (`SupabaseAlertRepository` + `FriendRepository` search/send/cancel/remove; `0009`/`0010`/`0013`), and group creation + group-invite coordination (`GroupRepository.createGroup` + `AlertRepository`; `0011`); mock group lifecycle via `LocalGroupRepository`/`InMemoryDatabase+GroupLifecycle` (mock photos via `GroupPhotoFileStore`); live group lifecycle + photos via `SupabaseGroupRepository`/`0015` RPCs + `GroupPhotoStoring` (`group-photos` Storage); user blocks (mock + live via `FriendRepository` block/unblock/list + `0016` RPCs; soft-hide; `private.is_blocked` guards social paths). Presence/feed stay empty in live — no mock data leaks. See `AGENTS.md`, `tasks/spec.md`, `docs/data-architecture.md`.
 - **Maps:** MapKit
 
 This is a **high-fidelity prototype** that can become production later.
@@ -42,7 +42,7 @@ This is a **high-fidelity prototype** that can become production later.
 
 ## What NOT to Build Yet
 
-- Live writes to social graph (friends/groups/sharing), realtime/subscriptions — profile self-writes (basics, toggles, availability, photo), push coordination (create/edit/cancel/delete, RSVP), friend-request coordination (search/send/cancel/accept/deny via `0009`/`0013`; remove via `0010`/`0013`), and group creation + group-invite coordination (`0011`) + group lifecycle (`0015`) are allowed
+- Live writes to social graph (friends/groups/sharing), realtime/subscriptions — profile self-writes (basics, toggles, availability, photo), push coordination (create/edit/cancel/delete, RSVP), friend-request coordination (search/send/cancel/accept/deny via `0009`/`0013`; remove via `0010`/`0013`), group creation + group-invite coordination (`0011`) + group lifecycle (`0015`), and user block/unblock via `0016` are allowed
 - Real-time location sharing
 - Real activity inference
 - Push notifications

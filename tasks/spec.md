@@ -1,3 +1,28 @@
+# Block / Unblock User (Issue #52)
+
+## Goal
+Allow a user to block another so further **direct** social interaction is impossible
+(backend-enforced). Unblock removes the restriction but does **not** restore friendship
+or reopen closed requests.
+
+## Contract
+- Directed `public.user_blocks` + `private.is_blocked` (bidirectional) + SECURITY DEFINER
+  RPCs: `block_user` / `unblock_user` / `list_blocked_users` (migration `0016`).
+- Guards on friend request, resolve, search, create_group invitees, and direct push
+  invitees; shared group memberships and historical pushes/groups are not mutated.
+- App API on `FriendRepository`: `blockUser` / `unblockUser` / `blockedUsers` →
+  `[BlockedPerson]`. Mock tears down friendship + pending requests; live RPCs +
+  `notifyFriendshipsChanged`. Soft-hide blocked-pair alerts/pickers.
+- UI: Friends expand **Block** + confirm (no optimistic remove; `ActionErrorBanner`);
+  Profile → Blocked list → Unblock (`fullScreenCover`).
+- Full design: `docs/superpowers/specs/2026-07-20-block-unblock-user-design.md`.
+
+## Acceptance
+See design doc acceptance criteria. Focused suites: `BlockUserTests`, plus regression
+on DataLayer / LiveDataStore / Alerts; `scripts/test.sh build`.
+
+---
+
 # Complete Group Lifecycle (Issue #43)
 
 ## Goal

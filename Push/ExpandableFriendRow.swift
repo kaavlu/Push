@@ -2,11 +2,10 @@
 //  ExpandableFriendRow.swift
 //  Push
 //
-//  Friends-list row that expands in place to reveal Directions/Start push/
-//  Remove actions, replacing the old map-style bottom sheet for this screen
-//  only. The row's own content (FriendRowCard) is drawn unchanged; this view
-//  just owns the single shared card surface the row and its actions grow
-//  inside of.
+//  Friends-list row that expands in place to a compact action rail:
+//  primary Start push, optional Directions (only with a usable location),
+//  and an overflow menu for Remove friend / Block. Friend identity and
+//  status stay on FriendRowCard unchanged.
 //
 
 import SwiftUI
@@ -16,30 +15,41 @@ struct ExpandableFriendRow: View {
     let row: FriendRowModel
     let isExpanded: Bool
     let isRemoving: Bool
+    let isBlocking: Bool
     let onToggle: () -> Void
     let onDirections: () -> Void
     let onStartPush: () -> Void
     let onRemove: () -> Void
+    let onBlock: () -> Void
 
     @State private var isConfirmingRemove = false
+    @State private var isConfirmingBlock = false
+
+    /// Directions only when the friend has a shared place name (usable location).
+    private var showsDirections: Bool {
+        guard let placeName = row.friend.placeName else { return false }
+        return !placeName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
 
     var body: some View {
         VStack(spacing: 0) {
             FriendRowCard(row: row, showsCardBackground: false, action: onToggle)
 
             if isExpanded {
-                ExpandableFriendRowActionRow(
-                    isRemoving: isRemoving,
+                ExpandableFriendRowActionRail(
+                    showsDirections: showsDirections,
+                    isBusy: isRemoving || isBlocking,
                     onDirections: onDirections,
                     onStartPush: onStartPush,
-                    onRemove: { isConfirmingRemove = true }
+                    onRemove: { isConfirmingRemove = true },
+                    onBlock: { isConfirmingBlock = true }
                 )
                 .padding(.horizontal, FriendsLayout.cardPadding(layout))
-                .padding(.bottom, FriendsLayout.cardPadding(layout))
+                .padding(.bottom, ExpandableFriendRowLayout.railBottomPadding)
                 .padding(.top, ExpandableFriendRowLayout.actionsTopSpacing)
                 .transition(
                     .asymmetric(
-                        insertion: .opacity.combined(with: .scale(scale: 0.94, anchor: .top)),
+                        insertion: .opacity.combined(with: .scale(scale: 0.96, anchor: .top)),
                         removal: .opacity
                     )
                 )
@@ -64,108 +74,155 @@ struct ExpandableFriendRow: View {
         } message: {
             Text("They won't see your status anymore, and you won't see theirs.")
         }
+        .confirmationDialog(
+            "Block \(row.friend.name)?",
+            isPresented: $isConfirmingBlock,
+            titleVisibility: .visible
+        ) {
+            Button("Block", role: .destructive, action: onBlock)
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("They won't be notified. You won't appear as friends.")
+        }
     }
 }
 
-// MARK: - Action Row
+// MARK: - Compact action rail
 
-private struct ExpandableFriendRowActionRow: View {
-    let isRemoving: Bool
+/// Single horizontal rail: optional Directions · Start push · fixed overflow.
+/// Directions and Start push share remaining width equally and match in style.
+private struct ExpandableFriendRowActionRail: View {
+    let showsDirections: Bool
+    let isBusy: Bool
     let onDirections: () -> Void
     let onStartPush: () -> Void
     let onRemove: () -> Void
+    let onBlock: () -> Void
 
     var body: some View {
-        HStack(spacing: FriendDetailSheetLayout.actionSpacing) {
-            ExpandableFriendRowActionButton(
-                label: "Directions",
-                symbolName: "arrow.triangle.turn.up.right.circle.fill",
-                emphasis: .plain,
-                action: onDirections
-            )
+        HStack(spacing: ExpandableFriendRowLayout.railSpacing) {
+            if showsDirections {
+                ExpandableFriendRowActionButton(
+                    label: "Directions",
+                    symbolName: "arrow.triangle.turn.up.right.circle.fill",
+                    action: onDirections
+                )
+            }
+
             ExpandableFriendRowActionButton(
                 label: "Start push",
                 symbolName: "calendar.badge.plus",
-                emphasis: .sunbeam,
                 action: onStartPush
             )
-            ExpandableFriendRowActionButton(
-                label: "Remove",
-                symbolName: "person.badge.minus",
-                emphasis: .destructive,
-                isLoading: isRemoving,
-                action: onRemove
+
+            ExpandableFriendRowOverflowMenu(
+                isBusy: isBusy,
+                onRemove: onRemove,
+                onBlock: onBlock
             )
         }
+        .frame(height: ExpandableFriendRowLayout.railHeight)
     }
 }
 
-private enum ExpandableFriendRowEmphasis {
-    case plain
-    case sunbeam
-    case destructive
-}
-
+/// Uniform action control — equal share of remaining rail width after overflow.
 private struct ExpandableFriendRowActionButton: View {
     let label: String
     let symbolName: String
-    let emphasis: ExpandableFriendRowEmphasis
-    var isLoading: Bool = false
     let action: () -> Void
-
-    private var shape: RoundedRectangle {
-        RoundedRectangle(cornerRadius: FriendDetailSheetLayout.actionCardCornerRadius, style: .continuous)
-    }
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: FriendDetailSheetLayout.actionCardLabelSpacing) {
-                if isLoading {
-                    ProgressView()
-                } else {
-                    Image(systemName: symbolName)
-                        .font(.system(size: FriendDetailSheetLayout.actionCardIconSize, weight: .semibold))
-                }
+            HStack(spacing: ExpandableFriendRowLayout.actionLabelSpacing) {
+                Image(systemName: symbolName)
+                    .font(.system(size: ExpandableFriendRowLayout.actionIconSize, weight: .semibold))
                 Text(label)
-                    .font(.subheadline.weight(.semibold))
+                    .font(.caption.weight(.semibold))
                     .lineLimit(1)
                     .minimumScaleFactor(FriendsLayout.minimumTextScale)
             }
-            .foregroundStyle(foregroundColor)
+            .foregroundStyle(PushControlColors.textSecondary)
             .frame(maxWidth: .infinity)
-            .frame(height: FriendDetailSheetLayout.actionCardHeight)
-            .pushGlassBackground(cornerRadius: FriendDetailSheetLayout.actionCardCornerRadius)
-            .overlay {
-                shape.stroke(Color.white.opacity(PushGlassStyle.strokeOpacity), lineWidth: ExpandableFriendRowLayout.emphasisStrokeWidth)
-            }
+            .frame(height: ExpandableFriendRowLayout.railHeight)
+            .expandableFriendRailSurface()
         }
         .buttonStyle(.plain)
-        .disabled(isLoading)
+        .frame(maxWidth: .infinity)
         .accessibilityLabel(label)
     }
+}
 
-    /// Only the icon/label tint distinguishes emphasis now; the glass
-    /// background and stroke stay identical across all three buttons.
-    private var foregroundColor: Color {
-        switch emphasis {
-        case .plain:       return PushControlColors.textPrimary
-        case .sunbeam:      return ExpandableFriendRowColor.startPushText
-        case .destructive: return PushControlColors.destructive
+private struct ExpandableFriendRowOverflowMenu: View {
+    let isBusy: Bool
+    let onRemove: () -> Void
+    let onBlock: () -> Void
+
+    var body: some View {
+        Menu {
+            Button("Remove friend", role: .destructive, action: onRemove)
+            Button("Block", role: .destructive, action: onBlock)
+        } label: {
+            Group {
+                if isBusy {
+                    ProgressView()
+                        .controlSize(.small)
+                } else {
+                    Image(systemName: "ellipsis")
+                        .font(.system(size: ExpandableFriendRowLayout.overflowIconSize, weight: .semibold))
+                        .foregroundStyle(PushControlColors.textSecondary)
+                }
+            }
+            .frame(width: ExpandableFriendRowLayout.overflowWidth, height: ExpandableFriendRowLayout.railHeight)
+            .expandableFriendRailSurface()
         }
+        .disabled(isBusy)
+        .accessibilityLabel("More actions")
+        .accessibilityHint("Remove friend or block")
+    }
+}
+
+/// Flat cream fill + thin walnut rim — no glass shadow so the rail sits flush on the card.
+private extension View {
+    func expandableFriendRailSurface() -> some View {
+        let shape = RoundedRectangle(
+            cornerRadius: ExpandableFriendRowLayout.railCornerRadius,
+            style: .continuous
+        )
+        return background(shape.fill(FriendsColor.pageIvory))
+            .overlay {
+                shape.stroke(
+                    ExpandableFriendRowColor.railBorder,
+                    lineWidth: ExpandableFriendRowLayout.railBorderWidth
+                )
+            }
     }
 }
 
 // MARK: - Style Tokens
 
 enum ExpandableFriendRowLayout {
-    static let actionsTopSpacing: CGFloat = 12
+    /// Tight gap under the friend identity so the rail reads as one card.
+    static let actionsTopSpacing: CGFloat = 6
+    static let railBottomPadding: CGFloat = 10
+    static let railSpacing: CGFloat = 8
+    static let railHeight: CGFloat = 40
+    static let railCornerRadius: CGFloat = 12
+
+    /// Shared type for Directions and Start push (uniform pair).
+    static let actionIconSize: CGFloat = 13
+    static let actionLabelSpacing: CGFloat = 4
+
+    static let overflowWidth: CGFloat = 40
+    static let overflowIconSize: CGFloat = 15
+
+    /// Thin walnut rim (1–2pt) — no glass shadow.
+    static let railBorderWidth: CGFloat = 1.5
+
     static let animationResponse = 0.40
     static let animationDamping = 0.86
-    static let emphasisStrokeWidth: CGFloat = 0.8
 }
 
 enum ExpandableFriendRowColor {
-    /// Darker brown than the default walnut text, so Start push still reads
-    /// as the emphasized action without a tinted background.
-    static let startPushText = Color(red: 0.32, green: 0.18, blue: 0.06)
+    /// Soft brand brown rim on rail controls.
+    static let railBorder = PushColorPalette.Accent.walnut.opacity(0.40)
 }

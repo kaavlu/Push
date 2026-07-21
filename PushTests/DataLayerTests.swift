@@ -410,4 +410,13 @@ struct ThrowingFriendRepository: FriendRepository {
     func removeFriend(_ personID: Person.ID) async throws {
         throw URLError(.badServerResponse)
     }
+    func blockUser(_ personID: Person.ID) async throws {
+        throw URLError(.badServerResponse)
+    }
+    func unblockUser(_ personID: Person.ID) async throws {
+        throw URLError(.badServerResponse)
+    }
+    func blockedUsers() async throws -> [BlockedPerson] {
+        throw URLError(.badServerResponse)
+    }
 }

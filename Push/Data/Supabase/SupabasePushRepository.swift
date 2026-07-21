@@ -71,9 +71,9 @@ final class SupabasePushRepository: PushRepository {
     func createPush(_ draft: PushDraft) async throws -> PushPlan.ID {
         let parsed = PushRecipientResolver.parse(draft.recipientIDs)
         let memberships = try await store.memberships().map { $0.membership() }
-        let invitees = PushRecipientResolver.invitees(
-            groupIDs: parsed.groupIDs, friendIDs: parsed.friendIDs,
-            memberships: memberships, creatorID: draft.creatorID
+        let invitees = try await nonBlockedInvitees(
+            groupIDs: parsed.groupIDs, friendIDs: parsed.friendIDs, creatorID: draft.creatorID,
+            memberships: memberships
         )
         let now = Date()
         let expiresAt = draft.startsAt.addingTimeInterval(PushWriteConstants.expiryWindow)
@@ -113,9 +113,9 @@ final class SupabasePushRepository: PushRepository {
         }
         let parsed = PushRecipientResolver.parse(draft.recipientIDs)
         let memberships = try await store.memberships().map { $0.membership() }
-        let invitees = PushRecipientResolver.invitees(
-            groupIDs: parsed.groupIDs, friendIDs: parsed.friendIDs,
-            memberships: memberships, creatorID: existing.creatorID
+        let invitees = try await nonBlockedInvitees(
+            groupIDs: parsed.groupIDs, friendIDs: parsed.friendIDs, creatorID: existing.creatorID,
+            memberships: memberships
         )
         let expiresAt = draft.startsAt.addingTimeInterval(PushWriteConstants.expiryWindow)
         let updatePayload = PushUpdatePayload(
@@ -170,6 +170,27 @@ final class SupabasePushRepository: PushRepository {
         }
         try await store.insertResponses(newRows)
         try await store.deleteResponses(pushID: planID, personIDs: Array(toRemove))
+    }
+
+    /// Drops blocked **direct** friend tokens only; group-expanded members stay
+    /// (group membership rules apply, not soft-hide) — mirrors
+    /// `LocalPushRepository.nonBlockedInvitees`.
+    private func nonBlockedInvitees(
+        groupIDs: [FriendGroup.ID],
+        friendIDs: [Person.ID],
+        creatorID: Person.ID,
+        memberships: [GroupMembership]
+    ) async throws -> Set<Person.ID> {
+        let blockedIDs = Set(
+            (try await store.listBlockedUsers()).map { $0.id.lowercased() }
+        )
+        let allowedFriendIDs = friendIDs.filter {
+            !blockedIDs.contains($0.lowercased())
+        }
+        return PushRecipientResolver.invitees(
+            groupIDs: groupIDs, friendIDs: allowedFriendIDs,
+            memberships: memberships, creatorID: creatorID
+        )
     }
 }
 

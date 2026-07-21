@@ -462,11 +462,40 @@ final class LiveDataLoaderSpy: LiveDataLoading {
         friendshipRows.remove(at: index)
     }
 
+    var blockedRows: [SearchProfileRow] = []
+
     func removeFriend(targetUserID: String) async throws {
         if let writeError { throw writeError }
         friendshipRows.removeAll {
             $0.involves("self") && $0.involves(targetUserID)
         }
+    }
+
+    func blockUser(targetUserID: String) async throws {
+        if let writeError { throw writeError }
+        friendshipRows.removeAll {
+            $0.involves("self") && $0.involves(targetUserID)
+        }
+        if !blockedRows.contains(where: { $0.id.caseInsensitiveCompare(targetUserID) == .orderedSame }) {
+            blockedRows.append(SearchProfileRow(
+                id: targetUserID,
+                first_name: targetUserID.capitalized,
+                handle: targetUserID,
+                image_asset_path: nil
+            ))
+        }
+    }
+
+    func unblockUser(targetUserID: String) async throws {
+        if let writeError { throw writeError }
+        blockedRows.removeAll {
+            $0.id.caseInsensitiveCompare(targetUserID) == .orderedSame
+        }
+    }
+
+    func listBlockedUsers() async throws -> [SearchProfileRow] {
+        if let writeError { throw writeError }
+        return blockedRows
     }
 
     func loadProfile(id: String) async throws -> ProfileRow {

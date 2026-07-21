@@ -18,7 +18,9 @@ final class LocalAlertRepository: AlertRepository {
 
     func incomingFriendRequests() async throws -> [FriendRequest] {
         database.friendRequests.filter {
-            $0.status == .pending && $0.recipientID == database.currentUserID
+            $0.status == .pending
+                && $0.recipientID == database.currentUserID
+                && !database.isBlocked(database.currentUserID, $0.requester.id)
         }
     }
 
@@ -32,6 +34,7 @@ final class LocalAlertRepository: AlertRepository {
 
     func incomingGroupInvites() async throws -> [GroupInvite] {
         database.pendingGroupInvites(for: database.currentUserID)
+            .filter { !database.isBlocked(database.currentUserID, $0.inviterID) }
     }
 
     func acceptGroupInvite(id: GroupInvite.ID) async throws {
@@ -73,6 +76,7 @@ final class LocalFriendRepository: FriendRepository {
         guard !trimmed.isEmpty else { return [] }
         return database.orderedPeople
             .filter { $0.id != database.currentUserID }
+            .filter { !database.isBlocked(database.currentUserID, $0.id) }
             .compactMap { person -> PersonSearchResult? in
                 let handle = database.handle(for: person.id)
                 let haystack = "\(person.firstName) \(person.displayName) \(handle)".lowercased()
@@ -102,6 +106,18 @@ final class LocalFriendRepository: FriendRepository {
 
     func removeFriend(_ personID: Person.ID) async throws {
         database.removeFriend(personID)
+    }
+
+    func blockUser(_ personID: Person.ID) async throws {
+        database.blockUser(personID)
+    }
+
+    func unblockUser(_ personID: Person.ID) async throws {
+        database.unblockUser(personID)
+    }
+
+    func blockedUsers() async throws -> [BlockedPerson] {
+        database.blockedPeople()
     }
 }
 
@@ -250,9 +266,8 @@ final class LocalPushRepository: PushRepository {
         let planID = "push-\(UUID().uuidString)"
         let now = Date()
 
-        let invitees = PushRecipientResolver.invitees(
-            groupIDs: parsed.groupIDs, friendIDs: parsed.friendIDs,
-            memberships: database.memberships, creatorID: draft.creatorID
+        let invitees = nonBlockedInvitees(
+            groupIDs: parsed.groupIDs, friendIDs: parsed.friendIDs, creatorID: draft.creatorID
         )
 
         let plan = makePlan(
@@ -267,9 +282,8 @@ final class LocalPushRepository: PushRepository {
     func updatePush(planID: PushPlan.ID, with draft: PushDraft) async throws {
         guard let existing = database.plansByID[planID] else { return }
         let parsed = PushRecipientResolver.parse(draft.recipientIDs)
-        let invitees = PushRecipientResolver.invitees(
-            groupIDs: parsed.groupIDs, friendIDs: parsed.friendIDs,
-            memberships: database.memberships, creatorID: existing.creatorID
+        let invitees = nonBlockedInvitees(
+            groupIDs: parsed.groupIDs, friendIDs: parsed.friendIDs, creatorID: existing.creatorID
         )
         let plan = updatedPlan(
             existing: existing, draft: draft, singleGroupOnly: parsed.singleGroupOnly,
@@ -279,6 +293,20 @@ final class LocalPushRepository: PushRepository {
             planID: planID, creatorID: existing.creatorID, invitees: invitees
         )
         database.updatePush(plan: plan, responses: responses)
+    }
+
+    /// Drops blocked **direct** friend tokens only; group-expanded members stay
+    /// (group membership rules apply, not soft-hide).
+    private func nonBlockedInvitees(
+        groupIDs: [FriendGroup.ID], friendIDs: [Person.ID], creatorID: Person.ID
+    ) -> Set<Person.ID> {
+        let allowedFriendIDs = friendIDs.filter {
+            !database.isBlocked(database.currentUserID, $0)
+        }
+        return PushRecipientResolver.invitees(
+            groupIDs: groupIDs, friendIDs: allowedFriendIDs,
+            memberships: database.memberships, creatorID: creatorID
+        )
     }
 
     func cancelPush(planID: PushPlan.ID) async throws {

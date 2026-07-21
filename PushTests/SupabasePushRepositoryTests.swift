@@ -197,4 +197,46 @@ final class SupabasePushRepositoryTests: XCTestCase {
         )
         XCTAssertEqual(invitees, ["bob"], "bob is deduped (friend + group member) and the creator is excluded")
     }
+
+    /// Blocked direct friend tokens are filtered; group co-members stay inviteable.
+    func testCreatePushFiltersBlockedDirectFriendsButKeepsGroupCoMembers() async throws {
+        let loader = LiveDataLoaderSpy()
+        loader.blockedRows = [
+            SearchProfileRow(
+                id: "blocked-peer", first_name: "Blocked", handle: "blocked", image_asset_path: nil
+            )
+        ]
+        loader.membershipRows = [
+            GroupMembershipRow(
+                id: "m1", person_id: "blocked-peer", group_id: "g1", role: "member",
+                membership_status: "active", joined_at: "2026-07-14T00:00:00Z"
+            ),
+            GroupMembershipRow(
+                id: "m2", person_id: "ok-friend", group_id: "g1", role: "member",
+                membership_status: "active", joined_at: "2026-07-14T00:00:00Z"
+            )
+        ]
+        let (repo, _) = makeRepository(loader: loader, currentUserID: "creator1")
+
+        let groupID = try await repo.createPush(PushDraft(
+            title: "Group hang",
+            recipientIDs: ["group_g1"],
+            startsAt: Date(), locationText: "", notes: "", creatorID: "creator1"
+        ))
+        let groupResponses = try await repo.responses().filter { $0.pushID == groupID }
+        XCTAssertTrue(
+            groupResponses.contains { $0.personID == "blocked-peer" && $0.response == .pending },
+            "blocked co-member still gets a group-audience pending row"
+        )
+        XCTAssertTrue(groupResponses.contains { $0.personID == "ok-friend" })
+
+        let directID = try await repo.createPush(PushDraft(
+            title: "Direct",
+            recipientIDs: ["friend_blocked-peer", "friend_ok-friend"],
+            startsAt: Date(), locationText: "", notes: "", creatorID: "creator1"
+        ))
+        let direct = try await repo.responses().filter { $0.pushID == directID }
+        XCTAssertFalse(direct.contains { $0.personID == "blocked-peer" })
+        XCTAssertTrue(direct.contains { $0.personID == "ok-friend" && $0.response == .pending })
+    }
 }

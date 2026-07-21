@@ -17,6 +17,7 @@ struct ProfileView: View {
     @State private var navigationPath: [ProfileRoute] = []
     @State private var isSignOutConfirmationPresented = false
     @State private var isSigningOut = false
+    @State private var isBlockedListPresented = false
     @State private var isDeleteAccountConfirmationPresented = false
     @State private var isDeletingAccount = false
     @State private var deleteAccountError: ActionErrorState?
@@ -111,6 +112,11 @@ struct ProfileView: View {
         } message: {
             Text(ProfileCopy.deleteAccountConfirmationMessage)
         }
+        // Cream Blocked list uses its own chrome; path-based Profile destinations
+        // would leave the modal close bar up, so present as a cover instead.
+        .fullScreenCover(isPresented: $isBlockedListPresented) {
+            BlockedUsersView()
+        }
     }
 
     private var profileContent: some View {
@@ -130,6 +136,7 @@ struct ProfileView: View {
                 ProfileRoutesCard(title: "Settings", routes: viewModel.settingsRoutes)
                 ProfileRoutesCard(title: "Privacy", routes: viewModel.privacyRoutes)
                 ProfileConnectCard(viewModel: viewModel)
+                ProfileBlockedCard { isBlockedListPresented = true }
                 ProfileLegalCard(destinations: viewModel.legalDestinations)
                 if let deleteAccountError {
                     ActionErrorBanner(
@@ -194,6 +201,28 @@ struct ProfileView: View {
 private enum ProfileCopy {
     static let deleteAccountConfirmationMessage =
         "This permanently deletes your account, profile, friend connections, group membership, and pushes you created. This cannot be undone."
+}
+
+/// Entry into the Blocked list — same GlassCard row chrome as Legal, but opens
+/// an internal cover (not an external `Link`).
+private struct ProfileBlockedCard: View {
+    let action: () -> Void
+
+    var body: some View {
+        GlassCard {
+            Button(action: action) {
+                ProfileRowContent(
+                    symbolName: "hand.raised",
+                    title: "Blocked",
+                    subtitle: "Manage blocked people",
+                    trailingSymbolName: "chevron.right"
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Blocked")
+            .accessibilityHint("Manage blocked people")
+        }
+    }
 }
 
 private struct ProfileLegalCard: View {

@@ -27,6 +27,9 @@ protocol LiveDataLoading: AnyObject {
     func resolveFriendRequest(id: String, accept: Bool) async throws -> FriendshipRow
     func cancelFriendRequest(id: String) async throws
     func removeFriend(targetUserID: String) async throws
+    func blockUser(targetUserID: String) async throws
+    func unblockUser(targetUserID: String) async throws
+    func listBlockedUsers() async throws -> [SearchProfileRow]
     func loadProfile(id: String) async throws -> ProfileRow
     func createGroup(name: String, imageAssetPath: String?, inviteeIDs: [String]) async throws -> GroupRow
     func incomingGroupInvites() async throws -> [GroupInviteRow]
@@ -517,6 +520,33 @@ final class LiveDataStore {
         profileRows = nil
         profilesTask = nil
         notifyFriendshipsChanged()
+    }
+
+    func blockUser(targetUserID: String) async throws {
+        try await loader.blockUser(targetUserID: targetUserID)
+        // Block tears down friendship and hides the peer; drop warm profiles.
+        profileRows = nil
+        profilesTask = nil
+        notifyFriendshipsChanged()
+    }
+
+    func unblockUser(targetUserID: String) async throws {
+        try await loader.unblockUser(targetUserID: targetUserID)
+        // Friendship is not restored, but search/list visibility can change.
+        profileRows = nil
+        profilesTask = nil
+        notifyFriendshipsChanged()
+    }
+
+    func listBlockedUsers() async throws -> [BlockedPerson] {
+        try await loader.listBlockedUsers().map { row in
+            BlockedPerson(
+                id: row.id,
+                firstName: row.first_name,
+                handle: row.handle,
+                imageAssetPath: row.image_asset_path
+            )
+        }
     }
 
     /// Fetches a single profile when it may not yet be in the warm snapshot
