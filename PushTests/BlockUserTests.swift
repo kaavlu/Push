@@ -99,6 +99,21 @@ final class BlockUserTests: XCTestCase {
         XCTAssertFalse(friends.contains { $0.id == friendID })
     }
 
+    /// Live friends() drops outbound-blocked ids (including co-members still on profiles).
+    func testLiveFriendsExcludesBlockedUsers() async throws {
+        let loader = LiveDataLoaderSpy()
+        loader.blockedRows = [
+            SearchProfileRow(
+                id: "friend", first_name: "Friend", handle: "friend", image_asset_path: nil
+            )
+        ]
+        let store = LiveDataStore(loader: loader)
+        let friends = SupabaseFriendRepository(store: store, currentUserID: "self")
+
+        let people = try await friends.friends()
+        XCTAssertFalse(people.contains { $0.id.caseInsensitiveCompare("friend") == .orderedSame })
+    }
+
     /// Live Alerts soft-hides group invites whose inviter is in list_blocked_users.
     func testLiveGroupInviteSoftHiddenWhenInviterBlocked() async throws {
         let loader = LiveDataLoaderSpy()

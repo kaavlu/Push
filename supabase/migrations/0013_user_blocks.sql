@@ -412,7 +412,9 @@ $$;
 revoke all on function public.resolve_group_invite(uuid, boolean) from public, anon;
 grant execute on function public.resolve_group_invite(uuid, boolean) to authenticated;
 
--- Creator may seed pending invitee rows only when not blocked with that person.
+-- Creator may seed pending invitee rows when not blocked with that person, OR
+-- when the person is an active member of the push's group (group-audience
+-- co-members stay inviteable despite a soft-hide block).
 drop policy if exists push_responses_insert_self_or_creator on public.push_responses;
 create policy push_responses_insert_self_or_creator on public.push_responses
   for insert with check (
@@ -420,6 +422,14 @@ create policy push_responses_insert_self_or_creator on public.push_responses
     or (
       private.is_push_creator((select auth.uid()), push_id)
       and response = 'pending'
-      and not private.is_blocked((select auth.uid()), person_id)
+      and (
+        not private.is_blocked((select auth.uid()), person_id)
+        or exists (
+          select 1 from public.pushes p
+          where p.id = push_id
+            and p.group_id is not null
+            and private.is_group_member(person_id, p.group_id)
+        )
+      )
     )
   );
