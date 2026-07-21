@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B6C29F693FC64B91A5D35D6E /* FakeAuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37FB45BF69501B533041420D /* FakeAuthService.swift */; };
+		E36337AF64C8EF85F8D06D2F /* AuthSocialButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B466898FBC1D567AD990E5 /* AuthSocialButtons.swift */; };
+		A7C8880D4143D13C8566DD41 /* SocialAuthSignIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FDFA7C3A655A371198C45EE /* SocialAuthSignIn.swift */; };
 		11281DC2A4345BAFE89579C1 /* FeedDeferredView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E7D640EAC9375F965E3D9B /* FeedDeferredView.swift */; };
 		D16A4EA302ECBC5BB7B704C7 /* MapEmptyOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA963421CE09159A29FCE55A /* MapEmptyOverlay.swift */; };
 		117AA115D49FD170A614EDD6 /* EmptySurfaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84123F72AC63382EDA610127 /* EmptySurfaceView.swift */; };
@@ -248,6 +251,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		37FB45BF69501B533041420D /* FakeAuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "FakeAuthService.swift"; path = "Data/Supabase/FakeAuthService.swift"; sourceTree = "<group>"; };
+		23B466898FBC1D567AD990E5 /* AuthSocialButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "AuthSocialButtons.swift"; path = "Auth/AuthSocialButtons.swift"; sourceTree = "<group>"; };
+		3FDFA7C3A655A371198C45EE /* SocialAuthSignIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SocialAuthSignIn.swift"; path = "Data/Supabase/SocialAuthSignIn.swift"; sourceTree = "<group>"; };
 		D3E7D640EAC9375F965E3D9B /* FeedDeferredView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedDeferredView.swift"; sourceTree = "<group>"; };
 		FA963421CE09159A29FCE55A /* MapEmptyOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MapEmptyOverlay.swift"; sourceTree = "<group>"; };
 		84123F72AC63382EDA610127 /* EmptySurfaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EmptySurfaceView.swift"; sourceTree = "<group>"; };
@@ -526,6 +532,9 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				37FB45BF69501B533041420D /* FakeAuthService.swift */,
+				23B466898FBC1D567AD990E5 /* AuthSocialButtons.swift */,
+				3FDFA7C3A655A371198C45EE /* SocialAuthSignIn.swift */,
 				D3E7D640EAC9375F965E3D9B /* FeedDeferredView.swift */,
 				FA963421CE09159A29FCE55A /* MapEmptyOverlay.swift */,
 				84123F72AC63382EDA610127 /* EmptySurfaceView.swift */,
@@ -909,6 +918,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				B6C29F693FC64B91A5D35D6E /* FakeAuthService.swift in Sources */,
+				E36337AF64C8EF85F8D06D2F /* AuthSocialButtons.swift in Sources */,
+				A7C8880D4143D13C8566DD41 /* SocialAuthSignIn.swift in Sources */,
 				11281DC2A4345BAFE89579C1 /* FeedDeferredView.swift in Sources */,
 				D16A4EA302ECBC5BB7B704C7 /* MapEmptyOverlay.swift in Sources */,
 				117AA115D49FD170A614EDD6 /* EmptySurfaceView.swift in Sources */,
@@ -1283,6 +1295,7 @@
 				DEVELOPMENT_TEAM = 43Z5J88JU8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				CODE_SIGN_ENTITLEMENTS = Push/Push.entitlements;
 				INFOPLIST_FILE = Push/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -1313,6 +1326,7 @@
 				DEVELOPMENT_TEAM = 43Z5J88JU8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				CODE_SIGN_ENTITLEMENTS = Push/Push.entitlements;
 				INFOPLIST_FILE = Push/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

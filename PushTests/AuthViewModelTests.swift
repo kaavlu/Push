@@ -217,4 +217,50 @@ final class AuthViewModelTests: XCTestCase {
         XCTAssertFalse(handled)
         XCTAssertEqual(vm.screen, .welcome)
     }
+
+    // MARK: Social providers
+
+    func testSignInWithApplePublishesUser() async {
+        let vm = AuthViewModel(auth: FakeAuthService())
+        await vm.signInWithApple()
+        XCTAssertEqual(vm.authedUser?.id, "apple-user")
+        XCTAssertNil(vm.errorMessage)
+    }
+
+    func testSignInWithGooglePublishesUser() async {
+        let vm = AuthViewModel(auth: FakeAuthService())
+        await vm.signInWithGoogle()
+        XCTAssertEqual(vm.authedUser?.id, "google-user")
+        XCTAssertNil(vm.errorMessage)
+    }
+
+    func testSocialSignInCancellationLeavesNoError() async {
+        let fake = FakeAuthService()
+        fake.signInWithAppleResult = .failure(SocialAuthError.cancelled)
+        let vm = AuthViewModel(auth: fake)
+        await vm.signInWithApple()
+        XCTAssertNil(vm.authedUser)
+        XCTAssertNil(vm.errorMessage)
+    }
+
+    func testSocialSignInFailureSurfacesCalmCopy() async {
+        let fake = FakeAuthService()
+        fake.signInWithGoogleResult = .failure(NSError(domain: "auth", code: 1))
+        let vm = AuthViewModel(auth: fake)
+        await vm.signInWithGoogle()
+        XCTAssertNil(vm.authedUser)
+        XCTAssertEqual(vm.errorMessage, AuthUserMessage.socialFailed)
+    }
+
+    func testOAuthCallbackPublishesSignedInUser() async {
+        let fake = FakeAuthService()
+        let user = AuthedUser(id: "oauth-user", email: "o@push.test")
+        fake.authURLResult = .success(.signedIn(user))
+        let vm = AuthViewModel(auth: fake)
+        let handled = await vm.handleOpenURL(URL(string: "pushapp://auth/callback?code=abc")!)
+        XCTAssertTrue(handled)
+        XCTAssertEqual(vm.authedUser?.id, "oauth-user")
+        XCTAssertFalse(vm.pendingPasswordRecovery)
+        XCTAssertEqual(vm.screen, .welcome)
+    }
 }

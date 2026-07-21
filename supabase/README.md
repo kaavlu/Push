@@ -37,6 +37,8 @@ of the files in order reproduces the schema.
   `block_user` / `unblock_user` / `list_blocked_users`; guards friend request, search,
   group invite, and creator-seeded push_responses; soft-hide policy (no hard-delete of
   historical pushes/groups). Shared group membership unchanged on block.
+- `migrations/0017_oauth_profile_handle.sql` — hardens `handle_new_user` for OAuth
+  (name metadata keys, sanitized unique handles with suffix on collision).
 - `migrations/0014_delete_account.sql` — parameterless `delete_account()` RPC
   (`SECURITY DEFINER`, `authenticated` only): best-effort avatars cleanup, group
   ownership transfer (earliest other active member) or group delete when sole
@@ -57,13 +59,26 @@ The project may have **"Confirm email" OFF** (`mailer_autoconfirm = true`) for i
 sessions, or ON for a confirmation email — the iOS client handles both via `SignUpResult`
 (`.authenticated` vs `.confirmationRequired`).
 
-### Auth deep links (Issue #32)
+### Auth deep links (Issue #32 / #61)
 - Custom URL scheme: `pushapp`
 - Password recovery redirect: `pushapp://auth/reset`
-- Add that URL under Authentication → URL Configuration → Redirect URLs in the
-  Supabase dashboard (and keep it in sync if the scheme changes).
-- The shared `SupabaseClient` sets `redirectToURL` to the same value so recovery and
-  related auth emails open the app.
+- OAuth callback (Google web session): `pushapp://auth/callback`
+- Add both URLs under Authentication → URL Configuration → Redirect URLs in the
+  Supabase dashboard (and keep them in sync if the scheme changes).
+- The shared `SupabaseClient` default `redirectToURL` is the recovery URL; Google
+  OAuth passes `pushapp://auth/callback` per call.
+
+### Apple + Google providers (Issue #61)
+- **Apple (native):** Enable Sign in with Apple on App ID `com.manav.Push`. In
+  Supabase Auth → Providers → Apple, add `com.manav.Push` under Client IDs.
+  The app entitlements file includes Sign in with Apple. No Services ID secret is
+  required for native-only sign-in.
+- **Google (OAuth web session):** Create a Google Cloud OAuth **Web** client ID +
+  secret; authorize redirect
+  `https://tzzvwjhvjduyqywlszqc.supabase.co/auth/v1/callback`. Paste client ID and
+  secret into Supabase Auth → Providers → Google and enable the provider.
+- Profile rows for new OAuth users still come from `handle_new_user`
+  (`0017_oauth_profile_handle` hardens handle uniqueness and name metadata keys).
 
 | Role | Email | Password | In graph? |
 |---|---|---|---|

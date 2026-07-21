@@ -2,7 +2,7 @@
 import SwiftUI
 
 /// Production returning-user sign-in: email/password against Supabase,
-/// plus a forgot-password entry. Social providers are omitted until wired.
+/// forgot-password, plus Apple / Google.
 struct AuthSignInView: View {
     @ObservedObject var model: AuthViewModel
     @Environment(\.pushLayout) private var layout
@@ -22,6 +22,12 @@ struct AuthSignInView: View {
             }
             signInCTA.padding(.top, 22)
             forgotLink.padding(.top, 14)
+            AuthOrDivider().padding(.vertical, 20)
+            AuthSocialButtons(
+                isBusy: model.isBusy,
+                onApple: { Task { await model.signInWithApple() } },
+                onGoogle: { Task { await model.signInWithGoogle() } }
+            )
             Spacer(minLength: 24)
             OnboardingAuthSwitchLink(
                 prompt: "Don't have an account?",
