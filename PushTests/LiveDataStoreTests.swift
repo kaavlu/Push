@@ -387,6 +387,38 @@ final class LiveDataLoaderSpy: LiveDataLoading {
     func loadProfile(id: String) async throws -> ProfileRow {
         .fixture(id: id, name: id.capitalized)
     }
+
+    // MARK: - Group invites
+
+    var createdGroupRows: [GroupRow] = []
+    var groupInviteRows: [GroupInviteRow] = []
+
+    func createGroup(name: String, imageAssetPath: String?, inviteeIDs: [String]) async throws -> GroupRow {
+        if let writeError { throw writeError }
+        let row = GroupRow(id: "group-\(createdGroupRows.count + 1)", name: name, image_asset_path: imageAssetPath)
+        createdGroupRows.append(row)
+        return row
+    }
+
+    func incomingGroupInvites() async throws -> [GroupInviteRow] { groupInviteRows }
+
+    func resolveGroupInvite(membershipID: String, accept: Bool) async throws -> GroupMembershipRow {
+        if let writeError { throw writeError }
+        guard let index = membershipRows.firstIndex(where: { $0.id == membershipID }) else {
+            throw SupabaseRepositoryError.notFound
+        }
+        let existing = membershipRows[index]
+        if accept {
+            let updated = GroupMembershipRow(
+                id: existing.id, person_id: existing.person_id, group_id: existing.group_id,
+                role: existing.role, membership_status: "active", joined_at: existing.joined_at
+            )
+            membershipRows[index] = updated
+            return updated
+        }
+        membershipRows.remove(at: index)
+        return existing
+    }
 }
 
 private enum TestFailure: Error { case expected }

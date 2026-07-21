@@ -7,6 +7,7 @@
 
 import Combine
 import Foundation
+import UIKit
 
 struct PushGroupData: Identifiable, Equatable {
     let id: String
@@ -47,6 +48,9 @@ struct PushGroupMemberData: Identifiable, Equatable {
     let activitySymbolName: String
     let venueStatusText: String
     let lastUpdated: String
+    /// True for an invited-but-not-yet-accepted member (`GroupMembership.Status.invited`).
+    /// Default false keeps existing call sites (previews, tests) unaffected.
+    let isPending: Bool
 
     init(
         id: String,
@@ -56,7 +60,8 @@ struct PushGroupMemberData: Identifiable, Equatable {
         availability: FriendAvailabilityState?,
         activitySymbolName: String = "person.fill",
         venueStatusText: String? = nil,
-        lastUpdated: String = ""
+        lastUpdated: String = "",
+        isPending: Bool = false
     ) {
         self.id = id
         self.name = name
@@ -66,6 +71,7 @@ struct PushGroupMemberData: Identifiable, Equatable {
         self.activitySymbolName = activitySymbolName
         self.venueStatusText = venueStatusText ?? availability?.title ?? "Hidden right now"
         self.lastUpdated = lastUpdated
+        self.isPending = isPending
     }
 
     var friendRow: FriendRowModel {
@@ -102,6 +108,9 @@ final class GroupsViewModel: ObservableObject {
     private var storeChangeSub: AnyCancellable?
     // Tracks the last revision we loaded so the subscription skips redundant reloads.
     private var lastSeenRevision = 0
+    // Session-only picked photos for freshly-created groups. Never persisted
+    // (no Storage upload), so a fresh app launch reverts to the initials tile.
+    private var sessionImages: [String: UIImage] = [:]
 
     // `container` defaults via `?? .shared` (not `= .shared`) because default-argument
     // expressions are checked in a nonisolated context even inside a @MainActor
@@ -207,5 +216,16 @@ final class GroupsViewModel: ObservableObject {
 
     func members(for group: PushGroupData) -> [PushGroupMemberData] {
         membersByGroupID[group.id] ?? []
+    }
+
+    /// Registers a picked photo for `id` so its detail view can show it this
+    /// session even though it was never uploaded anywhere.
+    func registerSessionImage(_ image: UIImage?, forGroupID id: String) {
+        guard let image else { return }
+        sessionImages[id] = image
+    }
+
+    func sessionImage(for group: PushGroupData) -> UIImage? {
+        sessionImages[group.id]
     }
 }

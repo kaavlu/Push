@@ -14,6 +14,15 @@
 		D20BBE9E24E3A5A738F5A1AD /* ProfilePhotoProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03F1B368CC6E9D9D4E105366 /* ProfilePhotoProcessor.swift */; };
 		5FAB0B553AFFCA8F7157CCFD /* MapPuckHitTestingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30EC8288ED6D5DFC46693E12 /* MapPuckHitTestingTests.swift */; };
 		07CCE2B52DAC859603B5A453 /* MapPuckHitTesting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88BD1A7599AF82CCE11F237E /* MapPuckHitTesting.swift */; };
+		B00A9F868BBB73CD5878C563 /* GroupRequestCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D441287507AB63FE03C26733 /* GroupRequestCard.swift */; };
+		14F2A9AC97337702850AC6E1 /* AddGroupStep3ReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB8CC3E7DC54B6D8F764187B /* AddGroupStep3ReviewView.swift */; };
+		CD1F689332E6E28CE53246A6 /* AddGroupStep2MembersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B968DCC925738E1F74F9CCD0 /* AddGroupStep2MembersView.swift */; };
+		938652C20C0B88464557A63A /* AddGroupStep1CreateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B96A88FD8C4EE1523C4BCB9 /* AddGroupStep1CreateView.swift */; };
+		082B48E0A8C77AC83BAC81ED /* AddGroupFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E1DC17AFADDBDFD81E41EE5 /* AddGroupFlowView.swift */; };
+		C7A3C0139389665540D1E3AB /* AddGroupViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47116879E5576FC7FFD09BD7 /* AddGroupViewModel.swift */; };
+		869075D1F1C2B1F7379A32B7 /* GroupPhotoBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12933B2D5AE985015CF88686 /* GroupPhotoBadge.swift */; };
+		CCC626DC744C9501DE4E49D9 /* GroupInviteRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58DF3F463907F260FF79B76B /* GroupInviteRow.swift */; };
+		16F7B3F3D4F386D16A3DCA0D /* GroupInvite.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBDF147EDAE09278AD7B8F90 /* GroupInvite.swift */; };
 		EDB45A1258432DBF99270700 /* SupabaseLiveDataLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 316F0384F2DAC8FABE08FD01 /* SupabaseLiveDataLoader.swift */; };
 		1DA8CBE0771B3102F0A0E81E /* AddFriendsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECA2C79204C1A37B4EE79B97 /* AddFriendsTests.swift */; };
 		CACE6741737057880FC5EAD7 /* SupabaseAlertRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBB185ED49BC09EF42647C81 /* SupabaseAlertRepository.swift */; };
@@ -206,6 +215,15 @@
 		03F1B368CC6E9D9D4E105366 /* ProfilePhotoProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "ProfilePhotoProcessor.swift"; path = "Data/ProfilePhotoProcessor.swift"; sourceTree = "<group>"; };
 		30EC8288ED6D5DFC46693E12 /* MapPuckHitTestingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MapPuckHitTestingTests.swift"; sourceTree = "<group>"; };
 		88BD1A7599AF82CCE11F237E /* MapPuckHitTesting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MapPuckHitTesting.swift"; sourceTree = "<group>"; };
+		D441287507AB63FE03C26733 /* GroupRequestCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GroupRequestCard.swift"; sourceTree = "<group>"; };
+		BB8CC3E7DC54B6D8F764187B /* AddGroupStep3ReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddGroupStep3ReviewView.swift"; sourceTree = "<group>"; };
+		B968DCC925738E1F74F9CCD0 /* AddGroupStep2MembersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddGroupStep2MembersView.swift"; sourceTree = "<group>"; };
+		1B96A88FD8C4EE1523C4BCB9 /* AddGroupStep1CreateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddGroupStep1CreateView.swift"; sourceTree = "<group>"; };
+		0E1DC17AFADDBDFD81E41EE5 /* AddGroupFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddGroupFlowView.swift"; sourceTree = "<group>"; };
+		47116879E5576FC7FFD09BD7 /* AddGroupViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddGroupViewModel.swift"; sourceTree = "<group>"; };
+		12933B2D5AE985015CF88686 /* GroupPhotoBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GroupPhotoBadge.swift"; sourceTree = "<group>"; };
+		58DF3F463907F260FF79B76B /* GroupInviteRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "GroupInviteRow.swift"; path = "Data/Supabase/Rows/GroupInviteRow.swift"; sourceTree = "<group>"; };
+		EBDF147EDAE09278AD7B8F90 /* GroupInvite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "GroupInvite.swift"; path = "Data/Domain/GroupInvite.swift"; sourceTree = "<group>"; };
 		316F0384F2DAC8FABE08FD01 /* SupabaseLiveDataLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SupabaseLiveDataLoader.swift"; path = "Data/Supabase/SupabaseLiveDataLoader.swift"; sourceTree = "<group>"; };
 		ECA2C79204C1A37B4EE79B97 /* AddFriendsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddFriendsTests.swift"; sourceTree = "<group>"; };
 		FBB185ED49BC09EF42647C81 /* SupabaseAlertRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SupabaseAlertRepository.swift"; path = "Data/Supabase/SupabaseAlertRepository.swift"; sourceTree = "<group>"; };
@@ -433,6 +451,15 @@
 				5479CF0A52EF3229A4619BA8 /* AvatarImageLoader.swift */,
 				03F1B368CC6E9D9D4E105366 /* ProfilePhotoProcessor.swift */,
 				88BD1A7599AF82CCE11F237E /* MapPuckHitTesting.swift */,
+				D441287507AB63FE03C26733 /* GroupRequestCard.swift */,
+				BB8CC3E7DC54B6D8F764187B /* AddGroupStep3ReviewView.swift */,
+				B968DCC925738E1F74F9CCD0 /* AddGroupStep2MembersView.swift */,
+				1B96A88FD8C4EE1523C4BCB9 /* AddGroupStep1CreateView.swift */,
+				0E1DC17AFADDBDFD81E41EE5 /* AddGroupFlowView.swift */,
+				47116879E5576FC7FFD09BD7 /* AddGroupViewModel.swift */,
+				12933B2D5AE985015CF88686 /* GroupPhotoBadge.swift */,
+				58DF3F463907F260FF79B76B /* GroupInviteRow.swift */,
+				EBDF147EDAE09278AD7B8F90 /* GroupInvite.swift */,
 				316F0384F2DAC8FABE08FD01 /* SupabaseLiveDataLoader.swift */,
 				FBB185ED49BC09EF42647C81 /* SupabaseAlertRepository.swift */,
 				BBB8729ABF9C6A739C33A37B /* FriendshipRow.swift */,
@@ -765,6 +792,15 @@
 				14A32B8BC1AE172D7E0E8E41 /* AvatarImageLoader.swift in Sources */,
 				D20BBE9E24E3A5A738F5A1AD /* ProfilePhotoProcessor.swift in Sources */,
 				07CCE2B52DAC859603B5A453 /* MapPuckHitTesting.swift in Sources */,
+				B00A9F868BBB73CD5878C563 /* GroupRequestCard.swift in Sources */,
+				14F2A9AC97337702850AC6E1 /* AddGroupStep3ReviewView.swift in Sources */,
+				CD1F689332E6E28CE53246A6 /* AddGroupStep2MembersView.swift in Sources */,
+				938652C20C0B88464557A63A /* AddGroupStep1CreateView.swift in Sources */,
+				082B48E0A8C77AC83BAC81ED /* AddGroupFlowView.swift in Sources */,
+				C7A3C0139389665540D1E3AB /* AddGroupViewModel.swift in Sources */,
+				869075D1F1C2B1F7379A32B7 /* GroupPhotoBadge.swift in Sources */,
+				CCC626DC744C9501DE4E49D9 /* GroupInviteRow.swift in Sources */,
+				16F7B3F3D4F386D16A3DCA0D /* GroupInvite.swift in Sources */,
 				EDB45A1258432DBF99270700 /* SupabaseLiveDataLoader.swift in Sources */,
 				CACE6741737057880FC5EAD7 /* SupabaseAlertRepository.swift in Sources */,
 				2F1D4519E20D6516E0C0653A /* FriendshipRow.swift in Sources */,
@@ -1089,7 +1125,6 @@
 				INFOPLIST_FILE = Push/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1120,7 +1155,6 @@
 				INFOPLIST_FILE = Push/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (

@@ -44,3 +44,31 @@ user’s avatar survives relaunch and is visible to friends after they refresh.
   the profile row never adopted.
 - Focused unit tests for processor, local repo photo writes, and avatar path resolution.
 - `scripts/test.sh build` + focused suites green.
+
+---
+
+# Production Branding Assets (Issue #35)
+
+## Goal
+Ship a coherent, non-placeholder Push identity in production and TestFlight builds: a
+complete app icon, an explicit brand accent, and a native launch screen whose first frame
+matches the app's warm cream presentation.
+
+## Product contract
+- App icon uses the Push sunbeam / walnut palette and a simple, legible social-map mark.
+- The icon contains no text, transparency, photography, or small detail that disappears at
+  SpringBoard sizes.
+- `AccentColor` resolves to the canonical sunbeam color in light and dark appearances.
+- The generated iOS launch screen uses a catalog-backed cream background so it never flashes
+  an unrelated system white/black surface before SwiftUI renders.
+- Runtime loading and authentication surfaces remain SwiftUI-owned; no fake interactive launch
+  UI or launch-delay behavior is introduced.
+
+## Acceptance criteria
+1. `AppIcon.appiconset` contains a valid opaque 1024×1024 production PNG referenced by
+   `Contents.json`.
+2. `AccentColor.colorset` and the launch-background colorset contain explicit sRGB values.
+3. Release build settings reference the app icon, accent, and launch background assets.
+4. A generic Release build succeeds without asset-catalog warnings about missing or unassigned
+   production branding.
+5. An archive succeeds and contains the compiled app icon and expected launch-screen metadata.

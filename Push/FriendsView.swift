@@ -46,6 +46,7 @@ struct FriendsView: View {
             GroupDetailView(
                 group: group,
                 members: groupsViewModel.members(for: group),
+                sessionImage: groupsViewModel.sessionImage(for: group),
                 onStartPush: { launchStartPush(.group(group.id)) }
             ) {
                 groupsViewModel.closeDetail()
@@ -108,12 +109,10 @@ struct FriendsView: View {
         .fullScreenCover(isPresented: $isAddFriendPresented) {
             AddFriendsView()
         }
-        .sheet(isPresented: $isAddGroupPresented) {
-            CreatePlaceholderView(
-                title: "Add Group",
-                subtitle: "Create a circle for the people you see together.",
-                symbolName: "person.3.fill"
-            )
+        .fullScreenCover(isPresented: $isAddGroupPresented) {
+            AddGroupFlowView { groupID, image in
+                handleGroupCreated(groupID: groupID, image: image)
+            }
         }
         .onChange(of: mode) { _ in viewModel.collapse() }
         .onChange(of: viewModel.removeErrorMessage) { message in
@@ -198,6 +197,20 @@ struct FriendsView: View {
 
     private func launchStartPush(_ context: StartPushLaunchContext) {
         startPushContext = context
+    }
+
+    /// Registering the picked photo must happen synchronously, before the
+    /// reload — `GroupDetailView` reads it via `sessionImage(for:)` as soon
+    /// as `openDetail` presents the freshly-created group.
+    private func handleGroupCreated(groupID: FriendGroup.ID, image: UIImage?) {
+        groupsViewModel.registerSessionImage(image, forGroupID: groupID)
+        mode = .groups
+        Task {
+            await groupsViewModel.load()
+            if let group = groupsViewModel.group(for: groupID) {
+                groupsViewModel.openDetail(for: group)
+            }
+        }
     }
 
     private func selectFriend(_ row: FriendRowModel) {
