@@ -41,12 +41,15 @@ struct PlansCalendarView: View {
 
             Spacer(minLength: WeeklyRecapCardLayout.headerSpacerMinLength)
 
-            Button(action: {}) {
+            Button {
+                viewModel.openHistory()
+            } label: {
                 Text("History ›")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(PushColorPalette.Accent.walnut)
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("Open history")
         }
     }
 

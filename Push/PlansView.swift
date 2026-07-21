@@ -55,6 +55,9 @@ struct PlansView: View {
         .fullScreenCover(item: $viewModel.reviewFocusPlan) { plan in
             ReviewPushesView(viewModel: viewModel, focusPlan: plan)
         }
+        .fullScreenCover(isPresented: $viewModel.isHistoryPresented) {
+            PlansHistoryView(viewModel: viewModel)
+        }
     }
 
     private var pageContent: some View {
