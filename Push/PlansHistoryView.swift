@@ -23,9 +23,6 @@ struct PlansHistoryView: View {
                 }
             }
         }
-        .sheet(item: $viewModel.selectedHistoryItem) { item in
-            HistoryDetailSheet(item: item)
-        }
     }
 
     private var header: some View {
@@ -53,14 +50,10 @@ struct PlansHistoryView: View {
     private var list: some View {
         ScrollView {
             // Same list rhythm as Friends (`FriendsLayout.listSpacing` + page padding).
+            // Rows are display-only for now — no detail modal on tap.
             LazyVStack(spacing: FriendsLayout.listSpacing) {
                 ForEach(viewModel.historyItems) { item in
-                    Button {
-                        viewModel.openHistoryItem(item)
-                    } label: {
-                        HistoryListRow(item: item)
-                    }
-                    .buttonStyle(.plain)
+                    HistoryListRow(item: item)
                 }
             }
             .padding(.horizontal, FriendsLayout.horizontalPadding(layout))
@@ -115,13 +108,9 @@ private struct HistoryListRow: View {
             }
             .layoutPriority(1)
             Spacer(minLength: 0)
-            Image(systemName: "chevron.right")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(PushControlColors.textTertiary)
         }
         .padding(FriendsLayout.cardPadding(layout))
         .frame(maxWidth: .infinity, alignment: .leading)
-        .contentShape(Rectangle())
         .friendsCard(cornerRadius: FriendsLayout.cardCornerRadius)
     }
 
@@ -133,92 +122,6 @@ private struct HistoryListRow: View {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMM d"
         return formatter.string(from: item.date)
-    }
-}
-
-// MARK: - Detail
-
-private struct HistoryDetailSheet: View {
-    @Environment(\.pushLayout) private var layout
-    let item: HistoryItemData
-
-    private var dayHeader: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "EEEE, MMMM d"
-        return formatter.string(from: item.date)
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            VStack(alignment: .leading, spacing: 6) {
-                Text(item.title)
-                    .font(.title3.weight(.bold))
-                    .foregroundStyle(PushControlColors.textEspresso)
-                Text(dayHeader)
-                    .font(.subheadline)
-                    .foregroundStyle(PushControlColors.textSecondary)
-                if !item.timeRange.isEmpty {
-                    Text(item.timeRange)
-                        .font(.subheadline.weight(.medium))
-                        .foregroundStyle(PlansColor.metadata)
-                }
-            }
-            .padding(.horizontal, PlansHistoryLayout.detailHorizontalPadding)
-            .padding(.top, PlansHistoryLayout.detailTopPadding)
-            .padding(.bottom, PlansHistoryLayout.detailHeaderBottom)
-
-            VStack(alignment: .leading, spacing: PlansHistoryLayout.detailFieldSpacing) {
-                if !item.groupName.isEmpty {
-                    detailField(label: "Group", value: item.groupName)
-                }
-                if !item.locationHint.isEmpty {
-                    detailField(label: "Location", value: item.locationHint)
-                }
-                detailField(
-                    label: "Status",
-                    value: item.didHappen ? "Completed" : "Almost happened"
-                )
-                if !item.participants.isEmpty {
-                    Text("In")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(PushControlColors.textTertiary)
-                    HistoryListPuck(
-                        people: item.participants,
-                        avatarSize: FriendsLayout.rowAvatarSize(layout)
-                    )
-                    Text(participantNames)
-                        .font(.subheadline)
-                        .foregroundStyle(PushControlColors.textEspresso)
-                }
-            }
-            .padding(.horizontal, PlansHistoryLayout.detailHorizontalPadding)
-
-            Spacer(minLength: 0)
-        }
-        .presentationDetents([.medium, .large])
-        .presentationDragIndicator(.visible)
-    }
-
-    private var participantNames: String {
-        let names = item.participants.map(\.name)
-        switch names.count {
-        case 0: return ""
-        case 1: return names[0]
-        case 2: return "\(names[0]) and \(names[1])"
-        default:
-            return "\(names[0]), \(names[1]), and \(names.count - 2) others"
-        }
-    }
-
-    private func detailField(label: String, value: String) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(label)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(PushControlColors.textTertiary)
-            Text(value)
-                .font(.subheadline)
-                .foregroundStyle(PushControlColors.textEspresso)
-        }
     }
 }
 
@@ -275,10 +178,6 @@ private enum PlansHistoryLayout {
     static let closeIconSize: CGFloat = 14
     static let closeTapSize: CGFloat = 32
     static let emptySpacing: CGFloat = 8
-    static let detailHorizontalPadding: CGFloat = 24
-    static let detailTopPadding: CGFloat = 24
-    static let detailHeaderBottom: CGFloat = 16
-    static let detailFieldSpacing: CGFloat = 12
     static let puckOverlapScale: CGFloat = 0.38
     static let puckMaxFaces = 3
 }
