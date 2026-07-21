@@ -1,13 +1,8 @@
 // Push/Auth/AuthWelcomeView.swift
 import SwiftUI
 
-/// Production front door for the live app: the same hero + wordmark +
-/// auth-method buttons as the DEBUG onboarding lab's welcome screen
-/// (`OnboardingWelcomeScreen`), but driven by the real `AuthViewModel`.
-/// Account creation isn't wired yet (see spec/Issue #27 scope), so the
-/// Apple/Google/mobile buttons surface "coming soon" instead of silently
-/// doing nothing — swap `model.requestUnavailable` for real sign-up calls
-/// when that work starts.
+/// Production front door: hero + wordmark + email continue. Social methods
+/// are intentionally omitted until they are implemented.
 struct AuthWelcomeView: View {
     @ObservedObject var model: AuthViewModel
 
@@ -52,9 +47,9 @@ struct AuthWelcomeView: View {
 
     private var authButtons: some View {
         VStack(spacing: 12) {
-            OnboardingAuthButton(kind: .apple) { model.requestUnavailable() }
-            OnboardingAuthButton(kind: .google) { model.requestUnavailable() }
-            OnboardingAuthButton(kind: .mobile) { model.requestUnavailable() }
+            OnboardingCTAButton(title: "Continue with email") {
+                model.showSignUp()
+            }
             OnboardingAuthSwitchLink(
                 prompt: "Already have an account?",
                 action: "Sign in"
