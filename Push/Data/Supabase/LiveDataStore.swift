@@ -25,6 +25,7 @@ protocol LiveDataLoading: AnyObject {
     func searchProfiles(query: String, limit: Int) async throws -> [SearchProfileRow]
     func sendFriendRequest(targetUserID: String) async throws -> FriendshipRow
     func resolveFriendRequest(id: String, accept: Bool) async throws -> FriendshipRow
+    func cancelFriendRequest(id: String) async throws
     func removeFriend(targetUserID: String) async throws
     func loadProfile(id: String) async throws -> ProfileRow
     func createGroup(name: String, imageAssetPath: String?, inviteeIDs: [String]) async throws -> GroupRow
@@ -435,9 +436,11 @@ final class LiveDataStore {
         try await loader.searchProfiles(query: query, limit: limit)
     }
 
-    func sendFriendRequest(targetUserID: String) async throws {
-        _ = try await loader.sendFriendRequest(targetUserID: targetUserID)
+    @discardableResult
+    func sendFriendRequest(targetUserID: String) async throws -> FriendRequest.ID {
+        let row = try await loader.sendFriendRequest(targetUserID: targetUserID)
         notifyFriendshipsChanged()
+        return row.id
     }
 
     func resolveFriendRequest(id: String, accept: Bool) async throws {
@@ -445,6 +448,11 @@ final class LiveDataStore {
         // Accept expands profile visibility; drop the warm cache so friends() refreshes.
         profileRows = nil
         profilesTask = nil
+        notifyFriendshipsChanged()
+    }
+
+    func cancelFriendRequest(id: String) async throws {
+        try await loader.cancelFriendRequest(id: id)
         notifyFriendshipsChanged()
     }
 

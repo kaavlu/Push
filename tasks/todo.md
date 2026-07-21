@@ -1,83 +1,20 @@
-# Legal Destinations (Issue #36)
-
-- [x] Define feature contract and replacement procedure.
-- [x] Add centralized placeholder Terms and Privacy destinations.
-- [x] Wire production onboarding, onboarding lab, and Profile.
-- [x] Document App Store privacy disclosure inputs.
-- [x] Add focused tests and verify build/test compilation.
-
-## Verification
-- [x] Both placeholder HTTPS destinations returned HTTP 200.
-- [x] `scripts/test.sh build` succeeded.
-- [x] Generic Release simulator build succeeded with store validation.
-- [x] Generic `build-for-testing` succeeded, including `LegalDestinationsTests` compilation.
-- [ ] Focused simulator execution: CoreSimulator XPC interrupted twice; the retry remained hung during simulator startup and was stopped after more than two minutes without test output.
-
----
-
-# Foreground Refresh & Mutation Errors (Issue #33)
-
-- [x] `LiveDataStore.refresh` + `AppDataContainer.refreshSession` + tests
-- [x] Foreground re-warm on `ContentView` (skip first active)
-- [x] `ActionErrorState` + `ActionErrorBanner`
-- [x] Plans RSVP/cancel/delete rollback + pull-to-refresh
-- [x] Friends remove retry + pull-to-refresh (Groups mode shares list)
-- [x] Alerts soft load + accept/deny action errors + pull-to-refresh
-- [x] Add Group create uses shared banner
-- [x] Focused suites: LiveDataStoreTests, PlansViewModelTests, AlertsTests; build SUCCEEDED
-
-## Verification
-- [x] `scripts/test.sh build` SUCCEEDED
-- [x] PlansViewModelTests 24/24, AlertsTests 8/8, LiveDataStoreTests 13/13
-
----
-
-# Complete production email authentication (Issue #32)
-
-- [x] Design: `docs/superpowers/specs/2026-07-17-complete-production-email-auth-design.md`
-- [x] Plan: `docs/superpowers/plans/2026-07-17-complete-production-email-auth.md`
-- [x] `AuthService`: sign-up with name/handle metadata, `SignUpResult`, reset/update password, `handleAuthURL`, error mapper
-- [x] Client redirect `pushapp://auth/reset` + Info.plist URL scheme
-- [x] `AuthViewModel` screens, validation, deep-link recovery without early app entry
-- [x] Views: welcome (email only), sign-up, sign-in + forgot, check-email, set-new-password
-- [x] `RootView.onOpenURL` → recovery gate
-- [x] Focused tests + `supabase/README.md` redirect notes
-
-## Verification
-- [x] `scripts/test.sh suite AuthViewModelTests` — 20 tests, 0 failures
-- [ ] Live smoke: new sign-up, forgot → open `pushapp://` → set password (needs dashboard redirect allow-list)
-
----
-
-# Issue #34 — Persistent Profile Photo Uploads
+# Issue #44 — Complete Friend Relationship Lifecycle
 
 - [x] Spec in `tasks/spec.md`
-- [x] Migration `0012_profile_photos` (avatars bucket + storage RLS) applied via MCP
-- [x] `ProfilePhotoProcessor` + `AvatarImageLoader` + avatar view remote support
-- [x] `ProfileRepository` photo APIs — Local + Supabase write-through
-- [x] ProfileView / ViewModel photo picker + remove
-- [x] Focused tests + pbxproj registration
-- [x] Build + focused test suites
+- [x] Migration `0013_friend_relationship_lifecycle.sql`
+  - `cancel_friend_request` (requester / pending / hard-delete)
+  - race-safe `send_friend_request` (unique_violation re-read)
+  - `remove_friend` deletes any status between the pair
+- [x] Swift data layer: `FriendRepository.cancelFriendRequest`, send returns request id
+- [x] Mock `InMemoryDatabase` cancel + remove clears pending
+- [x] Live loader/store wiring + revision bumps
+- [x] Add Friends: Cancel on outgoing; ActionErrorBanner + optimistic rollback
+- [x] Tests: `FriendRelationshipTests` (13) + existing suites
+- [x] `supabase/README.md` note for 0013
+- [ ] Apply migration 0013 to remote Supabase (MCP auth required — apply before live smoke)
+- [ ] Live two-account smoke (issue acceptance criteria 1–17)
 
 ## Verification
-- [x] `scripts/test.sh build` SUCCEEDED
-- [x] ProfilePhotoTests: 8 tests, 0 failures
-- [x] LiveDataStoreTests: 8 tests, 0 failures
-- [x] Migration `0012_profile_photos` applied; `avatars` bucket public; storage policies present
-
----
-
-# Production Branding Assets (Issue #35)
-
-- [x] Audit production asset catalog, launch settings, and design tokens.
-- [x] Write the production-branding contract in `tasks/spec.md`.
-- [x] Add and register the production app icon.
-- [x] Define AccentColor and launch-background catalog colors.
-- [x] Configure native generated launch branding.
-- [x] Verify generic Release build and archive contents.
-
-## Verification
-- [x] Generic iOS Simulator Release build succeeded.
-- [x] Unsigned generic iOS Release archive succeeded.
-- [x] Archived app contains compiled `Assets.car`, iPhone/iPad app-icon PNGs, and one valid
-      `UILaunchScreen` dictionary resolving `LaunchBackground`.
+- [x] `scripts/test.sh suite FriendRelationshipTests` — 13 tests, 0 failures
+- [x] `scripts/test.sh suite AddFriendsTests` — 5 tests, 0 failures
+- [x] `scripts/test.sh suite AlertsTests` — 8 tests, 0 failures

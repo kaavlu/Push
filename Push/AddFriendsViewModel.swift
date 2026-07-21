@@ -6,6 +6,7 @@ final class AddFriendsViewModel: ObservableObject {
     @Published var searchText: String = ""
     @Published private(set) var contentState: AddFriendsContentState = .prompt
     @Published private(set) var actingIDs: Set<Person.ID> = []
+    @Published private(set) var actionError: ActionErrorState?
 
     private let friends: FriendRepository
     private let alerts: AlertRepository
@@ -14,6 +15,14 @@ final class AddFriendsViewModel: ObservableObject {
     private var searchTask: Task<Void, Never>?
     private var lastSeenRevision = 0
     private var lastQuery = ""
+    private var pendingMutation: PendingMutation?
+
+    private enum PendingMutation {
+        case send(AddFriendRowModel)
+        case cancel(AddFriendRowModel)
+        case accept(AddFriendRowModel)
+        case deny(AddFriendRowModel)
+    }
 
     init(friends: FriendRepository, alerts: AlertRepository) {
         self.friends = friends
@@ -48,9 +57,10 @@ final class AddFriendsViewModel: ObservableObject {
     }
 
     func sendRequest(to row: AddFriendRowModel) async {
+        guard row.relation == .none else { return }
         guard actingIDs.insert(row.id).inserted else { return }
         defer { actingIDs.remove(row.id) }
-        // Optimistic outgoing pending.
+        let previous = row.result
         applyOptimistic(rowID: row.id) { result in
             PersonSearchResult(
                 person: result.person,
@@ -59,11 +69,43 @@ final class AddFriendsViewModel: ObservableObject {
             )
         }
         do {
-            try await friends.sendFriendRequest(to: row.id)
+            let requestID = try await friends.sendFriendRequest(to: row.id)
+            if !requestID.isEmpty {
+                applyOptimistic(rowID: row.id) { result in
+                    PersonSearchResult(
+                        person: result.person,
+                        handle: result.handle,
+                        relation: .outgoingPending(requestID: requestID)
+                    )
+                }
+            }
+            clearMutationError()
             lastSeenRevision = containerForRefresh?.storeRevision ?? lastSeenRevision
             await performSearch(query: lastQuery)
         } catch {
-            contentState = .failed
+            restore(previous)
+            pendingMutation = .send(row)
+            actionError = ActionErrorState(message: AddFriendsMutationCopy.sendFailed)
+        }
+    }
+
+    func cancelRequest(for row: AddFriendRowModel) async {
+        guard case .outgoingPending(let requestID) = row.relation else { return }
+        guard actingIDs.insert(row.id).inserted else { return }
+        defer { actingIDs.remove(row.id) }
+        let previous = row.result
+        applyOptimistic(rowID: row.id) { result in
+            PersonSearchResult(person: result.person, handle: result.handle, relation: .none)
+        }
+        do {
+            try await friends.cancelFriendRequest(id: requestID)
+            clearMutationError()
+            lastSeenRevision = containerForRefresh?.storeRevision ?? lastSeenRevision
+            await performSearch(query: lastQuery)
+        } catch {
+            restore(previous)
+            pendingMutation = .cancel(row)
+            actionError = ActionErrorState(message: AddFriendsMutationCopy.cancelFailed)
         }
     }
 
@@ -71,15 +113,19 @@ final class AddFriendsViewModel: ObservableObject {
         guard case .incomingPending(let requestID) = row.relation else { return }
         guard actingIDs.insert(row.id).inserted else { return }
         defer { actingIDs.remove(row.id) }
+        let previous = row.result
         applyOptimistic(rowID: row.id) { result in
             PersonSearchResult(person: result.person, handle: result.handle, relation: .friends)
         }
         do {
             try await alerts.acceptFriendRequest(id: requestID)
+            clearMutationError()
             lastSeenRevision = containerForRefresh?.storeRevision ?? lastSeenRevision
             await performSearch(query: lastQuery)
         } catch {
-            contentState = .failed
+            restore(previous)
+            pendingMutation = .accept(row)
+            actionError = ActionErrorState(message: AddFriendsMutationCopy.acceptFailed)
         }
     }
 
@@ -87,12 +133,34 @@ final class AddFriendsViewModel: ObservableObject {
         guard case .incomingPending(let requestID) = row.relation else { return }
         guard actingIDs.insert(row.id).inserted else { return }
         defer { actingIDs.remove(row.id) }
+        let previous = row.result
+        applyOptimistic(rowID: row.id) { result in
+            PersonSearchResult(person: result.person, handle: result.handle, relation: .none)
+        }
         do {
             try await alerts.denyFriendRequest(id: requestID)
+            clearMutationError()
             lastSeenRevision = containerForRefresh?.storeRevision ?? lastSeenRevision
             await performSearch(query: lastQuery)
         } catch {
-            contentState = .failed
+            restore(previous)
+            pendingMutation = .deny(row)
+            actionError = ActionErrorState(message: AddFriendsMutationCopy.denyFailed)
+        }
+    }
+
+    func dismissActionError() {
+        actionError = nil
+        pendingMutation = nil
+    }
+
+    func retryLastAction() async {
+        guard let pendingMutation else { return }
+        switch pendingMutation {
+        case .send(let row): await sendRequest(to: row)
+        case .cancel(let row): await cancelRequest(for: row)
+        case .accept(let row): await accept(row: row)
+        case .deny(let row): await deny(row: row)
         }
     }
 
@@ -123,7 +191,12 @@ final class AddFriendsViewModel: ObservableObject {
             contentState = rows.isEmpty ? .noResults : .results(rows)
             lastSeenRevision = containerForRefresh?.storeRevision ?? lastSeenRevision
         } catch {
-            contentState = .failed
+            // Do not present network errors as empty results.
+            if case .results = contentState {
+                actionError = ActionErrorState(message: AddFriendsMutationCopy.searchRefreshFailed)
+            } else {
+                contentState = .failed
+            }
         }
     }
 
@@ -138,4 +211,21 @@ final class AddFriendsViewModel: ObservableObject {
         }
         contentState = .results(updated)
     }
+
+    private func restore(_ previous: PersonSearchResult) {
+        applyOptimistic(rowID: previous.id) { _ in previous }
+    }
+
+    private func clearMutationError() {
+        actionError = nil
+        pendingMutation = nil
+    }
+}
+
+enum AddFriendsMutationCopy {
+    static let sendFailed = "Couldn't send the request. Try again."
+    static let cancelFailed = "Couldn't cancel the request. Try again."
+    static let acceptFailed = "Couldn't accept the request. Try again."
+    static let denyFailed = "Couldn't decline the request. Try again."
+    static let searchRefreshFailed = "Couldn't refresh results. Try again."
 }

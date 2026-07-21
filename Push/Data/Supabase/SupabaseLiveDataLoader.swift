@@ -125,6 +125,12 @@ final class SupabaseLiveDataLoader: LiveDataLoading {
             .value
     }
 
+    func cancelFriendRequest(id: String) async throws {
+        try await client
+            .rpc("cancel_friend_request", params: CancelFriendRequestParams(request_id: id))
+            .execute()
+    }
+
     func removeFriend(targetUserID: String) async throws {
         try await client
             .rpc("remove_friend", params: RemoveFriendParams(other_user_id: targetUserID))
@@ -179,6 +185,10 @@ private struct SendFriendRequestParams: Encodable {
 private struct ResolveFriendRequestParams: Encodable {
     let request_id: String
     let accept: Bool
+}
+
+private struct CancelFriendRequestParams: Encodable {
+    let request_id: String
 }
 
 private struct RemoveFriendParams: Encodable {
