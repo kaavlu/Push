@@ -21,7 +21,19 @@ final class SupabasePushRepository: PushRepository {
     }
 
     func activePlans() async throws -> [PushPlan] {
-        try await store.pushes().map { $0.pushPlan() }.filter { $0.cancelledAt == nil }
+        let now = Date()
+        return try await store.pushes()
+            .map { $0.pushPlan() }
+            .filter { PushLifecycle.isActive($0, now: now) }
+    }
+
+    func historicalPlans(forMonthContaining date: Date) async throws -> [PushPlan] {
+        let now = Date()
+        let calendar = Calendar.current
+        return try await store.pushes()
+            .map { $0.pushPlan() }
+            .filter { PushLifecycle.isHistorical($0, now: now) }
+            .filter { calendar.isDate($0.startsAt, equalTo: date, toGranularity: .month) }
     }
 
     func responses() async throws -> [PushResponse] {
@@ -39,9 +51,21 @@ final class SupabasePushRepository: PushRepository {
         await store.notifyPushesChanged()
     }
 
-    // Calendar and map places are out of scope for pushes persistence (see
-    // plan); live mode has no backing table for either yet.
-    func pastHangouts(forMonthContaining date: Date) async throws -> [PastHangout] { [] }
+    // History/calendar derive from completed pushes; places remain out of
+    // scope for live (no places table) — free-text location still surfaces
+    // via HistoryContentBuilder + location_text on the push row.
+    func pastHangouts(forMonthContaining date: Date) async throws -> [PastHangout] {
+        let now = Date()
+        let plans = try await store.pushes().map { $0.pushPlan() }
+        let responses = try await store.pushResponses().map { $0.pushResponse() }
+        return PastHangoutBuilder.hangouts(
+            plans: plans,
+            responses: responses,
+            monthContaining: date,
+            now: now
+        )
+    }
+
     func allPlaces() async throws -> [Place] { [] }
 
     func createPush(_ draft: PushDraft) async throws -> PushPlan.ID {

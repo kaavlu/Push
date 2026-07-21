@@ -27,6 +27,7 @@ enum AuthFailureContext: Equatable {
     case resetRequest
     case updatePassword
     case openURL
+    case deleteAccount
 }
 
 enum AuthRedirect {
@@ -44,8 +45,10 @@ enum AuthUserMessage {
     static let generic = "Something went wrong. Check your connection and try again."
     static let resetSent = "If an account exists for that email, we sent a reset link."
     static let resetLinkExpired = "This reset link expired. Request a new one."
+    static let deleteFailed = "Couldn't delete your account. Check your connection and try again."
 
     static func message(for error: Error, context: AuthFailureContext) -> String {
+        if context == .deleteAccount { return deleteFailed }
         if let authError = error as? AuthError {
             return message(for: authError, context: context)
         }
@@ -97,6 +100,9 @@ protocol AuthService {
     func updatePassword(newPassword: String) async throws -> AuthedUser
     func handleAuthURL(_ url: URL) async throws -> AuthURLResult
     func signOut() async throws
+    /// Permanently deletes the authenticated Auth user and related app data.
+    /// Must not clear the local session until the server operation succeeds.
+    func deleteAccount() async throws
 }
 
 final class SupabaseAuthService: AuthService {
@@ -187,6 +193,14 @@ final class SupabaseAuthService: AuthService {
         currentUser = nil
     }
 
+    func deleteAccount() async throws {
+        // RPC first — never clear local session if the backend failed.
+        try await client.rpc("delete_account").execute()
+        currentUser = nil
+        // Session rows are already gone with auth.users; best-effort local wipe.
+        try? await client.auth.signOut()
+    }
+
     private func looksLikeAuthCallback(_ url: URL) -> Bool {
         let s = url.absoluteString
         return s.contains("code=")
@@ -214,6 +228,7 @@ final class FakeAuthService: AuthService {
     var resetPasswordResult: Result<Void, Error>?
     var updatePasswordResult: Result<AuthedUser, Error>?
     var authURLResult: Result<AuthURLResult, Error>?
+    var deleteAccountResult: Result<Void, Error>?
 
     init(restorable: AuthedUser? = nil) { self.restorable = restorable }
 
@@ -272,4 +287,13 @@ final class FakeAuthService: AuthService {
     }
 
     func signOut() async throws { currentUser = nil }
+
+    func deleteAccount() async throws {
+        switch deleteAccountResult ?? .success(()) {
+        case .success:
+            currentUser = nil
+        case .failure(let error):
+            throw error
+        }
+    }
 }

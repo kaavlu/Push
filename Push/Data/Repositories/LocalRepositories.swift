@@ -89,8 +89,19 @@ final class LocalFriendRepository: FriendRepository {
             }
     }
 
-    func sendFriendRequest(to personID: Person.ID) async throws {
-        _ = database.sendFriendRequest(to: personID)
+    @discardableResult
+    func sendFriendRequest(to personID: Person.ID) async throws -> FriendRequest.ID {
+        guard let request = database.sendFriendRequest(to: personID) else {
+            // Already friends / self / unknown: still return any active pending id.
+            if case .outgoingPending(let id) = database.relation(to: personID) { return id }
+            if case .incomingPending(let id) = database.relation(to: personID) { return id }
+            return ""
+        }
+        return request.id
+    }
+
+    func cancelFriendRequest(id: FriendRequest.ID) async throws {
+        database.cancelFriendRequest(id: id)
     }
 
     func removeFriend(_ personID: Person.ID) async throws {
@@ -131,18 +142,85 @@ final class LocalGroupRepository: GroupRepository {
     ) async throws -> FriendGroup.ID {
         database.createGroup(name: name, imageAssetPath: imageAssetPath, inviteeIDs: inviteeIDs)
     }
+
+    func renameGroup(groupID: FriendGroup.ID, name: String) async throws {
+        try database.renameGroup(groupID: groupID, name: name)
+    }
+
+    func updateGroupPhoto(groupID: FriendGroup.ID, jpegData: Data) async throws {
+        let previous = database.groupsByID[groupID]?.imageAssetPath
+        let url = try GroupPhotoFileStore.save(groupID: groupID, jpegData: jpegData)
+        try database.setGroupImagePath(groupID: groupID, imageAssetPath: url.path)
+        AvatarImageLoader.invalidate(path: previous)
+        AvatarImageLoader.invalidate(path: url.path)
+    }
+
+    func removeGroupPhoto(groupID: FriendGroup.ID) async throws {
+        let previous = database.groupsByID[groupID]?.imageAssetPath
+        try database.setGroupImagePath(groupID: groupID, imageAssetPath: nil)
+        GroupPhotoFileStore.remove(groupID: groupID)
+        AvatarImageLoader.invalidate(path: previous)
+    }
+
+    func inviteToGroup(groupID: FriendGroup.ID, inviteeIDs: [Person.ID]) async throws {
+        try database.inviteToGroup(groupID: groupID, inviteeIDs: inviteeIDs)
+    }
+
+    func cancelGroupInvite(membershipID: GroupMembership.ID) async throws {
+        try database.cancelGroupInvite(membershipID: membershipID)
+    }
+
+    func removeMember(groupID: FriendGroup.ID, personID: Person.ID) async throws {
+        try database.removeMember(groupID: groupID, personID: personID)
+    }
+
+    func leaveGroup(groupID: FriendGroup.ID) async throws {
+        let previousPath = database.groupsByID[groupID]?.imageAssetPath
+        try database.leaveGroup(groupID: groupID)
+        // Sole-owner leave purges the group — clean mock photo file like delete.
+        if database.groupsByID[groupID] == nil {
+            GroupPhotoFileStore.remove(groupID: groupID)
+            AvatarImageLoader.invalidate(path: previousPath)
+        }
+    }
+
+    func transferOwnership(groupID: FriendGroup.ID, newOwnerID: Person.ID) async throws {
+        try database.transferOwnership(groupID: groupID, newOwnerID: newOwnerID)
+    }
+
+    func deleteGroup(groupID: FriendGroup.ID) async throws {
+        let previousPath = database.groupsByID[groupID]?.imageAssetPath
+        try database.deleteGroup(groupID: groupID)
+        GroupPhotoFileStore.remove(groupID: groupID)
+        AvatarImageLoader.invalidate(path: previousPath)
+    }
 }
 
 @MainActor
 final class LocalPushRepository: PushRepository {
     private let database: InMemoryDatabase
+    /// Injectable for frozen-date tests; production always uses wall clock.
+    private let clock: () -> Date
 
-    init(database: InMemoryDatabase) {
+    init(database: InMemoryDatabase, clock: @escaping () -> Date = { Date() }) {
         self.database = database
+        self.clock = clock
     }
 
     func activePlans() async throws -> [PushPlan] {
-        database.orderedPlans.compactMap { database.plansByID[$0.id] }.filter { $0.cancelledAt == nil }
+        let now = clock()
+        return database.orderedPlans
+            .compactMap { database.plansByID[$0.id] }
+            .filter { PushLifecycle.isActive($0, now: now) }
+    }
+
+    func historicalPlans(forMonthContaining date: Date) async throws -> [PushPlan] {
+        let now = clock()
+        let calendar = Calendar.current
+        return database.orderedPlans
+            .compactMap { database.plansByID[$0.id] }
+            .filter { PushLifecycle.isHistorical($0, now: now) }
+            .filter { calendar.isDate($0.startsAt, equalTo: date, toGranularity: .month) }
     }
 
     func responses() async throws -> [PushResponse] {
@@ -154,15 +232,29 @@ final class LocalPushRepository: PushRepository {
             pushID: planID,
             personID: database.currentUserID,
             response: response,
-            at: Date()
+            at: clock()
         )
     }
 
     func pastHangouts(forMonthContaining date: Date) async throws -> [PastHangout] {
         let calendar = Calendar.current
-        return database.hangouts.filter {
+        let now = clock()
+        let plans = database.orderedPlans.compactMap { database.plansByID[$0.id] }
+        let derived = PastHangoutBuilder.hangouts(
+            plans: plans,
+            responses: database.responses,
+            monthContaining: date,
+            now: now,
+            calendar: calendar
+        )
+        // Seed hangouts keep mock calendar richness; live never sees these rows.
+        let seed = database.hangouts.filter {
             calendar.isDate($0.date, equalTo: date, toGranularity: .month)
         }
+        // Prefer seed hangouts when both share an id (tests freeze a rich calendar).
+        let seedIDs = Set(seed.map(\.id))
+        let derivedOnly = derived.filter { !seedIDs.contains($0.id) }
+        return (derivedOnly + seed).sorted { $0.date < $1.date }
     }
 
     func allPlaces() async throws -> [Place] {

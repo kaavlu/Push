@@ -42,31 +42,12 @@ struct GroupRequestCard: View {
     }
 
     private var avatar: some View {
-        ZStack {
-            if let image = PushImageAssets.image(named: invite.imageAssetPath) {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFill()
-            } else {
-                LinearGradient(
-                    colors: [
-                        PushControlColors.activeFill.opacity(0.9),
-                        .white.opacity(0.85)
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                Text(groupInitials)
-                    .font(.subheadline.weight(.bold))
-                    .foregroundStyle(PushControlColors.activeForeground)
-            }
-        }
-        .frame(width: FriendsLayout.groupAvatarSize(layout), height: FriendsLayout.groupAvatarSize(layout))
-        .clipShape(RoundedRectangle(cornerRadius: FriendsLayout.groupAvatarCornerRadius(layout), style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: FriendsLayout.groupAvatarCornerRadius(layout), style: .continuous)
-                .stroke(.white.opacity(0.7), lineWidth: 1)
-        }
+        GroupListAvatar(
+            imageAssetName: invite.imageAssetPath,
+            fallbackInitials: groupInitials,
+            size: FriendsLayout.groupAvatarSize(layout),
+            cornerRadius: FriendsLayout.groupAvatarCornerRadius(layout)
+        )
     }
 
     private var groupInitials: String {

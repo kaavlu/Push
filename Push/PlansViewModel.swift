@@ -6,6 +6,7 @@ import Combine
 @MainActor
 final class PlansViewModel: ObservableObject {
     @Published private(set) var plans: [PlanData] = []
+    @Published private(set) var historyItems: [HistoryItemData] = []
     @Published private(set) var weekDays: [CalendarDayData]
     @Published private(set) var weekLabel: String
     @Published private(set) var totalPushesThisWeek: Int
@@ -16,6 +17,7 @@ final class PlansViewModel: ObservableObject {
     @Published var isReviewDeckPresented: Bool = false
     @Published var isStartPushPresented: Bool = false
     @Published var isYourPushesPresented: Bool = false
+    @Published var isHistoryPresented: Bool = false
     @Published var managedPlan: PlanData? = nil
     @Published var reviewFocusPlan: PlanData? = nil
     @Published private(set) var actionError: ActionErrorState?
@@ -47,7 +49,7 @@ final class PlansViewModel: ObservableObject {
         self.container = container
         self.pushesOverride = nil
         self.referenceDate = referenceDate
-        let summary = Self.makeWeekSummary(from: [], for: referenceDate)
+        let summary = PlansWeekSummary.make(from: [], for: referenceDate)
         weekDays = summary.days
         weekLabel = summary.label
         totalPushesThisWeek = summary.totalPushes
@@ -67,7 +69,7 @@ final class PlansViewModel: ObservableObject {
         self.pushesOverride = pushes
         self.referenceDate = referenceDate
         self.plans = plans
-        let summary = Self.makeWeekSummary(from: [], for: referenceDate)
+        let summary = PlansWeekSummary.make(from: [], for: referenceDate)
         weekDays = summary.days
         weekLabel = summary.label
         totalPushesThisWeek = summary.totalPushes
@@ -102,7 +104,11 @@ final class PlansViewModel: ObservableObject {
         guard let container else { return }
         if loadState.value == nil { loadState = .loading }
         do {
+            let now = Date()
             let planList = try await container.pushes.activePlans()
+            let historicalPlans = try await container.pushes.historicalPlans(
+                forMonthContaining: referenceDate
+            )
             let responses = try await container.pushes.responses()
             let hangouts = try await container.pushes.pastHangouts(forMonthContaining: referenceDate)
             let places = try await container.pushes.allPlaces()
@@ -124,7 +130,7 @@ final class PlansViewModel: ObservableObject {
                 placesByID: placesByID,
                 peopleByID: peopleByID,
                 currentUserID: user.id,
-                now: Date(),
+                now: now,
                 userCoordinate: userCoordinate(
                     userID: user.id, statuses: statuses, placesByID: placesByID
                 )
@@ -133,6 +139,15 @@ final class PlansViewModel: ObservableObject {
                 hangouts: hangouts,
                 peopleByID: peopleByID,
                 month: referenceDate
+            )
+            historyItems = HistoryContentBuilder.items(
+                plans: historicalPlans,
+                responses: responses,
+                hangouts: hangouts,
+                peopleByID: peopleByID,
+                groupsByID: groupsByID,
+                placesByID: placesByID,
+                now: now
             )
             plans = cards
             monthDays = days
@@ -190,13 +205,24 @@ final class PlansViewModel: ObservableObject {
     }
 
     func moveWeek(by offset: Int) {
-        guard let newDate = Calendar.current.date(
+        let calendar = Calendar.current
+        guard let newDate = calendar.date(
             byAdding: .day,
-            value: offset * PlansWeekNavigationConstants.daysPerWeek,
+            value: offset * PlansWeekSummary.daysPerWeek,
             to: referenceDate
         ) else { return }
+        let monthChanged = !calendar.isDate(newDate, equalTo: referenceDate, toGranularity: .month)
         referenceDate = newDate
-        applyWeekSummary(from: monthDays)
+        if monthChanged {
+            // Hangouts are month-scoped; reload so adjacent months are not empty/stale.
+            Task { await load() }
+        } else {
+            applyWeekSummary(from: monthDays)
+        }
+    }
+
+    func openHistory() {
+        isHistoryPresented = true
     }
 
     func respond(to plan: PlanData, with direction: SwipeDirection) async {
@@ -278,7 +304,7 @@ final class PlansViewModel: ObservableObject {
     }
 
     private func applyWeekSummary(from days: [CalendarDayData]) {
-        let summary = Self.makeWeekSummary(from: days, for: referenceDate)
+        let summary = PlansWeekSummary.make(from: days, for: referenceDate)
         weekDays = summary.days
         weekLabel = summary.label
         totalPushesThisWeek = summary.totalPushes
@@ -295,82 +321,6 @@ final class PlansViewModel: ObservableObject {
         case .waiting:   return 5
         }
     }
-
-    private static func makeWeekSummary(
-        from monthDays: [CalendarDayData],
-        for referenceDate: Date
-    ) -> (days: [CalendarDayData], label: String, totalPushes: Int, bestDay: String?) {
-        let days = weekDays(from: monthDays, for: referenceDate)
-        return (
-            days,
-            makeWeekLabel(for: days, referenceDate: referenceDate),
-            days.reduce(0) { $0 + $1.pushCount },
-            makeBestDayLabel(for: days)
-        )
-    }
-
-    private static func weekDays(
-        from monthDays: [CalendarDayData],
-        for referenceDate: Date
-    ) -> [CalendarDayData] {
-        let calendar = Calendar.current
-        let startOfDay = calendar.startOfDay(for: referenceDate)
-        let weekday = calendar.component(.weekday, from: startOfDay)
-        let daysFromMonday = (weekday + PlansWeekNavigationConstants.mondayOffsetAdjustment)
-            % PlansWeekNavigationConstants.daysPerWeek
-        guard let weekStart = calendar.date(byAdding: .day, value: -daysFromMonday, to: startOfDay) else {
-            return []
-        }
-
-        return (0..<PlansWeekNavigationConstants.daysPerWeek).compactMap { offset in
-            guard let date = calendar.date(byAdding: .day, value: offset, to: weekStart) else {
-                return nil
-            }
-            return monthDays.first { calendar.isDate($0.date, inSameDayAs: date) }
-                ?? emptyDay(for: date)
-        }
-    }
-
-    private static func emptyDay(for date: Date) -> CalendarDayData {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withFullDate]
-        return CalendarDayData(
-            id: formatter.string(from: date),
-            date: date,
-            pushCount: 0,
-            hadPlan: false,
-            almostHappened: false,
-            hangouts: []
-        )
-    }
-
-    private static func makeBestDayLabel(for days: [CalendarDayData]) -> String? {
-        guard let best = days.max(by: { $0.pushCount < $1.pushCount }), best.pushCount > 0 else {
-            return nil
-        }
-        return formatted(best.date, as: "EEEE")
-    }
-
-    private static func makeWeekLabel(for days: [CalendarDayData], referenceDate: Date) -> String {
-        guard let first = days.first?.date, let last = days.last?.date else {
-            return formatted(referenceDate, as: "MMM d")
-        }
-        let calendar = Calendar.current
-        let sameMonth = calendar.isDate(first, equalTo: last, toGranularity: .month)
-        let endFormat = sameMonth ? "d" : "MMM d"
-        return "\(formatted(first, as: "MMM d")) – \(formatted(last, as: endFormat))"
-    }
-
-    private static func formatted(_ date: Date, as format: String) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = format
-        return formatter.string(from: date)
-    }
-}
-
-private enum PlansWeekNavigationConstants {
-    static let daysPerWeek = 7
-    static let mondayOffsetAdjustment = 5
 }
 
 private enum PlansMutationCopy {

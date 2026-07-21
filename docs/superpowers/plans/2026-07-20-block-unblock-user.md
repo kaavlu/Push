@@ -25,8 +25,8 @@
 
 | File | Responsibility |
 |------|----------------|
-| `supabase/migrations/0013_user_blocks.sql` | Table, RLS, `is_blocked`, RPCs, guards on existing RPCs/policies |
-| `supabase/README.md` | Document `0013` |
+| `supabase/migrations/0016_user_blocks.sql` | Table, RLS, `is_blocked`, RPCs, guards on existing RPCs/policies |
+| `supabase/README.md` | Document `0016` |
 | `Push/Data/Domain/FriendRequest.swift` (or new `BlockedPerson.swift`) | `BlockedPerson` type |
 | `Push/Data/Repositories/Repositories.swift` | `FriendRepository` block APIs |
 | `Push/Data/Store/InMemoryDatabase.swift` | Block pairs + teardown + filters |
@@ -46,10 +46,10 @@
 
 ---
 
-### Task 1: Migration `0013_user_blocks`
+### Task 1: Migration `0016_user_blocks`
 
 **Files:**
-- Create: `supabase/migrations/0013_user_blocks.sql`
+- Create: `supabase/migrations/0016_user_blocks.sql`
 - Modify: `supabase/README.md`
 
 **Interfaces:**
@@ -65,10 +65,10 @@
 
 - [ ] **Step 1: Author migration file**
 
-Create `supabase/migrations/0013_user_blocks.sql` with:
+Create `supabase/migrations/0016_user_blocks.sql` with:
 
 ```sql
--- 0013_user_blocks.sql
+-- 0016_user_blocks.sql
 -- Directed blocks: blocker → blocked. Friendship pair row is deleted on block.
 -- Bidirectional checks via private.is_blocked. Writes only via RPCs.
 
@@ -256,7 +256,7 @@ Copy full function bodies from `0009_friend_requests.sql` and `0011_group_invite
 Add under Layout in `supabase/README.md`:
 
 ```markdown
-- `migrations/0013_user_blocks.sql` — directed `user_blocks`, `private.is_blocked`,
+- `migrations/0016_user_blocks.sql` — directed `user_blocks`, `private.is_blocked`,
   `block_user` / `unblock_user` / `list_blocked_users`; guards friend request, search,
   group invite, and creator-seeded push_responses; soft-hide policy (no hard-delete of
   historical pushes/groups). Shared group membership unchanged on block.
@@ -269,7 +269,7 @@ Use project Supabase skill / MCP `apply_migration` with name `user_blocks` and t
 - [ ] **Step 4: Commit**
 
 ```bash
-git add supabase/migrations/0013_user_blocks.sql supabase/README.md
+git add supabase/migrations/0016_user_blocks.sql supabase/README.md
 git commit -m "feat(db): user_blocks table and block RPCs (Issue #52)"
 ```
 
@@ -893,7 +893,7 @@ git commit -am "feat: Profile Blocked list and unblock (Issue #52)"
 # Issue #52 — Block / Unblock
 
 - [x] Design + plan
-- [x] Migration 0013
+- [x] Migration 0016
 - [x] Mock store + FriendRepository
 - [x] Live RPC path
 - [x] Friends Block UI

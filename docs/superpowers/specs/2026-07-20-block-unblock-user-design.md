@@ -78,7 +78,7 @@ Returns true if a row exists with `(blocker_id, blocked_id)` in either direction
 
 ## 2. Backend RPCs and guards
 
-Migration: `0013_user_blocks.sql` (after `0012b_profile_photos_select_own`).
+Migration: `0016_user_blocks.sql` (after `0012b_profile_photos_select_own`).
 
 All RPCs: `SECURITY DEFINER`, `set search_path = ''`, grant `EXECUTE` to `authenticated` only.
 
@@ -201,7 +201,7 @@ Views remain dumb; no `import Supabase` outside auth/repo layer.
 
 | Area | Touchpoints (expected) |
 |------|------------------------|
-| Migration | `supabase/migrations/0013_user_blocks.sql`; note in `supabase/README.md` |
+| Migration | `supabase/migrations/0016_user_blocks.sql`; note in `supabase/README.md` |
 | Private helper | `private.is_blocked`; guards in 0009/0011/push RPCs as needed |
 | Domain | `BlockedPerson` (or adjacent to search result types) |
 | Store | `InMemoryDatabase` block set + teardown helpers |
@@ -254,7 +254,7 @@ Views remain dumb; no `import Supabase` outside auth/repo layer.
 ## 6. Rollout notes
 
 - DEBUG mock: full block/unblock without network.
-- Live: apply `0013` via Supabase migration workflow (MCP/skills); seed needs no default blocks.
+- Live: apply `0016` via Supabase migration workflow (MCP/skills); seed needs no default blocks.
 - Documentation: durable notes in `agents.md` / `supabase/README.md` after implementation (post-commit doc skill may handle).
 
 ---

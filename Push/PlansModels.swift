@@ -68,7 +68,7 @@ enum PlanStatus: String, Equatable {
     }
 }
 
-struct HangoutPerson: Identifiable {
+struct HangoutPerson: Identifiable, Equatable {
     let id: String
     let name: String
     let imageAssetName: String
@@ -89,6 +89,19 @@ struct CalendarDayData: Identifiable {
     let hadPlan: Bool
     let almostHappened: Bool
     let hangouts: [DayHangoutEntry]
+}
+
+/// Read-only History list/detail row derived from a completed push (or mock seed hangout).
+struct HistoryItemData: Identifiable, Equatable {
+    let id: String
+    let date: Date
+    let title: String
+    let timeRange: String
+    let locationHint: String
+    let groupName: String
+    let participants: [HangoutPerson]
+    let cameFromPush: Bool
+    let didHappen: Bool
 }
 
 enum SwipeDirection { case left, right, up }

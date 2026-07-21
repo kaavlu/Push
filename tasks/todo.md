@@ -1,7 +1,7 @@
 # Issue #52 — Block / Unblock
 
 - [x] Design + plan
-- [x] Migration 0013
+- [x] Migration `0016_user_blocks` (renumbered after main's 0013–0015)
 - [x] Mock store + FriendRepository
 - [x] Live RPC path
 - [x] Friends Block UI
@@ -11,94 +11,32 @@
 - [ ] Live smoke: block friend, search empty, unblock, re-request
 
 ## Verification
-- [x] `scripts/test.sh suite BlockUserTests` — 11 tests, 0 failures
-- [x] `scripts/test.sh suite DataLayerTests` — 26 tests, 0 failures
-- [x] `scripts/test.sh suite LiveDataStoreTests` — 13 tests, 0 failures
-- [x] `scripts/test.sh suite AlertsTests` — 8 tests, 0 failures
-- [x] `scripts/test.sh build` — BUILD SUCCEEDED
+- [x] `scripts/test.sh suite BlockUserTests`
+- [x] `scripts/test.sh suite DataLayerTests`
+- [x] `scripts/test.sh suite LiveDataStoreTests`
+- [x] `scripts/test.sh suite AlertsTests`
+- [x] `scripts/test.sh build`
 
 ---
 
-# Legal Destinations (Issue #36)
+# Issue #56 — Create a Comprehensive Project README
 
-- [x] Define feature contract and replacement procedure.
-- [x] Add centralized placeholder Terms and Privacy destinations.
-- [x] Wire production onboarding, onboarding lab, and Profile.
-- [x] Document App Store privacy disclosure inputs.
-- [x] Add focused tests and verify build/test compilation.
+**Issue:** https://github.com/kaavlu/Push/issues/56
 
-## Verification
-- [x] Both placeholder HTTPS destinations returned HTTP 200.
-- [x] `scripts/test.sh build` succeeded.
-- [x] Generic Release simulator build succeeded with store validation.
-- [x] Generic `build-for-testing` succeeded, including `LegalDestinationsTests` compilation.
-- [ ] Focused simulator execution: CoreSimulator XPC interrupted twice; the retry remained hung during simulator startup and was stopped after more than two minutes without test output.
+## Status
 
----
+- [x] Inspect codebase, setup scripts, Supabase docs, MVP product doc
+- [x] Capture fresh simulator screenshots (map, friends, pushes, profile, alerts, onboarding)
+- [x] Write root `README.md`
+- [x] DEBUG launch args for screenshot targets (`--plans`, `--profile`, `--alerts`)
+- [x] Verify `scripts/test.sh build` and document verified setup steps
+- [ ] Open PR / close issue
 
-# Foreground Refresh & Mutation Errors (Issue #33)
+## Acceptance criteria check
 
-- [x] `LiveDataStore.refresh` + `AppDataContainer.refreshSession` + tests
-- [x] Foreground re-warm on `ContentView` (skip first active)
-- [x] `ActionErrorState` + `ActionErrorBanner`
-- [x] Plans RSVP/cancel/delete rollback + pull-to-refresh
-- [x] Friends remove retry + pull-to-refresh (Groups mode shares list)
-- [x] Alerts soft load + accept/deny action errors + pull-to-refresh
-- [x] Add Group create uses shared banner
-- [x] Focused suites: LiveDataStoreTests, PlansViewModelTests, AlertsTests; build SUCCEEDED
-
-## Verification
-- [x] `scripts/test.sh build` SUCCEEDED
-- [x] PlansViewModelTests 24/24, AlertsTests 8/8, LiveDataStoreTests 13/13
-
----
-
-# Complete production email authentication (Issue #32)
-
-- [x] Design: `docs/superpowers/specs/2026-07-17-complete-production-email-auth-design.md`
-- [x] Plan: `docs/superpowers/plans/2026-07-17-complete-production-email-auth.md`
-- [x] `AuthService`: sign-up with name/handle metadata, `SignUpResult`, reset/update password, `handleAuthURL`, error mapper
-- [x] Client redirect `pushapp://auth/reset` + Info.plist URL scheme
-- [x] `AuthViewModel` screens, validation, deep-link recovery without early app entry
-- [x] Views: welcome (email only), sign-up, sign-in + forgot, check-email, set-new-password
-- [x] `RootView.onOpenURL` → recovery gate
-- [x] Focused tests + `supabase/README.md` redirect notes
-
-## Verification
-- [x] `scripts/test.sh suite AuthViewModelTests` — 20 tests, 0 failures
-- [ ] Live smoke: new sign-up, forgot → open `pushapp://` → set password (needs dashboard redirect allow-list)
-
----
-
-# Issue #34 — Persistent Profile Photo Uploads
-
-- [x] Spec in `tasks/spec.md`
-- [x] Migration `0012_profile_photos` (avatars bucket + storage RLS) applied via MCP
-- [x] `ProfilePhotoProcessor` + `AvatarImageLoader` + avatar view remote support
-- [x] `ProfileRepository` photo APIs — Local + Supabase write-through
-- [x] ProfileView / ViewModel photo picker + remove
-- [x] Focused tests + pbxproj registration
-- [x] Build + focused test suites
-
-## Verification
-- [x] `scripts/test.sh build` SUCCEEDED
-- [x] ProfilePhotoTests: 8 tests, 0 failures
-- [x] LiveDataStoreTests: 8 tests, 0 failures
-- [x] Migration `0012_profile_photos` applied; `avatars` bucket public; storage policies present
-
----
-
-# Production Branding Assets (Issue #35)
-
-- [x] Audit production asset catalog, launch settings, and design tokens.
-- [x] Write the production-branding contract in `tasks/spec.md`.
-- [x] Add and register the production app icon.
-- [x] Define AccentColor and launch-background catalog colors.
-- [x] Configure native generated launch branding.
-- [x] Verify generic Release build and archive contents.
-
-## Verification
-- [x] Generic iOS Simulator Release build succeeded.
-- [x] Unsigned generic iOS Release archive succeeded.
-- [x] Archived app contains compiled `Assets.car`, iPhone/iPad app-icon PNGs, and one valid
-      `UILaunchScreen` dictionary resolving `LaunchBackground`.
+- [x] New developer can understand and run Push from the README
+- [x] Setup steps verified (`run-ios-sim.sh`, `test.sh build`)
+- [x] Screenshots reflect current mock UI
+- [x] Implemented / partial / planned clearly separated
+- [x] No secrets, service-role keys, or machine-local paths
+- [x] No placeholder boilerplate in README

@@ -1,4 +1,4 @@
--- 0013_user_blocks.sql
+-- 0016_user_blocks.sql
 -- Directed blocks: blocker → blocked. Friendship pair row is deleted on block.
 -- Bidirectional checks via private.is_blocked. Writes only via RPCs.
 -- Soft-hide: no hard-delete of historical pushes/groups; shared memberships stay.

@@ -18,12 +18,13 @@ final class InMemoryDatabase: ObservableObject {
     @Published private(set) var revision: Int = 0
 
     private(set) var peopleByID: [Person.ID: Person]
-    private(set) var groupsByID: [FriendGroup.ID: FriendGroup]
-    private(set) var memberships: [GroupMembership]
+    /// Writable by store extensions in this module; callers outside treat as read-only.
+    var groupsByID: [FriendGroup.ID: FriendGroup]
+    var memberships: [GroupMembership]
     private(set) var placesByID: [Place.ID: Place]
     private(set) var statusesByPersonID: [Person.ID: PresenceStatus]
     private(set) var policies: [SharingPolicy]
-    private(set) var plansByID: [PushPlan.ID: PushPlan]
+    var plansByID: [PushPlan.ID: PushPlan]
     private(set) var responses: [PushResponse]
     private(set) var hangouts: [PastHangout]
     private(set) var feedEvents: [FeedEvent]
@@ -35,8 +36,8 @@ final class InMemoryDatabase: ObservableObject {
 
     /// Seed order matters for deterministic UI (avatar stacks, card order).
     private(set) var orderedPeople: [Person]
-    private(set) var orderedGroups: [FriendGroup]
-    private(set) var orderedPlans: [PushPlan]
+    var orderedGroups: [FriendGroup]
+    var orderedPlans: [PushPlan]
 
     init(seed: SeedData) {
         currentUserID = seed.currentUserID
@@ -59,7 +60,8 @@ final class InMemoryDatabase: ObservableObject {
         userBlocks = []
     }
 
-    private func didMutate() {
+    /// Internal so lifecycle extensions in sibling files can notify once per write.
+    func didMutate() {
         revision += 1
     }
 
@@ -134,11 +136,24 @@ final class InMemoryDatabase: ObservableObject {
         return request
     }
 
+    /// Cancels an outgoing pending request the current user started.
+    func cancelFriendRequest(id: FriendRequest.ID) {
+        guard let index = friendRequests.firstIndex(where: {
+            $0.id == id
+                && $0.status == .pending
+                && $0.requester.id == currentUserID
+        }) else { return }
+        friendRequests.remove(at: index)
+        didMutate()
+    }
+
     /// Hard-deletes the friendship edge; removes any stale request row too so a
     /// fresh `sendFriendRequest` between the pair inserts cleanly afterward.
     func removeFriend(_ personID: Person.ID) {
-        guard acceptedFriendIDs.remove(personID) != nil else { return }
+        let hadFriend = acceptedFriendIDs.remove(personID) != nil
+        let pendingCount = friendRequests.count
         friendRequests.removeAll { involvesPair(personID, request: $0) }
+        guard hadFriend || friendRequests.count != pendingCount else { return }
         didMutate()
     }
 
