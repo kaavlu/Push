@@ -23,7 +23,7 @@
 
 | File | Responsibility |
 |---|---|
-| `supabase/migrations/0013_delete_account.sql` | `public.delete_account()` RPC |
+| `supabase/migrations/0014_delete_account.sql` | `public.delete_account()` RPC |
 | `supabase/README.md` | Document migration + RPC |
 | `Push/Data/Supabase/AuthService.swift` | `deleteAccount()`, messages, Fake |
 | `Push/RootView.swift` | `DeleteAccountAction`, env, perform path |
@@ -33,10 +33,10 @@
 
 ---
 
-### Task 1: Migration `0013_delete_account`
+### Task 1: Migration `0014_delete_account`
 
 **Files:**
-- Create: `supabase/migrations/0013_delete_account.sql`
+- Create: `supabase/migrations/0014_delete_account.sql`
 - Modify: `supabase/README.md`
 
 **Interfaces:**
@@ -45,7 +45,7 @@
 - [x] **Step 1: Write migration**
 
 ```sql
--- 0013_delete_account.sql
+-- 0014_delete_account.sql
 -- Permanent self-service account deletion (Issue #48).
 -- No parameters: only auth.uid() may be deleted (prevents IDOR).
 -- Order: storage best-effort → group ownership transfer/delete →
@@ -113,14 +113,14 @@ revoke all on function public.delete_account() from public, anon;
 grant execute on function public.delete_account() to authenticated;
 ```
 
-- [ ] **Step 2: README bullet** under Layout for `0013_delete_account.sql`.
+- [ ] **Step 2: README bullet** under Layout for `0014_delete_account.sql`.
 
 - [ ] **Step 3: Apply** via Supabase MCP `apply_migration` when authenticated; if MCP unavailable, leave file for later apply and note in commit.
 
 - [ ] **Step 4: Commit**
 
 ```bash
-git add supabase/migrations/0013_delete_account.sql supabase/README.md
+git add supabase/migrations/0014_delete_account.sql supabase/README.md
 git commit -m "feat(db): add delete_account RPC for issue #48"
 ```
 

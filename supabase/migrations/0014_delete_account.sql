@@ -1,4 +1,4 @@
--- 0013_delete_account.sql
+-- 0014_delete_account.sql
 -- Permanent self-service account deletion (Issue #48).
 -- No parameters: only auth.uid() may be deleted (prevents IDOR).
 -- Order: storage best-effort → group ownership transfer/delete →

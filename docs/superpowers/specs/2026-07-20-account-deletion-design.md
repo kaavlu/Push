@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-20  
 **Issue:** [kaavlu/Push#48](https://github.com/kaavlu/Push/issues/48)  
-**Status:** Implemented (client + migration file); remote apply + live smoke pending
+**Status:** Implemented; remote migration `0014_delete_account` applied; live smoke optional
 
 ## Problem
 
@@ -71,7 +71,7 @@ Deleting `auth.users` invalidates server-side sessions for that user. The client
 
 ## Backend: `public.delete_account()`
 
-**Migration:** next free file under `supabase/migrations/` (e.g. `0013_delete_account.sql`).
+**Migration:** next free file under `supabase/migrations/` (e.g. `0014_delete_account.sql`).
 
 ### Signature and privileges
 
