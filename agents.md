@@ -115,6 +115,7 @@ See `coding-standards.md` for the full reference. Key rules for this project:
 
 | File | Purpose |
 |---|---|
+| `README.md` | Human onboarding: product overview, mock vs live, setup, testing, screenshots |
 | `tasks/todo.md` | Current plan and progress tracking |
 | `tasks/spec.md` | Active feature spec (write before implementation) |
 | `docs/data-architecture.md` | Seed workflow, derivation rules, test suites, Supabase migration seam |
