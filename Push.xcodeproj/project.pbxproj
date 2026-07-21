@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E3176B6B38ECE0284BCB193C /* ProfileAccountActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12187C13380877BA7D3E9D92 /* ProfileAccountActions.swift */; };
 		D3D467B07433EB01B843EC35 /* DeleteAccountTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4734F794A8EED0CD4F006BE /* DeleteAccountTests.swift */; };
 		072819A00A31FCD7AAE53870 /* LegalDestinationsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B861E69CEF8CFCB3764C888D /* LegalDestinationsTests.swift */; };
 		EB2FE0A6BC8022F0F641F026 /* LegalDestinations.swift in Sources */ = {isa = PBXBuildFile; fileRef = A02315F8157A5D60D25725B1 /* LegalDestinations.swift */; };
@@ -218,6 +219,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		12187C13380877BA7D3E9D92 /* ProfileAccountActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ProfileAccountActions.swift"; sourceTree = "<group>"; };
 		E4734F794A8EED0CD4F006BE /* DeleteAccountTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeleteAccountTests.swift"; sourceTree = "<group>"; };
 		B861E69CEF8CFCB3764C888D /* LegalDestinationsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LegalDestinationsTests.swift"; sourceTree = "<group>"; };
 		A02315F8157A5D60D25725B1 /* LegalDestinations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LegalDestinations.swift"; sourceTree = "<group>"; };
@@ -466,6 +468,7 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				12187C13380877BA7D3E9D92 /* ProfileAccountActions.swift */,
 				A02315F8157A5D60D25725B1 /* LegalDestinations.swift */,
 				7764BF65FABD8886A5CEF5BB /* ActionErrorBanner.swift */,
 				37A5623D7FF0B22A6AB8F5EF /* ActionErrorState.swift */,
@@ -817,6 +820,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				E3176B6B38ECE0284BCB193C /* ProfileAccountActions.swift in Sources */,
 				EB2FE0A6BC8022F0F641F026 /* LegalDestinations.swift in Sources */,
 				441B0871A77B6D3A6EE02C12 /* ActionErrorBanner.swift in Sources */,
 				A90E4E210610C9F8847862B5 /* ActionErrorState.swift in Sources */,

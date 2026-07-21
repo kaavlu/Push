@@ -50,10 +50,6 @@ enum ProfileLayout {
     static let fieldPadding: CGFloat = 12
     static let selectionAnimationResponse = 0.24
     static let selectionAnimationDamping = 0.88
-    static let signOutTopPadding: CGFloat = 4
-    static let signOutVerticalPadding: CGFloat = 14
-    static let signOutSpacing: CGFloat = 8
-    static let deleteAccountTopPadding: CGFloat = 8
 }
 
 enum ProfileColor {

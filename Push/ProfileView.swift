@@ -137,19 +137,16 @@ struct ProfileView: View {
                         onRetry: { performDeleteAccount() },
                         onDismiss: { self.deleteAccountError = nil }
                     )
-                    .padding(.top, ProfileLayout.signOutTopPadding)
                 }
-                if signOut.isAvailable {
-                    SignOutButton(isBusy: isSigningOut) {
-                        isSignOutConfirmationPresented = true
-                    }
-                    .padding(.top, ProfileLayout.signOutTopPadding)
-                }
-                if deleteAccount.isAvailable {
-                    DeleteAccountButton(isBusy: isDeletingAccount) {
-                        isDeleteAccountConfirmationPresented = true
-                    }
-                    .padding(.top, ProfileLayout.deleteAccountTopPadding)
+                if signOut.isAvailable || deleteAccount.isAvailable {
+                    ProfileAccountActionsCard(
+                        showSignOut: signOut.isAvailable,
+                        isSigningOut: isSigningOut,
+                        onSignOut: { isSignOutConfirmationPresented = true },
+                        showDeleteAccount: deleteAccount.isAvailable,
+                        isDeletingAccount: isDeletingAccount,
+                        onDeleteAccount: { isDeleteAccountConfirmationPresented = true }
+                    )
                 }
             }
             .padding(.horizontal, ProfileLayout.horizontalPadding(layout))
@@ -329,54 +326,6 @@ private struct ProfileConnectorRow: View {
             RoundedRectangle(cornerRadius: ProfileLayout.rowCornerRadius, style: .continuous)
                 .fill(.white.opacity(ProfileColor.rowFillOpacity))
         )
-    }
-}
-
-private struct SignOutButton: View {
-    let isBusy: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: ProfileLayout.signOutSpacing) {
-                if isBusy {
-                    ProgressView()
-                } else {
-                    Text("Sign Out")
-                        .font(.subheadline.weight(.bold))
-                }
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, ProfileLayout.signOutVerticalPadding)
-        }
-        .buttonStyle(.plain)
-        .foregroundStyle(.red)
-        .disabled(isBusy)
-        .accessibilityLabel("Sign out")
-    }
-}
-
-private struct DeleteAccountButton: View {
-    let isBusy: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: ProfileLayout.signOutSpacing) {
-                if isBusy {
-                    ProgressView()
-                } else {
-                    Text("Delete Account")
-                        .font(.subheadline.weight(.bold))
-                }
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, ProfileLayout.signOutVerticalPadding)
-        }
-        .buttonStyle(.plain)
-        .foregroundStyle(.red)
-        .disabled(isBusy)
-        .accessibilityLabel("Delete account")
     }
 }
 
