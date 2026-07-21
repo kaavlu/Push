@@ -29,6 +29,10 @@ of the files in order reproduces the schema.
   Storage bucket; owner-only SELECT/INSERT/UPDATE/DELETE under `{auth.uid()}/…`.
   No listable public SELECT (public object URLs still work). App stores the public
   object URL on existing `profiles.image_asset_path`.
+- `migrations/0013_user_blocks.sql` — directed `user_blocks`, `private.is_blocked`,
+  `block_user` / `unblock_user` / `list_blocked_users`; guards friend request, search,
+  group invite, and creator-seeded push_responses; soft-hide policy (no hard-delete of
+  historical pushes/groups). Shared group membership unchanged on block.
 - `seed.sql` — idempotent public-graph seed keyed off **real** auth IDs (resolved by email).
 
 ## Security model
