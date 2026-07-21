@@ -229,14 +229,17 @@ struct GroupDetailView_Previews: PreviewProvider {
                     name: "Chitty",
                     avatarPlaceholder: "CH",
                     profileImageAssetName: "assets/friends/chitty.png",
-                    availability: .freeNow
+                    availability: .freeNow,
+                    membershipID: "membership-india-chitty",
+                    isOwner: true
                 ),
                 PushGroupMemberData(
                     id: "nitin",
                     name: "Nitin",
                     avatarPlaceholder: "NI",
                     profileImageAssetName: "assets/friends/nitin.png",
-                    availability: .maybeDown
+                    availability: .maybeDown,
+                    membershipID: "membership-india-nitin"
                 ),
                 PushGroupMemberData(
                     id: "raj",
@@ -244,6 +247,7 @@ struct GroupDetailView_Previews: PreviewProvider {
                     avatarPlaceholder: "RA",
                     profileImageAssetName: nil,
                     availability: nil,
+                    membershipID: "membership-india-raj",
                     isPending: true
                 )
             ],

@@ -281,6 +281,11 @@ final class DerivationTests: XCTestCase {
         // while the map showed maybeDown — map wins.
         XCTAssertEqual(members.first { $0.id == "nitin" }?.availability, .maybeDown)
         XCTAssertEqual(members.first { $0.id == "roh" }?.availability, .unavailable)
+        // Person id stays `id`; membership id + owner come from GroupMembership.
+        let chitty = try XCTUnwrap(members.first { $0.id == "chitty" })
+        XCTAssertEqual(chitty.membershipID, "membership-india-chitty")
+        XCTAssertTrue(chitty.isOwner)
+        XCTAssertFalse(try XCTUnwrap(members.first { $0.id == "nitin" }).isOwner)
     }
 
     func testMemberPuckFieldsDeriveFromPlaceAndStatus() throws {

@@ -40,7 +40,10 @@ struct PushGroupStat: Identifiable, Equatable {
 }
 
 struct PushGroupMemberData: Identifiable, Equatable {
+    /// Person id — stable row identity for friend rows.
     let id: String
+    /// `GroupMembership.id` for cancel-invite / membership mutations.
+    let membershipID: String
     let name: String
     let avatarPlaceholder: String
     let profileImageAssetName: String?
@@ -48,6 +51,8 @@ struct PushGroupMemberData: Identifiable, Equatable {
     let activitySymbolName: String
     let venueStatusText: String
     let lastUpdated: String
+    /// True when `GroupMembership.role == .owner`.
+    let isOwner: Bool
     /// True for an invited-but-not-yet-accepted member (`GroupMembership.Status.invited`).
     /// Default false keeps existing call sites (previews, tests) unaffected.
     let isPending: Bool
@@ -61,9 +66,12 @@ struct PushGroupMemberData: Identifiable, Equatable {
         activitySymbolName: String = "person.fill",
         venueStatusText: String? = nil,
         lastUpdated: String = "",
+        membershipID: String = "",
+        isOwner: Bool = false,
         isPending: Bool = false
     ) {
         self.id = id
+        self.membershipID = membershipID
         self.name = name
         self.avatarPlaceholder = avatarPlaceholder
         self.profileImageAssetName = profileImageAssetName
@@ -71,6 +79,7 @@ struct PushGroupMemberData: Identifiable, Equatable {
         self.activitySymbolName = activitySymbolName
         self.venueStatusText = venueStatusText ?? availability?.title ?? "Hidden right now"
         self.lastUpdated = lastUpdated
+        self.isOwner = isOwner
         self.isPending = isPending
     }
 
@@ -104,6 +113,10 @@ final class GroupsViewModel: ObservableObject {
 
     private let container: AppDataContainer?
     private var membersByGroupID: [String: [PushGroupMemberData]] = [:]
+    /// Raw memberships from the last successful `load()` — used for owner / invite helpers.
+    private var cachedMemberships: [GroupMembership] = []
+    private var cachedFriends: [Person] = []
+    private var currentUserID: String = ""
     // Holds the active store-change subscription; nil when container is absent.
     private var storeChangeSub: AnyCancellable?
     // Tracks the last revision we loaded so the subscription skips redundant reloads.
@@ -175,6 +188,9 @@ final class GroupsViewModel: ObservableObject {
                     )
                 )
             })
+            cachedMemberships = memberships
+            cachedFriends = friendList
+            currentUserID = user.id
             groups = cards
             if selectedGroupID == nil { selectedGroupID = cards.first?.id }
             loadState = .loaded(cards)
@@ -216,6 +232,32 @@ final class GroupsViewModel: ObservableObject {
 
     func members(for group: PushGroupData) -> [PushGroupMemberData] {
         membersByGroupID[group.id] ?? []
+    }
+
+    /// Active membership for the signed-in user in `groupID`, if any.
+    func currentUserMembership(in groupID: String) -> GroupMembership? {
+        cachedMemberships.first {
+            $0.groupID == groupID
+                && $0.personID == currentUserID
+                && $0.membershipStatus == .active
+        }
+    }
+
+    func isCurrentUserOwner(of groupID: String) -> Bool {
+        currentUserMembership(in: groupID)?.role == .owner
+    }
+
+    /// Direct friends who are neither active nor pending in `groupID`.
+    func inviteCandidates(for groupID: String) -> [Person] {
+        let occupied = Set(
+            cachedMemberships
+                .filter {
+                    $0.groupID == groupID
+                        && ($0.membershipStatus == .active || $0.membershipStatus == .invited)
+                }
+                .map(\.personID)
+        )
+        return cachedFriends.filter { !occupied.contains($0.id) }
     }
 
     /// Registers a picked photo for `id` so its detail view can show it this
