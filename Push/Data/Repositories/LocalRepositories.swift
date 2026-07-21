@@ -203,15 +203,18 @@ final class LocalPushRepository: PushRepository {
         database.updatePush(plan: plan, responses: responses)
     }
 
-    /// Resolves recipient tokens then drops anyone blocked with the current user.
+    /// Drops blocked **direct** friend tokens only; group-expanded members stay
+    /// (group membership rules apply, not soft-hide).
     private func nonBlockedInvitees(
         groupIDs: [FriendGroup.ID], friendIDs: [Person.ID], creatorID: Person.ID
     ) -> Set<Person.ID> {
-        let resolved = PushRecipientResolver.invitees(
-            groupIDs: groupIDs, friendIDs: friendIDs,
+        let allowedFriendIDs = friendIDs.filter {
+            !database.isBlocked(database.currentUserID, $0)
+        }
+        return PushRecipientResolver.invitees(
+            groupIDs: groupIDs, friendIDs: allowedFriendIDs,
             memberships: database.memberships, creatorID: creatorID
         )
-        return Set(resolved.filter { !database.isBlocked(database.currentUserID, $0) })
     }
 
     func cancelPush(planID: PushPlan.ID) async throws {

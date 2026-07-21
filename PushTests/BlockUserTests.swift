@@ -66,4 +66,35 @@ final class BlockUserTests: XCTestCase {
         let after = try await container.alerts.incomingFriendRequests()
         XCTAssertFalse(after.contains { $0.id == request.id })
     }
+
+    /// Blocked direct friends are excluded; group co-members still get responses.
+    func testGroupAudiencePushKeepsBlockedCoMember() async throws {
+        let container = AppDataContainer(seed: .standard())
+        let me = container.currentUserID
+        // chitty is an active member of seed group "india" and a friend.
+        let blockedID = "chitty"
+        try await container.friends.blockUser(blockedID)
+
+        let id = try await container.pushes.createPush(PushDraft(
+            title: "India hang",
+            recipientIDs: ["group_india"],
+            startsAt: Date(), locationText: "", notes: "", creatorID: me
+        ))
+        let responses = try await container.pushes.responses().filter { $0.pushID == id }
+        XCTAssertTrue(
+            responses.contains { $0.personID == blockedID && $0.response == .pending },
+            "blocked co-member should still receive a group-audience response"
+        )
+
+        // Direct person recipient remains filtered.
+        let other = try await container.friends.friends().first!.id
+        let directID = try await container.pushes.createPush(PushDraft(
+            title: "Direct",
+            recipientIDs: ["friend_\(blockedID)", "friend_\(other)"],
+            startsAt: Date(), locationText: "", notes: "", creatorID: me
+        ))
+        let direct = try await container.pushes.responses().filter { $0.pushID == directID }
+        XCTAssertFalse(direct.contains { $0.personID == blockedID })
+        XCTAssertTrue(direct.contains { $0.personID == other && $0.response == .pending })
+    }
 }
