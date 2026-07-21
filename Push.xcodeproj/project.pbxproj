@@ -59,6 +59,7 @@
 		A1F873C8D8EA53F9A07531BE /* SupabaseClientProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0B03E7723B8B1AF8E5386D /* SupabaseClientProvider.swift */; };
 		FB1AB98543348B8BBE4233ED /* SupabaseConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26AF0988720D034328C4B8C1 /* SupabaseConfig.swift */; };
 		AA00000000000000000000B3 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = AA00000000000000000000B2 /* Supabase */; };
+		AA00000000000000000000B4 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = AA00000000000000000000B2 /* Supabase */; };
 		E97C488E782CEEBD8CE08C79 /* FriendDetailBottomSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFA2D8E79901202D07BD399A /* FriendDetailBottomSheet.swift */; };
 		67F4A75D64CE4225B69B965C /* AdaptiveLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0AE1378DD16B6E0849F7A1 /* AdaptiveLayoutTests.swift */; };
 		4488D274468B8CF54EF8E572 /* PushAdaptiveLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 561BA912296C8CF1EB60435F /* PushAdaptiveLayout.swift */; };
@@ -379,6 +380,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA00000000000000000000B4 /* Supabase in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -644,6 +646,9 @@
 				5217A2782FF1B6DA0011F860 /* PBXTargetDependency */,
 			);
 			name = PushTests;
+			packageProductDependencies = (
+				AA00000000000000000000B2 /* Supabase */,
+			);
 			productName = PushTests;
 			productReference = 5217A2762FF1B6DA0011F860 /* PushTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
