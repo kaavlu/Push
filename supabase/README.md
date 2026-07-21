@@ -33,6 +33,11 @@ of the files in order reproduces the schema.
   Storage bucket; owner-only SELECT/INSERT/UPDATE/DELETE under `{auth.uid()}/…`.
   No listable public SELECT (public object URLs still work). App stores the public
   object URL on existing `profiles.image_asset_path`.
+- `migrations/0014_delete_account.sql` — parameterless `delete_account()` RPC
+  (`SECURITY DEFINER`, `authenticated` only): best-effort avatars cleanup, group
+  ownership transfer (earliest other active member) or group delete when sole
+  active, remove memberships/friendships, then `DELETE FROM auth.users` for
+  `auth.uid()` (profiles and cascading FKs follow). No target-user argument.
 - `seed.sql` — idempotent public-graph seed keyed off **real** auth IDs (resolved by email).
 
 ## Security model

@@ -1,3 +1,23 @@
+# Account Deletion (Issue #48)
+
+- [x] Design: `docs/superpowers/specs/2026-07-20-account-deletion-design.md`
+- [x] Plan: `docs/superpowers/plans/2026-07-20-account-deletion.md`
+- [x] Migration `0014_delete_account` (parameterless RPC; transfer-then-delete groups)
+- [x] `AuthService.deleteAccount` + Fake + user message
+- [x] `RootView` `DeleteAccountAction` (live-only; gate only after RPC success)
+- [x] Profile confirmation + busy + recoverable `ActionErrorBanner`
+- [x] Focused tests `DeleteAccountTests` (6) + pbxproj registration
+- [x] Apply migration to remote Supabase (`0014_delete_account` via MCP)
+- [ ] Live smoke: throwaway user delete → sign-in fails
+
+## Verification
+- [x] `scripts/test.sh suite DeleteAccountTests` — 6 tests, 0 failures
+- [x] Remote migration history includes `0014_delete_account`
+- [x] `public.delete_account()` present: SECURITY DEFINER, `authenticated` EXECUTE, `anon` no EXECUTE
+- [x] Security advisors: no high findings; WARN for intentional authenticated SECURITY DEFINER RPCs (same class as create_group / remove_friend)
+
+---
+
 # Issue #44 — Complete Friend Relationship Lifecycle
 
 - [x] Spec in `tasks/spec.md`
@@ -63,6 +83,7 @@
       directly, but not observed live end-to-end. A future session with live credentials should
       complete this leg (sign in, then optionally toggle airplane mode mid-prepare to also see a
       `SupabaseLiveDataLoader` failure log line, e.g. `[network] loadProfiles failed: URLError`).
+
 
 ---
 
