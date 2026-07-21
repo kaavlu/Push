@@ -5,6 +5,7 @@
 //  Created by Manav Khanvilkar on 6/29/26.
 //
 
+import PhotosUI
 import SwiftUI
 
 struct ProfileView: View {
@@ -33,6 +34,11 @@ struct ProfileView: View {
             ZStack {
                 PushModalBackground()
                 profileContent
+                if viewModel.isPhotoBusy {
+                    ProgressView()
+                        .controlSize(.large)
+                        .tint(PushControlColors.activeForeground)
+                }
             }
             .navigationDestination(for: ProfileRoute.self) { route in
                 ProfileDestinationView(route: route, viewModel: viewModel)
@@ -45,11 +51,36 @@ struct ProfileView: View {
                 }
             }
         }
-        .alert("Profile photo editing", isPresented: $viewModel.isPhotoEditorPresented) {
-            Button("Done", role: .cancel) {
+        .confirmationDialog(
+            "Profile photo",
+            isPresented: $viewModel.isPhotoEditorPresented,
+            titleVisibility: .visible
+        ) {
+            Button("Choose Photo") { viewModel.choosePhotoFromLibrary() }
+            if viewModel.hasProfilePhoto {
+                Button("Remove Photo", role: .destructive) { viewModel.removeProfilePhoto() }
             }
+            Button("Cancel", role: .cancel) { }
+        }
+        .photosPicker(
+            isPresented: $viewModel.isPhotoPickerPresented,
+            selection: $viewModel.photoPickerItem,
+            matching: .images,
+            photoLibrary: .shared()
+        )
+        .onChange(of: viewModel.photoPickerItem) { item in
+            viewModel.handlePhotoPickerItemChange(item)
+        }
+        .alert(
+            "Couldn't update photo",
+            isPresented: Binding(
+                get: { viewModel.photoErrorMessage != nil },
+                set: { if !$0 { viewModel.photoErrorMessage = nil } }
+            )
+        ) {
+            Button("OK", role: .cancel) { viewModel.photoErrorMessage = nil }
         } message: {
-            Text("Photo editing is local-only in this prototype.")
+            Text(viewModel.photoErrorMessage ?? "")
         }
         .alert(item: $viewModel.connectorAlert) { alert in
             Alert(

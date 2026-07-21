@@ -11,6 +11,7 @@ protocol LiveDataLoading: AnyObject {
     func updateBasics(userID: String, displayName: String, handle: String) async throws -> ProfileRow
     func updatePrivacy(userID: String, payload: ProfileSettingsPayload) async throws -> ProfileRow
     func updateAvailability(userID: String, rawValue: String) async throws -> ProfileRow
+    func updateImagePath(userID: String, imageAssetPath: String?) async throws -> ProfileRow
     func loadPushes() async throws -> [PushRow]
     func loadResponses() async throws -> [PushResponseRow]
     func insertPush(_ payload: PushInsertPayload) async throws -> PushRow
@@ -326,6 +327,15 @@ final class LiveDataStore {
 
     func updateAvailability(userID: String, rawValue: String) async throws {
         replace(try await loader.updateAvailability(userID: userID, rawValue: rawValue))
+    }
+
+    func updateImagePath(userID: String, imageAssetPath: String?) async throws {
+        replace(try await loader.updateImagePath(userID: userID, imageAssetPath: imageAssetPath))
+    }
+
+    /// Current cached path for the user, if the profiles snapshot is warm.
+    func cachedImagePath(userID: String) -> String? {
+        profileRows?.first(where: { $0.id.lowercased() == userID.lowercased() })?.image_asset_path
     }
 
     private func finish<Value>(

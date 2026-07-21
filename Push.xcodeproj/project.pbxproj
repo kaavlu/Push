@@ -10,6 +10,11 @@
 		441B0871A77B6D3A6EE02C12 /* ActionErrorBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7764BF65FABD8886A5CEF5BB /* ActionErrorBanner.swift */; };
 		A90E4E210610C9F8847862B5 /* ActionErrorState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A5623D7FF0B22A6AB8F5EF /* ActionErrorState.swift */; };
 		74E5ED98452F902FB59D46ED /* SessionRefreshConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 302309E0CF78B089472018B9 /* SessionRefreshConstants.swift */; };
+		CBC87FDFB9F7E0EE36A72F25 /* ProfilePhotoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0D61EC00365754BEEB241C /* ProfilePhotoTests.swift */; };
+		5432D43B30C0EC850ACF2669 /* ProfilePhotoStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CCAA9420519CEB5CB94109A /* ProfilePhotoStorage.swift */; };
+		1B879D07D964CE24114888C4 /* ProfilePhotoFileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19BBF5A0464E5957D2B29344 /* ProfilePhotoFileStore.swift */; };
+		14A32B8BC1AE172D7E0E8E41 /* AvatarImageLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5479CF0A52EF3229A4619BA8 /* AvatarImageLoader.swift */; };
+		D20BBE9E24E3A5A738F5A1AD /* ProfilePhotoProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03F1B368CC6E9D9D4E105366 /* ProfilePhotoProcessor.swift */; };
 		5FAB0B553AFFCA8F7157CCFD /* MapPuckHitTestingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30EC8288ED6D5DFC46693E12 /* MapPuckHitTestingTests.swift */; };
 		07CCE2B52DAC859603B5A453 /* MapPuckHitTesting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88BD1A7599AF82CCE11F237E /* MapPuckHitTesting.swift */; };
 		B00A9F868BBB73CD5878C563 /* GroupRequestCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D441287507AB63FE03C26733 /* GroupRequestCard.swift */; };
@@ -209,6 +214,11 @@
 		7764BF65FABD8886A5CEF5BB /* ActionErrorBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ActionErrorBanner.swift"; sourceTree = "<group>"; };
 		37A5623D7FF0B22A6AB8F5EF /* ActionErrorState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ActionErrorState.swift"; sourceTree = "<group>"; };
 		302309E0CF78B089472018B9 /* SessionRefreshConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SessionRefreshConstants.swift"; path = "Data/SessionRefreshConstants.swift"; sourceTree = "<group>"; };
+		3F0D61EC00365754BEEB241C /* ProfilePhotoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ProfilePhotoTests.swift"; sourceTree = "<group>"; };
+		3CCAA9420519CEB5CB94109A /* ProfilePhotoStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "ProfilePhotoStorage.swift"; path = "Data/Supabase/ProfilePhotoStorage.swift"; sourceTree = "<group>"; };
+		19BBF5A0464E5957D2B29344 /* ProfilePhotoFileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "ProfilePhotoFileStore.swift"; path = "Data/ProfilePhotoFileStore.swift"; sourceTree = "<group>"; };
+		5479CF0A52EF3229A4619BA8 /* AvatarImageLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "AvatarImageLoader.swift"; path = "Data/AvatarImageLoader.swift"; sourceTree = "<group>"; };
+		03F1B368CC6E9D9D4E105366 /* ProfilePhotoProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "ProfilePhotoProcessor.swift"; path = "Data/ProfilePhotoProcessor.swift"; sourceTree = "<group>"; };
 		30EC8288ED6D5DFC46693E12 /* MapPuckHitTestingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MapPuckHitTestingTests.swift"; sourceTree = "<group>"; };
 		88BD1A7599AF82CCE11F237E /* MapPuckHitTesting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MapPuckHitTesting.swift"; sourceTree = "<group>"; };
 		D441287507AB63FE03C26733 /* GroupRequestCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GroupRequestCard.swift"; sourceTree = "<group>"; };
@@ -445,6 +455,10 @@
 				7764BF65FABD8886A5CEF5BB /* ActionErrorBanner.swift */,
 				37A5623D7FF0B22A6AB8F5EF /* ActionErrorState.swift */,
 				302309E0CF78B089472018B9 /* SessionRefreshConstants.swift */,
+				3CCAA9420519CEB5CB94109A /* ProfilePhotoStorage.swift */,
+				19BBF5A0464E5957D2B29344 /* ProfilePhotoFileStore.swift */,
+				5479CF0A52EF3229A4619BA8 /* AvatarImageLoader.swift */,
+				03F1B368CC6E9D9D4E105366 /* ProfilePhotoProcessor.swift */,
 				88BD1A7599AF82CCE11F237E /* MapPuckHitTesting.swift */,
 				D441287507AB63FE03C26733 /* GroupRequestCard.swift */,
 				BB8CC3E7DC54B6D8F764187B /* AddGroupStep3ReviewView.swift */,
@@ -611,6 +625,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				3F0D61EC00365754BEEB241C /* ProfilePhotoTests.swift */,
 				30EC8288ED6D5DFC46693E12 /* MapPuckHitTestingTests.swift */,
 				ECA2C79204C1A37B4EE79B97 /* AddFriendsTests.swift */,
 				323D73CFF6607601D92B9653 /* SupabasePushRepositoryTests.swift */,
@@ -784,6 +799,10 @@
 				441B0871A77B6D3A6EE02C12 /* ActionErrorBanner.swift in Sources */,
 				A90E4E210610C9F8847862B5 /* ActionErrorState.swift in Sources */,
 				74E5ED98452F902FB59D46ED /* SessionRefreshConstants.swift in Sources */,
+				5432D43B30C0EC850ACF2669 /* ProfilePhotoStorage.swift in Sources */,
+				1B879D07D964CE24114888C4 /* ProfilePhotoFileStore.swift in Sources */,
+				14A32B8BC1AE172D7E0E8E41 /* AvatarImageLoader.swift in Sources */,
+				D20BBE9E24E3A5A738F5A1AD /* ProfilePhotoProcessor.swift in Sources */,
 				07CCE2B52DAC859603B5A453 /* MapPuckHitTesting.swift in Sources */,
 				B00A9F868BBB73CD5878C563 /* GroupRequestCard.swift in Sources */,
 				14F2A9AC97337702850AC6E1 /* AddGroupStep3ReviewView.swift in Sources */,
@@ -941,6 +960,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				CBC87FDFB9F7E0EE36A72F25 /* ProfilePhotoTests.swift in Sources */,
 				5FAB0B553AFFCA8F7157CCFD /* MapPuckHitTestingTests.swift in Sources */,
 				1DA8CBE0771B3102F0A0E81E /* AddFriendsTests.swift in Sources */,
 				359E08AED8A94D2D87B851A1 /* PlansMetadataTests.swift in Sources */,
@@ -1117,7 +1137,6 @@
 				INFOPLIST_FILE = Push/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1148,7 +1167,6 @@
 				INFOPLIST_FILE = Push/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (

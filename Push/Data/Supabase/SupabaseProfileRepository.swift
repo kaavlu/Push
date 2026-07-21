@@ -16,10 +16,16 @@ enum SupabaseRepositoryError: Error {
 final class SupabaseProfileRepository: ProfileRepository {
     private let store: LiveDataStore
     private let currentUserID: String
+    private let photoStorage: ProfilePhotoStoring?
 
-    init(store: LiveDataStore, currentUserID: String) {
+    init(
+        store: LiveDataStore,
+        currentUserID: String,
+        photoStorage: ProfilePhotoStoring? = nil
+    ) {
         self.store = store
         self.currentUserID = currentUserID
+        self.photoStorage = photoStorage
     }
 
     func userProfile() async throws -> UserProfile {
@@ -43,6 +49,44 @@ final class SupabaseProfileRepository: ProfileRepository {
             settings_close_friends: closeFriends.enabledByID()
         )
         try await store.updatePrivacy(userID: currentUserID, payload: payload)
+    }
+
+    func updateProfilePhoto(jpegData: Data) async throws {
+        guard let photoStorage else { throw SupabaseRepositoryError.writeNotSupported }
+        // LiveDataStore is @MainActor; hop explicitly for the sync cache read.
+        let previousPath = await store.cachedImagePath(userID: currentUserID)
+        let previousObject = ProfilePhotoPath.storageObjectPath(from: previousPath)
+
+        // Upload first so a network failure never writes a broken URL.
+        let uploaded = try await photoStorage.upload(userID: currentUserID, jpegData: jpegData)
+        do {
+            try await store.updateImagePath(
+                userID: currentUserID, imageAssetPath: uploaded.publicURL
+            )
+        } catch {
+            // Roll back the orphan object so Storage and the row stay aligned.
+            try? await photoStorage.delete(objectPath: uploaded.objectPath)
+            throw error
+        }
+
+        AvatarImageLoader.invalidate(path: previousPath)
+        AvatarImageLoader.invalidate(path: uploaded.publicURL)
+        if let previousObject, previousObject != uploaded.objectPath {
+            try? await photoStorage.delete(objectPath: previousObject)
+        }
+    }
+
+    func removeProfilePhoto() async throws {
+        guard let photoStorage else { throw SupabaseRepositoryError.writeNotSupported }
+        let previousPath = await store.cachedImagePath(userID: currentUserID)
+        let previousObject = ProfilePhotoPath.storageObjectPath(from: previousPath)
+
+        // Clear the row first so a failed Storage delete cannot leave a dead URL.
+        try await store.updateImagePath(userID: currentUserID, imageAssetPath: nil)
+        AvatarImageLoader.invalidate(path: previousPath)
+        if let previousObject {
+            try? await photoStorage.delete(objectPath: previousObject)
+        }
     }
 }
 

@@ -265,6 +265,11 @@ final class LiveDataLoaderSpy: LiveDataLoading {
         return .fixture(id: userID, name: "Self", availability: rawValue)
     }
 
+    func updateImagePath(userID: String, imageAssetPath: String?) async throws -> ProfileRow {
+        if let writeError { throw writeError }
+        return .fixture(id: userID, name: "Self", imagePath: imageAssetPath)
+    }
+
     private func load(index: Int) async throws {
         if shouldFailLoads { throw TestFailure.expected }
         loadCounts[index] += 1
@@ -517,10 +522,14 @@ private extension LiveDataStoreTests {
 
 private extension ProfileRow {
     static func fixture(
-        id: String, name: String, handle: String = "@test", availability: String = "free_now"
+        id: String,
+        name: String,
+        handle: String = "@test",
+        availability: String = "free_now",
+        imagePath: String? = nil
     ) -> ProfileRow {
         ProfileRow(
-            id: id, first_name: name, handle: handle, image_asset_path: nil,
+            id: id, first_name: name, handle: handle, image_asset_path: imagePath,
             availability_choice: availability, visibility_note: "Visible",
             settings_activity_visibility: nil, settings_map_preferences: nil,
             settings_close_friends: nil

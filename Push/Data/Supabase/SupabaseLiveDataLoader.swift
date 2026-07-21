@@ -45,6 +45,12 @@ final class SupabaseLiveDataLoader: LiveDataLoading {
             .eq("id", value: userID).select().single().execute().value
     }
 
+    func updateImagePath(userID: String, imageAssetPath: String?) async throws -> ProfileRow {
+        try await client.from("profiles")
+            .update(ProfileImagePayload(image_asset_path: imageAssetPath))
+            .eq("id", value: userID).select().single().execute().value
+    }
+
     func loadPushes() async throws -> [PushRow] {
         try await client.from("pushes").select().execute().value
     }
@@ -197,4 +203,19 @@ private struct ProfileBasicsPayload: Encodable {
 
 private struct AvailabilityPayload: Encodable {
     let availability_choice: String
+}
+
+/// Explicit null encoding so remove-photo clears the column (default Optional
+/// synthesis uses encodeIfPresent and would omit the key entirely).
+private struct ProfileImagePayload: Encodable {
+    let image_asset_path: String?
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(image_asset_path, forKey: .image_asset_path)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case image_asset_path
+    }
 }
