@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		26D68ADB8C76ED66B4376227 /* GroupPhotoStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CD80E224F6DA6D4584EE3A1 /* GroupPhotoStorage.swift */; };
 		072819A00A31FCD7AAE53870 /* LegalDestinationsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B861E69CEF8CFCB3764C888D /* LegalDestinationsTests.swift */; };
 		EB2FE0A6BC8022F0F641F026 /* LegalDestinations.swift in Sources */ = {isa = PBXBuildFile; fileRef = A02315F8157A5D60D25725B1 /* LegalDestinations.swift */; };
 		441B0871A77B6D3A6EE02C12 /* ActionErrorBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7764BF65FABD8886A5CEF5BB /* ActionErrorBanner.swift */; };
@@ -217,6 +218,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		6CD80E224F6DA6D4584EE3A1 /* GroupPhotoStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "GroupPhotoStorage.swift"; path = "Data/Supabase/GroupPhotoStorage.swift"; sourceTree = "<group>"; };
 		B861E69CEF8CFCB3764C888D /* LegalDestinationsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LegalDestinationsTests.swift"; sourceTree = "<group>"; };
 		A02315F8157A5D60D25725B1 /* LegalDestinations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LegalDestinations.swift"; sourceTree = "<group>"; };
 		7764BF65FABD8886A5CEF5BB /* ActionErrorBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ActionErrorBanner.swift"; sourceTree = "<group>"; };
@@ -464,6 +466,7 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				6CD80E224F6DA6D4584EE3A1 /* GroupPhotoStorage.swift */,
 				A02315F8157A5D60D25725B1 /* LegalDestinations.swift */,
 				7764BF65FABD8886A5CEF5BB /* ActionErrorBanner.swift */,
 				37A5623D7FF0B22A6AB8F5EF /* ActionErrorState.swift */,
@@ -814,6 +817,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				26D68ADB8C76ED66B4376227 /* GroupPhotoStorage.swift in Sources */,
 				EB2FE0A6BC8022F0F641F026 /* LegalDestinations.swift in Sources */,
 				441B0871A77B6D3A6EE02C12 /* ActionErrorBanner.swift in Sources */,
 				A90E4E210610C9F8847862B5 /* ActionErrorState.swift in Sources */,

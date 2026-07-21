@@ -29,4 +29,41 @@ final class SupabaseGroupRepository: GroupRepository {
         )
         return row.id
     }
+
+    // Task 4 will wire lifecycle RPCs + group-photos Storage.
+    func renameGroup(groupID: FriendGroup.ID, name: String) async throws {
+        throw SupabaseRepositoryError.writeNotSupported
+    }
+
+    func updateGroupPhoto(groupID: FriendGroup.ID, jpegData: Data) async throws {
+        throw SupabaseRepositoryError.writeNotSupported
+    }
+
+    func removeGroupPhoto(groupID: FriendGroup.ID) async throws {
+        throw SupabaseRepositoryError.writeNotSupported
+    }
+
+    func inviteToGroup(groupID: FriendGroup.ID, inviteeIDs: [Person.ID]) async throws {
+        throw SupabaseRepositoryError.writeNotSupported
+    }
+
+    func cancelGroupInvite(membershipID: GroupMembership.ID) async throws {
+        throw SupabaseRepositoryError.writeNotSupported
+    }
+
+    func removeMember(groupID: FriendGroup.ID, personID: Person.ID) async throws {
+        throw SupabaseRepositoryError.writeNotSupported
+    }
+
+    func leaveGroup(groupID: FriendGroup.ID) async throws {
+        throw SupabaseRepositoryError.writeNotSupported
+    }
+
+    func transferOwnership(groupID: FriendGroup.ID, newOwnerID: Person.ID) async throws {
+        throw SupabaseRepositoryError.writeNotSupported
+    }
+
+    func deleteGroup(groupID: FriendGroup.ID) async throws {
+        throw SupabaseRepositoryError.writeNotSupported
+    }
 }

@@ -115,6 +115,43 @@ final class LocalGroupRepository: GroupRepository {
     ) async throws -> FriendGroup.ID {
         database.createGroup(name: name, imageAssetPath: imageAssetPath, inviteeIDs: inviteeIDs)
     }
+
+    // Task 3 will implement mock lifecycle mutations.
+    func renameGroup(groupID: FriendGroup.ID, name: String) async throws {
+        throw GroupRepositoryError.notImplemented
+    }
+
+    func updateGroupPhoto(groupID: FriendGroup.ID, jpegData: Data) async throws {
+        throw GroupRepositoryError.notImplemented
+    }
+
+    func removeGroupPhoto(groupID: FriendGroup.ID) async throws {
+        throw GroupRepositoryError.notImplemented
+    }
+
+    func inviteToGroup(groupID: FriendGroup.ID, inviteeIDs: [Person.ID]) async throws {
+        throw GroupRepositoryError.notImplemented
+    }
+
+    func cancelGroupInvite(membershipID: GroupMembership.ID) async throws {
+        throw GroupRepositoryError.notImplemented
+    }
+
+    func removeMember(groupID: FriendGroup.ID, personID: Person.ID) async throws {
+        throw GroupRepositoryError.notImplemented
+    }
+
+    func leaveGroup(groupID: FriendGroup.ID) async throws {
+        throw GroupRepositoryError.notImplemented
+    }
+
+    func transferOwnership(groupID: FriendGroup.ID, newOwnerID: Person.ID) async throws {
+        throw GroupRepositoryError.notImplemented
+    }
+
+    func deleteGroup(groupID: FriendGroup.ID) async throws {
+        throw GroupRepositoryError.notImplemented
+    }
 }
 
 @MainActor
