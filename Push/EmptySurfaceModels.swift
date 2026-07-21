@@ -21,6 +21,10 @@ enum EmptySurfaceCopy {
 
     static let calendarEmptyFooter = "No hangouts this week"
 
+    static let startPushEmptyTitle = "No one to push yet"
+    static let startPushEmptyMessage = "Add friends first so you have people to send this to."
+    static let startPushLoading = "Loading people"
+
     static let mapLoading = "Loading map"
     static let friendsLoading = "Loading friends"
 

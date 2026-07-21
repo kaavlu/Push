@@ -9,6 +9,8 @@ final class EmptySurfaceTests: XCTestCase {
         XCTAssertNotEqual(EmptySurfaceCopy.mapEmptyTitle, EmptySurfaceCopy.failedTitle(surface: "map"))
         XCTAssertEqual(EmptySurfaceCopy.addFriendsAction, "Add friends")
         XCTAssertEqual(EmptySurfaceCopy.calendarEmptyFooter, "No hangouts this week")
+        XCTAssertFalse(EmptySurfaceCopy.startPushEmptyTitle.isEmpty)
+        XCTAssertFalse(EmptySurfaceCopy.startPushEmptyMessage.isEmpty)
     }
 
     func testSurfacePhasesAreDistinct() {
@@ -169,5 +171,23 @@ final class EmptySurfaceTests: XCTestCase {
         XCTAssertEqual(viewModel.weekFooterPrimaryText, EmptySurfaceCopy.calendarEmptyFooter)
         XCTAssertFalse(viewModel.showsMostActiveGroup)
         XCTAssertFalse(viewModel.showsBestDay)
+    }
+
+    @MainActor
+    func testStartPushEmptyPhaseWhenNoInvitees() async throws {
+        let viewModel = StartPushViewModel(container: AppDataContainer(seed: .emptyGraph()))
+        await viewModel.load()
+        XCTAssertEqual(viewModel.surfacePhase, .empty)
+        XCTAssertFalse(viewModel.hasInviteesAvailable)
+        XCTAssertFalse(viewModel.canAdvanceStep1)
+    }
+
+    @MainActor
+    func testStartPushContentPhaseForStandardSeed() async throws {
+        let viewModel = StartPushViewModel(container: AppDataContainer(seed: .standard()))
+        await viewModel.load()
+        XCTAssertEqual(viewModel.surfacePhase, .content)
+        XCTAssertTrue(viewModel.hasInviteesAvailable)
+        XCTAssertFalse(viewModel.friends.isEmpty)
     }
 }

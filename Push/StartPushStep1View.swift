@@ -11,8 +11,48 @@ struct StartPushStep1View: View {
     @Environment(\.pushLayout) private var layout
     @ObservedObject var viewModel: StartPushViewModel
     let onNext: () -> Void
+    var onAddFriends: (() -> Void)? = nil
 
     var body: some View {
+        Group {
+            switch viewModel.surfacePhase {
+            case .loading:
+                EmptySurfaceStateView.loading(message: EmptySurfaceCopy.startPushLoading)
+            case .failed:
+                EmptySurfaceStateView.failed(surface: "people") {
+                    Task { await viewModel.load() }
+                }
+            case .empty:
+                emptyInviteesState
+            case .content, .deferred:
+                recipientPicker
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var emptyInviteesState: some View {
+        VStack(spacing: 0) {
+            StartPushHeader(
+                title: "Who's this for?",
+                subtitle: "Choose groups or friends to send this push to."
+            )
+            .padding(.horizontal, StartPushLayout.horizontalPadding(layout))
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            Spacer(minLength: 0)
+            EmptySurfaceView(
+                title: EmptySurfaceCopy.startPushEmptyTitle,
+                message: EmptySurfaceCopy.startPushEmptyMessage,
+                systemImage: "person.badge.plus",
+                actionTitle: onAddFriends == nil ? nil : EmptySurfaceCopy.addFriendsAction,
+                action: onAddFriends
+            )
+            Spacer(minLength: 0)
+        }
+    }
+
+    private var recipientPicker: some View {
         ScrollView {
             VStack(spacing: StartPushLayout.sectionSpacing(layout)) {
                 StartPushHeader(
@@ -32,7 +72,6 @@ struct StartPushStep1View: View {
                 .padding(.bottom, StartPushLayout.bottomPadding(layout))
                 .background(bottomBarBackground)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var bottomBarBackground: some View {
