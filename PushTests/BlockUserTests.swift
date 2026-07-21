@@ -67,6 +67,81 @@ final class BlockUserTests: XCTestCase {
         XCTAssertFalse(after.contains { $0.id == request.id })
     }
 
+    /// Seed exec/michigan invites are owned by ram — block hides them from
+    /// Alerts without deleting the pending membership rows.
+    func testGroupInviteSoftHiddenWhenInviterBlocked() async throws {
+        let container = AppDataContainer(seed: .standard())
+        let invites = try await container.alerts.incomingGroupInvites()
+        XCTAssertFalse(invites.isEmpty)
+        let inviterID = try XCTUnwrap(invites.first?.inviterID)
+        XCTAssertFalse(inviterID.isEmpty)
+
+        try await container.friends.blockUser(inviterID)
+
+        let after = try await container.alerts.incomingGroupInvites()
+        XCTAssertFalse(after.contains { $0.inviterID == inviterID })
+        // Soft-hide only — memberships stay so unblock does not need re-invite.
+        XCTAssertTrue(
+            container.database.memberships.contains {
+                $0.personID == container.currentUserID && $0.membershipStatus == .invited
+            }
+        )
+    }
+
+    /// Start Push / Add Group pickers load via friends() only; after block the
+    /// target is gone from that list so they cannot be re-selected as invitees.
+    func testBlockedFriendExcludedFromFriendsPickerSource() async throws {
+        let container = AppDataContainer(seed: .standard())
+        let friendID = try await container.friends.friends().first!.id
+        try await container.friends.blockUser(friendID)
+
+        let friends = try await container.friends.friends()
+        XCTAssertFalse(friends.contains { $0.id == friendID })
+    }
+
+    /// Live Alerts soft-hides group invites whose inviter is in list_blocked_users.
+    func testLiveGroupInviteSoftHiddenWhenInviterBlocked() async throws {
+        let loader = LiveDataLoaderSpy()
+        loader.groupInviteRows = [
+            GroupInviteRow(
+                membership_id: "m-blocked",
+                group_id: "g1",
+                group_name: "Blocked Invite",
+                image_asset_path: nil,
+                inviter_id: "blocked-peer",
+                inviter_first_name: "Blocked",
+                inviter_image: nil,
+                member_count: 2,
+                created_at: "2026-07-14T00:00:00Z"
+            ),
+            GroupInviteRow(
+                membership_id: "m-ok",
+                group_id: "g2",
+                group_name: "Ok Invite",
+                image_asset_path: nil,
+                inviter_id: "friend",
+                inviter_first_name: "Friend",
+                inviter_image: nil,
+                member_count: 3,
+                created_at: "2026-07-14T01:00:00Z"
+            )
+        ]
+        loader.blockedRows = [
+            SearchProfileRow(
+                id: "blocked-peer",
+                first_name: "Blocked",
+                handle: "blocked",
+                image_asset_path: nil
+            )
+        ]
+        let store = LiveDataStore(loader: loader)
+        let alerts = SupabaseAlertRepository(store: store, currentUserID: "self")
+
+        let invites = try await alerts.incomingGroupInvites()
+        XCTAssertEqual(invites.map(\.id), ["m-ok"])
+        XCTAssertFalse(invites.contains { $0.inviterID == "blocked-peer" })
+    }
+
     /// Blocked direct friends are excluded; group co-members still get responses.
     func testGroupAudiencePushKeepsBlockedCoMember() async throws {
         let container = AppDataContainer(seed: .standard())
