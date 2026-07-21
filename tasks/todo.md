@@ -1,31 +1,21 @@
-# Issue #45 — Complete the Push Lifecycle and Live History
+# Issue #56 — Create a Comprehensive Project README
 
-**Design:** `docs/superpowers/specs/2026-07-20-complete-push-lifecycle-design.md`  
-**Plan:** `docs/superpowers/plans/2026-07-20-complete-push-lifecycle.md`  
-**Spec:** `tasks/spec.md`
+**Issue:** https://github.com/kaavlu/Push/issues/56
 
 ## Status
 
-- [x] Product decisions (derive, time-only active, cancel excluded, edit until expiry, History month list)
-- [x] Design doc written
-- [x] Implementation plan
-- [x] Implementation
-- [x] Focused verification
+- [x] Inspect codebase, setup scripts, Supabase docs, MVP product doc
+- [x] Capture fresh simulator screenshots (map, friends, pushes, profile, alerts, onboarding)
+- [x] Write root `README.md`
+- [x] DEBUG launch args for screenshot targets (`--plans`, `--profile`, `--alerts`)
+- [x] Verify `scripts/test.sh build` and document verified setup steps
+- [ ] Open PR / close issue
 
-## Implementation checklist
+## Acceptance criteria check
 
-- [x] Pure lifecycle + hangout/history derivation + tests
-- [x] Local + Supabase repository wiring (`activePlans`, `historicalPlans`, `pastHangouts`)
-- [x] Timing formatter + ViewModel month reload + History state
-- [x] History list + detail UI; wire History ›
-- [x] Remove ManagePushView stub
-- [x] Focused test suites + build
-- [ ] Manual AC smoke (two accounts) when live env available
-
-## Verification
-
-- [x] `PushLifecycleTests` 6/6
-- [x] `PushTimingFormatterTests` 4/4
-- [x] `SupabasePushRepositoryTests` 7/7
-- [x] `PlansViewModelTests` 24/24
-- [x] `LiveDataStoreTests` 13/13
+- [x] New developer can understand and run Push from the README
+- [x] Setup steps verified (`run-ios-sim.sh`, `test.sh build`)
+- [x] Screenshots reflect current mock UI
+- [x] Implemented / partial / planned clearly separated
+- [x] No secrets, service-role keys, or machine-local paths
+- [x] No placeholder boilerplate in README
