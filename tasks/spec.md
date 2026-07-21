@@ -1,3 +1,25 @@
+# Honest Empty States Across Live Surfaces (Issue #49)
+
+## Goal
+Replace blank, misleading, or prototype-looking live surfaces with intentional empty states
+when live data is empty or deferred — without building presence, Feed, or History backends.
+
+## Design
+Full product contract, phase model, and surface rules:
+`docs/superpowers/specs/2026-07-20-honest-empty-states-design.md`
+
+## Surfaces (summary)
+- **Map:** empty overlay + Add friends when no friend map content; loading/failed separate
+- **Friends:** empty + Add friends CTA; hidden-presence rows stay content; loading/failed
+- **Feed:** deferred cream screen, copy only (no CTA)
+- **Pushes calendar:** honest empty week footer; hide dead History; suppress empty stats
+- **Your/Active push empty cards:** keep existing
+
+## Acceptance
+See design doc; focused suites: `EmptySurfaceTests`, related VM suites; mock seed stays populated.
+
+---
+
 # Foreground Refresh & Reliable Mutation Errors (Issue #33)
 
 ## Goal
