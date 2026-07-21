@@ -21,6 +21,13 @@ struct AddFriendsView: View {
             VStack(spacing: AddFriendsLayout.stackSpacing) {
                 header
                 searchField
+                if let actionError = viewModel.actionError {
+                    ActionErrorBanner(
+                        message: actionError.message,
+                        onRetry: { Task { await viewModel.retryLastAction() } },
+                        onDismiss: { viewModel.dismissActionError() }
+                    )
+                }
                 content
             }
             .padding(.horizontal, AddFriendsLayout.horizontalPadding(layout))
@@ -101,7 +108,9 @@ struct AddFriendsView: View {
                 Task { await viewModel.sendRequest(to: row) }
             }
         case .outgoingPending:
-            actionButton("Request Sent", isPrimary: false, disabled: true, action: {})
+            actionButton("Cancel", isPrimary: false, disabled: isActing) {
+                Task { await viewModel.cancelRequest(for: row) }
+            }
         case .incomingPending:
             HStack(spacing: AddFriendsLayout.actionSpacing) {
                 actionButton("Decline", isPrimary: false, disabled: isActing) {

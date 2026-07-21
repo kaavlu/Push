@@ -85,8 +85,19 @@ final class LocalFriendRepository: FriendRepository {
             }
     }
 
-    func sendFriendRequest(to personID: Person.ID) async throws {
-        _ = database.sendFriendRequest(to: personID)
+    @discardableResult
+    func sendFriendRequest(to personID: Person.ID) async throws -> FriendRequest.ID {
+        guard let request = database.sendFriendRequest(to: personID) else {
+            // Already friends / self / unknown: still return any active pending id.
+            if case .outgoingPending(let id) = database.relation(to: personID) { return id }
+            if case .incomingPending(let id) = database.relation(to: personID) { return id }
+            return ""
+        }
+        return request.id
+    }
+
+    func cancelFriendRequest(id: FriendRequest.ID) async throws {
+        database.cancelFriendRequest(id: id)
     }
 
     func removeFriend(_ personID: Person.ID) async throws {

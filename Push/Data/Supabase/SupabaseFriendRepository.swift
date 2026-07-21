@@ -69,8 +69,13 @@ final class SupabaseFriendRepository: FriendRepository {
             }
     }
 
-    func sendFriendRequest(to personID: Person.ID) async throws {
+    @discardableResult
+    func sendFriendRequest(to personID: Person.ID) async throws -> FriendRequest.ID {
         try await store.sendFriendRequest(targetUserID: personID)
+    }
+
+    func cancelFriendRequest(id: FriendRequest.ID) async throws {
+        try await store.cancelFriendRequest(id: id)
     }
 
     func removeFriend(_ personID: Person.ID) async throws {

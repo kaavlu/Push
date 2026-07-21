@@ -452,12 +452,21 @@ final class LiveDataLoaderSpy: LiveDataLoading {
         return updated
     }
 
-    func removeFriend(targetUserID: String) async throws {
+    func cancelFriendRequest(id: String) async throws {
         if let writeError { throw writeError }
         guard let index = friendshipRows.firstIndex(where: {
-            $0.involves("self") && $0.involves(targetUserID) && $0.isAccepted
-        }) else { return }
+            $0.id == id && $0.isPending && $0.isRequester("self")
+        }) else {
+            throw SupabaseRepositoryError.notFound
+        }
         friendshipRows.remove(at: index)
+    }
+
+    func removeFriend(targetUserID: String) async throws {
+        if let writeError { throw writeError }
+        friendshipRows.removeAll {
+            $0.involves("self") && $0.involves(targetUserID)
+        }
     }
 
     func loadProfile(id: String) async throws -> ProfileRow {

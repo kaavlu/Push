@@ -10,6 +10,10 @@ import SwiftUI
 
 @main
 struct PushApp: App {
+    init() {
+        CrashReporter.shared.start()
+    }
+
     var body: some Scene {
         WindowGroup {
             PushAdaptiveLayoutReader {
