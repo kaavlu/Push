@@ -2,10 +2,10 @@
 //  ExpandableFriendRow.swift
 //  Push
 //
-//  Friends-list row that expands in place to reveal Directions/Start push/
-//  Remove/Block actions, replacing the old map-style bottom sheet for this
-//  screen only. The row's own content (FriendRowCard) is drawn unchanged;
-//  this view owns the shared card surface the row and its actions grow inside.
+//  Friends-list row that expands in place to a compact action rail:
+//  primary Start push, optional Directions (only with a usable location),
+//  and an overflow menu for Remove friend / Block. Friend identity and
+//  status stay on FriendRowCard unchanged.
 //
 
 import SwiftUI
@@ -25,25 +25,31 @@ struct ExpandableFriendRow: View {
     @State private var isConfirmingRemove = false
     @State private var isConfirmingBlock = false
 
+    /// Directions only when the friend has a shared place name (usable location).
+    private var showsDirections: Bool {
+        guard let placeName = row.friend.placeName else { return false }
+        return !placeName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             FriendRowCard(row: row, showsCardBackground: false, action: onToggle)
 
             if isExpanded {
-                ExpandableFriendRowActionRow(
-                    isRemoving: isRemoving,
-                    isBlocking: isBlocking,
+                ExpandableFriendRowActionRail(
+                    showsDirections: showsDirections,
+                    isBusy: isRemoving || isBlocking,
                     onDirections: onDirections,
                     onStartPush: onStartPush,
                     onRemove: { isConfirmingRemove = true },
                     onBlock: { isConfirmingBlock = true }
                 )
                 .padding(.horizontal, FriendsLayout.cardPadding(layout))
-                .padding(.bottom, FriendsLayout.cardPadding(layout))
+                .padding(.bottom, ExpandableFriendRowLayout.railBottomPadding)
                 .padding(.top, ExpandableFriendRowLayout.actionsTopSpacing)
                 .transition(
                     .asymmetric(
-                        insertion: .opacity.combined(with: .scale(scale: 0.94, anchor: .top)),
+                        insertion: .opacity.combined(with: .scale(scale: 0.96, anchor: .top)),
                         removal: .opacity
                     )
                 )
@@ -81,119 +87,183 @@ struct ExpandableFriendRow: View {
     }
 }
 
-// MARK: - Action Row
+// MARK: - Compact action rail
 
-/// Four actions in a 2×2 grid so compact widths don't overflow.
-private struct ExpandableFriendRowActionRow: View {
-    let isRemoving: Bool
-    let isBlocking: Bool
+/// Single horizontal rail: optional Directions · primary Start push · overflow.
+private struct ExpandableFriendRowActionRail: View {
+    let showsDirections: Bool
+    let isBusy: Bool
     let onDirections: () -> Void
     let onStartPush: () -> Void
     let onRemove: () -> Void
     let onBlock: () -> Void
 
     var body: some View {
-        VStack(spacing: FriendDetailSheetLayout.actionSpacing) {
-            HStack(spacing: FriendDetailSheetLayout.actionSpacing) {
-                ExpandableFriendRowActionButton(
+        HStack(spacing: ExpandableFriendRowLayout.railSpacing) {
+            if showsDirections {
+                ExpandableFriendRowSecondaryButton(
                     label: "Directions",
                     symbolName: "arrow.triangle.turn.up.right.circle.fill",
-                    emphasis: .plain,
                     action: onDirections
                 )
-                ExpandableFriendRowActionButton(
-                    label: "Start push",
-                    symbolName: "calendar.badge.plus",
-                    emphasis: .sunbeam,
-                    action: onStartPush
-                )
             }
-            HStack(spacing: FriendDetailSheetLayout.actionSpacing) {
-                ExpandableFriendRowActionButton(
-                    label: "Remove",
-                    symbolName: "person.badge.minus",
-                    emphasis: .destructive,
-                    isLoading: isRemoving,
-                    action: onRemove
-                )
-                ExpandableFriendRowActionButton(
-                    label: "Block",
-                    symbolName: "hand.raised.fill",
-                    emphasis: .destructive,
-                    isLoading: isBlocking,
-                    action: onBlock
-                )
-            }
+
+            ExpandableFriendRowPrimaryButton(
+                label: "Start push",
+                symbolName: "calendar.badge.plus",
+                action: onStartPush
+            )
+
+            ExpandableFriendRowOverflowMenu(
+                isBusy: isBusy,
+                onRemove: onRemove,
+                onBlock: onBlock
+            )
         }
+        .frame(height: ExpandableFriendRowLayout.railHeight)
     }
 }
 
-private enum ExpandableFriendRowEmphasis {
-    case plain
-    case sunbeam
-    case destructive
-}
-
-private struct ExpandableFriendRowActionButton: View {
+private struct ExpandableFriendRowPrimaryButton: View {
     let label: String
     let symbolName: String
-    let emphasis: ExpandableFriendRowEmphasis
-    var isLoading: Bool = false
     let action: () -> Void
 
     private var shape: RoundedRectangle {
-        RoundedRectangle(cornerRadius: FriendDetailSheetLayout.actionCardCornerRadius, style: .continuous)
+        RoundedRectangle(cornerRadius: ExpandableFriendRowLayout.railCornerRadius, style: .continuous)
     }
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: FriendDetailSheetLayout.actionCardLabelSpacing) {
-                if isLoading {
-                    ProgressView()
-                } else {
-                    Image(systemName: symbolName)
-                        .font(.system(size: FriendDetailSheetLayout.actionCardIconSize, weight: .semibold))
-                }
+            HStack(spacing: ExpandableFriendRowLayout.primaryLabelSpacing) {
+                Image(systemName: symbolName)
+                    .font(.system(size: ExpandableFriendRowLayout.primaryIconSize, weight: .semibold))
                 Text(label)
                     .font(.subheadline.weight(.semibold))
                     .lineLimit(1)
                     .minimumScaleFactor(FriendsLayout.minimumTextScale)
             }
-            .foregroundStyle(foregroundColor)
+            .foregroundStyle(ExpandableFriendRowColor.startPushText)
             .frame(maxWidth: .infinity)
-            .frame(height: FriendDetailSheetLayout.actionCardHeight)
-            .pushGlassBackground(cornerRadius: FriendDetailSheetLayout.actionCardCornerRadius)
+            .frame(height: ExpandableFriendRowLayout.railHeight)
+            .pushGlassBackground(cornerRadius: ExpandableFriendRowLayout.railCornerRadius)
             .overlay {
-                shape.stroke(Color.white.opacity(PushGlassStyle.strokeOpacity), lineWidth: ExpandableFriendRowLayout.emphasisStrokeWidth)
+                shape.stroke(
+                    ExpandableFriendRowColor.primaryStroke,
+                    lineWidth: ExpandableFriendRowLayout.primaryStrokeWidth
+                )
             }
         }
         .buttonStyle(.plain)
-        .disabled(isLoading)
         .accessibilityLabel(label)
+        .accessibilityAddTraits(.isButton)
+    }
+}
+
+private struct ExpandableFriendRowSecondaryButton: View {
+    let label: String
+    let symbolName: String
+    let action: () -> Void
+
+    private var shape: RoundedRectangle {
+        RoundedRectangle(cornerRadius: ExpandableFriendRowLayout.railCornerRadius, style: .continuous)
     }
 
-    /// Only the icon/label tint distinguishes emphasis now; the glass
-    /// background and stroke stay identical across all three buttons.
-    private var foregroundColor: Color {
-        switch emphasis {
-        case .plain:       return PushControlColors.textPrimary
-        case .sunbeam:      return ExpandableFriendRowColor.startPushText
-        case .destructive: return PushControlColors.destructive
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: ExpandableFriendRowLayout.secondaryLabelSpacing) {
+                Image(systemName: symbolName)
+                    .font(.system(size: ExpandableFriendRowLayout.secondaryIconSize, weight: .semibold))
+                Text(label)
+                    .font(.caption.weight(.semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(FriendsLayout.minimumTextScale)
+            }
+            .foregroundStyle(PushControlColors.textSecondary)
+            .padding(.horizontal, ExpandableFriendRowLayout.secondaryHorizontalPadding)
+            .frame(height: ExpandableFriendRowLayout.railHeight)
+            .pushGlassBackground(cornerRadius: ExpandableFriendRowLayout.railCornerRadius)
+            .overlay {
+                shape.stroke(
+                    Color.white.opacity(PushGlassStyle.strokeOpacity),
+                    lineWidth: ExpandableFriendRowLayout.emphasisStrokeWidth
+                )
+            }
         }
+        .buttonStyle(.plain)
+        .fixedSize(horizontal: true, vertical: false)
+        .accessibilityLabel(label)
+    }
+}
+
+private struct ExpandableFriendRowOverflowMenu: View {
+    let isBusy: Bool
+    let onRemove: () -> Void
+    let onBlock: () -> Void
+
+    private var shape: RoundedRectangle {
+        RoundedRectangle(cornerRadius: ExpandableFriendRowLayout.railCornerRadius, style: .continuous)
+    }
+
+    var body: some View {
+        Menu {
+            Button("Remove friend", role: .destructive, action: onRemove)
+            Button("Block", role: .destructive, action: onBlock)
+        } label: {
+            Group {
+                if isBusy {
+                    ProgressView()
+                        .controlSize(.small)
+                } else {
+                    Image(systemName: "ellipsis")
+                        .font(.system(size: ExpandableFriendRowLayout.overflowIconSize, weight: .semibold))
+                        .foregroundStyle(PushControlColors.textSecondary)
+                }
+            }
+            .frame(width: ExpandableFriendRowLayout.overflowWidth, height: ExpandableFriendRowLayout.railHeight)
+            .pushGlassBackground(cornerRadius: ExpandableFriendRowLayout.railCornerRadius)
+            .overlay {
+                shape.stroke(
+                    Color.white.opacity(PushGlassStyle.strokeOpacity),
+                    lineWidth: ExpandableFriendRowLayout.emphasisStrokeWidth
+                )
+            }
+        }
+        .disabled(isBusy)
+        .accessibilityLabel("More actions")
+        .accessibilityHint("Remove friend or block")
     }
 }
 
 // MARK: - Style Tokens
 
 enum ExpandableFriendRowLayout {
-    static let actionsTopSpacing: CGFloat = 12
+    /// Tight gap under the friend identity so the rail reads as one card.
+    static let actionsTopSpacing: CGFloat = 6
+    static let railBottomPadding: CGFloat = 10
+    static let railSpacing: CGFloat = 8
+    static let railHeight: CGFloat = 40
+    static let railCornerRadius: CGFloat = 12
+
+    static let primaryIconSize: CGFloat = 15
+    static let primaryLabelSpacing: CGFloat = 6
+    static let primaryStrokeWidth: CGFloat = 1.0
+
+    static let secondaryIconSize: CGFloat = 13
+    static let secondaryLabelSpacing: CGFloat = 4
+    static let secondaryHorizontalPadding: CGFloat = 10
+
+    static let overflowWidth: CGFloat = 40
+    static let overflowIconSize: CGFloat = 15
+
     static let animationResponse = 0.40
     static let animationDamping = 0.86
     static let emphasisStrokeWidth: CGFloat = 0.8
 }
 
 enum ExpandableFriendRowColor {
-    /// Darker brown than the default walnut text, so Start push still reads
-    /// as the emphasized action without a tinted background.
+    /// Darker brown than default walnut so Start push reads as primary.
     static let startPushText = Color(red: 0.32, green: 0.18, blue: 0.06)
+    /// Warm rim slightly stronger than plain glass so primary stands out.
+    static let primaryStroke = Color.white.opacity(0.55)
 }

@@ -66,7 +66,7 @@ final class FriendsViewModel: ObservableObject {
     @Published private(set) var loadState: LoadState<[FriendRowModel]> = .idle
     @Published var searchText: String = ""
     @Published var selectedFilter: FriendsFilter = .all
-    /// The single row expanded inline for its Directions/Start push/Remove/Block actions.
+    /// The single row expanded inline for its compact action rail.
     @Published var expandedFriendID: String?
     /// Friend IDs with an in-flight remove call, so the row can disable its button.
     @Published private(set) var removingFriendIDs: Set<String> = []
