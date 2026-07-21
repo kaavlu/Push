@@ -167,6 +167,27 @@ final class PlansViewModel: ObservableObject {
         loadState.value != nil && activePushes.isEmpty
     }
 
+    /// True when the visible week has hangouts, almost-happened days, or a push total.
+    var hasWeekHangoutSummary: Bool {
+        totalPushesThisWeek > 0
+            || weekDays.contains { !$0.hangouts.isEmpty || $0.almostHappened }
+    }
+
+    /// Hide the dead History control when the week has no hangout story.
+    var showsHistoryLink: Bool { hasWeekHangoutSummary }
+
+    var weekFooterPrimaryText: String {
+        hasWeekHangoutSummary
+            ? "\(totalPushesThisWeek) Pushes this week"
+            : EmptySurfaceCopy.calendarEmptyFooter
+    }
+
+    var showsMostActiveGroup: Bool {
+        hasWeekHangoutSummary && !mostActiveGroup.isEmpty
+    }
+
+    var showsBestDay: Bool { bestDayThisWeek != nil }
+
     var activeCount: Int { activePushes.count }
 
     var needsResponseCount: Int { plansNeedingResponse.count }

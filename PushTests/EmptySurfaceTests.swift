@@ -159,4 +159,15 @@ final class EmptySurfaceTests: XCTestCase {
         await viewModel.load()
         XCTAssertEqual(viewModel.surfacePhase, .failed)
     }
+
+    @MainActor
+    func testPlansEmptyWeekHidesHistoryAndUsesHonestFooter() async throws {
+        let viewModel = PlansViewModel(container: AppDataContainer(seed: .emptyGraph()))
+        await viewModel.load()
+        XCTAssertFalse(viewModel.showsHistoryLink)
+        XCTAssertFalse(viewModel.hasWeekHangoutSummary)
+        XCTAssertEqual(viewModel.weekFooterPrimaryText, EmptySurfaceCopy.calendarEmptyFooter)
+        XCTAssertFalse(viewModel.showsMostActiveGroup)
+        XCTAssertFalse(viewModel.showsBestDay)
+    }
 }
