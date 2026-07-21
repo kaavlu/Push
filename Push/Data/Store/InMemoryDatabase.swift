@@ -130,11 +130,24 @@ final class InMemoryDatabase: ObservableObject {
         return request
     }
 
+    /// Cancels an outgoing pending request the current user started.
+    func cancelFriendRequest(id: FriendRequest.ID) {
+        guard let index = friendRequests.firstIndex(where: {
+            $0.id == id
+                && $0.status == .pending
+                && $0.requester.id == currentUserID
+        }) else { return }
+        friendRequests.remove(at: index)
+        didMutate()
+    }
+
     /// Hard-deletes the friendship edge; removes any stale request row too so a
     /// fresh `sendFriendRequest` between the pair inserts cleanly afterward.
     func removeFriend(_ personID: Person.ID) {
-        guard acceptedFriendIDs.remove(personID) != nil else { return }
+        let hadFriend = acceptedFriendIDs.remove(personID) != nil
+        let pendingCount = friendRequests.count
         friendRequests.removeAll { involvesPair(personID, request: $0) }
+        guard hadFriend || friendRequests.count != pendingCount else { return }
         didMutate()
     }
 

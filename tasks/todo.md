@@ -18,6 +18,75 @@
 
 ---
 
+# Issue #44 — Complete Friend Relationship Lifecycle
+
+- [x] Spec in `tasks/spec.md`
+- [x] Migration `0013_friend_relationship_lifecycle.sql`
+  - `cancel_friend_request` (requester / pending / hard-delete)
+  - race-safe `send_friend_request` (unique_violation re-read)
+  - `remove_friend` deletes any status between the pair
+- [x] Swift data layer: `FriendRepository.cancelFriendRequest`, send returns request id
+- [x] Mock `InMemoryDatabase` cancel + remove clears pending
+- [x] Live loader/store wiring + revision bumps
+- [x] Add Friends: Cancel on outgoing; ActionErrorBanner + optimistic rollback
+- [x] Tests: `FriendRelationshipTests` (13) + existing suites
+- [x] `supabase/README.md` note for 0013
+- [x] Apply migration 0013 to remote Supabase (`0013_friend_relationship_lifecycle`)
+- [x] Live two-account smoke (Alice/Bob/Carol JWT → PostgREST RPCs)
+
+## Verification
+- [x] `scripts/test.sh suite FriendRelationshipTests` — 13 tests, 0 failures
+- [x] `scripts/test.sh suite AddFriendsTests` — 5 tests, 0 failures
+- [x] `scripts/test.sh suite AlertsTests` — 8 tests, 0 failures
+- [x] Migration history includes `0013_friend_relationship_lifecycle`
+- [x] Function grants: cancel/send/remove/resolve — authenticated only (anon/public false)
+- [x] Security advisors: only expected WARN for intentional public SECURITY DEFINER RPCs + auth leaked-password toggle (no new high-severity)
+- [x] Live smoke 18/18: send, idempotent re-send, incoming pending, requester/unrelated reject resolve, deny, re-request, cancel, stale cancel, accept, already-friends reject, remove, groups intact, re-request after remove
+
+---
+
+# Harden Release Configuration and Observability (Issue #37)
+
+## Completed
+- [x] Audited existing Release/mock isolation (`AppEnvironment.resolve`, `#if DEBUG` lab routes,
+      `AppDataContainer.installPreparedLive` gating) — already correct, no changes needed.
+- [x] `Push/Diagnostics/PushLog.swift`: categorized `os.Logger`s, `safeDescription(for:)`
+      PII-redaction helper (type name + `PostgrestError.code` only, never message/detail/hint),
+      generic `logged<T>` run-and-log-on-failure wrapper, `logStartupBanner(mode:)`.
+- [x] `Push/Diagnostics/CrashReporter.swift`: MetricKit `MXMetricManagerSubscriber`, registered
+      once in `PushApp.init()`. Apple-native, no third-party dependency.
+- [x] `SupabaseConfig.isProductionHost(_:)` runtime guard — `fatalError`s on a non-`.supabase.co`
+      host instead of shipping a misconfigured `xcconfig` silently; logs the resolved host only.
+- [x] `SupabaseLiveDataLoader` (all ~22 methods, the single live PostgREST/RPC network boundary)
+      routed through `PushLog.logged` for PII-free backend-failure logging.
+- [x] `RootView` bootstrap logging: startup banner (version/build/mode), session-restore outcome,
+      live-data-preparation success/failure — on-screen failure message left untouched.
+- [x] Fix round (Task 5 review): added `@discardableResult` to `PushLog.logged` — the wrap
+      introduced 5 new "unused result" warnings on `Void`-returning methods; behavior-neutral fix.
+
+## Verification
+- [x] Full `PushTests` suite (clean `DerivedData-Tests`): 205 tests, 0 failures.
+- [x] Generic Debug build (`scripts/test.sh build`): `BUILD SUCCEEDED`, 0 warnings.
+- [x] Release build (`xcodebuild -configuration Release -destination 'generic/platform=iOS
+      Simulator'`): `BUILD SUCCEEDED`. `strings` on the built binary confirms no `pucklab` /
+      `onboardinglab` / `OnboardingLabViewModel` symbols reachable — Debug-only lab routes are
+      genuinely compiled out of Release.
+- [x] `--live` smoke launch (labeled worktree simulator, real device log stream filtered to
+      `subsystem == "com.manav.Push"`): observed real log lines with zero PII —
+      `[bootstrap] Supabase host: tzzvwjhvjduyqywlszqc.supabase.co`,
+      `[bootstrap] Push 1.0 (1) launching, mode=live`, `[bootstrap] session restore: false`.
+      App reached `AuthGateView` cleanly (screenshot confirmed), no crash.
+- [ ] Not exercised: the `AppDataContainer.prepareLive` success (`"live data ready"`) / failure
+      (`"live data preparation failed: ..."`) log lines require an authenticated session past the
+      auth gate; no test credentials were available in this session to sign in and reach that
+      code path. The code was verified by task review (Task 6) reading the implementation
+      directly, but not observed live end-to-end. A future session with live credentials should
+      complete this leg (sign in, then optionally toggle airplane mode mid-prepare to also see a
+      `SupabaseLiveDataLoader` failure log line, e.g. `[network] loadProfiles failed: URLError`).
+
+
+---
+
 # Legal Destinations (Issue #36)
 
 - [x] Define feature contract and replacement procedure.

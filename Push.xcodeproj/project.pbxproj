@@ -9,6 +9,11 @@
 /* Begin PBXBuildFile section */
 		E3176B6B38ECE0284BCB193C /* ProfileAccountActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12187C13380877BA7D3E9D92 /* ProfileAccountActions.swift */; };
 		D3D467B07433EB01B843EC35 /* DeleteAccountTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4734F794A8EED0CD4F006BE /* DeleteAccountTests.swift */; };
+		42B08C7AAD8183A4B720AA38 /* FriendRelationshipTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCD184701E575A8AEB5BCFC7 /* FriendRelationshipTests.swift */; };
+		717902E7743E6D3E257F275E /* SupabaseConfigTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 933F958D948C4473B10E96C8 /* SupabaseConfigTests.swift */; };
+		44783BD3ECF7F1E99ADDB479 /* CrashReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E6FD1D8078C709BE7196DE1 /* CrashReporter.swift */; };
+		DDD8F2ADBCB8163E5E309330 /* PushLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB35D36CF6C0B2BDE78E32C1 /* PushLog.swift */; };
+		3F270BF6B8E608671A598363 /* PushLogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F5079F08567887D86C3291B /* PushLogTests.swift */; };
 		072819A00A31FCD7AAE53870 /* LegalDestinationsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B861E69CEF8CFCB3764C888D /* LegalDestinationsTests.swift */; };
 		EB2FE0A6BC8022F0F641F026 /* LegalDestinations.swift in Sources */ = {isa = PBXBuildFile; fileRef = A02315F8157A5D60D25725B1 /* LegalDestinations.swift */; };
 		441B0871A77B6D3A6EE02C12 /* ActionErrorBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7764BF65FABD8886A5CEF5BB /* ActionErrorBanner.swift */; };
@@ -84,6 +89,7 @@
 		A1F873C8D8EA53F9A07531BE /* SupabaseClientProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0B03E7723B8B1AF8E5386D /* SupabaseClientProvider.swift */; };
 		FB1AB98543348B8BBE4233ED /* SupabaseConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26AF0988720D034328C4B8C1 /* SupabaseConfig.swift */; };
 		AA00000000000000000000B3 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = AA00000000000000000000B2 /* Supabase */; };
+		AA00000000000000000000B4 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = AA00000000000000000000B2 /* Supabase */; };
 		E97C488E782CEEBD8CE08C79 /* FriendDetailBottomSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFA2D8E79901202D07BD399A /* FriendDetailBottomSheet.swift */; };
 		67F4A75D64CE4225B69B965C /* AdaptiveLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0AE1378DD16B6E0849F7A1 /* AdaptiveLayoutTests.swift */; };
 		4488D274468B8CF54EF8E572 /* PushAdaptiveLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 561BA912296C8CF1EB60435F /* PushAdaptiveLayout.swift */; };
@@ -221,6 +227,11 @@
 /* Begin PBXFileReference section */
 		12187C13380877BA7D3E9D92 /* ProfileAccountActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ProfileAccountActions.swift"; sourceTree = "<group>"; };
 		E4734F794A8EED0CD4F006BE /* DeleteAccountTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeleteAccountTests.swift"; sourceTree = "<group>"; };
+		FCD184701E575A8AEB5BCFC7 /* FriendRelationshipTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FriendRelationshipTests.swift"; sourceTree = "<group>"; };
+		933F958D948C4473B10E96C8 /* SupabaseConfigTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SupabaseConfigTests.swift"; sourceTree = "<group>"; };
+		5E6FD1D8078C709BE7196DE1 /* CrashReporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "CrashReporter.swift"; path = "Diagnostics/CrashReporter.swift"; sourceTree = "<group>"; };
+		FB35D36CF6C0B2BDE78E32C1 /* PushLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushLog.swift"; path = "Diagnostics/PushLog.swift"; sourceTree = "<group>"; };
+		2F5079F08567887D86C3291B /* PushLogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PushLogTests.swift"; sourceTree = "<group>"; };
 		B861E69CEF8CFCB3764C888D /* LegalDestinationsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LegalDestinationsTests.swift"; sourceTree = "<group>"; };
 		A02315F8157A5D60D25725B1 /* LegalDestinations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LegalDestinations.swift"; sourceTree = "<group>"; };
 		7764BF65FABD8886A5CEF5BB /* ActionErrorBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ActionErrorBanner.swift"; sourceTree = "<group>"; };
@@ -429,6 +440,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA00000000000000000000B4 /* Supabase in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -469,6 +481,8 @@
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
 				12187C13380877BA7D3E9D92 /* ProfileAccountActions.swift */,
+				5E6FD1D8078C709BE7196DE1 /* CrashReporter.swift */,
+				FB35D36CF6C0B2BDE78E32C1 /* PushLog.swift */,
 				A02315F8157A5D60D25725B1 /* LegalDestinations.swift */,
 				7764BF65FABD8886A5CEF5BB /* ActionErrorBanner.swift */,
 				37A5623D7FF0B22A6AB8F5EF /* ActionErrorState.swift */,
@@ -648,6 +662,9 @@
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
 				E4734F794A8EED0CD4F006BE /* DeleteAccountTests.swift */,
+				FCD184701E575A8AEB5BCFC7 /* FriendRelationshipTests.swift */,
+				933F958D948C4473B10E96C8 /* SupabaseConfigTests.swift */,
+				2F5079F08567887D86C3291B /* PushLogTests.swift */,
 				B861E69CEF8CFCB3764C888D /* LegalDestinationsTests.swift */,
 				3F0D61EC00365754BEEB241C /* ProfilePhotoTests.swift */,
 				30EC8288ED6D5DFC46693E12 /* MapPuckHitTestingTests.swift */,
@@ -719,6 +736,9 @@
 				5217A2782FF1B6DA0011F860 /* PBXTargetDependency */,
 			);
 			name = PushTests;
+			packageProductDependencies = (
+				AA00000000000000000000B2 /* Supabase */,
+			);
 			productName = PushTests;
 			productReference = 5217A2762FF1B6DA0011F860 /* PushTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -821,6 +841,8 @@
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
 				E3176B6B38ECE0284BCB193C /* ProfileAccountActions.swift in Sources */,
+				44783BD3ECF7F1E99ADDB479 /* CrashReporter.swift in Sources */,
+				DDD8F2ADBCB8163E5E309330 /* PushLog.swift in Sources */,
 				EB2FE0A6BC8022F0F641F026 /* LegalDestinations.swift in Sources */,
 				441B0871A77B6D3A6EE02C12 /* ActionErrorBanner.swift in Sources */,
 				A90E4E210610C9F8847862B5 /* ActionErrorState.swift in Sources */,
@@ -991,6 +1013,9 @@
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
 				D3D467B07433EB01B843EC35 /* DeleteAccountTests.swift in Sources */,
+				42B08C7AAD8183A4B720AA38 /* FriendRelationshipTests.swift in Sources */,
+				717902E7743E6D3E257F275E /* SupabaseConfigTests.swift in Sources */,
+				3F270BF6B8E608671A598363 /* PushLogTests.swift in Sources */,
 				072819A00A31FCD7AAE53870 /* LegalDestinationsTests.swift in Sources */,
 				CBC87FDFB9F7E0EE36A72F25 /* ProfilePhotoTests.swift in Sources */,
 				5FAB0B553AFFCA8F7157CCFD /* MapPuckHitTestingTests.swift in Sources */,
