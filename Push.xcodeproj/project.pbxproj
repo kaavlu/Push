@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7B15E35B1D189974D674E9FA /* DayDetailBottomSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 175B3CE0BF6D9E3C2CC407E6 /* DayDetailBottomSheet.swift */; };
 		792092478018022614F60D19 /* PlansWeekSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A09A374313A10652B29401CE /* PlansWeekSummary.swift */; };
 		8A22FA01E2AD9E5F9C800325 /* PlansHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D737A2A60B2CF9B1B21D0E5 /* PlansHistoryView.swift */; };
 		C06AA80BBD32256753462BF3 /* HistoryContentBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA7B0839579D318CE9A998AF /* HistoryContentBuilder.swift */; };
@@ -222,6 +223,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		175B3CE0BF6D9E3C2CC407E6 /* DayDetailBottomSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DayDetailBottomSheet.swift"; sourceTree = "<group>"; };
 		A09A374313A10652B29401CE /* PlansWeekSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PlansWeekSummary.swift"; path = "Data/Derived/PlansWeekSummary.swift"; sourceTree = "<group>"; };
 		3D737A2A60B2CF9B1B21D0E5 /* PlansHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PlansHistoryView.swift"; sourceTree = "<group>"; };
 		BA7B0839579D318CE9A998AF /* HistoryContentBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "HistoryContentBuilder.swift"; path = "Data/Derived/HistoryContentBuilder.swift"; sourceTree = "<group>"; };
@@ -474,6 +476,7 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				175B3CE0BF6D9E3C2CC407E6 /* DayDetailBottomSheet.swift */,
 				A09A374313A10652B29401CE /* PlansWeekSummary.swift */,
 				3D737A2A60B2CF9B1B21D0E5 /* PlansHistoryView.swift */,
 				BA7B0839579D318CE9A998AF /* HistoryContentBuilder.swift */,
@@ -829,6 +832,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				7B15E35B1D189974D674E9FA /* DayDetailBottomSheet.swift in Sources */,
 				792092478018022614F60D19 /* PlansWeekSummary.swift in Sources */,
 				8A22FA01E2AD9E5F9C800325 /* PlansHistoryView.swift in Sources */,
 				C06AA80BBD32256753462BF3 /* HistoryContentBuilder.swift in Sources */,
