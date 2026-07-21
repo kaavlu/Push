@@ -46,4 +46,17 @@ final class SupabaseAlertRepository: AlertRepository {
     func denyFriendRequest(id: FriendRequest.ID) async throws {
         try await store.resolveFriendRequest(id: id, accept: false)
     }
+
+    func incomingGroupInvites() async throws -> [GroupInvite] {
+        let rows = try await store.incomingGroupInvites()
+        return rows.map { $0.groupInvite() }.sorted { $0.createdAt > $1.createdAt }
+    }
+
+    func acceptGroupInvite(id: GroupInvite.ID) async throws {
+        try await store.resolveGroupInvite(id: id, accept: true)
+    }
+
+    func denyGroupInvite(id: GroupInvite.ID) async throws {
+        try await store.resolveGroupInvite(id: id, accept: false)
+    }
 }

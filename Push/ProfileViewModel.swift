@@ -7,6 +7,9 @@
 
 import Combine
 import Foundation
+import PhotosUI
+import SwiftUI
+import UIKit
 
 @MainActor
 final class ProfileViewModel: ObservableObject {
@@ -18,6 +21,10 @@ final class ProfileViewModel: ObservableObject {
     @Published private(set) var selectedAvailability: FriendAvailabilityState = .maybeDown
     @Published private(set) var selectedStatusID: String = FriendAvailabilityState.maybeDown.title
     @Published var isPhotoEditorPresented = false
+    @Published var isPhotoPickerPresented = false
+    @Published var photoPickerItem: PhotosPickerItem?
+    @Published private(set) var isPhotoBusy = false
+    @Published var photoErrorMessage: String?
     @Published var connectorAlert: ProfileConnectorAlert?
     @Published private(set) var activityVisibility: [ProfileToggleItem] = []
     @Published private(set) var mapPreferences: [ProfileToggleItem] = []
@@ -193,8 +200,68 @@ final class ProfileViewModel: ObservableObject {
         Task { try? await container.profile.updateBasics(displayName: name, handle: handle) }
     }
 
+    var hasProfilePhoto: Bool {
+        guard let profileImageAssetName, !profileImageAssetName.isEmpty else { return false }
+        return true
+    }
+
     func beginPhotoEditing() {
+        guard !isPhotoBusy else { return }
         isPhotoEditorPresented = true
+    }
+
+    func choosePhotoFromLibrary() {
+        isPhotoEditorPresented = false
+        isPhotoPickerPresented = true
+    }
+
+    func handlePhotoPickerItemChange(_ item: PhotosPickerItem?) {
+        guard let item else { return }
+        Task { await applyPickedPhoto(item) }
+    }
+
+    func applyPickedPhoto(_ item: PhotosPickerItem) async {
+        guard !isPhotoBusy else { return }
+        isPhotoBusy = true
+        photoErrorMessage = nil
+        defer {
+            isPhotoBusy = false
+            photoPickerItem = nil
+        }
+        do {
+            guard let raw = try await item.loadTransferable(type: Data.self) else {
+                photoErrorMessage = "Couldn't read that photo. Try another one."
+                return
+            }
+            guard let jpeg = ProfilePhotoProcessor.jpegData(from: raw) else {
+                photoErrorMessage = "Couldn't process that photo. Try another one."
+                return
+            }
+            guard let container else { return }
+            try await container.profile.updateProfilePhoto(jpegData: jpeg)
+            await load()
+        } catch {
+            photoErrorMessage = "Couldn't save your photo. Check your connection and try again."
+        }
+    }
+
+    func removeProfilePhoto() {
+        guard !isPhotoBusy else { return }
+        isPhotoEditorPresented = false
+        Task { await performRemoveProfilePhoto() }
+    }
+
+    private func performRemoveProfilePhoto() async {
+        guard let container else { return }
+        isPhotoBusy = true
+        photoErrorMessage = nil
+        defer { isPhotoBusy = false }
+        do {
+            try await container.profile.removeProfilePhoto()
+            await load()
+        } catch {
+            photoErrorMessage = "Couldn't remove your photo. Try again."
+        }
     }
 
     func toggleActivityVisibility(id: String) {

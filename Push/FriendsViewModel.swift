@@ -70,8 +70,8 @@ final class FriendsViewModel: ObservableObject {
     @Published var expandedFriendID: String?
     /// Friend IDs with an in-flight remove call, so the row can disable its button.
     @Published private(set) var removingFriendIDs: Set<String> = []
-    /// Set when a remove call fails; surfaced as a toast by the view.
-    @Published var removeErrorMessage: String?
+    /// Recoverable mutation error (remove friend) with Retry via `retryLastAction`.
+    @Published private(set) var actionError: ActionErrorState?
 
     private let friends: FriendRepository
     private let groups: GroupRepository
@@ -83,6 +83,7 @@ final class FriendsViewModel: ObservableObject {
     private var storeChangeSub: AnyCancellable?
     // Tracks the last revision we loaded so the subscription skips redundant reloads.
     private var lastSeenRevision = 0
+    private var pendingRemove: FriendRowModel?
 
     init(
         friends: FriendRepository,
@@ -198,6 +199,21 @@ final class FriendsViewModel: ObservableObject {
         expandedFriendID = nil
     }
 
+    func dismissActionError() {
+        actionError = nil
+    }
+
+    func retryLastAction() async {
+        guard let pendingRemove else { return }
+        await removeFriend(pendingRemove)
+    }
+
+    /// Pull-to-refresh: re-warm live snapshot, then reload the friends list.
+    func refresh() async {
+        try? await containerForRefresh?.refreshSession()
+        await load()
+    }
+
     /// Hard-removes the friendship, then reloads so the row disappears from the list.
     func removeFriend(_ row: FriendRowModel) async {
         guard removingFriendIDs.insert(row.id).inserted else { return }
@@ -206,9 +222,14 @@ final class FriendsViewModel: ObservableObject {
             try await friends.removeFriend(row.friend.id)
             lastSeenRevision = containerForRefresh?.storeRevision ?? lastSeenRevision
             if expandedFriendID == row.id { expandedFriendID = nil }
+            actionError = nil
+            pendingRemove = nil
             await load()
         } catch {
-            removeErrorMessage = "Couldn't remove \(row.friend.name). Try again."
+            pendingRemove = row
+            actionError = ActionErrorState(
+                message: "Couldn't remove \(row.friend.name). Try again."
+            )
         }
     }
 

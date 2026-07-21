@@ -10,8 +10,25 @@ import SwiftUI
 struct GroupDetailView: View {
     let group: PushGroupData
     let members: [PushGroupMemberData]
+    /// This-session-only photo picked during Add Group creation, if any. Nil
+    /// on a fresh launch — see `GroupsViewModel.sessionImage(for:)`.
+    let sessionImage: UIImage?
     let onStartPush: () -> Void
     let backAction: () -> Void
+
+    init(
+        group: PushGroupData,
+        members: [PushGroupMemberData],
+        sessionImage: UIImage? = nil,
+        onStartPush: @escaping () -> Void,
+        backAction: @escaping () -> Void
+    ) {
+        self.group = group
+        self.members = members
+        self.sessionImage = sessionImage
+        self.onStartPush = onStartPush
+        self.backAction = backAction
+    }
 
     var body: some View {
         ZStack {
@@ -19,7 +36,7 @@ struct GroupDetailView: View {
 
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: GroupDetailLayout.sectionSpacing) {
-                    GroupDetailHeader(group: group)
+                    GroupDetailHeader(group: group, sessionImage: sessionImage)
                     GroupDetailActions(onStartPush: onStartPush)
                     GroupMembersList(members: members)
                 }
@@ -60,10 +77,15 @@ private struct GroupDetailBackButtonBar: View {
 
 private struct GroupDetailHeader: View {
     let group: PushGroupData
+    let sessionImage: UIImage?
 
     var body: some View {
         VStack(spacing: GroupDetailLayout.headerSpacing) {
-            GroupDetailImage(group: group)
+            GroupPhotoBadge(
+                imageAssetName: group.imageAssetName,
+                fallbackInitials: group.fallbackInitials,
+                overrideImage: sessionImage
+            )
 
             VStack(spacing: GroupDetailLayout.titleSpacing) {
                 Text(group.name)
@@ -80,73 +102,6 @@ private struct GroupDetailHeader: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .center)
-    }
-}
-
-private struct GroupDetailImage: View {
-    let group: PushGroupData
-
-    var body: some View {
-        ZStack(alignment: .bottomTrailing) {
-            ZStack {
-                if let image = PushImageAssets.image(named: group.imageAssetName) {
-                    Image(uiImage: image)
-                        .resizable()
-                        .scaledToFill()
-                } else {
-                    GroupDetailFallbackTile(group: group)
-                }
-            }
-            .frame(width: GroupDetailLayout.heroImageSize, height: GroupDetailLayout.heroImageSize)
-            .clipShape(RoundedRectangle(cornerRadius: GroupDetailLayout.heroImageCornerRadius, style: .continuous))
-            .overlay {
-                RoundedRectangle(cornerRadius: GroupDetailLayout.heroImageCornerRadius, style: .continuous)
-                    .stroke(.white.opacity(GroupDetailColor.imageStrokeOpacity), lineWidth: GroupDetailLayout.imageStrokeWidth)
-            }
-
-            GroupDetailEditBadge()
-                .offset(x: GroupDetailLayout.editBadgeOffset, y: GroupDetailLayout.editBadgeOffset)
-        }
-        .shadow(
-            color: PushColorPalette.Accent.walnut.opacity(GroupDetailColor.imageShadowOpacity),
-            radius: GroupDetailLayout.imageShadowRadius,
-            y: GroupDetailLayout.imageShadowYOffset
-        )
-    }
-}
-
-private struct GroupDetailEditBadge: View {
-    var body: some View {
-        Image(systemName: "camera.fill")
-            .font(.system(size: GroupDetailLayout.editBadgeIconSize, weight: .bold))
-            .foregroundStyle(PushControlColors.activeForeground)
-            .frame(width: GroupDetailLayout.editBadgeSize, height: GroupDetailLayout.editBadgeSize)
-            .background(Circle().fill(.white.opacity(GroupDetailColor.editBadgeFillOpacity)))
-            .overlay {
-                Circle()
-                    .stroke(PushControlColors.activeFill, lineWidth: GroupDetailLayout.editBadgeStrokeWidth)
-            }
-    }
-}
-
-private struct GroupDetailFallbackTile: View {
-    let group: PushGroupData
-
-    var body: some View {
-        ZStack {
-            LinearGradient(
-                colors: [
-                    PushControlColors.activeFill.opacity(GroupDetailColor.fallbackTopOpacity),
-                    .white.opacity(GroupDetailColor.fallbackBottomOpacity)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-
-            Text(group.fallbackInitials)
-                .font(.system(size: GroupDetailLayout.fallbackTextSize, weight: .bold, design: .rounded))
-                .foregroundStyle(PushControlColors.activeForeground)
-        }
     }
 }
 
@@ -206,12 +161,25 @@ private struct GroupDetailActionButton: View {
 private struct GroupMembersList: View {
     let members: [PushGroupMemberData]
 
+    private var activeMembers: [PushGroupMemberData] { members.filter { !$0.isPending } }
+    private var pendingMembers: [PushGroupMemberData] { members.filter(\.isPending) }
+
     var body: some View {
         LazyVStack(alignment: .leading, spacing: FriendsLayout.listSpacing) {
-            FriendsSectionHeader(title: "Members", count: members.count)
+            FriendsSectionHeader(title: "Members", count: activeMembers.count)
 
-            ForEach(members) { member in
+            ForEach(activeMembers) { member in
                 FriendRowCard(row: member.friendRow, showsGroupLabel: false)
+            }
+
+            if !pendingMembers.isEmpty {
+                FriendsSectionHeader(title: "Pending", count: pendingMembers.count)
+                    .padding(.top, GroupDetailLayout.pendingSectionTopPadding)
+
+                ForEach(pendingMembers) { member in
+                    FriendRowCard(row: member.friendRow, showsGroupLabel: false)
+                        .opacity(GroupDetailColor.pendingMemberOpacity)
+                }
             }
         }
     }
@@ -224,31 +192,19 @@ private enum GroupDetailLayout {
     static let sectionSpacing: CGFloat = 18
     static let headerSpacing: CGFloat = 14
     static let titleSpacing: CGFloat = 3
-    static let heroImageSize: CGFloat = 112
-    static let heroImageCornerRadius: CGFloat = 34
-    static let imageStrokeWidth: CGFloat = 1.2
-    static let imageShadowRadius: CGFloat = 18
-    static let imageShadowYOffset: CGFloat = 8
-    static let fallbackTextSize: CGFloat = 34
-    static let editBadgeSize: CGFloat = 34
-    static let editBadgeIconSize: CGFloat = 14
-    static let editBadgeStrokeWidth: CGFloat = 2
-    static let editBadgeOffset: CGFloat = 4
     static let actionSpacing: CGFloat = 10
     static let actionLabelSpacing: CGFloat = 7
     static let actionIconSize: CGFloat = 14
     static let actionVerticalPadding: CGFloat = 14
     static let actionCornerRadius: CGFloat = 18
     static let minimumTextScale = 0.82
+    static let pendingSectionTopPadding: CGFloat = 6
 }
 
 private enum GroupDetailColor {
-    static let imageStrokeOpacity = 0.82
-    static let imageShadowOpacity = 0.18
-    static let fallbackTopOpacity = 0.92
-    static let fallbackBottomOpacity = 0.86
-    static let editBadgeFillOpacity = 0.9
     static let secondaryActionFillOpacity = 0.38
+    /// De-emphasizes invited-but-not-yet-accepted members without hiding them.
+    static let pendingMemberOpacity = 0.55
 }
 
 struct GroupDetailView_Previews: PreviewProvider {
@@ -281,6 +237,14 @@ struct GroupDetailView_Previews: PreviewProvider {
                     avatarPlaceholder: "NI",
                     profileImageAssetName: "assets/friends/nitin.png",
                     availability: .maybeDown
+                ),
+                PushGroupMemberData(
+                    id: "raj",
+                    name: "Raj",
+                    avatarPlaceholder: "RA",
+                    profileImageAssetName: nil,
+                    availability: nil,
+                    isPending: true
                 )
             ],
             onStartPush: {}

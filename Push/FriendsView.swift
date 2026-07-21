@@ -46,6 +46,7 @@ struct FriendsView: View {
             GroupDetailView(
                 group: group,
                 members: groupsViewModel.members(for: group),
+                sessionImage: groupsViewModel.sessionImage(for: group),
                 onStartPush: { launchStartPush(.group(group.id)) }
             ) {
                 groupsViewModel.closeDetail()
@@ -105,22 +106,26 @@ struct FriendsView: View {
                     .transition(.move(edge: .top).combined(with: .opacity))
             }
         }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if let actionError = viewModel.actionError {
+                ActionErrorBanner(
+                    message: actionError.message,
+                    onRetry: { Task { await viewModel.retryLastAction() } },
+                    onDismiss: { viewModel.dismissActionError() }
+                )
+                .padding(.horizontal, FriendsLayout.horizontalPadding(layout))
+                .padding(.bottom, FriendsLayout.bottomPadding(layout))
+            }
+        }
         .fullScreenCover(isPresented: $isAddFriendPresented) {
             AddFriendsView()
         }
-        .sheet(isPresented: $isAddGroupPresented) {
-            CreatePlaceholderView(
-                title: "Add Group",
-                subtitle: "Create a circle for the people you see together.",
-                symbolName: "person.3.fill"
-            )
+        .fullScreenCover(isPresented: $isAddGroupPresented) {
+            AddGroupFlowView { groupID, image in
+                handleGroupCreated(groupID: groupID, image: image)
+            }
         }
         .onChange(of: mode) { _ in viewModel.collapse() }
-        .onChange(of: viewModel.removeErrorMessage) { message in
-            guard let message else { return }
-            triggerToast(message)
-            viewModel.removeErrorMessage = nil
-        }
     }
 
     private var listContent: some View {
@@ -135,6 +140,10 @@ struct FriendsView: View {
                     }
                 }
                 .padding(.bottom, FriendsLayout.bottomPadding(layout))
+            }
+            .refreshable {
+                await viewModel.refresh()
+                await groupsViewModel.load()
             }
             .onChange(of: viewModel.expandedFriendID) { expandedID in
                 guard let expandedID else { return }
@@ -198,6 +207,20 @@ struct FriendsView: View {
 
     private func launchStartPush(_ context: StartPushLaunchContext) {
         startPushContext = context
+    }
+
+    /// Registering the picked photo must happen synchronously, before the
+    /// reload — `GroupDetailView` reads it via `sessionImage(for:)` as soon
+    /// as `openDetail` presents the freshly-created group.
+    private func handleGroupCreated(groupID: FriendGroup.ID, image: UIImage?) {
+        groupsViewModel.registerSessionImage(image, forGroupID: groupID)
+        mode = .groups
+        Task {
+            await groupsViewModel.load()
+            if let group = groupsViewModel.group(for: groupID) {
+                groupsViewModel.openDetail(for: group)
+            }
+        }
     }
 
     private func selectFriend(_ row: FriendRowModel) {

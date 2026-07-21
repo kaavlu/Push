@@ -9,6 +9,14 @@ final class SupabaseClientProvider {
     let client: SupabaseClient
 
     private init() {
-        client = SupabaseClient(supabaseURL: SupabaseConfig.url, supabaseKey: SupabaseConfig.anonKey)
+        // Default redirect for recovery / confirm emails so deep links land in-app.
+        let options = SupabaseClientOptions(
+            auth: .init(redirectToURL: AuthRedirect.resetURL)
+        )
+        client = SupabaseClient(
+            supabaseURL: SupabaseConfig.url,
+            supabaseKey: SupabaseConfig.anonKey,
+            options: options
+        )
     }
 }

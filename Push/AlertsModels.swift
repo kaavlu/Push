@@ -28,5 +28,14 @@ enum AlertsCopy {
     static let requestSubtitle = "Sent you a friend request."
     static let emptyTitle = "You're all caught up."
     static let sectionTitle = "Friend Requests"
+    static let groupSectionTitle = "Group Requests"
     static let addedLabel = "Added"
+
+    static func groupInviteSubtitle(inviterName: String) -> String {
+        "\(inviterName) invited you to join."
+    }
+
+    static func groupMemberCountLabel(_ count: Int) -> String {
+        "\(count) member\(count == 1 ? "" : "s")"
+    }
 }

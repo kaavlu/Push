@@ -11,6 +11,7 @@ protocol LiveDataLoading: AnyObject {
     func updateBasics(userID: String, displayName: String, handle: String) async throws -> ProfileRow
     func updatePrivacy(userID: String, payload: ProfileSettingsPayload) async throws -> ProfileRow
     func updateAvailability(userID: String, rawValue: String) async throws -> ProfileRow
+    func updateImagePath(userID: String, imageAssetPath: String?) async throws -> ProfileRow
     func loadPushes() async throws -> [PushRow]
     func loadResponses() async throws -> [PushResponseRow]
     func insertPush(_ payload: PushInsertPayload) async throws -> PushRow
@@ -26,6 +27,9 @@ protocol LiveDataLoading: AnyObject {
     func resolveFriendRequest(id: String, accept: Bool) async throws -> FriendshipRow
     func removeFriend(targetUserID: String) async throws
     func loadProfile(id: String) async throws -> ProfileRow
+    func createGroup(name: String, imageAssetPath: String?, inviteeIDs: [String]) async throws -> GroupRow
+    func incomingGroupInvites() async throws -> [GroupInviteRow]
+    func resolveGroupInvite(membershipID: String, accept: Bool) async throws -> GroupMembershipRow
 }
 
 struct ProfileSettingsPayload: Encodable {
@@ -131,6 +135,8 @@ final class LiveDataStore {
     private var pushesTask: Task<[PushRow], Error>?
     private var responsesTask: Task<[PushResponseRow], Error>?
     private let revisionSubject = CurrentValueSubject<Int, Never>(0)
+    private var refreshTask: Task<Void, Error>?
+    private var lastSuccessfulRefreshAt: Date?
 
     init(loader: LiveDataLoading) { self.loader = loader }
 
@@ -148,6 +154,83 @@ final class LiveDataStore {
         async let pushes = pushes()
         async let responses = pushResponses()
         _ = try await (profiles, groups, memberships, policies, pushes, responses)
+    }
+
+    /// Clears session caches, re-warms, and publishes one revision on success.
+    /// Concurrent callers await the same in-flight task. A new refresh started
+    /// within `SessionRefreshConstants.minimumInterval` of a successful one is a no-op.
+    /// Failed re-warms restore the prior snapshot and do not bump revision.
+    func refresh() async throws {
+        if let refreshTask {
+            try await refreshTask.value
+            return
+        }
+        if let lastSuccessfulRefreshAt,
+           Date().timeIntervalSince(lastSuccessfulRefreshAt) < SessionRefreshConstants.minimumInterval {
+            return
+        }
+        let task = Task { try await performRefresh() }
+        refreshTask = task
+        do {
+            try await task.value
+            refreshTask = nil
+        } catch {
+            refreshTask = nil
+            throw error
+        }
+    }
+
+    private func performRefresh() async throws {
+        let snapshot = SessionCacheSnapshot(
+            profileRows: profileRows,
+            groupRows: groupRows,
+            membershipRows: membershipRows,
+            policyRows: policyRows,
+            pushRows: pushRows,
+            responseRows: responseRows
+        )
+        clearAllSessionCaches()
+        do {
+            try await warm()
+            lastSuccessfulRefreshAt = Date()
+            revisionSubject.value += 1
+        } catch {
+            restoreSessionCaches(from: snapshot)
+            throw error
+        }
+    }
+
+    private func clearAllSessionCaches() {
+        profileRows = nil
+        groupRows = nil
+        membershipRows = nil
+        policyRows = nil
+        pushRows = nil
+        responseRows = nil
+        profilesTask = nil
+        groupsTask = nil
+        membershipsTask = nil
+        policiesTask = nil
+        pushesTask = nil
+        responsesTask = nil
+    }
+
+    private func restoreSessionCaches(from snapshot: SessionCacheSnapshot) {
+        profileRows = snapshot.profileRows
+        groupRows = snapshot.groupRows
+        membershipRows = snapshot.membershipRows
+        policyRows = snapshot.policyRows
+        pushRows = snapshot.pushRows
+        responseRows = snapshot.responseRows
+    }
+
+    private struct SessionCacheSnapshot {
+        let profileRows: [ProfileRow]?
+        let groupRows: [GroupRow]?
+        let membershipRows: [GroupMembershipRow]?
+        let policyRows: [SharingPolicyRow]?
+        let pushRows: [PushRow]?
+        let responseRows: [PushResponseRow]?
     }
 
     func profiles() async throws -> [ProfileRow] {
@@ -191,6 +274,41 @@ final class LiveDataStore {
         )
     }
 
+    // MARK: - Groups (writes)
+    //
+    // Like pushes: no long-lived cache for the write path itself, but the
+    // read caches above (`groupRows`/`membershipRows`) go stale the moment a
+    // group is created or an invite resolved, so both paths drop them via
+    // `notifyGroupsChanged()` before bumping the revision.
+
+    func createGroup(name: String, imageAssetPath: String?, inviteeIDs: [String]) async throws -> GroupRow {
+        let row = try await loader.createGroup(
+            name: name, imageAssetPath: imageAssetPath, inviteeIDs: inviteeIDs
+        )
+        notifyGroupsChanged()
+        return row
+    }
+
+    func incomingGroupInvites() async throws -> [GroupInviteRow] {
+        try await loader.incomingGroupInvites()
+    }
+
+    func resolveGroupInvite(id: String, accept: Bool) async throws {
+        _ = try await loader.resolveGroupInvite(membershipID: id, accept: accept)
+        notifyGroupsChanged()
+    }
+
+    /// Drop the group/membership snapshot so the next read re-fetches, then
+    /// bump the revision. Called after create (creator's list gains the new
+    /// group) and after accept (invitee's list gains it on their next load).
+    func notifyGroupsChanged() {
+        groupRows = nil
+        membershipRows = nil
+        groupsTask = nil
+        membershipsTask = nil
+        revisionSubject.value += 1
+    }
+
     func policies() async throws -> [SharingPolicyRow] {
         if let policyRows { return policyRows }
         if let policiesTask { return try await policiesTask.value }
@@ -209,6 +327,15 @@ final class LiveDataStore {
 
     func updateAvailability(userID: String, rawValue: String) async throws {
         replace(try await loader.updateAvailability(userID: userID, rawValue: rawValue))
+    }
+
+    func updateImagePath(userID: String, imageAssetPath: String?) async throws {
+        replace(try await loader.updateImagePath(userID: userID, imageAssetPath: imageAssetPath))
+    }
+
+    /// Current cached path for the user, if the profiles snapshot is warm.
+    func cachedImagePath(userID: String) -> String? {
+        profileRows?.first(where: { $0.id.lowercased() == userID.lowercased() })?.image_asset_path
     }
 
     private func finish<Value>(

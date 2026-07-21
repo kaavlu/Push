@@ -138,6 +138,81 @@ final class InMemoryDatabase: ObservableObject {
         didMutate()
     }
 
+    /// Creates a group: caller becomes its active owner, each invitee gets a
+    /// pending (`invited`) membership row rather than an immediate one.
+    @discardableResult
+    func createGroup(name: String, imageAssetPath: String?, inviteeIDs: [Person.ID]) -> FriendGroup.ID {
+        let groupID = "group-\(UUID().uuidString)"
+        let group = FriendGroup(id: groupID, name: name, imageAssetPath: imageAssetPath)
+        groupsByID[groupID] = group
+        orderedGroups.append(group)
+
+        let now = Date()
+        let ownerMembership = GroupMembership(
+            id: "membership-\(groupID)-\(currentUserID)",
+            personID: currentUserID, groupID: groupID,
+            role: .owner, sharingLevel: .full, membershipStatus: .active, joinedAt: now
+        )
+        let inviteeMemberships = inviteeIDs.map { personID in
+            GroupMembership(
+                id: "membership-\(groupID)-\(personID)",
+                personID: personID, groupID: groupID,
+                role: .member, sharingLevel: .full, membershipStatus: .invited, joinedAt: now
+            )
+        }
+        memberships.append(contentsOf: [ownerMembership] + inviteeMemberships)
+        didMutate()
+        return groupID
+    }
+
+    /// Enriches the caller's pending group invites with group + inviter (owner)
+    /// identity, mirroring what the `incoming_group_invites()` RPC hands the
+    /// live client — the invitee has no other read path to this data.
+    func pendingGroupInvites(for personID: Person.ID) -> [GroupInvite] {
+        memberships
+            .filter { $0.personID == personID && $0.membershipStatus == .invited }
+            .compactMap { membership -> GroupInvite? in
+                guard let group = groupsByID[membership.groupID] else { return nil }
+                let owner = memberships.first {
+                    $0.groupID == membership.groupID && $0.role == .owner && $0.membershipStatus == .active
+                }
+                let inviter = owner.flatMap { peopleByID[$0.personID] }
+                let memberCount = memberships.filter {
+                    $0.groupID == membership.groupID && $0.membershipStatus == .active
+                }.count
+                return GroupInvite(
+                    id: membership.id,
+                    groupID: group.id,
+                    groupName: group.name,
+                    imageAssetPath: group.imageAssetPath,
+                    inviterID: inviter?.id ?? "",
+                    inviterName: inviter?.displayName ?? "",
+                    inviterImageAssetPath: inviter?.imageAssetPath,
+                    memberCount: memberCount,
+                    createdAt: membership.joinedAt
+                )
+            }
+            .sorted { $0.createdAt > $1.createdAt }
+    }
+
+    /// Accept flips the membership to active; deny hard-deletes the row so a
+    /// future re-invite for the same pair inserts cleanly, mirroring the
+    /// Supabase RPC's behavior.
+    func resolveGroupInvite(id: GroupMembership.ID, accept: Bool) {
+        guard let index = memberships.firstIndex(where: { $0.id == id }) else { return }
+        if accept {
+            let existing = memberships[index]
+            memberships[index] = GroupMembership(
+                id: existing.id, personID: existing.personID, groupID: existing.groupID,
+                role: existing.role, sharingLevel: existing.sharingLevel,
+                membershipStatus: .active, joinedAt: existing.joinedAt
+            )
+        } else {
+            memberships.remove(at: index)
+        }
+        didMutate()
+    }
+
     private func involvesPair(_ personID: Person.ID, request: FriendRequest) -> Bool {
         let a = request.requester.id
         let b = request.recipientID
@@ -188,11 +263,22 @@ final class InMemoryDatabase: ObservableObject {
     /// and initials derive from firstName, so callers never pass them explicitly.
     func updatePerson(id: Person.ID, firstName: String) {
         guard let existing = peopleByID[id] else { return }
-        let updated = Person(
+        replacePerson(Person(
             id: existing.id, firstName: firstName, imageAssetPath: existing.imageAssetPath
-        )
-        peopleByID[id] = updated
-        if let index = orderedPeople.firstIndex(where: { $0.id == id }) {
+        ))
+    }
+
+    /// Updates only the profile image path (bundle asset, local file, or remote URL).
+    func updatePersonImage(id: Person.ID, imageAssetPath: String?) {
+        guard let existing = peopleByID[id] else { return }
+        replacePerson(Person(
+            id: existing.id, firstName: existing.firstName, imageAssetPath: imageAssetPath
+        ))
+    }
+
+    private func replacePerson(_ updated: Person) {
+        peopleByID[updated.id] = updated
+        if let index = orderedPeople.firstIndex(where: { $0.id == updated.id }) {
             orderedPeople[index] = updated
         }
         didMutate()
