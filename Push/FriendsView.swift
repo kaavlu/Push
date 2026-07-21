@@ -166,10 +166,12 @@ struct FriendsView: View {
                     row: row,
                     isExpanded: viewModel.expandedFriendID == row.id,
                     isRemoving: viewModel.removingFriendIDs.contains(row.id),
+                    isBlocking: viewModel.blockingFriendIDs.contains(row.id),
                     onToggle: { selectFriend(row) },
                     onDirections: { triggerToast("Opening in Maps…") },
                     onStartPush: { startPush(for: row) },
-                    onRemove: { Task { await viewModel.removeFriend(row) } }
+                    onRemove: { Task { await viewModel.removeFriend(row) } },
+                    onBlock: { Task { await viewModel.blockFriend(row) } }
                 )
                 .id(row.id)
             }

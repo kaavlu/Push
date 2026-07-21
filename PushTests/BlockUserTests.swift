@@ -97,4 +97,75 @@ final class BlockUserTests: XCTestCase {
         XCTAssertFalse(direct.contains { $0.personID == blockedID })
         XCTAssertTrue(direct.contains { $0.personID == other && $0.response == .pending })
     }
+
+    /// Failed block must keep the friend row and surface a recoverable banner.
+    func testBlockFailureKeepsFriendAndSurfacesError() async throws {
+        let container = AppDataContainer(seed: .standard())
+        let failingFriends = BlockFailingFriendRepository(backing: container.friends)
+        let viewModel = FriendsViewModel(
+            friends: failingFriends,
+            groups: container.groups,
+            sharing: container.sharing,
+            pushes: container.pushes
+        )
+        await waitForFriendsLoad(viewModel)
+        let row = try XCTUnwrap(viewModel.rows.first)
+        let beforeCount = viewModel.rows.count
+
+        await viewModel.blockFriend(row)
+
+        XCTAssertEqual(viewModel.rows.count, beforeCount)
+        XCTAssertTrue(viewModel.rows.contains { $0.id == row.id })
+        XCTAssertEqual(
+            viewModel.actionError?.message,
+            "Couldn't block \(row.friend.name). Try again."
+        )
+        XCTAssertFalse(viewModel.blockingFriendIDs.contains(row.id))
+    }
+
+    private func waitForFriendsLoad(_ viewModel: FriendsViewModel) async {
+        for _ in 0..<50 {
+            if viewModel.loadState.value != nil { return }
+            try? await Task.sleep(nanoseconds: 20_000_000)
+        }
+    }
+}
+
+/// Forwards all friend reads/writes except `blockUser`, which always throws.
+@MainActor
+private final class BlockFailingFriendRepository: FriendRepository {
+    enum Failure: Error { case expected }
+
+    private let backing: FriendRepository
+
+    init(backing: FriendRepository) {
+        self.backing = backing
+    }
+
+    func friends() async throws -> [Person] { try await backing.friends() }
+    func currentUser() async throws -> Person { try await backing.currentUser() }
+    func presenceStatuses() async throws -> [PresenceStatus] {
+        try await backing.presenceStatuses()
+    }
+    func setCurrentUserAvailability(_ availability: FriendAvailabilityState) async throws {
+        try await backing.setCurrentUserAvailability(availability)
+    }
+    func searchPeople(query: String) async throws -> [PersonSearchResult] {
+        try await backing.searchPeople(query: query)
+    }
+    func sendFriendRequest(to personID: Person.ID) async throws {
+        try await backing.sendFriendRequest(to: personID)
+    }
+    func removeFriend(_ personID: Person.ID) async throws {
+        try await backing.removeFriend(personID)
+    }
+    func blockUser(_ personID: Person.ID) async throws {
+        throw Failure.expected
+    }
+    func unblockUser(_ personID: Person.ID) async throws {
+        try await backing.unblockUser(personID)
+    }
+    func blockedUsers() async throws -> [BlockedPerson] {
+        try await backing.blockedUsers()
+    }
 }

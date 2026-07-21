@@ -3,10 +3,9 @@
 //  Push
 //
 //  Friends-list row that expands in place to reveal Directions/Start push/
-//  Remove actions, replacing the old map-style bottom sheet for this screen
-//  only. The row's own content (FriendRowCard) is drawn unchanged; this view
-//  just owns the single shared card surface the row and its actions grow
-//  inside of.
+//  Remove/Block actions, replacing the old map-style bottom sheet for this
+//  screen only. The row's own content (FriendRowCard) is drawn unchanged;
+//  this view owns the shared card surface the row and its actions grow inside.
 //
 
 import SwiftUI
@@ -16,12 +15,15 @@ struct ExpandableFriendRow: View {
     let row: FriendRowModel
     let isExpanded: Bool
     let isRemoving: Bool
+    let isBlocking: Bool
     let onToggle: () -> Void
     let onDirections: () -> Void
     let onStartPush: () -> Void
     let onRemove: () -> Void
+    let onBlock: () -> Void
 
     @State private var isConfirmingRemove = false
+    @State private var isConfirmingBlock = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -30,9 +32,11 @@ struct ExpandableFriendRow: View {
             if isExpanded {
                 ExpandableFriendRowActionRow(
                     isRemoving: isRemoving,
+                    isBlocking: isBlocking,
                     onDirections: onDirections,
                     onStartPush: onStartPush,
-                    onRemove: { isConfirmingRemove = true }
+                    onRemove: { isConfirmingRemove = true },
+                    onBlock: { isConfirmingBlock = true }
                 )
                 .padding(.horizontal, FriendsLayout.cardPadding(layout))
                 .padding(.bottom, FriendsLayout.cardPadding(layout))
@@ -64,38 +68,62 @@ struct ExpandableFriendRow: View {
         } message: {
             Text("They won't see your status anymore, and you won't see theirs.")
         }
+        .confirmationDialog(
+            "Block \(row.friend.name)?",
+            isPresented: $isConfirmingBlock,
+            titleVisibility: .visible
+        ) {
+            Button("Block", role: .destructive, action: onBlock)
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("They won't be notified. You won't appear as friends.")
+        }
     }
 }
 
 // MARK: - Action Row
 
+/// Four actions in a 2×2 grid so compact widths don't overflow.
 private struct ExpandableFriendRowActionRow: View {
     let isRemoving: Bool
+    let isBlocking: Bool
     let onDirections: () -> Void
     let onStartPush: () -> Void
     let onRemove: () -> Void
+    let onBlock: () -> Void
 
     var body: some View {
-        HStack(spacing: FriendDetailSheetLayout.actionSpacing) {
-            ExpandableFriendRowActionButton(
-                label: "Directions",
-                symbolName: "arrow.triangle.turn.up.right.circle.fill",
-                emphasis: .plain,
-                action: onDirections
-            )
-            ExpandableFriendRowActionButton(
-                label: "Start push",
-                symbolName: "calendar.badge.plus",
-                emphasis: .sunbeam,
-                action: onStartPush
-            )
-            ExpandableFriendRowActionButton(
-                label: "Remove",
-                symbolName: "person.badge.minus",
-                emphasis: .destructive,
-                isLoading: isRemoving,
-                action: onRemove
-            )
+        VStack(spacing: FriendDetailSheetLayout.actionSpacing) {
+            HStack(spacing: FriendDetailSheetLayout.actionSpacing) {
+                ExpandableFriendRowActionButton(
+                    label: "Directions",
+                    symbolName: "arrow.triangle.turn.up.right.circle.fill",
+                    emphasis: .plain,
+                    action: onDirections
+                )
+                ExpandableFriendRowActionButton(
+                    label: "Start push",
+                    symbolName: "calendar.badge.plus",
+                    emphasis: .sunbeam,
+                    action: onStartPush
+                )
+            }
+            HStack(spacing: FriendDetailSheetLayout.actionSpacing) {
+                ExpandableFriendRowActionButton(
+                    label: "Remove",
+                    symbolName: "person.badge.minus",
+                    emphasis: .destructive,
+                    isLoading: isRemoving,
+                    action: onRemove
+                )
+                ExpandableFriendRowActionButton(
+                    label: "Block",
+                    symbolName: "hand.raised.fill",
+                    emphasis: .destructive,
+                    isLoading: isBlocking,
+                    action: onBlock
+                )
+            }
         }
     }
 }
