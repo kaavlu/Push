@@ -234,11 +234,7 @@ struct ContentView: View {
         case .addFriend:
             AddFriendsView()
         case .feed:
-            CreatePlaceholderView(
-                title: "Feed",
-                subtitle: "What's happening with your friends.",
-                symbolName: route.systemImageName
-            )
+            FeedDeferredView()
         case .plans:
             PlansView()
         case .startPush:

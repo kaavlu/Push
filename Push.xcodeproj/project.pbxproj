@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		11281DC2A4345BAFE89579C1 /* FeedDeferredView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E7D640EAC9375F965E3D9B /* FeedDeferredView.swift */; };
 		D16A4EA302ECBC5BB7B704C7 /* MapEmptyOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA963421CE09159A29FCE55A /* MapEmptyOverlay.swift */; };
 		117AA115D49FD170A614EDD6 /* EmptySurfaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84123F72AC63382EDA610127 /* EmptySurfaceView.swift */; };
 		5E64B61FCD74C989AE6A113F /* EmptySurfaceModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4B96E9283F20FF6B2DC41D6 /* EmptySurfaceModels.swift */; };
@@ -165,7 +166,6 @@
 		5217A2B82FF2FA000011F860 /* GroupDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2B72FF2FA000011F860 /* GroupDetailView.swift */; };
 		5217A2BE2FF300000011F860 /* CreateActionModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2BD2FF300000011F860 /* CreateActionModels.swift */; };
 		5217A2C02FF300000011F860 /* CreateActionMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2BF2FF300000011F860 /* CreateActionMenuView.swift */; };
-		5217A2C22FF300000011F860 /* CreatePlaceholderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2C12FF300000011F860 /* CreatePlaceholderView.swift */; };
 		5217A2C42FF300000011F860 /* BottomNavigationBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2C32FF300000011F860 /* BottomNavigationBar.swift */; };
 		5217A2D02FF320000011F860 /* assets in Resources */ = {isa = PBXBuildFile; fileRef = 5217A2CF2FF320000011F860 /* assets */; };
 		5217A2D42FF330000011F860 /* FriendPuckStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5217A2D32FF330000011F860 /* FriendPuckStyle.swift */; };
@@ -221,6 +221,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		D3E7D640EAC9375F965E3D9B /* FeedDeferredView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedDeferredView.swift"; sourceTree = "<group>"; };
 		FA963421CE09159A29FCE55A /* MapEmptyOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MapEmptyOverlay.swift"; sourceTree = "<group>"; };
 		84123F72AC63382EDA610127 /* EmptySurfaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EmptySurfaceView.swift"; sourceTree = "<group>"; };
 		F4B96E9283F20FF6B2DC41D6 /* EmptySurfaceModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EmptySurfaceModels.swift"; sourceTree = "<group>"; };
@@ -389,7 +390,6 @@
 		5217A2B72FF2FA000011F860 /* GroupDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupDetailView.swift; sourceTree = "<group>"; };
 		5217A2BD2FF300000011F860 /* CreateActionModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateActionModels.swift; sourceTree = "<group>"; };
 		5217A2BF2FF300000011F860 /* CreateActionMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateActionMenuView.swift; sourceTree = "<group>"; };
-		5217A2C12FF300000011F860 /* CreatePlaceholderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatePlaceholderView.swift; sourceTree = "<group>"; };
 		5217A2C32FF300000011F860 /* BottomNavigationBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomNavigationBar.swift; sourceTree = "<group>"; };
 		5217A2CF2FF320000011F860 /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; path = assets; sourceTree = "<group>"; };
 		5217A2D32FF330000011F860 /* FriendPuckStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendPuckStyle.swift; sourceTree = "<group>"; };
@@ -472,6 +472,7 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				D3E7D640EAC9375F965E3D9B /* FeedDeferredView.swift */,
 				FA963421CE09159A29FCE55A /* MapEmptyOverlay.swift */,
 				84123F72AC63382EDA610127 /* EmptySurfaceView.swift */,
 				F4B96E9283F20FF6B2DC41D6 /* EmptySurfaceModels.swift */,
@@ -578,7 +579,6 @@
 				5217A2AF2FF2F1000011F860 /* MainMapModels.swift */,
 				5217A2BD2FF300000011F860 /* CreateActionModels.swift */,
 				5217A2BF2FF300000011F860 /* CreateActionMenuView.swift */,
-				5217A2C12FF300000011F860 /* CreatePlaceholderView.swift */,
 				5217A2B32FF2F8000011F860 /* GroupsModels.swift */,
 				5217A2B52FF2F8000011F860 /* GroupsView.swift */,
 				5217A2B72FF2FA000011F860 /* GroupDetailView.swift */,
@@ -826,6 +826,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				11281DC2A4345BAFE89579C1 /* FeedDeferredView.swift in Sources */,
 				D16A4EA302ECBC5BB7B704C7 /* MapEmptyOverlay.swift in Sources */,
 				117AA115D49FD170A614EDD6 /* EmptySurfaceView.swift in Sources */,
 				5E64B61FCD74C989AE6A113F /* EmptySurfaceModels.swift in Sources */,
@@ -934,7 +935,6 @@
 				5217A2B02FF2F1000011F860 /* MainMapModels.swift in Sources */,
 				5217A2BE2FF300000011F860 /* CreateActionModels.swift in Sources */,
 				5217A2C02FF300000011F860 /* CreateActionMenuView.swift in Sources */,
-				5217A2C22FF300000011F860 /* CreatePlaceholderView.swift in Sources */,
 				5217A2B42FF2F8000011F860 /* GroupsModels.swift in Sources */,
 				5217A2B62FF2F8000011F860 /* GroupsView.swift in Sources */,
 				5217A2B82FF2FA000011F860 /* GroupDetailView.swift in Sources */,
