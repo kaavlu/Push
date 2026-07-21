@@ -77,16 +77,17 @@ final class SupabaseFriendRepository: FriendRepository {
         try await store.removeFriend(targetUserID: personID)
     }
 
-    // Live block/unblock RPCs land in Task 3 (Issue #52).
     func blockUser(_ personID: Person.ID) async throws {
-        throw SupabaseRepositoryError.writeNotSupported
+        try await store.blockUser(targetUserID: personID)
     }
 
     func unblockUser(_ personID: Person.ID) async throws {
-        throw SupabaseRepositoryError.writeNotSupported
+        try await store.unblockUser(targetUserID: personID)
     }
 
-    func blockedUsers() async throws -> [BlockedPerson] { [] }
+    func blockedUsers() async throws -> [BlockedPerson] {
+        try await store.listBlockedUsers()
+    }
 
     // Mirror image of `ProfileRow.mapAvailability` — Swift's raw values are
     // camelCase while the DB column is snake_case, so this needs an explicit map.

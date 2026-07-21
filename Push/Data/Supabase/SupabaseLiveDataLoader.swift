@@ -131,6 +131,25 @@ final class SupabaseLiveDataLoader: LiveDataLoading {
             .execute()
     }
 
+    func blockUser(targetUserID: String) async throws {
+        try await client
+            .rpc("block_user", params: BlockUserParams(target_user_id: targetUserID))
+            .execute()
+    }
+
+    func unblockUser(targetUserID: String) async throws {
+        try await client
+            .rpc("unblock_user", params: BlockUserParams(target_user_id: targetUserID))
+            .execute()
+    }
+
+    func listBlockedUsers() async throws -> [SearchProfileRow] {
+        try await client
+            .rpc("list_blocked_users")
+            .execute()
+            .value
+    }
+
     func loadProfile(id: String) async throws -> ProfileRow {
         try await client.from("profiles")
             .select()
@@ -183,6 +202,10 @@ private struct ResolveFriendRequestParams: Encodable {
 
 private struct RemoveFriendParams: Encodable {
     let other_user_id: String
+}
+
+private struct BlockUserParams: Encodable {
+    let target_user_id: String
 }
 
 private struct CreateGroupParams: Encodable {
