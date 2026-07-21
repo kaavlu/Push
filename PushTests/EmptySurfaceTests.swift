@@ -126,4 +126,37 @@ final class EmptySurfaceTests: XCTestCase {
         await viewModel.load()
         XCTAssertEqual(viewModel.surfacePhase, .failed)
     }
+
+    @MainActor
+    func testFriendsEmptyPhaseForEmptyGraph() async throws {
+        let viewModel = FriendsViewModel(container: AppDataContainer(seed: .emptyGraph()))
+        await viewModel.load()
+        XCTAssertEqual(viewModel.surfacePhase, .empty)
+        XCTAssertEqual(viewModel.friendsCount, 0)
+        XCTAssertFalse(viewModel.showsFilterChips)
+    }
+
+    @MainActor
+    func testFriendsHiddenPresenceIsContentNotEmpty() async throws {
+        let viewModel = FriendsViewModel(
+            container: AppDataContainer(seed: .friendsWithoutPresence())
+        )
+        await viewModel.load()
+        XCTAssertEqual(viewModel.surfacePhase, .content)
+        XCTAssertFalse(viewModel.rows.isEmpty)
+        XCTAssertTrue(viewModel.rows.allSatisfy { $0.friend.venueStatusText == "Hidden right now" })
+    }
+
+    @MainActor
+    func testFriendsFailedPhase() async throws {
+        let container = AppDataContainer(seed: .standard())
+        let viewModel = FriendsViewModel(
+            friends: ThrowingFriendRepository(),
+            groups: container.groups,
+            sharing: container.sharing,
+            pushes: container.pushes
+        )
+        await viewModel.load()
+        XCTAssertEqual(viewModel.surfacePhase, .failed)
+    }
 }

@@ -80,10 +80,12 @@ struct FriendsView: View {
                     ) {
                         isAddFriendPresented = true
                     }
-                    FriendsFilterChipRow(
-                        selected: $viewModel.selectedFilter,
-                        counts: viewModel.filterCounts
-                    )
+                    if viewModel.showsFilterChips {
+                        FriendsFilterChipRow(
+                            selected: $viewModel.selectedFilter,
+                            counts: viewModel.filterCounts
+                        )
+                    }
                 } else {
                     FriendsSearchRow(
                         text: $groupSearchText,
@@ -156,6 +158,28 @@ struct FriendsView: View {
 
     @ViewBuilder
     private var friendsList: some View {
+        switch viewModel.surfacePhase {
+        case .loading:
+            EmptySurfaceStateView.loading(message: EmptySurfaceCopy.friendsLoading)
+        case .failed:
+            EmptySurfaceStateView.failed(surface: "friends") {
+                Task { await viewModel.load() }
+            }
+        case .empty:
+            FriendsEmptyState(
+                mode: .friends,
+                isSearching: false,
+                onAddFriends: { isAddFriendPresented = true }
+            )
+        case .content:
+            friendsContentList
+        case .deferred:
+            EmptyView()
+        }
+    }
+
+    @ViewBuilder
+    private var friendsContentList: some View {
         let rows = viewModel.filteredRows
         if rows.isEmpty {
             FriendsEmptyState(mode: .friends, isSearching: !viewModel.searchText.isEmpty)

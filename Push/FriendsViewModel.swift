@@ -122,6 +122,26 @@ final class FriendsViewModel: ObservableObject {
     /// Total direct friends — powers the "Friends N" segment badge.
     var friendsCount: Int { rows.count }
 
+    /// Hide filter chips when there are no friends yet (search-no-match still shows chips).
+    var showsFilterChips: Bool { friendsCount > 0 }
+
+    /// Presentation phase for the friends list. Search no-match stays `.content`
+    /// (empty `filteredRows`); hidden-presence friends are still rows.
+    var surfacePhase: SurfaceContentPhase {
+        switch loadState {
+        case .idle, .loading:
+            return loadState.value == nil ? .loading : phaseForLoadedRows()
+        case .failed:
+            return loadState.value == nil ? .failed : phaseForLoadedRows()
+        case .loaded:
+            return phaseForLoadedRows()
+        }
+    }
+
+    private func phaseForLoadedRows() -> SurfaceContentPhase {
+        rows.isEmpty ? .empty : .content
+    }
+
     /// Live per-filter tallies for the chip badges.
     var filterCounts: [FriendsFilter: Int] {
         Dictionary(

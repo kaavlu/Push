@@ -272,6 +272,7 @@ struct FriendGroupCard: View {
 struct FriendsEmptyState: View {
     let mode: FriendsMode
     let isSearching: Bool
+    var onAddFriends: (() -> Void)? = nil
 
     var body: some View {
         VStack(spacing: FriendsLayout.emptyStateSpacing) {
@@ -287,6 +288,14 @@ struct FriendsEmptyState: View {
                 .font(.subheadline)
                 .foregroundStyle(PushControlColors.textSecondary)
                 .multilineTextAlignment(.center)
+
+            if let onAddFriends, !isSearching, mode == .friends {
+                Button(EmptySurfaceCopy.addFriendsAction, action: onAddFriends)
+                    .buttonStyle(.borderedProminent)
+                    .tint(PushControlColors.activeFill)
+                    .foregroundStyle(PushControlColors.activeForeground)
+                    .padding(.top, EmptySurfaceLayout.actionTopPadding)
+            }
         }
         .frame(maxWidth: .infinity)
         .padding(.top, FriendsLayout.emptyStateTopPadding)
@@ -299,13 +308,13 @@ struct FriendsEmptyState: View {
 
     private var title: String {
         if isSearching { return "No matches" }
-        return mode == .friends ? "No friends yet" : "No groups yet"
+        return mode == .friends ? EmptySurfaceCopy.friendsEmptyTitle : "No groups yet"
     }
 
     private var message: String {
         if isSearching { return "Try a different name or place." }
         return mode == .friends
-            ? "Add friends to see who's around."
+            ? EmptySurfaceCopy.friendsEmptyMessage
             : "Create a circle to coordinate faster."
     }
 }
