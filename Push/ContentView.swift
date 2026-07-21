@@ -108,9 +108,11 @@ struct ContentView: View {
     }
 
     /// Lower-middle map card for empty/failed friend presence — below top controls and above bottom nav.
+    /// Spacers pass hits through so the map stays pannable; only the card receives taps.
     private var mapSurfaceOverlay: some View {
         VStack(spacing: 0) {
             Spacer(minLength: 0)
+                .allowsHitTesting(false)
             MapEmptyOverlay(
                 phase: viewModel.surfacePhase,
                 onAddFriends: {
@@ -120,10 +122,13 @@ struct ContentView: View {
                 onRetry: { Task { await viewModel.load() } }
             )
             .padding(.horizontal, MapEmptyOverlayLayout.horizontalPadding)
+            .allowsHitTesting(true)
             Spacer()
                 .frame(height: MapEmptyOverlayLayout.bottomClearance(layout))
+                .allowsHitTesting(false)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .allowsHitTesting(true)
     }
 
     private var topControlsLayer: some View {

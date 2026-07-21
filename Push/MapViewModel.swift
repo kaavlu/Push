@@ -124,9 +124,11 @@ final class MapViewModel: ObservableObject {
     }
 
     /// Friend-derived map content only — self-only does not count.
+    /// Vague sources are per-person (`RegionalPuckSource`); only non-self rows count.
     var hasFriendMapContent: Bool {
         let pucks = loadState.value ?? []
-        return !pucks.isEmpty || !vagueRegionalSources.isEmpty
+        let hasFriendVague = vagueRegionalSources.contains { !$0.containsCurrentUser }
+        return !pucks.isEmpty || hasFriendVague
     }
 
     var surfacePhase: SurfaceContentPhase {
