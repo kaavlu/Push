@@ -4,6 +4,10 @@
 //
 //  PostgREST I/O behind `LiveDataStore`. Views and ViewModels never import this.
 //
+//  Every method routes through `PushLog.logged` so a backend failure gets
+//  one consistent, PII-free log line (see PushLog for the redaction rule)
+//  before the original error propagates unchanged.
+//
 
 import Foundation
 import Supabase
@@ -14,156 +18,208 @@ final class SupabaseLiveDataLoader: LiveDataLoading {
     init(client: SupabaseClient) { self.client = client }
 
     func loadProfiles() async throws -> [ProfileRow] {
-        try await client.from("profiles").select().execute().value
+        try await PushLog.logged("loadProfiles") {
+            try await client.from("profiles").select().execute().value
+        }
     }
 
     func loadGroups() async throws -> [GroupRow] {
-        try await client.from("groups").select().execute().value
+        try await PushLog.logged("loadGroups") {
+            try await client.from("groups").select().execute().value
+        }
     }
 
     func loadMemberships() async throws -> [GroupMembershipRow] {
-        try await client.from("group_memberships").select().execute().value
+        try await PushLog.logged("loadMemberships") {
+            try await client.from("group_memberships").select().execute().value
+        }
     }
 
     func loadPolicies() async throws -> [SharingPolicyRow] {
-        try await client.from("sharing_policies").select().execute().value
+        try await PushLog.logged("loadPolicies") {
+            try await client.from("sharing_policies").select().execute().value
+        }
     }
 
     func updateBasics(userID: String, displayName: String, handle: String) async throws -> ProfileRow {
-        try await client.from("profiles")
-            .update(ProfileBasicsPayload(first_name: displayName, handle: handle))
-            .eq("id", value: userID).select().single().execute().value
+        try await PushLog.logged("updateBasics") {
+            try await client.from("profiles")
+                .update(ProfileBasicsPayload(first_name: displayName, handle: handle))
+                .eq("id", value: userID).select().single().execute().value
+        }
     }
 
     func updatePrivacy(userID: String, payload: ProfileSettingsPayload) async throws -> ProfileRow {
-        try await client.from("profiles").update(payload)
-            .eq("id", value: userID).select().single().execute().value
+        try await PushLog.logged("updatePrivacy") {
+            try await client.from("profiles").update(payload)
+                .eq("id", value: userID).select().single().execute().value
+        }
     }
 
     func updateAvailability(userID: String, rawValue: String) async throws -> ProfileRow {
-        try await client.from("profiles").update(AvailabilityPayload(availability_choice: rawValue))
-            .eq("id", value: userID).select().single().execute().value
+        try await PushLog.logged("updateAvailability") {
+            try await client.from("profiles").update(AvailabilityPayload(availability_choice: rawValue))
+                .eq("id", value: userID).select().single().execute().value
+        }
     }
 
     func updateImagePath(userID: String, imageAssetPath: String?) async throws -> ProfileRow {
-        try await client.from("profiles")
-            .update(ProfileImagePayload(image_asset_path: imageAssetPath))
-            .eq("id", value: userID).select().single().execute().value
+        try await PushLog.logged("updateImagePath") {
+            try await client.from("profiles")
+                .update(ProfileImagePayload(image_asset_path: imageAssetPath))
+                .eq("id", value: userID).select().single().execute().value
+        }
     }
 
     func loadPushes() async throws -> [PushRow] {
-        try await client.from("pushes").select().execute().value
+        try await PushLog.logged("loadPushes") {
+            try await client.from("pushes").select().execute().value
+        }
     }
 
     func loadResponses() async throws -> [PushResponseRow] {
-        try await client.from("push_responses").select().execute().value
+        try await PushLog.logged("loadResponses") {
+            try await client.from("push_responses").select().execute().value
+        }
     }
 
     func insertPush(_ payload: PushInsertPayload) async throws -> PushRow {
-        try await client.from("pushes").insert(payload).select().single().execute().value
+        try await PushLog.logged("insertPush") {
+            try await client.from("pushes").insert(payload).select().single().execute().value
+        }
     }
 
     func updatePush(id: String, payload: PushUpdatePayload) async throws -> PushRow {
-        try await client.from("pushes").update(payload)
-            .eq("id", value: id).select().single().execute().value
+        try await PushLog.logged("updatePush") {
+            try await client.from("pushes").update(payload)
+                .eq("id", value: id).select().single().execute().value
+        }
     }
 
     func cancelPush(id: String, payload: PushCancelPayload) async throws -> PushRow {
-        try await client.from("pushes").update(payload)
-            .eq("id", value: id).select().single().execute().value
+        try await PushLog.logged("cancelPush") {
+            try await client.from("pushes").update(payload)
+                .eq("id", value: id).select().single().execute().value
+        }
     }
 
     func deletePush(id: String) async throws {
-        try await client.from("pushes").delete().eq("id", value: id).execute()
+        try await PushLog.logged("deletePush") {
+            try await client.from("pushes").delete().eq("id", value: id).execute()
+        }
     }
 
     func insertResponses(_ payloads: [PushResponsePayload]) async throws {
-        try await client.from("push_responses").insert(payloads).execute()
+        try await PushLog.logged("insertResponses") {
+            try await client.from("push_responses").insert(payloads).execute()
+        }
     }
 
     func upsertResponse(_ payload: PushResponsePayload) async throws {
-        try await client.from("push_responses")
-            .upsert(payload, onConflict: "push_id,person_id")
-            .execute()
+        try await PushLog.logged("upsertResponse") {
+            try await client.from("push_responses")
+                .upsert(payload, onConflict: "push_id,person_id")
+                .execute()
+        }
     }
 
     func deleteResponses(pushID: String, personIDs: [String]) async throws {
-        try await client.from("push_responses").delete()
-            .eq("push_id", value: pushID)
-            .in("person_id", values: personIDs)
-            .execute()
+        try await PushLog.logged("deleteResponses") {
+            try await client.from("push_responses").delete()
+                .eq("push_id", value: pushID)
+                .in("person_id", values: personIDs)
+                .execute()
+        }
     }
 
     func loadFriendships() async throws -> [FriendshipRow] {
-        try await client.from("friendships").select().execute().value
+        try await PushLog.logged("loadFriendships") {
+            try await client.from("friendships").select().execute().value
+        }
     }
 
     func searchProfiles(query: String, limit: Int) async throws -> [SearchProfileRow] {
-        try await client
-            .rpc(
-                "search_profiles",
-                params: SearchProfilesParams(search_query: query, result_limit: limit)
-            )
-            .execute()
-            .value
+        try await PushLog.logged("searchProfiles") {
+            try await client
+                .rpc(
+                    "search_profiles",
+                    params: SearchProfilesParams(search_query: query, result_limit: limit)
+                )
+                .execute()
+                .value
+        }
     }
 
     func sendFriendRequest(targetUserID: String) async throws -> FriendshipRow {
-        try await client
-            .rpc("send_friend_request", params: SendFriendRequestParams(target_user_id: targetUserID))
-            .execute()
-            .value
+        try await PushLog.logged("sendFriendRequest") {
+            try await client
+                .rpc("send_friend_request", params: SendFriendRequestParams(target_user_id: targetUserID))
+                .execute()
+                .value
+        }
     }
 
     func resolveFriendRequest(id: String, accept: Bool) async throws -> FriendshipRow {
-        try await client
-            .rpc(
-                "resolve_friend_request",
-                params: ResolveFriendRequestParams(request_id: id, accept: accept)
-            )
-            .execute()
-            .value
+        try await PushLog.logged("resolveFriendRequest") {
+            try await client
+                .rpc(
+                    "resolve_friend_request",
+                    params: ResolveFriendRequestParams(request_id: id, accept: accept)
+                )
+                .execute()
+                .value
+        }
     }
 
     func removeFriend(targetUserID: String) async throws {
-        try await client
-            .rpc("remove_friend", params: RemoveFriendParams(other_user_id: targetUserID))
-            .execute()
+        try await PushLog.logged("removeFriend") {
+            try await client
+                .rpc("remove_friend", params: RemoveFriendParams(other_user_id: targetUserID))
+                .execute()
+        }
     }
 
     func loadProfile(id: String) async throws -> ProfileRow {
-        try await client.from("profiles")
-            .select()
-            .eq("id", value: id)
-            .single()
-            .execute()
-            .value
+        try await PushLog.logged("loadProfile") {
+            try await client.from("profiles")
+                .select()
+                .eq("id", value: id)
+                .single()
+                .execute()
+                .value
+        }
     }
 
     func createGroup(name: String, imageAssetPath: String?, inviteeIDs: [String]) async throws -> GroupRow {
-        try await client
-            .rpc(
-                "create_group",
-                params: CreateGroupParams(
-                    group_name: name, image_path: imageAssetPath, invitee_ids: inviteeIDs
+        try await PushLog.logged("createGroup") {
+            try await client
+                .rpc(
+                    "create_group",
+                    params: CreateGroupParams(
+                        group_name: name, image_path: imageAssetPath, invitee_ids: inviteeIDs
+                    )
                 )
-            )
-            .execute()
-            .value
+                .execute()
+                .value
+        }
     }
 
     func incomingGroupInvites() async throws -> [GroupInviteRow] {
-        try await client.rpc("incoming_group_invites").execute().value
+        try await PushLog.logged("incomingGroupInvites") {
+            try await client.rpc("incoming_group_invites").execute().value
+        }
     }
 
     func resolveGroupInvite(membershipID: String, accept: Bool) async throws -> GroupMembershipRow {
-        try await client
-            .rpc(
-                "resolve_group_invite",
-                params: ResolveGroupInviteParams(membership_id: membershipID, accept: accept)
-            )
-            .execute()
-            .value
+        try await PushLog.logged("resolveGroupInvite") {
+            try await client
+                .rpc(
+                    "resolve_group_invite",
+                    params: ResolveGroupInviteParams(membership_id: membershipID, accept: accept)
+                )
+                .execute()
+                .value
+        }
     }
 }
 
