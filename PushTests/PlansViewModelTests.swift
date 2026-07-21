@@ -38,32 +38,79 @@ final class PlansViewModelTests: XCTestCase {
         XCTAssertEqual(vm.needsResponseCount, 2)
     }
 
-    func testRespond_rightSwipe_setsJoined() {
+    func testRespond_rightSwipe_setsJoined() async {
         let plan = seamPlan("x", status: .pending)
         let vm = PlansViewModel(plans: [plan])
-        vm.respond(to: plan, with: .right)
+        await vm.respond(to: plan, with: .right)
         XCTAssertEqual(vm.plans.first?.status, .joined)
     }
 
-    func testRespond_leftSwipe_setsWaiting() {
+    func testRespond_leftSwipe_setsWaiting() async {
         let plan = seamPlan("x", status: .pending)
         let vm = PlansViewModel(plans: [plan])
-        vm.respond(to: plan, with: .left)
+        await vm.respond(to: plan, with: .left)
         XCTAssertEqual(vm.plans.first?.status, .waiting)
     }
 
-    func testRespond_upSwipe_setsOpen() {
+    func testRespond_upSwipe_setsOpen() async {
         let plan = seamPlan("x", status: .pending)
         let vm = PlansViewModel(plans: [plan])
-        vm.respond(to: plan, with: .up)
+        await vm.respond(to: plan, with: .up)
         XCTAssertEqual(vm.plans.first?.status, .open)
     }
 
-    func testRespond_unknownPlan_doesNotCrash() {
+    func testRespond_unknownPlan_doesNotCrash() async {
         let plan = seamPlan("x", status: .pending)
         let vm = PlansViewModel(plans: [plan])
-        vm.respond(to: seamPlan("y", status: .pending), with: .right)
+        await vm.respond(to: seamPlan("y", status: .pending), with: .right)
         XCTAssertEqual(vm.plans.first?.status, .pending)
+    }
+
+    func testRespondFailure_rollsBackAndSetsActionError() async {
+        let fake = ControllablePushRepository()
+        fake.shouldFailWrite = true
+        let plan = seamPlan("p1", status: .pending)
+        let vm = PlansViewModel(plans: [plan], pushes: fake)
+        await vm.respond(to: plan, with: .right)
+        XCTAssertEqual(vm.plans.first?.status, .pending)
+        XCTAssertEqual(vm.actionError?.message, "Couldn't update your response. Try again.")
+        XCTAssertEqual(fake.setResponseCalls.count, 1)
+
+        fake.shouldFailWrite = false
+        await vm.retryLastAction()
+        XCTAssertNil(vm.actionError)
+        XCTAssertEqual(vm.plans.first?.status, .joined)
+        XCTAssertEqual(fake.setResponseCalls.count, 2)
+    }
+
+    func testCancelFailure_restoresCard() async {
+        let fake = ControllablePushRepository()
+        fake.shouldFailWrite = true
+        let plan = seamPlan("p1", status: .joined, isOwner: true)
+        let vm = PlansViewModel(plans: [plan], pushes: fake)
+        await vm.cancel(plan: plan)
+        XCTAssertEqual(vm.plans.map(\.id), ["p1"])
+        XCTAssertEqual(vm.actionError?.message, "Couldn't cancel this Push. Try again.")
+
+        fake.shouldFailWrite = false
+        await vm.retryLastAction()
+        XCTAssertTrue(vm.plans.isEmpty)
+        XCTAssertNil(vm.actionError)
+    }
+
+    func testDeleteFailure_restoresCard() async {
+        let fake = ControllablePushRepository()
+        fake.shouldFailWrite = true
+        let plan = seamPlan("p1", status: .joined, isOwner: true)
+        let vm = PlansViewModel(plans: [plan], pushes: fake)
+        await vm.delete(plan: plan)
+        XCTAssertEqual(vm.plans.map(\.id), ["p1"])
+        XCTAssertEqual(vm.actionError?.message, "Couldn't delete this Push. Try again.")
+
+        fake.shouldFailWrite = false
+        await vm.retryLastAction()
+        XCTAssertTrue(vm.plans.isEmpty)
+        XCTAssertNil(vm.actionError)
     }
 
     func testWeekLabel_matchesReferenceWeek() throws {
@@ -253,13 +300,42 @@ final class PlansViewModelTests: XCTestCase {
         await vm.load()
         let pending = try XCTUnwrap(vm.plans.first { $0.id == "food-tonight" })
 
-        vm.respond(to: pending, with: .right)
+        await vm.respond(to: pending, with: .right)
 
         XCTAssertEqual(vm.plans.first { $0.id == "food-tonight" }?.status, .joined)
-        // Give the fire-and-forget write-through a beat to land.
-        try await Task.sleep(nanoseconds: 100_000_000)
         let responses = try await container.pushes.responses()
         let mine = responses.first { $0.pushID == "food-tonight" && $0.personID == "manav" }
         XCTAssertEqual(mine?.response, .in)
+    }
+}
+
+// MARK: - Test doubles
+
+private enum PlansTestFailure: Error { case expected }
+
+/// Minimal PushRepository that can fail writes for mutation rollback tests.
+@MainActor
+final class ControllablePushRepository: PushRepository {
+    var shouldFailWrite = false
+    var setResponseCalls: [(PushPlan.ID, PushResponse.Response)] = []
+
+    func activePlans() async throws -> [PushPlan] { [] }
+    func responses() async throws -> [PushResponse] { [] }
+    func pastHangouts(forMonthContaining date: Date) async throws -> [PastHangout] { [] }
+    func allPlaces() async throws -> [Place] { [] }
+    func createPush(_ draft: PushDraft) async throws -> PushPlan.ID { "new" }
+    func updatePush(planID: PushPlan.ID, with draft: PushDraft) async throws {}
+
+    func setCurrentUserResponse(planID: PushPlan.ID, response: PushResponse.Response) async throws {
+        setResponseCalls.append((planID, response))
+        if shouldFailWrite { throw PlansTestFailure.expected }
+    }
+
+    func cancelPush(planID: PushPlan.ID) async throws {
+        if shouldFailWrite { throw PlansTestFailure.expected }
+    }
+
+    func deletePush(planID: PushPlan.ID) async throws {
+        if shouldFailWrite { throw PlansTestFailure.expected }
     }
 }

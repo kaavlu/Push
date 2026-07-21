@@ -26,6 +26,17 @@ struct AlertsView: View {
             .padding(.horizontal, FriendsLayout.horizontalPadding(layout))
             .padding(.top, FriendsLayout.topPadding)
         }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if let actionError = viewModel.actionError {
+                ActionErrorBanner(
+                    message: actionError.message,
+                    onRetry: { Task { await viewModel.retryLastAction() } },
+                    onDismiss: { viewModel.dismissActionError() }
+                )
+                .padding(.horizontal, FriendsLayout.horizontalPadding(layout))
+                .padding(.bottom, FriendsLayout.bottomPadding(layout))
+            }
+        }
     }
 
     private var header: some View {
@@ -105,6 +116,9 @@ struct AlertsView: View {
                 .easeInOut(duration: AlertsLayout.removeDuration),
                 value: viewModel.groupInvites.map(\.id)
             )
+        }
+        .refreshable {
+            await viewModel.refresh()
         }
     }
 

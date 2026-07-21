@@ -1,3 +1,20 @@
+# Foreground Refresh & Mutation Errors (Issue #33)
+
+- [x] `LiveDataStore.refresh` + `AppDataContainer.refreshSession` + tests
+- [x] Foreground re-warm on `ContentView` (skip first active)
+- [x] `ActionErrorState` + `ActionErrorBanner`
+- [x] Plans RSVP/cancel/delete rollback + pull-to-refresh
+- [x] Friends remove retry + pull-to-refresh (Groups mode shares list)
+- [x] Alerts soft load + accept/deny action errors + pull-to-refresh
+- [x] Add Group create uses shared banner
+- [x] Focused suites: LiveDataStoreTests, PlansViewModelTests, AlertsTests; build SUCCEEDED
+
+## Verification
+- [x] `scripts/test.sh build` SUCCEEDED
+- [x] PlansViewModelTests 24/24, AlertsTests 8/8, LiveDataStoreTests 13/13
+
+---
+
 # Add Friends UI + Friend Requests (Issue #29)
 
 - [x] Spec contract in `tasks/spec.md`
