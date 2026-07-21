@@ -88,7 +88,6 @@ struct PlansHistoryView: View {
 // MARK: - Row
 
 private struct HistoryListRow: View {
-    @Environment(\.pushLayout) private var layout
     let item: HistoryItemData
 
     var body: some View {
@@ -114,8 +113,9 @@ private struct HistoryListRow: View {
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(PlansColor.metadataTertiary)
         }
-        .padding(PlansLayout.cardPadding(layout))
-        .plansGlassCard(cornerRadius: PlansLayout.cardCornerRadius(layout))
+        // Flat list rows on the cream page — no per-row card/glass shading.
+        .padding(.vertical, PlansHistoryLayout.rowVerticalPadding)
+        .contentShape(Rectangle())
     }
 
     private var metaLine: String {
@@ -256,7 +256,8 @@ private struct HistoryListPuck: View {
 private enum PlansHistoryLayout {
     static let closeIconSize: CGFloat = 14
     static let closeTapSize: CGFloat = 32
-    static let rowSpacing: CGFloat = 10
+    static let rowSpacing: CGFloat = 4
+    static let rowVerticalPadding: CGFloat = 10
     static let rowInnerSpacing: CGFloat = 12
     static let emptySpacing: CGFloat = 8
     static let detailHorizontalPadding: CGFloat = 24

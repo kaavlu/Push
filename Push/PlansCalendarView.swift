@@ -151,6 +151,12 @@ private struct DayDetailSheet: View {
                 Spacer()
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        // Same cream glass treatment as map `FriendDetailBottomSheet` chrome.
+        .presentationBackground {
+            MapPopupSheetBackground()
+        }
+        .presentationCornerRadius(FriendDetailSheetLayout.sheetCornerRadius)
         .presentationDetents([.fraction(0.35)])
         .presentationDragIndicator(.visible)
     }
