@@ -39,6 +39,7 @@ enum PushLog {
     /// Runs `operation`, logging a one-line failure (label + safe error
     /// description) to `category` before rethrowing. Success is a silent
     /// passthrough — this only adds a logging side effect on failure.
+    @discardableResult
     static func logged<T>(
         _ label: String,
         category: Logger = network,
