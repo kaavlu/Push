@@ -81,6 +81,7 @@ See `coding-standards.md` for the full reference. Key rules for this project:
 |---|---|
 | `tasks/todo.md` | Current plan and progress tracking |
 | `tasks/spec.md` | Feature spec (write before implementation) |
+| `docs/app-store-privacy.md` | App Store Connect privacy disclosure inventory |
 | `tasks/lessons.md` | Project-specific learnings and gotchas |
 
 ### Session Resume Protocol

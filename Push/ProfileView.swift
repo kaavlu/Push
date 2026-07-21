@@ -116,6 +116,7 @@ struct ProfileView: View {
                 ProfileRoutesCard(title: "Settings", routes: viewModel.settingsRoutes)
                 ProfileRoutesCard(title: "Privacy", routes: viewModel.privacyRoutes)
                 ProfileConnectCard(viewModel: viewModel)
+                ProfileLegalCard(destinations: viewModel.legalDestinations)
                 if signOut.isAvailable {
                     SignOutButton(isBusy: isSigningOut) {
                         isSignOutConfirmationPresented = true
@@ -143,6 +144,31 @@ struct ProfileView: View {
         Task {
             await signOut()
             isSigningOut = false
+        }
+    }
+}
+
+private struct ProfileLegalCard: View {
+    let destinations: [LegalDestination]
+
+    var body: some View {
+        GlassCard {
+            VStack(alignment: .leading, spacing: ProfileLayout.rowSpacing) {
+                SectionTitle("Legal")
+                ForEach(destinations) { destination in
+                    Link(destination: destination.url) {
+                        ProfileRowContent(
+                            symbolName: destination.symbolName,
+                            title: destination.title,
+                            subtitle: destination.subtitle,
+                            trailingSymbolName: "arrow.up.right"
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(destination.title)
+                    .accessibilityHint("Opens in your browser")
+                }
+            }
         }
     }
 }

@@ -1,3 +1,20 @@
+# Legal Destinations (Issue #36)
+
+- [x] Define feature contract and replacement procedure.
+- [x] Add centralized placeholder Terms and Privacy destinations.
+- [x] Wire production onboarding, onboarding lab, and Profile.
+- [x] Document App Store privacy disclosure inputs.
+- [x] Add focused tests and verify build/test compilation.
+
+## Verification
+- [x] Both placeholder HTTPS destinations returned HTTP 200.
+- [x] `scripts/test.sh build` succeeded.
+- [x] Generic Release simulator build succeeded with store validation.
+- [x] Generic `build-for-testing` succeeded, including `LegalDestinationsTests` compilation.
+- [ ] Focused simulator execution: CoreSimulator XPC interrupted twice; the retry remained hung during simulator startup and was stopped after more than two minutes without test output.
+
+---
+
 # Foreground Refresh & Mutation Errors (Issue #33)
 
 - [x] `LiveDataStore.refresh` + `AppDataContainer.refreshSession` + tests

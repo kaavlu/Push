@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		072819A00A31FCD7AAE53870 /* LegalDestinationsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B861E69CEF8CFCB3764C888D /* LegalDestinationsTests.swift */; };
+		EB2FE0A6BC8022F0F641F026 /* LegalDestinations.swift in Sources */ = {isa = PBXBuildFile; fileRef = A02315F8157A5D60D25725B1 /* LegalDestinations.swift */; };
 		441B0871A77B6D3A6EE02C12 /* ActionErrorBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7764BF65FABD8886A5CEF5BB /* ActionErrorBanner.swift */; };
 		A90E4E210610C9F8847862B5 /* ActionErrorState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A5623D7FF0B22A6AB8F5EF /* ActionErrorState.swift */; };
 		74E5ED98452F902FB59D46ED /* SessionRefreshConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 302309E0CF78B089472018B9 /* SessionRefreshConstants.swift */; };
@@ -215,6 +217,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B861E69CEF8CFCB3764C888D /* LegalDestinationsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LegalDestinationsTests.swift"; sourceTree = "<group>"; };
+		A02315F8157A5D60D25725B1 /* LegalDestinations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LegalDestinations.swift"; sourceTree = "<group>"; };
 		7764BF65FABD8886A5CEF5BB /* ActionErrorBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ActionErrorBanner.swift"; sourceTree = "<group>"; };
 		37A5623D7FF0B22A6AB8F5EF /* ActionErrorState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ActionErrorState.swift"; sourceTree = "<group>"; };
 		302309E0CF78B089472018B9 /* SessionRefreshConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SessionRefreshConstants.swift"; path = "Data/SessionRefreshConstants.swift"; sourceTree = "<group>"; };
@@ -460,6 +464,7 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				A02315F8157A5D60D25725B1 /* LegalDestinations.swift */,
 				7764BF65FABD8886A5CEF5BB /* ActionErrorBanner.swift */,
 				37A5623D7FF0B22A6AB8F5EF /* ActionErrorState.swift */,
 				302309E0CF78B089472018B9 /* SessionRefreshConstants.swift */,
@@ -637,6 +642,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				B861E69CEF8CFCB3764C888D /* LegalDestinationsTests.swift */,
 				3F0D61EC00365754BEEB241C /* ProfilePhotoTests.swift */,
 				30EC8288ED6D5DFC46693E12 /* MapPuckHitTestingTests.swift */,
 				ECA2C79204C1A37B4EE79B97 /* AddFriendsTests.swift */,
@@ -808,6 +814,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				EB2FE0A6BC8022F0F641F026 /* LegalDestinations.swift in Sources */,
 				441B0871A77B6D3A6EE02C12 /* ActionErrorBanner.swift in Sources */,
 				A90E4E210610C9F8847862B5 /* ActionErrorState.swift in Sources */,
 				74E5ED98452F902FB59D46ED /* SessionRefreshConstants.swift in Sources */,
@@ -976,6 +983,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				072819A00A31FCD7AAE53870 /* LegalDestinationsTests.swift in Sources */,
 				CBC87FDFB9F7E0EE36A72F25 /* ProfilePhotoTests.swift in Sources */,
 				5FAB0B553AFFCA8F7157CCFD /* MapPuckHitTestingTests.swift in Sources */,
 				1DA8CBE0771B3102F0A0E81E /* AddFriendsTests.swift in Sources */,
