@@ -165,6 +165,76 @@ final class SupabaseLiveDataLoader: LiveDataLoading {
             .execute()
             .value
     }
+
+    func renameGroup(groupID: String, name: String) async throws -> GroupRow {
+        try await client
+            .rpc(
+                "rename_group",
+                params: RenameGroupParams(p_group_id: groupID, p_name: name)
+            )
+            .execute()
+            .value
+    }
+
+    func setGroupImage(groupID: String, imagePath: String?) async throws -> GroupRow {
+        try await client
+            .rpc(
+                "set_group_image",
+                params: SetGroupImageParams(p_group_id: groupID, p_image_path: imagePath)
+            )
+            .execute()
+            .value
+    }
+
+    func inviteToGroup(groupID: String, inviteeIDs: [String]) async throws {
+        try await client
+            .rpc(
+                "invite_to_group",
+                params: InviteToGroupParams(p_group_id: groupID, p_invitee_ids: inviteeIDs)
+            )
+            .execute()
+    }
+
+    func cancelGroupInvite(membershipID: String) async throws {
+        try await client
+            .rpc(
+                "cancel_group_invite",
+                params: CancelGroupInviteParams(p_membership_id: membershipID)
+            )
+            .execute()
+    }
+
+    func removeGroupMember(groupID: String, personID: String) async throws {
+        try await client
+            .rpc(
+                "remove_group_member",
+                params: RemoveGroupMemberParams(p_group_id: groupID, p_person_id: personID)
+            )
+            .execute()
+    }
+
+    func leaveGroup(groupID: String) async throws {
+        try await client
+            .rpc("leave_group", params: LeaveGroupParams(p_group_id: groupID))
+            .execute()
+    }
+
+    func transferGroupOwnership(groupID: String, newOwnerID: String) async throws {
+        try await client
+            .rpc(
+                "transfer_group_ownership",
+                params: TransferGroupOwnershipParams(
+                    p_group_id: groupID, p_new_owner_id: newOwnerID
+                )
+            )
+            .execute()
+    }
+
+    func deleteGroup(groupID: String) async throws {
+        try await client
+            .rpc("delete_group", params: DeleteGroupParams(p_group_id: groupID))
+            .execute()
+    }
 }
 
 private struct SearchProfilesParams: Encodable {
@@ -194,6 +264,55 @@ private struct CreateGroupParams: Encodable {
 private struct ResolveGroupInviteParams: Encodable {
     let membership_id: String
     let accept: Bool
+}
+
+private struct RenameGroupParams: Encodable {
+    let p_group_id: String
+    let p_name: String
+}
+
+/// Explicit null encoding so remove-photo clears the column (default Optional
+/// synthesis uses encodeIfPresent and would omit the key entirely).
+private struct SetGroupImageParams: Encodable {
+    let p_group_id: String
+    let p_image_path: String?
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(p_group_id, forKey: .p_group_id)
+        try container.encode(p_image_path, forKey: .p_image_path)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case p_group_id, p_image_path
+    }
+}
+
+private struct InviteToGroupParams: Encodable {
+    let p_group_id: String
+    let p_invitee_ids: [String]
+}
+
+private struct CancelGroupInviteParams: Encodable {
+    let p_membership_id: String
+}
+
+private struct RemoveGroupMemberParams: Encodable {
+    let p_group_id: String
+    let p_person_id: String
+}
+
+private struct LeaveGroupParams: Encodable {
+    let p_group_id: String
+}
+
+private struct TransferGroupOwnershipParams: Encodable {
+    let p_group_id: String
+    let p_new_owner_id: String
+}
+
+private struct DeleteGroupParams: Encodable {
+    let p_group_id: String
 }
 
 private struct ProfileBasicsPayload: Encodable {

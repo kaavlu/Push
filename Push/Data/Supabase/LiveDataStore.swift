@@ -30,6 +30,14 @@ protocol LiveDataLoading: AnyObject {
     func createGroup(name: String, imageAssetPath: String?, inviteeIDs: [String]) async throws -> GroupRow
     func incomingGroupInvites() async throws -> [GroupInviteRow]
     func resolveGroupInvite(membershipID: String, accept: Bool) async throws -> GroupMembershipRow
+    func renameGroup(groupID: String, name: String) async throws -> GroupRow
+    func setGroupImage(groupID: String, imagePath: String?) async throws -> GroupRow
+    func inviteToGroup(groupID: String, inviteeIDs: [String]) async throws
+    func cancelGroupInvite(membershipID: String) async throws
+    func removeGroupMember(groupID: String, personID: String) async throws
+    func leaveGroup(groupID: String) async throws
+    func transferGroupOwnership(groupID: String, newOwnerID: String) async throws
+    func deleteGroup(groupID: String) async throws
 }
 
 struct ProfileSettingsPayload: Encodable {
@@ -287,6 +295,53 @@ final class LiveDataStore {
         )
         notifyGroupsChanged()
         return row
+    }
+
+    func renameGroup(groupID: String, name: String) async throws {
+        _ = try await loader.renameGroup(groupID: groupID, name: name)
+        notifyGroupsChanged()
+    }
+
+    func setGroupImage(groupID: String, imagePath: String?) async throws {
+        _ = try await loader.setGroupImage(groupID: groupID, imagePath: imagePath)
+        notifyGroupsChanged()
+    }
+
+    func inviteToGroup(groupID: String, inviteeIDs: [String]) async throws {
+        try await loader.inviteToGroup(groupID: groupID, inviteeIDs: inviteeIDs)
+        notifyGroupsChanged()
+    }
+
+    func cancelGroupInvite(membershipID: String) async throws {
+        try await loader.cancelGroupInvite(membershipID: membershipID)
+        notifyGroupsChanged()
+    }
+
+    func removeGroupMember(groupID: String, personID: String) async throws {
+        try await loader.removeGroupMember(groupID: groupID, personID: personID)
+        notifyGroupsChanged()
+    }
+
+    func leaveGroup(groupID: String) async throws {
+        try await loader.leaveGroup(groupID: groupID)
+        notifyGroupsChanged()
+    }
+
+    func transferGroupOwnership(groupID: String, newOwnerID: String) async throws {
+        try await loader.transferGroupOwnership(groupID: groupID, newOwnerID: newOwnerID)
+        notifyGroupsChanged()
+    }
+
+    func deleteGroup(groupID: String) async throws {
+        try await loader.deleteGroup(groupID: groupID)
+        notifyGroupsChanged()
+    }
+
+    /// Current cached `image_asset_path` for a group, if the groups snapshot is warm.
+    func cachedGroupImagePath(groupID: String) -> String? {
+        groupRows?.first(where: {
+            $0.id.caseInsensitiveCompare(groupID) == .orderedSame
+        })?.image_asset_path
     }
 
     func incomingGroupInvites() async throws -> [GroupInviteRow] {
