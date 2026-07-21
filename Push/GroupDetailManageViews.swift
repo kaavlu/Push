@@ -2,8 +2,8 @@
 //  GroupDetailManageViews.swift
 //  Push
 //
-//  Owner/member management chrome for Group Detail: trailings, rename field,
-//  manage footer, start-push actions, and confirm dialogs.
+//  Shared group chrome: member trailings, rename field, manage action list
+//  (used on GroupManageView), Start push / Manage action row, and copy.
 //
 
 import SwiftUI
@@ -168,6 +168,7 @@ struct GroupDetailRenameField: View {
 
 struct GroupDetailActions: View {
     let onStartPush: () -> Void
+    let onManage: () -> Void
 
     var body: some View {
         HStack(spacing: GroupDetailLayout.actionSpacing) {
@@ -178,10 +179,10 @@ struct GroupDetailActions: View {
                 action: onStartPush
             )
             GroupDetailActionButton(
-                title: "Ping group",
-                symbolName: "paperplane.fill",
+                title: "Manage",
+                symbolName: "gearshape.fill",
                 isPrimary: false,
-                action: {}
+                action: onManage
             )
         }
     }
@@ -220,98 +221,7 @@ private struct GroupDetailActionButton: View {
     }
 }
 
-// MARK: - Confirmations
-
-struct GroupDetailConfirmationsModifier: ViewModifier {
-    @Binding var isLeaveConfirmPresented: Bool
-    @Binding var isDeleteConfirmPresented: Bool
-    @Binding var memberPendingRemove: PushGroupMemberData?
-    @Binding var memberPendingCancel: PushGroupMemberData?
-    @Binding var memberPendingTransfer: PushGroupMemberData?
-    let onLeave: () -> Void
-    let onDelete: () -> Void
-    let onRemoveMember: (String) -> Void
-    let onCancelInvite: (String) -> Void
-    let onTransfer: (String) -> Void
-
-    func body(content: Content) -> some View {
-        content
-            .confirmationDialog(
-                GroupDetailCopy.leaveTitle,
-                isPresented: $isLeaveConfirmPresented,
-                titleVisibility: .visible
-            ) {
-                Button("Leave group", role: .destructive, action: onLeave)
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text(GroupDetailCopy.leaveMessage)
-            }
-            .confirmationDialog(
-                GroupDetailCopy.deleteTitle,
-                isPresented: $isDeleteConfirmPresented,
-                titleVisibility: .visible
-            ) {
-                Button("Delete group", role: .destructive, action: onDelete)
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text(GroupDetailCopy.deleteMessage)
-            }
-            .confirmationDialog(
-                memberPendingRemove.map { "Remove \($0.name)?" } ?? "Remove member?",
-                isPresented: Binding(
-                    get: { memberPendingRemove != nil },
-                    set: { if !$0 { memberPendingRemove = nil } }
-                ),
-                titleVisibility: .visible
-            ) {
-                Button("Remove", role: .destructive) {
-                    if let member = memberPendingRemove { onRemoveMember(member.id) }
-                    memberPendingRemove = nil
-                }
-                Button("Cancel", role: .cancel) { memberPendingRemove = nil }
-            } message: {
-                Text(GroupDetailCopy.removeMemberMessage)
-            }
-            .confirmationDialog(
-                memberPendingCancel.map { "Cancel invite for \($0.name)?" } ?? "Cancel invite?",
-                isPresented: Binding(
-                    get: { memberPendingCancel != nil },
-                    set: { if !$0 { memberPendingCancel = nil } }
-                ),
-                titleVisibility: .visible
-            ) {
-                Button("Cancel invite", role: .destructive) {
-                    if let member = memberPendingCancel {
-                        onCancelInvite(member.membershipID)
-                    }
-                    memberPendingCancel = nil
-                }
-                Button("Keep invite", role: .cancel) { memberPendingCancel = nil }
-            } message: {
-                Text(GroupDetailCopy.cancelInviteMessage)
-            }
-            .confirmationDialog(
-                memberPendingTransfer.map { "Make \($0.name) the owner?" } ?? "Transfer ownership?",
-                isPresented: Binding(
-                    get: { memberPendingTransfer != nil },
-                    set: { if !$0 { memberPendingTransfer = nil } }
-                ),
-                titleVisibility: .visible
-            ) {
-                Button("Transfer", role: .destructive) {
-                    if let member = memberPendingTransfer { onTransfer(member.id) }
-                    memberPendingTransfer = nil
-                }
-                Button("Cancel", role: .cancel) { memberPendingTransfer = nil }
-            } message: {
-                if let member = memberPendingTransfer {
-                    Text(GroupDetailCopy.transferMessage(name: member.name))
-                } else {
-                    Text("")
-                }
-            }
-    }
-}
+// MARK: - Confirmations copy
 
 enum GroupDetailCopy {
     static let leaveTitle = "Leave this group?"

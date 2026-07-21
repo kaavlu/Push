@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		85DAC058D34F49CD87BC2CB6 /* GroupManageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AABA368F2FCCAE6A226132A /* GroupManageView.swift */; };
 		4246F5B2B47B04C3F7BC4BF0 /* GroupListAvatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBB91281B4FDBEB4200E53AE /* GroupListAvatar.swift */; };
 		8F7E56FFC11CB99D0AB3A000 /* GroupDetailHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752E7BDA0403ABDCF49693B9 /* GroupDetailHost.swift */; };
 		1289A8F9D2A3F220F1BC1790 /* GroupDetailSheets.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFE3B5725FB0A3CDD544E54C /* GroupDetailSheets.swift */; };
@@ -226,6 +227,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1AABA368F2FCCAE6A226132A /* GroupManageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GroupManageView.swift"; sourceTree = "<group>"; };
 		CBB91281B4FDBEB4200E53AE /* GroupListAvatar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GroupListAvatar.swift"; sourceTree = "<group>"; };
 		752E7BDA0403ABDCF49693B9 /* GroupDetailHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GroupDetailHost.swift"; sourceTree = "<group>"; };
 		CFE3B5725FB0A3CDD544E54C /* GroupDetailSheets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GroupDetailSheets.swift"; sourceTree = "<group>"; };
@@ -482,6 +484,7 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				1AABA368F2FCCAE6A226132A /* GroupManageView.swift */,
 				CBB91281B4FDBEB4200E53AE /* GroupListAvatar.swift */,
 				752E7BDA0403ABDCF49693B9 /* GroupDetailHost.swift */,
 				CFE3B5725FB0A3CDD544E54C /* GroupDetailSheets.swift */,
@@ -841,6 +844,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				85DAC058D34F49CD87BC2CB6 /* GroupManageView.swift in Sources */,
 				4246F5B2B47B04C3F7BC4BF0 /* GroupListAvatar.swift in Sources */,
 				8F7E56FFC11CB99D0AB3A000 /* GroupDetailHost.swift in Sources */,
 				1289A8F9D2A3F220F1BC1790 /* GroupDetailSheets.swift in Sources */,

@@ -2,8 +2,8 @@
 //  GroupDetailView.swift
 //  Push
 //
-//  Group Detail management hub. Views stay dumb — all mutations go through
-//  closures supplied by FriendsView / GroupsView from GroupsViewModel.
+//  Group Detail hub: identity, members, Start push. Manage (invite / leave /
+//  transfer / delete) lives on GroupManageView, opened from the Manage button.
 //
 
 import PhotosUI
@@ -33,20 +33,14 @@ struct GroupDetailView: View {
     let onTransfer: (String) -> Void
     let onDelete: () -> Void
 
+    @State private var isManagePresented = false
     @State private var isEditingName = false
     @State private var draftName = ""
     @State private var isPhotoMenuPresented = false
     @State private var isPhotoPickerPresented = false
     @State private var photoPickerItem: PhotosPickerItem?
-    @State private var isInvitePresented = false
-    @State private var isTransferPresented = false
-    @State private var isLeaveConfirmPresented = false
-    @State private var isDeleteConfirmPresented = false
     @State private var memberPendingRemove: PushGroupMemberData?
     @State private var memberPendingCancel: PushGroupMemberData?
-    /// Staging only while the transfer sheet dismisses; confirmation uses `memberPendingTransfer`.
-    @State private var pendingTransferMember: PushGroupMemberData?
-    @State private var memberPendingTransfer: PushGroupMemberData?
 
     private var activeMembers: [PushGroupMemberData] { members.filter { !$0.isPending } }
     private var pendingMembers: [PushGroupMemberData] { members.filter(\.isPending) }
@@ -57,21 +51,40 @@ struct GroupDetailView: View {
     }
 
     var body: some View {
+        Group {
+            if isManagePresented {
+                GroupManageView(
+                    groupName: group.name,
+                    isOwner: isOwner,
+                    canTransfer: canTransfer,
+                    inviteCandidates: inviteCandidates,
+                    transferCandidates: transferCandidates,
+                    actionError: actionError,
+                    backAction: { isManagePresented = false },
+                    onDismissError: onDismissError,
+                    onRetryError: onRetryError,
+                    onInvite: onInvite,
+                    onTransfer: onTransfer,
+                    onLeave: onLeave,
+                    onDelete: onDelete
+                )
+            } else {
+                detailContent
+            }
+        }
+    }
+
+    private var detailContent: some View {
         ZStack {
             FriendsBackground()
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: GroupDetailLayout.sectionSpacing) {
                     header
-                    GroupDetailActions(onStartPush: onStartPush)
-                    membersList
-                    GroupDetailManageSection(
-                        isOwner: isOwner,
-                        canTransfer: canTransfer,
-                        onInvite: { isInvitePresented = true },
-                        onTransfer: { isTransferPresented = true },
-                        onLeave: { isLeaveConfirmPresented = true },
-                        onDelete: { isDeleteConfirmPresented = true }
+                    GroupDetailActions(
+                        onStartPush: onStartPush,
+                        onManage: { isManagePresented = true }
                     )
+                    membersList
                 }
                 .padding(.horizontal, GroupDetailLayout.horizontalPadding)
                 .padding(.top, GroupDetailLayout.topPadding)
@@ -113,35 +126,40 @@ struct GroupDetailView: View {
             guard let item else { return }
             Task { await processPickedPhoto(item) }
         }
-        .sheet(isPresented: $isInvitePresented) {
-            GroupInviteSheet(candidates: inviteCandidates, onInvite: onInvite)
-        }
-        .sheet(isPresented: $isTransferPresented, onDismiss: {
-            // Present confirmation only after the sheet has fully dismissed —
-            // setting the dialog item while the sheet is up can drop it.
-            if let member = pendingTransferMember {
-                pendingTransferMember = nil
-                memberPendingTransfer = member
+        .confirmationDialog(
+            memberPendingRemove.map { "Remove \($0.name)?" } ?? "Remove member?",
+            isPresented: Binding(
+                get: { memberPendingRemove != nil },
+                set: { if !$0 { memberPendingRemove = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            Button("Remove", role: .destructive) {
+                if let member = memberPendingRemove { onRemoveMember(member.id) }
+                memberPendingRemove = nil
             }
-        }) {
-            GroupTransferSheet(candidates: transferCandidates) { member in
-                pendingTransferMember = member
-            }
+            Button("Cancel", role: .cancel) { memberPendingRemove = nil }
+        } message: {
+            Text(GroupDetailCopy.removeMemberMessage)
         }
-        .modifier(
-            GroupDetailConfirmationsModifier(
-                isLeaveConfirmPresented: $isLeaveConfirmPresented,
-                isDeleteConfirmPresented: $isDeleteConfirmPresented,
-                memberPendingRemove: $memberPendingRemove,
-                memberPendingCancel: $memberPendingCancel,
-                memberPendingTransfer: $memberPendingTransfer,
-                onLeave: onLeave,
-                onDelete: onDelete,
-                onRemoveMember: onRemoveMember,
-                onCancelInvite: onCancelInvite,
-                onTransfer: onTransfer
-            )
-        )
+        .confirmationDialog(
+            memberPendingCancel.map { "Cancel invite for \($0.name)?" } ?? "Cancel invite?",
+            isPresented: Binding(
+                get: { memberPendingCancel != nil },
+                set: { if !$0 { memberPendingCancel = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            Button("Cancel invite", role: .destructive) {
+                if let member = memberPendingCancel {
+                    onCancelInvite(member.membershipID)
+                }
+                memberPendingCancel = nil
+            }
+            Button("Keep invite", role: .cancel) { memberPendingCancel = nil }
+        } message: {
+            Text(GroupDetailCopy.cancelInviteMessage)
+        }
     }
 
     private var header: some View {
