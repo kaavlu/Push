@@ -44,6 +44,8 @@ struct GroupDetailView: View {
     @State private var isDeleteConfirmPresented = false
     @State private var memberPendingRemove: PushGroupMemberData?
     @State private var memberPendingCancel: PushGroupMemberData?
+    /// Staging only while the transfer sheet dismisses; confirmation uses `memberPendingTransfer`.
+    @State private var pendingTransferMember: PushGroupMemberData?
     @State private var memberPendingTransfer: PushGroupMemberData?
 
     private var activeMembers: [PushGroupMemberData] { members.filter { !$0.isPending } }
@@ -114,9 +116,16 @@ struct GroupDetailView: View {
         .sheet(isPresented: $isInvitePresented) {
             GroupInviteSheet(candidates: inviteCandidates, onInvite: onInvite)
         }
-        .sheet(isPresented: $isTransferPresented) {
-            GroupTransferSheet(candidates: transferCandidates) { member in
+        .sheet(isPresented: $isTransferPresented, onDismiss: {
+            // Present confirmation only after the sheet has fully dismissed —
+            // setting the dialog item while the sheet is up can drop it.
+            if let member = pendingTransferMember {
+                pendingTransferMember = nil
                 memberPendingTransfer = member
+            }
+        }) {
+            GroupTransferSheet(candidates: transferCandidates) { member in
+                pendingTransferMember = member
             }
         }
         .modifier(
