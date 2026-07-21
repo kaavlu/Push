@@ -1,3 +1,20 @@
+# Complete production email authentication (Issue #32)
+
+- [x] Design: `docs/superpowers/specs/2026-07-17-complete-production-email-auth-design.md`
+- [x] Plan: `docs/superpowers/plans/2026-07-17-complete-production-email-auth.md`
+- [x] `AuthService`: sign-up with name/handle metadata, `SignUpResult`, reset/update password, `handleAuthURL`, error mapper
+- [x] Client redirect `pushapp://auth/reset` + Info.plist URL scheme
+- [x] `AuthViewModel` screens, validation, deep-link recovery without early app entry
+- [x] Views: welcome (email only), sign-up, sign-in + forgot, check-email, set-new-password
+- [x] `RootView.onOpenURL` → recovery gate
+- [x] Focused tests + `supabase/README.md` redirect notes
+
+## Verification
+- [x] `scripts/test.sh suite AuthViewModelTests` — 20 tests, 0 failures
+- [ ] Live smoke: new sign-up, forgot → open `pushapp://` → set password (needs dashboard redirect allow-list)
+
+---
+
 # Issue #34 — Persistent Profile Photo Uploads
 
 - [x] Spec in `tasks/spec.md`

@@ -40,8 +40,17 @@ of the files in order reproduces the schema.
 
 ## Test identities (created via REAL Supabase Auth — never SQL-inserted)
 `.test`/`.example` TLDs are rejected by GoTrue's validator, so real-TLD emails are used.
-The project must have **"Confirm email" OFF** (`mailer_autoconfirm = true`) so signups are
-immediately usable without sending email.
+The project may have **"Confirm email" OFF** (`mailer_autoconfirm = true`) for immediate
+sessions, or ON for a confirmation email — the iOS client handles both via `SignUpResult`
+(`.authenticated` vs `.confirmationRequired`).
+
+### Auth deep links (Issue #32)
+- Custom URL scheme: `pushapp`
+- Password recovery redirect: `pushapp://auth/reset`
+- Add that URL under Authentication → URL Configuration → Redirect URLs in the
+  Supabase dashboard (and keep it in sync if the scheme changes).
+- The shared `SupabaseClient` sets `redirectToURL` to the same value so recovery and
+  related auth emails open the app.
 
 | Role | Email | Password | In graph? |
 |---|---|---|---|
