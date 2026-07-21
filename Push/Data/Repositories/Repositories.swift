@@ -28,6 +28,7 @@ protocol FriendRepository {
 }
 
 /// Errors from group lifecycle mutations (create, rename, photo, invite, leave, etc.).
+/// Maps to 0013 RPC exception strings for mock parity with live.
 enum GroupRepositoryError: Error, Equatable {
     case notAuthenticated
     case notOwner
@@ -36,8 +37,6 @@ enum GroupRepositoryError: Error, Equatable {
     case invalidTarget
     case transferRequired
     case notPending
-    /// Temporary: Task 2 stubs until Task 3 (mock) / Task 4 (live) implement writes.
-    case notImplemented
 }
 
 protocol GroupRepository {

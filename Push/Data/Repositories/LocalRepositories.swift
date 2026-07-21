@@ -116,41 +116,47 @@ final class LocalGroupRepository: GroupRepository {
         database.createGroup(name: name, imageAssetPath: imageAssetPath, inviteeIDs: inviteeIDs)
     }
 
-    // Task 3 will implement mock lifecycle mutations.
     func renameGroup(groupID: FriendGroup.ID, name: String) async throws {
-        throw GroupRepositoryError.notImplemented
+        try database.renameGroup(groupID: groupID, name: name)
     }
 
     func updateGroupPhoto(groupID: FriendGroup.ID, jpegData: Data) async throws {
-        throw GroupRepositoryError.notImplemented
+        let previous = database.groupsByID[groupID]?.imageAssetPath
+        let url = try GroupPhotoFileStore.save(groupID: groupID, jpegData: jpegData)
+        try database.setGroupImagePath(groupID: groupID, imageAssetPath: url.path)
+        AvatarImageLoader.invalidate(path: previous)
+        AvatarImageLoader.invalidate(path: url.path)
     }
 
     func removeGroupPhoto(groupID: FriendGroup.ID) async throws {
-        throw GroupRepositoryError.notImplemented
+        let previous = database.groupsByID[groupID]?.imageAssetPath
+        try database.setGroupImagePath(groupID: groupID, imageAssetPath: nil)
+        GroupPhotoFileStore.remove(groupID: groupID)
+        AvatarImageLoader.invalidate(path: previous)
     }
 
     func inviteToGroup(groupID: FriendGroup.ID, inviteeIDs: [Person.ID]) async throws {
-        throw GroupRepositoryError.notImplemented
+        try database.inviteToGroup(groupID: groupID, inviteeIDs: inviteeIDs)
     }
 
     func cancelGroupInvite(membershipID: GroupMembership.ID) async throws {
-        throw GroupRepositoryError.notImplemented
+        try database.cancelGroupInvite(membershipID: membershipID)
     }
 
     func removeMember(groupID: FriendGroup.ID, personID: Person.ID) async throws {
-        throw GroupRepositoryError.notImplemented
+        try database.removeMember(groupID: groupID, personID: personID)
     }
 
     func leaveGroup(groupID: FriendGroup.ID) async throws {
-        throw GroupRepositoryError.notImplemented
+        try database.leaveGroup(groupID: groupID)
     }
 
     func transferOwnership(groupID: FriendGroup.ID, newOwnerID: Person.ID) async throws {
-        throw GroupRepositoryError.notImplemented
+        try database.transferOwnership(groupID: groupID, newOwnerID: newOwnerID)
     }
 
     func deleteGroup(groupID: FriendGroup.ID) async throws {
-        throw GroupRepositoryError.notImplemented
+        try database.deleteGroup(groupID: groupID)
     }
 }
 

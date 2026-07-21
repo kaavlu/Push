@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		EDDCACAA80E4405F903DBF31 /* GroupPhotoFileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60EED318024ABC7E2B3FDF27 /* GroupPhotoFileStore.swift */; };
+		5FB6C20A375CDF8F5B078ED5 /* InMemoryDatabase+GroupLifecycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1805E47125FE669081B952 /* InMemoryDatabase+GroupLifecycle.swift */; };
+		A756BA0079C06B309FD4CF54 /* GroupLifecycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 495DA5007C746FA1C7F586EC /* GroupLifecycleTests.swift */; };
 		26D68ADB8C76ED66B4376227 /* GroupPhotoStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CD80E224F6DA6D4584EE3A1 /* GroupPhotoStorage.swift */; };
 		072819A00A31FCD7AAE53870 /* LegalDestinationsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B861E69CEF8CFCB3764C888D /* LegalDestinationsTests.swift */; };
 		EB2FE0A6BC8022F0F641F026 /* LegalDestinations.swift in Sources */ = {isa = PBXBuildFile; fileRef = A02315F8157A5D60D25725B1 /* LegalDestinations.swift */; };
@@ -218,6 +221,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		60EED318024ABC7E2B3FDF27 /* GroupPhotoFileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "GroupPhotoFileStore.swift"; path = "Data/GroupPhotoFileStore.swift"; sourceTree = "<group>"; };
+		3E1805E47125FE669081B952 /* InMemoryDatabase+GroupLifecycle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "InMemoryDatabase+GroupLifecycle.swift"; path = "Data/Store/InMemoryDatabase+GroupLifecycle.swift"; sourceTree = "<group>"; };
+		495DA5007C746FA1C7F586EC /* GroupLifecycleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GroupLifecycleTests.swift"; sourceTree = "<group>"; };
 		6CD80E224F6DA6D4584EE3A1 /* GroupPhotoStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "GroupPhotoStorage.swift"; path = "Data/Supabase/GroupPhotoStorage.swift"; sourceTree = "<group>"; };
 		B861E69CEF8CFCB3764C888D /* LegalDestinationsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LegalDestinationsTests.swift"; sourceTree = "<group>"; };
 		A02315F8157A5D60D25725B1 /* LegalDestinations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LegalDestinations.swift"; sourceTree = "<group>"; };
@@ -466,6 +472,8 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				60EED318024ABC7E2B3FDF27 /* GroupPhotoFileStore.swift */,
+				3E1805E47125FE669081B952 /* InMemoryDatabase+GroupLifecycle.swift */,
 				6CD80E224F6DA6D4584EE3A1 /* GroupPhotoStorage.swift */,
 				A02315F8157A5D60D25725B1 /* LegalDestinations.swift */,
 				7764BF65FABD8886A5CEF5BB /* ActionErrorBanner.swift */,
@@ -645,6 +653,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				495DA5007C746FA1C7F586EC /* GroupLifecycleTests.swift */,
 				B861E69CEF8CFCB3764C888D /* LegalDestinationsTests.swift */,
 				3F0D61EC00365754BEEB241C /* ProfilePhotoTests.swift */,
 				30EC8288ED6D5DFC46693E12 /* MapPuckHitTestingTests.swift */,
@@ -817,6 +826,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				EDDCACAA80E4405F903DBF31 /* GroupPhotoFileStore.swift in Sources */,
+				5FB6C20A375CDF8F5B078ED5 /* InMemoryDatabase+GroupLifecycle.swift in Sources */,
 				26D68ADB8C76ED66B4376227 /* GroupPhotoStorage.swift in Sources */,
 				EB2FE0A6BC8022F0F641F026 /* LegalDestinations.swift in Sources */,
 				441B0871A77B6D3A6EE02C12 /* ActionErrorBanner.swift in Sources */,
@@ -987,6 +998,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				A756BA0079C06B309FD4CF54 /* GroupLifecycleTests.swift in Sources */,
 				072819A00A31FCD7AAE53870 /* LegalDestinationsTests.swift in Sources */,
 				CBC87FDFB9F7E0EE36A72F25 /* ProfilePhotoTests.swift in Sources */,
 				5FAB0B553AFFCA8F7157CCFD /* MapPuckHitTestingTests.swift in Sources */,
