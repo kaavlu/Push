@@ -54,13 +54,12 @@ struct GroupDetailView: View {
         Group {
             if isManagePresented {
                 GroupManageView(
-                    groupName: group.name,
                     isOwner: isOwner,
                     canTransfer: canTransfer,
                     inviteCandidates: inviteCandidates,
                     transferCandidates: transferCandidates,
                     actionError: actionError,
-                    backAction: { isManagePresented = false },
+                    dismissAction: { isManagePresented = false },
                     onDismissError: onDismissError,
                     onRetryError: onRetryError,
                     onInvite: onInvite,

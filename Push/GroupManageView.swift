@@ -3,8 +3,8 @@
 //  Push
 //
 //  Group settings page: invite / transfer / leave / delete. Opened from
-//  Group Detail’s Manage button (replaces the former inline Manage section
-//  and the unused Ping action).
+//  Group Detail’s Manage button. Top bar matches cream-page chrome: title
+//  leading, glass X trailing (same control as Friends / Profile modals).
 //
 
 import SwiftUI
@@ -12,14 +12,13 @@ import SwiftUI
 struct GroupManageView: View {
     @Environment(\.pushLayout) private var layout
 
-    let groupName: String
     let isOwner: Bool
     let canTransfer: Bool
     let inviteCandidates: [Person]
     let transferCandidates: [PushGroupMemberData]
     let actionError: ActionErrorState?
 
-    let backAction: () -> Void
+    let dismissAction: () -> Void
     let onDismissError: () -> Void
     let onRetryError: () -> Void
     let onInvite: ([String]) -> Void
@@ -38,24 +37,21 @@ struct GroupManageView: View {
         ZStack {
             FriendsBackground()
             ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: GroupDetailLayout.sectionSpacing) {
-                    titleBlock
-                    GroupDetailManageSection(
-                        isOwner: isOwner,
-                        canTransfer: canTransfer,
-                        onInvite: { isInvitePresented = true },
-                        onTransfer: { isTransferPresented = true },
-                        onLeave: { isLeaveConfirmPresented = true },
-                        onDelete: { isDeleteConfirmPresented = true }
-                    )
-                }
+                GroupDetailManageSection(
+                    isOwner: isOwner,
+                    canTransfer: canTransfer,
+                    onInvite: { isInvitePresented = true },
+                    onTransfer: { isTransferPresented = true },
+                    onLeave: { isLeaveConfirmPresented = true },
+                    onDelete: { isDeleteConfirmPresented = true }
+                )
                 .padding(.horizontal, GroupDetailLayout.horizontalPadding)
                 .padding(.top, GroupDetailLayout.topPadding)
                 .padding(.bottom, GroupDetailLayout.bottomPadding)
             }
         }
         .safeAreaInset(edge: .top) {
-            GroupManageBackBar(action: backAction)
+            GroupManageHeaderBar(onClose: dismissAction)
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             if let actionError {
@@ -122,59 +118,45 @@ struct GroupManageView: View {
             }
         }
     }
+}
 
-    private var titleBlock: some View {
-        VStack(alignment: .leading, spacing: GroupManageLayout.subtitleSpacing) {
+/// Title leading + glass X trailing — same control family as Friends / Profile.
+private struct GroupManageHeaderBar: View {
+    @Environment(\.pushLayout) private var layout
+    let onClose: () -> Void
+
+    var body: some View {
+        HStack(alignment: .center) {
             Text("Manage group")
                 .font(.largeTitle.weight(.bold))
                 .foregroundStyle(PushControlColors.activeForeground)
-            Text(groupName)
-                .font(.callout.weight(.semibold))
-                .foregroundStyle(PushControlColors.inactiveForeground)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .accessibilityElement(children: .combine)
-    }
-}
+                .lineLimit(1)
+                .minimumScaleFactor(GroupDetailLayout.minimumTextScale)
 
-private struct GroupManageBackBar: View {
-    @Environment(\.pushLayout) private var layout
-    let action: () -> Void
-
-    var body: some View {
-        HStack {
-            Button(action: action) {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: ProfileLayout.closeIconSize, weight: .bold))
-                    .foregroundStyle(PushControlColors.activeForeground)
-                    .frame(width: ProfileLayout.closeButtonSize, height: ProfileLayout.closeButtonSize)
-                    .pushGlassBackground(cornerRadius: ProfileLayout.closeButtonSize / 2)
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("Back to group")
             Spacer(minLength: 0)
+
+            FriendsCircleButton(
+                systemImageName: "xmark",
+                accessibilityLabel: "Close manage group",
+                action: onClose
+            )
         }
-        .padding(.horizontal, ProfileLayout.horizontalPadding(layout))
+        .padding(.horizontal, FriendsLayout.horizontalPadding(layout))
         .padding(.top, ProfileLayout.closeTopPadding)
         .padding(.bottom, ProfileLayout.closeBottomPadding)
     }
-}
-
-private enum GroupManageLayout {
-    static let subtitleSpacing: CGFloat = 4
 }
 
 #if DEBUG
 struct GroupManageView_Previews: PreviewProvider {
     static var previews: some View {
         GroupManageView(
-            groupName: "India",
             isOwner: true,
             canTransfer: true,
             inviteCandidates: [],
             transferCandidates: [],
             actionError: nil,
-            backAction: {},
+            dismissAction: {},
             onDismissError: {},
             onRetryError: {},
             onInvite: { _ in },
