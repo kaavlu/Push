@@ -1,4 +1,4 @@
--- 0013_group_lifecycle.sql
+-- 0015_group_lifecycle.sql
 -- Complete group management after 0011's create + invite accept/deny:
 -- rename, photo path, invite/cancel, remove, leave, transfer, delete — all via
 -- SECURITY DEFINER RPCs (no broad client write policies on groups/memberships).

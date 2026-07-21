@@ -110,6 +110,49 @@ final class SupabasePushRepositoryTests: XCTestCase {
         XCTAssertEqual(loader.pushRows.first?.cancelled_at != nil, true)
     }
 
+    func testPastHangoutsDerivesCompletedPushAndSkipsCancelled() async throws {
+        let loader = LiveDataLoaderSpy()
+        let calendar = Calendar.current
+        let now = Date()
+        let monthStart = calendar.date(from: calendar.dateComponents([.year, .month], from: now))!
+        let startsAt = calendar.date(byAdding: .day, value: 2, to: monthStart)!
+        let expiresAt = startsAt.addingTimeInterval(6 * 60 * 60)
+        // Force completed by writing rows with past expiry via the spy after create.
+        let (repo, store) = makeRepository(loader: loader, currentUserID: "creator1")
+        let created = try await repo.createPush(PushDraft(
+            title: "Past dinner", recipientIDs: ["friend_bob"],
+            startsAt: startsAt, locationText: "North Park", notes: "", creatorID: "creator1"
+        ))
+        try await repo.setCurrentUserResponse(planID: created, response: .in)
+
+        // Rewrite expiry into the past so the push becomes historical.
+        guard let index = loader.pushRows.firstIndex(where: { $0.id == created }) else {
+            return XCTFail("missing created push")
+        }
+        let existing = loader.pushRows[index]
+        loader.pushRows[index] = PushRow(
+            id: existing.id, title: existing.title, group_id: existing.group_id,
+            creator_id: existing.creator_id, created_at: existing.created_at,
+            updated_at: existing.updated_at,
+            starts_at: PushDateFormatting.string(startsAt),
+            has_explicit_time: true, is_approximate_time: false,
+            expires_at: PushDateFormatting.string(expiresAt.addingTimeInterval(-7 * 24 * 60 * 60)),
+            cancelled_at: nil, place_id: nil, place_is_suggested: false,
+            state: existing.state, audience: existing.audience, note: existing.note,
+            location_text: existing.location_text
+        )
+        store.notifyPushesChanged()
+
+        let hangouts = try await repo.pastHangouts(forMonthContaining: now)
+        XCTAssertTrue(hangouts.contains { $0.id == created && $0.note == "Past dinner" })
+        XCTAssertTrue(hangouts.contains { $0.id == created && $0.participantIDs.contains("creator1") })
+
+        let historical = try await repo.historicalPlans(forMonthContaining: now)
+        XCTAssertTrue(historical.contains { $0.id == created })
+        let active = try await repo.activePlans()
+        XCTAssertTrue(active.allSatisfy { $0.id != created })
+    }
+
     func testSetCurrentUserResponseUpsertsRsvpAndClearsRespondedAtForPending() async throws {
         let loader = LiveDataLoaderSpy()
         let (repo, store) = makeRepository(loader: loader, currentUserID: "creator1")

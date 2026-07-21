@@ -20,15 +20,20 @@ protocol FriendRepository {
     func setCurrentUserAvailability(_ availability: FriendAvailabilityState) async throws
     /// Discover people by display name and/or handle. Never returns the current user.
     func searchPeople(query: String) async throws -> [PersonSearchResult]
-    /// Creates (or re-opens) a pending outgoing request. No-op / throws on invalid targets.
-    func sendFriendRequest(to personID: Person.ID) async throws
-    /// Hard-deletes the accepted friendship with `personID`, then bumps the
-    /// store revision so view models reload. No-op if not currently friends.
+    /// Creates (or re-opens) a pending outgoing request.
+    /// Returns the active request id (existing or newly created).
+    @discardableResult
+    func sendFriendRequest(to personID: Person.ID) async throws -> FriendRequest.ID
+    /// Cancels an outgoing pending request the current user started.
+    /// No-op / throws when the id is missing, not pending, or not owned by the caller.
+    func cancelFriendRequest(id: FriendRequest.ID) async throws
+    /// Hard-deletes the relationship with `personID` (any status), then bumps the
+    /// store revision so view models reload. No-op if no row exists for the pair.
     func removeFriend(_ personID: Person.ID) async throws
 }
 
 /// Errors from group lifecycle mutations (create, rename, photo, invite, leave, etc.).
-/// Maps to 0013 RPC exception strings for mock parity with live.
+/// Maps to 0015 RPC exception strings for mock parity with live.
 enum GroupRepositoryError: Error, Equatable {
     case notAuthenticated
     case notOwner
@@ -69,8 +74,10 @@ struct PushDraft {
 }
 
 protocol PushRepository {
-    /// Non-cancelled plans in seed order.
+    /// Non-cancelled, not-yet-expired plans (time-derived active window).
     func activePlans() async throws -> [PushPlan]
+    /// Completed non-cancelled plans whose `startsAt` falls in the given month.
+    func historicalPlans(forMonthContaining date: Date) async throws -> [PushPlan]
     func responses() async throws -> [PushResponse]
     func setCurrentUserResponse(planID: PushPlan.ID, response: PushResponse.Response) async throws
     func pastHangouts(forMonthContaining date: Date) async throws -> [PastHangout]

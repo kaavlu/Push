@@ -33,7 +33,7 @@ Finish the live group lifecycle now that create + invite accept/deny exist (`001
 
 Add `private.is_group_owner(u uuid, g uuid)` — true when `u` has an **active** membership with `role = 'owner'` for `g`. Keep in `private` schema (not PostgREST-exposed). Revoke from `public`/`anon`; grant execute to `authenticated` only as needed by policies/RPCs.
 
-### RPCs (migration `0013_group_lifecycle` or sequential next number)
+### RPCs (migration `0015_group_lifecycle`)
 
 | Function | Caller | Behavior |
 |---|---|---|

@@ -2,7 +2,7 @@
 //  InMemoryDatabase+GroupLifecycle.swift
 //  Push
 //
-//  Mock group lifecycle mutations mirroring 0013 SECURITY DEFINER RPC rules.
+//  Mock group lifecycle mutations mirroring 0015 SECURITY DEFINER RPC rules.
 //
 
 import Foundation

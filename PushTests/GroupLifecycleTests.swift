@@ -3,7 +3,7 @@
 //  PushTests
 //
 //  Mock group lifecycle mutations via LocalGroupRepository / InMemoryDatabase.
-//  Error contract: GroupRepositoryError (mirrors 0013 RPC exceptions).
+//  Error contract: GroupRepositoryError (mirrors 0015 RPC exceptions).
 //
 
 import UIKit
@@ -27,7 +27,7 @@ final class GroupLifecycleTests: XCTestCase {
         XCTAssertEqual(group.name, "Renamed Crew")
     }
 
-    /// Non-owners throw `GroupRepositoryError.notOwner` (same conceptual error as 0013).
+    /// Non-owners throw `GroupRepositoryError.notOwner` (same conceptual error as 0015).
     func testNonOwnerRenameThrowsOrNoopsPerMockContract() async throws {
         let container = AppDataContainer(seed: .standard())
         // Seed groups are owned by others; manav is only invited (exec/michigan) or absent (india).

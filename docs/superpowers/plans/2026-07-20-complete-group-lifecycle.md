@@ -4,7 +4,7 @@
 
 **Goal:** Live group lifecycle end-to-end — owner manage (rename, photo, invite, cancel, remove, transfer, delete), member leave, persisted group photos, backend-enforced permissions, session refresh + recoverable errors.
 
-**Architecture:** New `SECURITY DEFINER` RPCs + `group-photos` Storage bucket (migration `0013`). `GroupRepository` gains mutation methods; live path goes `SupabaseGroupRepository` → `LiveDataStore` → `LiveDataLoading` RPCs, with `notifyGroupsChanged()` after every successful write. Group Detail becomes the management hub driven by `GroupsViewModel` (or a thin detail extension on it). Mock `InMemoryDatabase` mirrors RPC rules for unit tests.
+**Architecture:** New `SECURITY DEFINER` RPCs + `group-photos` Storage bucket (migration `0015`). `GroupRepository` gains mutation methods; live path goes `SupabaseGroupRepository` → `LiveDataStore` → `LiveDataLoading` RPCs, with `notifyGroupsChanged()` after every successful write. Group Detail becomes the management hub driven by `GroupsViewModel` (or a thin detail extension on it). Mock `InMemoryDatabase` mirrors RPC rules for unit tests.
 
 **Tech Stack:** SwiftUI MVVM, supabase-swift, Postgres RLS/RPC, XCTest via `scripts/test.sh`, `python3 scripts/pbxproj_add.py`.
 
@@ -24,7 +24,7 @@
 
 | File | Responsibility |
 |------|----------------|
-| `supabase/migrations/0013_group_lifecycle.sql` | `private.is_group_owner`, all lifecycle RPCs, `group-photos` bucket + storage policies |
+| `supabase/migrations/0015_group_lifecycle.sql` | `private.is_group_owner`, all lifecycle RPCs, `group-photos` bucket + storage policies |
 | `Push/Data/Supabase/GroupPhotoStorage.swift` | `GroupPhotoStoring`, path helper, Supabase + mock-capable upload/delete |
 | `Push/Data/Repositories/Repositories.swift` | Extend `GroupRepository` protocol |
 | `Push/Data/Store/InMemoryDatabase.swift` | Mock mutations mirroring RPC rules + single `didMutate()` |
@@ -47,14 +47,14 @@
 ### Task 1: Migration — helpers, RPCs, group-photos storage
 
 **Files:**
-- Create: `supabase/migrations/0013_group_lifecycle.sql`
+- Create: `supabase/migrations/0015_group_lifecycle.sql`
 - Reference: `supabase/migrations/0011_group_invites.sql`, `0012_profile_photos.sql`, `0010_remove_friend.sql`
 
 **Interfaces:**
 - Consumes: `public.groups`, `public.group_memberships`, `private.is_friend`, `private.is_group_member`
 - Produces: SQL functions listed below; bucket `group-photos`
 
-- [ ] **Step 1: Author `0013_group_lifecycle.sql`**
+- [ ] **Step 1: Author `0015_group_lifecycle.sql`**
 
 Include, in order:
 
@@ -112,8 +112,8 @@ Prefer project skill workflow (`apply_migration` / MCP). If auth fails, leave fi
 - [ ] **Step 3: Commit**
 
 ```bash
-git add supabase/migrations/0013_group_lifecycle.sql
-git commit -m "feat(db): group lifecycle RPCs and group-photos storage (0013)"
+git add supabase/migrations/0015_group_lifecycle.sql
+git commit -m "feat(db): group lifecycle RPCs and group-photos storage (0015)"
 ```
 
 ---

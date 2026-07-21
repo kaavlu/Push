@@ -101,50 +101,8 @@ struct FriendDetailBottomSheet: View {
         .accessibilityAddTraits(.isModal)
     }
 
-    /// Matches map top-control cream surfaces (`topControlBackground`): material
-    /// base, warm opaque cream fill, and a small sunbeam glow accent.
     private var sheetBackground: some View {
-        let shape = FriendDetailBottomSheetShape()
-        return ZStack {
-            shape.fill(.ultraThinMaterial)
-            shape.fill(FriendDetailBottomSheetColor.creamFill)
-            shape.fill(sheetSunbeamAccent)
-            shape.stroke(
-                FriendDetailBottomSheetColor.stroke,
-                lineWidth: FriendDetailBottomSheetLayout.strokeWidth
-            )
-            shape
-                .stroke(
-                    sheetReflectiveHighlight,
-                    lineWidth: FriendDetailBottomSheetLayout.highlightWidth
-                )
-                .padding(FriendDetailBottomSheetLayout.highlightInset)
-        }
-    }
-
-    private var sheetSunbeamAccent: RadialGradient {
-        RadialGradient(
-            colors: [
-                PushGlassStyle.warmTint.opacity(FriendDetailBottomSheetColor.creamGlowOpacity),
-                PushControlColors.activeFill.opacity(FriendDetailBottomSheetColor.sunbeamGlowOpacity),
-                .clear
-            ],
-            center: .bottom,
-            startRadius: 0,
-            endRadius: FriendDetailBottomSheetLayout.sunbeamGlowRadius
-        )
-    }
-
-    private var sheetReflectiveHighlight: LinearGradient {
-        LinearGradient(
-            colors: [
-                Color.white.opacity(FriendDetailBottomSheetColor.highlightTopOpacity),
-                Color.white.opacity(FriendDetailBottomSheetColor.highlightSideOpacity),
-                .clear
-            ],
-            startPoint: .top,
-            endPoint: .bottom
-        )
+        MapPopupSheetBackground(shape: FriendDetailBottomSheetShape())
     }
 
     private var dragIndicator: some View {
@@ -275,4 +233,58 @@ enum FriendDetailBottomSheetColor {
     static let stroke = Color.white.opacity(PushGlassStyle.strokeOpacity)
     static let highlightTopOpacity = 0.72
     static let highlightSideOpacity = 0.14
+}
+
+/// Shared cream-glass surface used by the map friend popup and calendar day sheet.
+struct MapPopupSheetBackground<S: Shape>: View {
+    let shape: S
+
+    var body: some View {
+        ZStack {
+            shape.fill(.ultraThinMaterial)
+            shape.fill(FriendDetailBottomSheetColor.creamFill)
+            shape.fill(sunbeamAccent)
+            shape.stroke(
+                FriendDetailBottomSheetColor.stroke,
+                lineWidth: FriendDetailBottomSheetLayout.strokeWidth
+            )
+            shape
+                .stroke(
+                    reflectiveHighlight,
+                    lineWidth: FriendDetailBottomSheetLayout.highlightWidth
+                )
+                .padding(FriendDetailBottomSheetLayout.highlightInset)
+        }
+    }
+
+    private var sunbeamAccent: RadialGradient {
+        RadialGradient(
+            colors: [
+                PushGlassStyle.warmTint.opacity(FriendDetailBottomSheetColor.creamGlowOpacity),
+                PushControlColors.activeFill.opacity(FriendDetailBottomSheetColor.sunbeamGlowOpacity),
+                .clear
+            ],
+            center: .bottom,
+            startRadius: 0,
+            endRadius: FriendDetailBottomSheetLayout.sunbeamGlowRadius
+        )
+    }
+
+    private var reflectiveHighlight: LinearGradient {
+        LinearGradient(
+            colors: [
+                Color.white.opacity(FriendDetailBottomSheetColor.highlightTopOpacity),
+                Color.white.opacity(FriendDetailBottomSheetColor.highlightSideOpacity),
+                .clear
+            ],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+    }
+}
+
+extension MapPopupSheetBackground where S == Rectangle {
+    init() {
+        self.init(shape: Rectangle())
+    }
 }

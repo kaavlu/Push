@@ -25,6 +25,33 @@ extension EnvironmentValues {
     }
 }
 
+/// Environment-injected account deletion owned by `RootView`. Unavailable in
+/// mock (no Auth user). Throws on backend failure so Profile can show a
+/// recoverable error without leaving `.app`.
+struct DeleteAccountAction {
+    private let handler: (() async throws -> Void)?
+
+    init(handler: (() async throws -> Void)? = nil) { self.handler = handler }
+
+    var isAvailable: Bool { handler != nil }
+
+    func callAsFunction() async throws {
+        guard let handler else { return }
+        try await handler()
+    }
+}
+
+private struct DeleteAccountActionKey: EnvironmentKey {
+    static let defaultValue = DeleteAccountAction()
+}
+
+extension EnvironmentValues {
+    var deleteAccount: DeleteAccountAction {
+        get { self[DeleteAccountActionKey.self] }
+        set { self[DeleteAccountActionKey.self] = newValue }
+    }
+}
+
 /// Pure, testable description of what the root should show.
 enum BootstrapState: Equatable {
     case loading
@@ -58,7 +85,11 @@ struct RootView: View {
         content
             .task {
                 guard case .loading = state else { return }
+                PushLog.logStartupBanner(mode: mode)
                 let restored = mode == .live ? await auth.restoreSession() : nil
+                if mode == .live {
+                    PushLog.bootstrap.log("session restore: \(restored != nil, privacy: .public)")
+                }
                 let initial = BootstrapState.initial(mode: mode, restored: restored)
                 enter(initial)
                 if case .preparing(let user) = initial { await prepare(user) }
@@ -93,6 +124,7 @@ struct RootView: View {
             // ViewModels default to AppDataContainer.shared (installed in `enter`).
             ContentView()
                 .environment(\.signOut, signOutAction)
+                .environment(\.deleteAccount, deleteAccountAction)
         }
     }
 
@@ -105,12 +137,25 @@ struct RootView: View {
         return SignOutAction { await performSignOut() }
     }
 
+    private var deleteAccountAction: DeleteAccountAction {
+        guard mode == .live else { return DeleteAccountAction() }
+        return DeleteAccountAction { try await performDeleteAccount() }
+    }
+
     @MainActor
     private func performSignOut() async {
         try? await auth.signOut()
         // Clears the stale `authedUser` so `AuthGateView`'s `onChange` fires
         // again if the same user signs back in (Equatable value would
         // otherwise look unchanged and never re-trigger `onAuthenticated`).
+        authModel.signOutReset()
+        enter(.gate)
+    }
+
+    /// RPC must succeed before local session teardown or gate transition.
+    @MainActor
+    private func performDeleteAccount() async throws {
+        try await auth.deleteAccount()
         authModel.signOutReset()
         enter(.gate)
     }
@@ -133,8 +178,10 @@ struct RootView: View {
                 client: SupabaseClientProvider.shared.client, currentUserID: user.id
             )
             AppDataContainer.installPreparedLive(container)
+            PushLog.bootstrap.log("live data ready")
             enter(.app(user))
         } catch {
+            PushLog.bootstrap.error("live data preparation failed: \(PushLog.safeDescription(for: error), privacy: .public)")
             enter(.preparationFailed(user, error.localizedDescription))
         }
     }

@@ -11,10 +11,9 @@ import Foundation
 enum PushTimingFormatter {
 
     static func label(for plan: PushPlan, now: Date = Date()) -> String {
-        // Only an actually-`.happening` push says "now" — a push whose
-        // scheduled time has simply passed (e.g. live data where the clock
-        // has moved a few minutes past `startsAt`) still shows its real time.
-        if plan.state == .happening { return "now" }
+        // Time-derived happening (startsAt…expiresAt), not stored `state` —
+        // live/mock rows can leave `state` stale while the window is open.
+        if PushLifecycle.isHappening(plan, now: now) { return "now" }
         if !plan.hasExplicitTime { return weekday(from: plan.startsAt) }
         let time = timeOfDay(from: plan.startsAt)
         if Calendar.current.isDate(plan.startsAt, inSameDayAs: now) {
