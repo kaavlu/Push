@@ -58,7 +58,11 @@ struct RootView: View {
         content
             .task {
                 guard case .loading = state else { return }
+                PushLog.logStartupBanner(mode: mode)
                 let restored = mode == .live ? await auth.restoreSession() : nil
+                if mode == .live {
+                    PushLog.bootstrap.log("session restore: \(restored != nil, privacy: .public)")
+                }
                 let initial = BootstrapState.initial(mode: mode, restored: restored)
                 enter(initial)
                 if case .preparing(let user) = initial { await prepare(user) }
@@ -118,8 +122,10 @@ struct RootView: View {
                 client: SupabaseClientProvider.shared.client, currentUserID: user.id
             )
             AppDataContainer.installPreparedLive(container)
+            PushLog.bootstrap.log("live data ready")
             enter(.app(user))
         } catch {
+            PushLog.bootstrap.error("live data preparation failed: \(PushLog.safeDescription(for: error), privacy: .public)")
             enter(.preparationFailed(user, error.localizedDescription))
         }
     }
