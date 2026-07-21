@@ -163,21 +163,12 @@ private struct GroupProfileImage: View {
     let group: PushGroupData
 
     var body: some View {
-        ZStack {
-            if let image = PushImageAssets.image(named: group.imageAssetName) {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFill()
-            } else {
-                GroupFallbackTile(group: group)
-            }
-        }
-        .frame(width: GroupsLayout.avatarSize(layout), height: GroupsLayout.avatarSize(layout))
-        .clipShape(RoundedRectangle(cornerRadius: GroupsLayout.avatarCornerRadius(layout), style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: GroupsLayout.avatarCornerRadius(layout), style: .continuous)
-                .stroke(.white.opacity(GroupsColor.avatarStrokeOpacity), lineWidth: GroupsLayout.avatarStrokeWidth)
-        }
+        GroupListAvatar(
+            imageAssetName: group.imageAssetName,
+            fallbackInitials: group.fallbackInitials,
+            size: GroupsLayout.avatarSize(layout),
+            cornerRadius: GroupsLayout.avatarCornerRadius(layout)
+        )
     }
 }
 

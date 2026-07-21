@@ -242,13 +242,16 @@ final class GroupsViewModel: ObservableObject {
     func updateGroupPhoto(groupID: String, jpegData: Data) async {
         guard let groupRepo else { return }
         let previousSession = sessionImages[groupID]
+        // Keep the picked image visible until the reload has a resolvable path
+        // (HTTPS or local file). Clearing too early showed initials only —
+        // list/detail used to ignore remote URLs entirely.
         if let image = UIImage(data: jpegData) {
             sessionImages[groupID] = image
         }
         do {
             try await groupRepo.updateGroupPhoto(groupID: groupID, jpegData: jpegData)
             await finishSuccess()
-            // Remote path is on the card after load; drop the in-flight override.
+            // Path is on the card after load; drop override once remote/file can load.
             sessionImages.removeValue(forKey: groupID)
         } catch {
             if let previousSession {
