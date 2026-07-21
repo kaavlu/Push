@@ -21,12 +21,12 @@ struct AddGroupStep3ReviewView: View {
                 photoNameSection
                 membersSection
 
-                if let errorMessage = viewModel.errorMessage {
-                    Text(errorMessage)
-                        .font(.footnote.weight(.semibold))
-                        .foregroundStyle(PushControlColors.destructive)
-                        .multilineTextAlignment(.center)
-                        .frame(maxWidth: .infinity)
+                if let actionError = viewModel.actionError {
+                    ActionErrorBanner(
+                        message: actionError.message,
+                        onRetry: { Task { await onSubmit() } },
+                        onDismiss: { viewModel.dismissActionError() }
+                    )
                 }
             }
             .padding(.horizontal, StartPushLayout.horizontalPadding(layout))

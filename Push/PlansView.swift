@@ -18,11 +18,27 @@ struct PlansView: View {
     var body: some View {
         ZStack {
             FriendsBackground()
-            pageContent
+            ScrollView {
+                pageContent
+            }
+            .refreshable {
+                await viewModel.refresh()
+            }
         }
         .safeAreaInset(edge: .top, spacing: 0) {
             PlansPageHeader(dismissAction: { dismiss() })
                 .padding(.horizontal, PlansLayout.horizontalPadding(layout))
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if let actionError = viewModel.actionError {
+                ActionErrorBanner(
+                    message: actionError.message,
+                    onRetry: { Task { await viewModel.retryLastAction() } },
+                    onDismiss: { viewModel.dismissActionError() }
+                )
+                .padding(.horizontal, PlansLayout.horizontalPadding(layout))
+                .padding(.bottom, PlansLayout.startPlanButtonBottomPadding(layout))
+            }
         }
         .fullScreenCover(isPresented: $viewModel.isReviewDeckPresented) {
             ReviewPushesView(viewModel: viewModel)
@@ -122,7 +138,7 @@ private struct YourPushesModule: View {
                 YourPushCard(plan: first, onManage: {
                     viewModel.openManage(plan: first)
                 }, onCancel: {
-                    viewModel.cancel(plan: first)
+                    Task { await viewModel.cancel(plan: first) }
                 })
             }
         }
@@ -213,9 +229,11 @@ struct YourPushesListView: View {
                             YourPushCard(plan: plan, onManage: {
                                 managedPlan = plan
                             }, onCancel: {
-                                viewModel.cancel(plan: plan)
-                                if viewModel.yourPushes.isEmpty {
-                                    dismiss()
+                                Task {
+                                    await viewModel.cancel(plan: plan)
+                                    if viewModel.yourPushes.isEmpty {
+                                        dismiss()
+                                    }
                                 }
                             })
                         }

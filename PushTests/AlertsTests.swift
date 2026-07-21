@@ -76,6 +76,45 @@ final class AlertsTests: XCTestCase {
             return XCTFail("Expected failed alert load state")
         }
     }
+
+    func testAcceptFailureKeepsRequestAndSetsActionError() async throws {
+        let container = AppDataContainer(seed: .standard())
+        let controllable = ControllableAlertRepository()
+        controllable.requests = try await container.alerts.incomingFriendRequests()
+        controllable.invites = try await container.alerts.incomingGroupInvites()
+        controllable.shouldFailResolve = true
+        let failingVM = AlertsViewModel(repository: controllable)
+        await failingVM.load()
+        let loaded = try XCTUnwrap(failingVM.requests.first)
+        XCTAssertFalse(failingVM.requests.isEmpty)
+
+        await failingVM.accept(loaded)
+
+        XCTAssertTrue(failingVM.requests.contains { $0.id == loaded.id })
+        XCTAssertEqual(failingVM.actionError?.message, "Couldn't accept. Try again.")
+        if case .failed = failingVM.loadState {
+            XCTFail("Action failure must not force full-screen failed load state")
+        }
+    }
+
+    func testSoftReloadKeepsContentWhenSecondLoadFails() async throws {
+        let controllable = ControllableAlertRepository()
+        let container = AppDataContainer(seed: .standard())
+        controllable.requests = try await container.alerts.incomingFriendRequests()
+        controllable.invites = try await container.alerts.incomingGroupInvites()
+        let viewModel = AlertsViewModel(repository: controllable)
+        await viewModel.load()
+        XCTAssertFalse(viewModel.requests.isEmpty)
+        let before = viewModel.requests.count
+
+        controllable.shouldFailLoad = true
+        await viewModel.load()
+
+        XCTAssertEqual(viewModel.requests.count, before)
+        if case .failed = viewModel.loadState {
+            XCTFail("Soft load should keep prior loaded state on refresh failure")
+        }
+    }
 }
 
 private struct ThrowingAlertRepository: AlertRepository {
@@ -87,4 +126,44 @@ private struct ThrowingAlertRepository: AlertRepository {
     func incomingGroupInvites() async throws -> [GroupInvite] { throw Failure.unavailable }
     func acceptGroupInvite(id: GroupInvite.ID) async throws { throw Failure.unavailable }
     func denyGroupInvite(id: GroupInvite.ID) async throws { throw Failure.unavailable }
+}
+
+@MainActor
+final class ControllableAlertRepository: AlertRepository {
+    var requests: [FriendRequest] = []
+    var invites: [GroupInvite] = []
+    var shouldFailLoad = false
+    var shouldFailResolve = false
+
+    enum Failure: Error { case expected }
+
+    func incomingFriendRequests() async throws -> [FriendRequest] {
+        if shouldFailLoad { throw Failure.expected }
+        return requests
+    }
+
+    func incomingGroupInvites() async throws -> [GroupInvite] {
+        if shouldFailLoad { throw Failure.expected }
+        return invites
+    }
+
+    func acceptFriendRequest(id: FriendRequest.ID) async throws {
+        if shouldFailResolve { throw Failure.expected }
+        requests.removeAll { $0.id == id }
+    }
+
+    func denyFriendRequest(id: FriendRequest.ID) async throws {
+        if shouldFailResolve { throw Failure.expected }
+        requests.removeAll { $0.id == id }
+    }
+
+    func acceptGroupInvite(id: GroupInvite.ID) async throws {
+        if shouldFailResolve { throw Failure.expected }
+        invites.removeAll { $0.id == id }
+    }
+
+    func denyGroupInvite(id: GroupInvite.ID) async throws {
+        if shouldFailResolve { throw Failure.expected }
+        invites.removeAll { $0.id == id }
+    }
 }

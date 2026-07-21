@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		441B0871A77B6D3A6EE02C12 /* ActionErrorBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7764BF65FABD8886A5CEF5BB /* ActionErrorBanner.swift */; };
+		A90E4E210610C9F8847862B5 /* ActionErrorState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A5623D7FF0B22A6AB8F5EF /* ActionErrorState.swift */; };
+		74E5ED98452F902FB59D46ED /* SessionRefreshConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 302309E0CF78B089472018B9 /* SessionRefreshConstants.swift */; };
 		26DD739FC701FAE462A327DE /* AuthSetNewPasswordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98BF0E5EA25D79D33DA8776E /* AuthSetNewPasswordView.swift */; };
 		6CCB6648DA94CF019EBEA449 /* AuthForgotPasswordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D3F33F3BA8780F7AD73D7F7 /* AuthForgotPasswordView.swift */; };
 		CC5FF0444C8C530B217EABA9 /* AuthCheckEmailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6819B821B3F11A73FE2C0344 /* AuthCheckEmailView.swift */; };
@@ -212,6 +215,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		7764BF65FABD8886A5CEF5BB /* ActionErrorBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ActionErrorBanner.swift"; sourceTree = "<group>"; };
+		37A5623D7FF0B22A6AB8F5EF /* ActionErrorState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ActionErrorState.swift"; sourceTree = "<group>"; };
+		302309E0CF78B089472018B9 /* SessionRefreshConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SessionRefreshConstants.swift"; path = "Data/SessionRefreshConstants.swift"; sourceTree = "<group>"; };
 		98BF0E5EA25D79D33DA8776E /* AuthSetNewPasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "AuthSetNewPasswordView.swift"; path = "Auth/AuthSetNewPasswordView.swift"; sourceTree = "<group>"; };
 		6D3F33F3BA8780F7AD73D7F7 /* AuthForgotPasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "AuthForgotPasswordView.swift"; path = "Auth/AuthForgotPasswordView.swift"; sourceTree = "<group>"; };
 		6819B821B3F11A73FE2C0344 /* AuthCheckEmailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "AuthCheckEmailView.swift"; path = "Auth/AuthCheckEmailView.swift"; sourceTree = "<group>"; };
@@ -454,6 +460,9 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				7764BF65FABD8886A5CEF5BB /* ActionErrorBanner.swift */,
+				37A5623D7FF0B22A6AB8F5EF /* ActionErrorState.swift */,
+				302309E0CF78B089472018B9 /* SessionRefreshConstants.swift */,
 				98BF0E5EA25D79D33DA8776E /* AuthSetNewPasswordView.swift */,
 				6D3F33F3BA8780F7AD73D7F7 /* AuthForgotPasswordView.swift */,
 				6819B821B3F11A73FE2C0344 /* AuthCheckEmailView.swift */,
@@ -799,6 +808,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				441B0871A77B6D3A6EE02C12 /* ActionErrorBanner.swift in Sources */,
+				A90E4E210610C9F8847862B5 /* ActionErrorState.swift in Sources */,
+				74E5ED98452F902FB59D46ED /* SessionRefreshConstants.swift in Sources */,
 				26DD739FC701FAE462A327DE /* AuthSetNewPasswordView.swift in Sources */,
 				6CCB6648DA94CF019EBEA449 /* AuthForgotPasswordView.swift in Sources */,
 				CC5FF0444C8C530B217EABA9 /* AuthCheckEmailView.swift in Sources */,

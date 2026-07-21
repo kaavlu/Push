@@ -106,6 +106,17 @@ struct FriendsView: View {
                     .transition(.move(edge: .top).combined(with: .opacity))
             }
         }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if let actionError = viewModel.actionError {
+                ActionErrorBanner(
+                    message: actionError.message,
+                    onRetry: { Task { await viewModel.retryLastAction() } },
+                    onDismiss: { viewModel.dismissActionError() }
+                )
+                .padding(.horizontal, FriendsLayout.horizontalPadding(layout))
+                .padding(.bottom, FriendsLayout.bottomPadding(layout))
+            }
+        }
         .fullScreenCover(isPresented: $isAddFriendPresented) {
             AddFriendsView()
         }
@@ -115,11 +126,6 @@ struct FriendsView: View {
             }
         }
         .onChange(of: mode) { _ in viewModel.collapse() }
-        .onChange(of: viewModel.removeErrorMessage) { message in
-            guard let message else { return }
-            triggerToast(message)
-            viewModel.removeErrorMessage = nil
-        }
     }
 
     private var listContent: some View {
@@ -134,6 +140,10 @@ struct FriendsView: View {
                     }
                 }
                 .padding(.bottom, FriendsLayout.bottomPadding(layout))
+            }
+            .refreshable {
+                await viewModel.refresh()
+                await groupsViewModel.load()
             }
             .onChange(of: viewModel.expandedFriendID) { expandedID in
                 guard let expandedID else { return }

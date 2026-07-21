@@ -1,3 +1,25 @@
+# Foreground Refresh & Reliable Mutation Errors (Issue #33)
+
+## Goal
+Re-warm the live session snapshot on foreground return and pull-to-refresh, and make
+covered mutations fail visibly with optimistic rollback and Retry.
+
+## Contract
+- `AppDataContainer.refreshSession()` → live `LiveDataStore.refresh()` (clear caches,
+  `warm()`, one revision on success; coalesce in-flight; debounce ~2s; restore snapshot
+  on failure). Mock is a no-op.
+- `ContentView` re-warms on return from background (skip first `.active`); failures silent.
+- Pull-to-refresh: Friends (incl. Groups mode), Alerts, Pushes.
+- Soft loads keep prior content while refreshing.
+- Shared `ActionErrorState` + `ActionErrorBanner` (message, Retry, dismiss).
+- Covered mutations: push RSVP/cancel/delete (rollback); friend remove; group create;
+  friend-request and group-invite accept/deny (keep list; no full-screen fail).
+
+## Acceptance
+See `docs/superpowers/specs/2026-07-17-foreground-refresh-mutation-errors-design.md`.
+
+---
+
 # Persistent Profile Photo Uploads (Issue #34)
 
 ## Goal

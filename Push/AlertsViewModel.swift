@@ -19,11 +19,32 @@ final class AlertsViewModel: ObservableObject {
     // group invites so their accept/deny timing/chrome never diverges.
     @Published private(set) var resolvingIDs: Set<String> = []
     @Published private(set) var cardPhases: [String: AlertCardPhase] = [:]
+    @Published private(set) var actionError: ActionErrorState?
 
     private let repository: AlertRepository
     private var containerForRefresh: AppDataContainer?
     private var storeChangeSub: AnyCancellable?
     private var lastSeenRevision = 0
+    private var pendingResolve: PendingResolve?
+
+    private struct PendingResolve {
+        let id: String
+        let accepting: Bool
+        let perform: () async throws -> Void
+        let removeFromList: () -> Void
+
+        init(
+            id: String,
+            accepting: Bool,
+            perform: @escaping () async throws -> Void,
+            removeFromList: @escaping () -> Void
+        ) {
+            self.id = id
+            self.accepting = accepting
+            self.perform = perform
+            self.removeFromList = removeFromList
+        }
+    }
 
     /// Group invites carry no per-row read state, so every pending invite
     /// counts toward the badge — matching how every pending friend request does.
@@ -51,7 +72,8 @@ final class AlertsViewModel: ObservableObject {
         // Avoid wiping in-flight resolution chrome when the store mutates mid-animation.
         guard resolvingIDs.isEmpty else { return }
 
-        loadState = .loading
+        // Soft load: keep last content visible while refreshing.
+        if loadState.value == nil { loadState = .loading }
         do {
             let models = try await repository.incomingFriendRequests()
                 .map(FriendRequestAlertModel.init)
@@ -61,8 +83,29 @@ final class AlertsViewModel: ObservableObject {
             loadState = .loaded(models)
             lastSeenRevision = containerForRefresh?.storeRevision ?? lastSeenRevision
         } catch {
-            loadState = .failed(error)
+            if loadState.value == nil {
+                loadState = .failed(error)
+            }
         }
+    }
+
+    func refresh() async {
+        try? await containerForRefresh?.refreshSession()
+        await load()
+    }
+
+    func dismissActionError() {
+        actionError = nil
+    }
+
+    func retryLastAction() async {
+        guard let pending = pendingResolve else { return }
+        await resolve(
+            id: pending.id,
+            accepting: pending.accepting,
+            perform: pending.perform,
+            removeFromList: pending.removeFromList
+        )
     }
 
     func accept(_ request: FriendRequestAlertModel) async {
@@ -108,7 +151,7 @@ final class AlertsViewModel: ObservableObject {
     private func resolve(
         id: String,
         accepting: Bool,
-        perform: () async throws -> Void,
+        perform: @escaping () async throws -> Void,
         removeFromList: @escaping () -> Void
     ) async {
         guard resolvingIDs.insert(id).inserted else { return }
@@ -126,8 +169,21 @@ final class AlertsViewModel: ObservableObject {
             try await Task.sleep(nanoseconds: holdNanoseconds)
             removeFromList()
             lastSeenRevision = containerForRefresh?.storeRevision ?? lastSeenRevision
+            actionError = nil
+            pendingResolve = nil
         } catch {
-            loadState = .failed(error)
+            // Keep the list; do not force full-screen .failed on action errors.
+            pendingResolve = PendingResolve(
+                id: id,
+                accepting: accepting,
+                perform: perform,
+                removeFromList: removeFromList
+            )
+            actionError = ActionErrorState(
+                message: accepting
+                    ? AlertsMutationCopy.acceptFailed
+                    : AlertsMutationCopy.denyFailed
+            )
         }
     }
 
@@ -139,4 +195,9 @@ final class AlertsViewModel: ObservableObject {
     private func removeResolvedGroupInvite(_ id: String) {
         groupInvites.removeAll { $0.id == id }
     }
+}
+
+private enum AlertsMutationCopy {
+    static let acceptFailed = "Couldn't accept. Try again."
+    static let denyFailed = "Couldn't decline. Try again."
 }

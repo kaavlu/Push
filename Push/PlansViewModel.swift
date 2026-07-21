@@ -18,14 +18,25 @@ final class PlansViewModel: ObservableObject {
     @Published var isYourPushesPresented: Bool = false
     @Published var managedPlan: PlanData? = nil
     @Published var reviewFocusPlan: PlanData? = nil
+    @Published private(set) var actionError: ActionErrorState?
 
     private let container: AppDataContainer?
+    private let pushesOverride: PushRepository?
     private var referenceDate: Date
     private var monthDays: [CalendarDayData] = []
     // Holds the active store-change subscription; nil when container is absent.
     private var storeChangeSub: AnyCancellable?
     // Tracks the last revision we loaded so the subscription skips redundant reloads.
     private var lastSeenRevision = 0
+    private var pendingMutation: PendingMutation?
+
+    private var pushRepo: PushRepository? { pushesOverride ?? container?.pushes }
+
+    private enum PendingMutation {
+        case respond(planID: PlanData.ID, direction: SwipeDirection)
+        case cancel(plan: PlanData, index: Int)
+        case delete(plan: PlanData, index: Int)
+    }
 
     // `container` defaults via `?? .shared` (not `= .shared`) because default-argument
     // expressions are checked in a nonisolated context even inside a @MainActor
@@ -34,6 +45,7 @@ final class PlansViewModel: ObservableObject {
     init(container: AppDataContainer? = nil, referenceDate: Date = Date()) {
         let container = container ?? .shared
         self.container = container
+        self.pushesOverride = nil
         self.referenceDate = referenceDate
         let summary = Self.makeWeekSummary(from: [], for: referenceDate)
         weekDays = summary.days
@@ -49,8 +61,10 @@ final class PlansViewModel: ObservableObject {
     }
 
     /// Preview/test seam: serve injected cards without touching repositories.
-    init(plans: [PlanData], referenceDate: Date = Date()) {
+    /// Optional `pushes` override drives mutation tests without a full container.
+    init(plans: [PlanData], referenceDate: Date = Date(), pushes: PushRepository? = nil) {
         container = nil
+        self.pushesOverride = pushes
         self.referenceDate = referenceDate
         self.plans = plans
         let summary = Self.makeWeekSummary(from: [], for: referenceDate)
@@ -59,6 +73,29 @@ final class PlansViewModel: ObservableObject {
         totalPushesThisWeek = summary.totalPushes
         bestDayThisWeek = summary.bestDay
         loadState = .loaded(plans)
+    }
+
+    func dismissActionError() {
+        actionError = nil
+    }
+
+    func retryLastAction() async {
+        guard let pendingMutation else { return }
+        switch pendingMutation {
+        case .respond(let id, let direction):
+            guard let plan = plans.first(where: { $0.id == id }) else { return }
+            await respond(to: plan, with: direction)
+        case .cancel(let plan, _):
+            await cancel(plan: plan)
+        case .delete(let plan, _):
+            await delete(plan: plan)
+        }
+    }
+
+    /// Pull-to-refresh: re-warm the live session snapshot, then reload cards.
+    func refresh() async {
+        try? await container?.refreshSession()
+        await load()
     }
 
     func load() async {
@@ -162,43 +199,67 @@ final class PlansViewModel: ObservableObject {
         applyWeekSummary(from: monthDays)
     }
 
-    func respond(to plan: PlanData, with direction: SwipeDirection) {
+    func respond(to plan: PlanData, with direction: SwipeDirection) async {
         guard let idx = plans.firstIndex(where: { $0.id == plan.id }) else { return }
+        let previous = plans[idx].status
         let response: PushResponse.Response
         switch direction {
         case .right: response = .in
         case .left: response = .out
         case .up: response = .maybe
         }
-        // Update the pill synchronously so the swipe feels instant, then
-        // write through to the canonical response row.
+        // Optimistic pill so the swipe feels instant; roll back if the write fails.
         plans[idx].status = PlansContentBuilder.pill(for: response)
-        if let container {
-            Task {
-                try? await container.pushes.setCurrentUserResponse(planID: plan.id, response: response)
-            }
+        guard let pushRepo else { return }
+        do {
+            try await pushRepo.setCurrentUserResponse(planID: plan.id, response: response)
+            actionError = nil
+            pendingMutation = nil
+            lastSeenRevision = container?.storeRevision ?? lastSeenRevision
+        } catch {
+            plans[idx].status = previous
+            pendingMutation = .respond(planID: plan.id, direction: direction)
+            actionError = ActionErrorState(message: PlansMutationCopy.respondFailed)
         }
     }
 
     /// Owner-only. Removes the card immediately so the cancel feels instant,
     /// then writes through to the canonical push row.
-    func cancel(plan: PlanData) {
-        plans.removeAll { $0.id == plan.id }
-        if let container {
-            Task {
-                try? await container.pushes.cancelPush(planID: plan.id)
-            }
+    func cancel(plan: PlanData) async {
+        guard let idx = plans.firstIndex(where: { $0.id == plan.id }) else { return }
+        let snapshot = plans[idx]
+        plans.remove(at: idx)
+        guard let pushRepo else { return }
+        do {
+            try await pushRepo.cancelPush(planID: plan.id)
+            actionError = nil
+            pendingMutation = nil
+            lastSeenRevision = container?.storeRevision ?? lastSeenRevision
+        } catch {
+            let insertAt = min(idx, plans.count)
+            plans.insert(snapshot, at: insertAt)
+            pendingMutation = .cancel(plan: snapshot, index: insertAt)
+            actionError = ActionErrorState(message: PlansMutationCopy.cancelFailed)
         }
     }
 
     /// Owner-only. Hard-deletes the push (and its responses). Removes the
     /// card immediately, then writes through to the canonical push row.
-    func delete(plan: PlanData) {
-        plans.removeAll { $0.id == plan.id }
-        if let container {
-            Task {
-                try? await container.pushes.deletePush(planID: plan.id)
-            }
+    func delete(plan: PlanData) async {
+        guard let idx = plans.firstIndex(where: { $0.id == plan.id }) else { return }
+        let snapshot = plans[idx]
+        plans.remove(at: idx)
+        guard let pushRepo else { return }
+        do {
+            try await pushRepo.deletePush(planID: plan.id)
+            actionError = nil
+            pendingMutation = nil
+            lastSeenRevision = container?.storeRevision ?? lastSeenRevision
+        } catch {
+            let insertAt = min(idx, plans.count)
+            plans.insert(snapshot, at: insertAt)
+            pendingMutation = .delete(plan: snapshot, index: insertAt)
+            actionError = ActionErrorState(message: PlansMutationCopy.deleteFailed)
         }
     }
 
@@ -310,4 +371,10 @@ final class PlansViewModel: ObservableObject {
 private enum PlansWeekNavigationConstants {
     static let daysPerWeek = 7
     static let mondayOffsetAdjustment = 5
+}
+
+private enum PlansMutationCopy {
+    static let respondFailed = "Couldn't update your response. Try again."
+    static let cancelFailed = "Couldn't cancel this Push. Try again."
+    static let deleteFailed = "Couldn't delete this Push. Try again."
 }

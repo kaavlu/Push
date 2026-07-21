@@ -126,7 +126,7 @@ struct ReviewPushesView: View {
     }
 
     private func commit(plan: PlanData, direction: SwipeDirection) {
-        viewModel.respond(to: plan, with: direction)
+        Task { await viewModel.respond(to: plan, with: direction) }
         if focusPlan != nil {
             dismiss()
         } else {

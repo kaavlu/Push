@@ -52,7 +52,7 @@ final class AddGroupViewModel: ObservableObject {
     @Published private(set) var friends: [Person] = []
     @Published private(set) var loadState: LoadState<[Person]> = .idle
     @Published private(set) var isSubmitting = false
-    @Published var errorMessage: String?
+    @Published private(set) var actionError: ActionErrorState?
 
     private let container: AppDataContainer?
 
@@ -142,12 +142,16 @@ final class AddGroupViewModel: ObservableObject {
                 imageAssetPath: nil,
                 inviteeIDs: Array(selectedFriendIDs)
             )
-            errorMessage = nil
+            actionError = nil
             return groupID
         } catch {
-            errorMessage = "Couldn't create the group. Try again."
+            actionError = ActionErrorState(message: "Couldn't create the group. Try again.")
             return nil
         }
+    }
+
+    func dismissActionError() {
+        actionError = nil
     }
 
     private func loadPickedImage() {
