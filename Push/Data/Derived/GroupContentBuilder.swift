@@ -72,6 +72,8 @@ enum GroupContentBuilder {
                     activitySymbolName: status?.activity.symbolName ?? "moon.zzz.fill",
                     venueStatusText: isPending ? "Invite pending" : memberStatusText(status: status, places: places),
                     lastUpdated: memberLastUpdated(status: status, now: now),
+                    membershipID: membership.id,
+                    isOwner: membership.role == .owner,
                     isPending: isPending
                 )
             }

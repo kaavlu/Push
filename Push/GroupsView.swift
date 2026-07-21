@@ -23,25 +23,29 @@ struct GroupsView: View {
     }
 
     var body: some View {
-        content
+        groupsList
+            // Same system slide-up / slide-down as Profile (fullScreenCover).
+            .fullScreenCover(item: presentedGroupBinding) { group in
+                GroupDetailHost(
+                    viewModel: viewModel,
+                    group: group,
+                    onStartPush: { startPushContext = .group(group.id) }
+                )
+            }
             .fullScreenCover(item: $startPushContext) { context in
                 StartPushFlowView(context: context)
             }
     }
 
-    @ViewBuilder
-    private var content: some View {
-        if let group = viewModel.group(for: viewModel.presentedGroupID) {
-            GroupDetailView(
-                group: group,
-                members: viewModel.members(for: group),
-                onStartPush: { startPushContext = .group(group.id) }
-            ) {
-                viewModel.closeDetail()
+    private var presentedGroupBinding: Binding<PushGroupData?> {
+        Binding(
+            get: { viewModel.group(for: viewModel.presentedGroupID) },
+            set: { newValue in
+                if newValue == nil {
+                    viewModel.closeDetail()
+                }
             }
-        } else {
-            groupsList
-        }
+        )
     }
 
     private var groupsList: some View {
@@ -165,21 +169,12 @@ private struct GroupProfileImage: View {
     let group: PushGroupData
 
     var body: some View {
-        ZStack {
-            if let image = PushImageAssets.image(named: group.imageAssetName) {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFill()
-            } else {
-                GroupFallbackTile(group: group)
-            }
-        }
-        .frame(width: GroupsLayout.avatarSize(layout), height: GroupsLayout.avatarSize(layout))
-        .clipShape(RoundedRectangle(cornerRadius: GroupsLayout.avatarCornerRadius(layout), style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: GroupsLayout.avatarCornerRadius(layout), style: .continuous)
-                .stroke(.white.opacity(GroupsColor.avatarStrokeOpacity), lineWidth: GroupsLayout.avatarStrokeWidth)
-        }
+        GroupListAvatar(
+            imageAssetName: group.imageAssetName,
+            fallbackInitials: group.fallbackInitials,
+            size: GroupsLayout.avatarSize(layout),
+            cornerRadius: GroupsLayout.avatarCornerRadius(layout)
+        )
     }
 }
 

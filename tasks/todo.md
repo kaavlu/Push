@@ -1,3 +1,29 @@
+# Complete Group Lifecycle (Issue #43)
+
+- [x] Design: `docs/superpowers/specs/2026-07-20-complete-group-lifecycle-design.md`
+- [x] Plan: `docs/superpowers/plans/2026-07-20-complete-group-lifecycle.md`
+- [x] Migration `0015_group_lifecycle` (RPCs + `group-photos` Storage) — SQL in repo (renumbered after main's `0013` friend + `0014` delete account)
+- [x] `GroupRepository` lifecycle APIs + `GroupPhotoStoring`
+- [x] Mock lifecycle (`InMemoryDatabase+GroupLifecycle` / `LocalGroupRepository`) + tests
+- [x] Live RPCs + photo upload (`SupabaseGroupRepository` / `LiveDataStore` / `0015`)
+- [x] Add Group: create then `updateGroupPhoto` for picked JPEG
+- [x] Member presentation: `membershipID`, `isOwner`, `isPending`
+- [x] `GroupsViewModel` lifecycle mutations + `ActionErrorState` / retry
+- [x] Group Detail management UI (rename/photo/invite/cancel/remove/leave/transfer/delete)
+- [x] Focused verification suites + build + full suite
+
+## Verification
+- [x] `scripts/test.sh suite GroupLifecycleTests` — 17 tests, 0 failures
+- [x] `scripts/test.sh suite DataLayerTests` — 26 tests, 0 failures
+- [x] `scripts/test.sh suite LiveDataStoreTests` — 13 tests, 0 failures
+- [x] `scripts/test.sh suite GroupsTests` — 6 tests, 0 failures
+- [x] `scripts/test.sh build` — SUCCEEDED
+- [x] `scripts/test.sh full` — 251 tests, 0 failures
+- [ ] Live smoke (acceptance 1–16) when `0015` applied + two test accounts
+- [ ] Confirm remote apply of `0015_group_lifecycle` via MCP/CLI if not yet on project
+
+---
+
 # Issue #45 — Complete the Push Lifecycle and Live History
 
 **Design:** `docs/superpowers/specs/2026-07-20-complete-push-lifecycle-design.md`  

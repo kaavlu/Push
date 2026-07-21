@@ -5,9 +5,7 @@
 //  Created by Manav Khanvilkar on 6/29/26.
 //
 
-import Combine
 import Foundation
-import UIKit
 
 struct PushGroupData: Identifiable, Equatable {
     let id: String
@@ -40,7 +38,10 @@ struct PushGroupStat: Identifiable, Equatable {
 }
 
 struct PushGroupMemberData: Identifiable, Equatable {
+    /// Person id — stable row identity for friend rows.
     let id: String
+    /// `GroupMembership.id` for cancel-invite / membership mutations.
+    let membershipID: String
     let name: String
     let avatarPlaceholder: String
     let profileImageAssetName: String?
@@ -48,6 +49,8 @@ struct PushGroupMemberData: Identifiable, Equatable {
     let activitySymbolName: String
     let venueStatusText: String
     let lastUpdated: String
+    /// True when `GroupMembership.role == .owner`.
+    let isOwner: Bool
     /// True for an invited-but-not-yet-accepted member (`GroupMembership.Status.invited`).
     /// Default false keeps existing call sites (previews, tests) unaffected.
     let isPending: Bool
@@ -61,9 +64,12 @@ struct PushGroupMemberData: Identifiable, Equatable {
         activitySymbolName: String = "person.fill",
         venueStatusText: String? = nil,
         lastUpdated: String = "",
+        membershipID: String = "",
+        isOwner: Bool = false,
         isPending: Bool = false
     ) {
         self.id = id
+        self.membershipID = membershipID
         self.name = name
         self.avatarPlaceholder = avatarPlaceholder
         self.profileImageAssetName = profileImageAssetName
@@ -71,6 +77,7 @@ struct PushGroupMemberData: Identifiable, Equatable {
         self.activitySymbolName = activitySymbolName
         self.venueStatusText = venueStatusText ?? availability?.title ?? "Hidden right now"
         self.lastUpdated = lastUpdated
+        self.isOwner = isOwner
         self.isPending = isPending
     }
 
@@ -92,140 +99,5 @@ struct PushGroupMemberData: Identifiable, Equatable {
             ),
             groupLabel: nil
         )
-    }
-}
-
-@MainActor
-final class GroupsViewModel: ObservableObject {
-    @Published private(set) var groups: [PushGroupData] = []
-    @Published private(set) var selectedGroupID: String?
-    @Published private(set) var presentedGroupID: String?
-    @Published private(set) var loadState: LoadState<[PushGroupData]> = .idle
-
-    private let container: AppDataContainer?
-    private var membersByGroupID: [String: [PushGroupMemberData]] = [:]
-    // Holds the active store-change subscription; nil when container is absent.
-    private var storeChangeSub: AnyCancellable?
-    // Tracks the last revision we loaded so the subscription skips redundant reloads.
-    private var lastSeenRevision = 0
-    // Session-only picked photos for freshly-created groups. Never persisted
-    // (no Storage upload), so a fresh app launch reverts to the initials tile.
-    private var sessionImages: [String: UIImage] = [:]
-
-    // `container` defaults via `?? .shared` (not `= .shared`) because default-argument
-    // expressions are checked in a nonisolated context even inside a @MainActor
-    // initializer; `.shared` is a MainActor-isolated mutable static, so the fallback
-    // must live in the (MainActor) initializer body instead.
-    init(container: AppDataContainer? = nil) {
-        let container = container ?? .shared
-        self.container = container
-        Task { await load() }
-        // Subscribe after the initial load task so each real mutation triggers a reload.
-        storeChangeSub = container.onStoreChange { [weak self] revision in
-            guard let self, revision != self.lastSeenRevision else { return }
-            Task { await self.load() }
-        }
-    }
-
-    /// Preview/test seam: serve injected cards without touching repositories.
-    init(groups: [PushGroupData]) {
-        container = nil
-        self.groups = groups
-        selectedGroupID = groups.first?.id
-        loadState = .loaded(groups)
-    }
-
-    func load() async {
-        guard let container else { return }
-        if loadState.value == nil { loadState = .loading }
-        do {
-            let groupList = try await container.groups.groups()
-            let memberships = try await container.groups.memberships()
-            let statuses = try await container.friends.presenceStatuses()
-            let plans = try await container.pushes.activePlans()
-            let friendList = try await container.friends.friends()
-            let user = try await container.friends.currentUser()
-            let places = try await container.pushes.allPlaces()
-
-            let statusesByPersonID = Dictionary(
-                uniqueKeysWithValues: statuses.map { ($0.personID, $0) }
-            )
-            let peopleByID = Dictionary(
-                uniqueKeysWithValues: (friendList + [user]).map { ($0.id, $0) }
-            )
-            let placesByID = Dictionary(uniqueKeysWithValues: places.map { ($0.id, $0) })
-            let now = Date()
-            let cards = GroupContentBuilder.groupCards(
-                groups: groupList,
-                memberships: memberships,
-                statuses: statusesByPersonID,
-                plans: plans,
-                now: now
-            )
-            membersByGroupID = Dictionary(uniqueKeysWithValues: groupList.map { group in
-                (
-                    group.id,
-                    GroupContentBuilder.members(
-                        groupID: group.id,
-                        memberships: memberships,
-                        people: peopleByID,
-                        statuses: statusesByPersonID,
-                        places: placesByID,
-                        now: now
-                    )
-                )
-            })
-            groups = cards
-            if selectedGroupID == nil { selectedGroupID = cards.first?.id }
-            loadState = .loaded(cards)
-            // Stamp the revision so the subscription guard can detect duplicates.
-            lastSeenRevision = container.storeRevision
-        } catch {
-            loadState = .failed(error)
-        }
-    }
-
-    func stats(for group: PushGroupData) -> [PushGroupStat] {
-        [
-            PushGroupStat(id: "active-now", value: group.activeNowCount, label: "Active now"),
-            PushGroupStat(id: "nearby", value: group.nearbyCount, label: "Nearby"),
-            PushGroupStat(id: "plans", value: group.planCount, label: "Pushes")
-        ]
-    }
-
-    func isSelected(_ group: PushGroupData) -> Bool {
-        selectedGroupID == group.id
-    }
-
-    func select(_ group: PushGroupData) {
-        selectedGroupID = group.id
-    }
-
-    func openDetail(for group: PushGroupData) {
-        selectedGroupID = group.id
-        presentedGroupID = group.id
-    }
-
-    func closeDetail() {
-        presentedGroupID = nil
-    }
-
-    func group(for id: String?) -> PushGroupData? {
-        groups.first { $0.id == id }
-    }
-
-    func members(for group: PushGroupData) -> [PushGroupMemberData] {
-        membersByGroupID[group.id] ?? []
-    }
-
-    /// Registers a picked photo for `id` so its detail view can show it this
-    /// session even though it was never uploaded anywhere.
-    func registerSessionImage(_ image: UIImage?, forGroupID id: String) {
-        guard let image else { return }
-        sessionImages[id] = image
-    }
-
-    func sessionImage(for group: PushGroupData) -> UIImage? {
-        sessionImages[group.id]
     }
 }

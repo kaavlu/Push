@@ -7,15 +7,20 @@
 //  the exact same visual language while a photo is only picked, not yet
 //  persisted — see `overrideImage`.
 //
+//  Persisted paths may be bundle assets (mock seed), local file paths (mock
+//  upload), or HTTPS Storage URLs (live). Resolve via AvatarImageLoader —
+//  never PushImageAssets alone, or live photos never appear after upload.
+//
 
 import SwiftUI
+import UIKit
 
 struct GroupPhotoBadge: View {
     let imageAssetName: String?
     let fallbackInitials: String
-    /// A locally picked image that overrides the persisted asset. Session-only
-    /// by product decision (no Storage upload), so this is nil again on next launch.
+    /// In-flight / session override (picked image while upload runs, or local preview).
     let overrideImage: UIImage?
+    @State private var resolvedImage: UIImage?
 
     init(imageAssetName: String?, fallbackInitials: String, overrideImage: UIImage? = nil) {
         self.imageAssetName = imageAssetName
@@ -44,6 +49,10 @@ struct GroupPhotoBadge: View {
             radius: GroupPhotoBadgeLayout.imageShadowRadius,
             y: GroupPhotoBadgeLayout.imageShadowYOffset
         )
+        .task(id: imageAssetName) {
+            resolvedImage = nil
+            resolvedImage = await AvatarImageLoader.image(for: imageAssetName)
+        }
     }
 
     @ViewBuilder
@@ -52,7 +61,7 @@ struct GroupPhotoBadge: View {
             Image(uiImage: overrideImage)
                 .resizable()
                 .scaledToFill()
-        } else if let image = PushImageAssets.image(named: imageAssetName) {
+        } else if let image = resolvedImage ?? AvatarImageLoader.localImage(for: imageAssetName) {
             Image(uiImage: image)
                 .resizable()
                 .scaledToFill()

@@ -80,6 +80,28 @@ final class ProfilePhotoTests: XCTestCase {
         XCTAssertNil(ProfilePhotoPath.storageObjectPath(from: nil))
     }
 
+    func testGroupPhotoPathParsesPublicURLAndAvatarLoaderReadsFile() async throws {
+        let publicURL =
+            "https://tzzvwjhvjduyqywlszqc.supabase.co/storage/v1/object/public/group-photos/"
+            + "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/photo.jpg"
+        XCTAssertEqual(
+            GroupPhotoPath.storageObjectPath(from: publicURL),
+            "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/photo.jpg"
+        )
+        XCTAssertNil(GroupPhotoPath.storageObjectPath(from: "assets/groups/India/chitty.png"))
+
+        let jpeg = try XCTUnwrap(
+            ProfilePhotoProcessor.jpegData(
+                from: makeSolidImage(width: 32, height: 32, color: .orange)
+            )
+        )
+        let url = try GroupPhotoFileStore.save(groupID: "group-avatar-loader", jpegData: jpeg)
+        defer { GroupPhotoFileStore.remove(groupID: "group-avatar-loader") }
+        let loaded = await AvatarImageLoader.image(for: url.path)
+        XCTAssertNotNil(loaded, "group mock paths must resolve like profile files")
+        AvatarImageLoader.invalidate(path: url.path)
+    }
+
     func testLivePhotoUploadWritesPathAndRollsBackOnProfileFailure() async throws {
         let storage = ProfilePhotoStorageSpy()
         let loader = LiveDataLoaderSpy()

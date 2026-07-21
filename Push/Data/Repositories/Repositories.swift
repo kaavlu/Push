@@ -32,6 +32,18 @@ protocol FriendRepository {
     func removeFriend(_ personID: Person.ID) async throws
 }
 
+/// Errors from group lifecycle mutations (create, rename, photo, invite, leave, etc.).
+/// Maps to 0015 RPC exception strings for mock parity with live.
+enum GroupRepositoryError: Error, Equatable {
+    case notAuthenticated
+    case notOwner
+    case notMember
+    case invalidName
+    case invalidTarget
+    case transferRequired
+    case notPending
+}
+
 protocol GroupRepository {
     func groups() async throws -> [FriendGroup]
     func memberships() async throws -> [GroupMembership]
@@ -39,6 +51,15 @@ protocol GroupRepository {
     /// pending (`invited`) memberships for each invitee — they become members
     /// only after accepting via `AlertRepository.acceptGroupInvite`.
     func createGroup(name: String, imageAssetPath: String?, inviteeIDs: [Person.ID]) async throws -> FriendGroup.ID
+    func renameGroup(groupID: FriendGroup.ID, name: String) async throws
+    func updateGroupPhoto(groupID: FriendGroup.ID, jpegData: Data) async throws
+    func removeGroupPhoto(groupID: FriendGroup.ID) async throws
+    func inviteToGroup(groupID: FriendGroup.ID, inviteeIDs: [Person.ID]) async throws
+    func cancelGroupInvite(membershipID: GroupMembership.ID) async throws
+    func removeMember(groupID: FriendGroup.ID, personID: Person.ID) async throws
+    func leaveGroup(groupID: FriendGroup.ID) async throws
+    func transferOwnership(groupID: FriendGroup.ID, newOwnerID: Person.ID) async throws
+    func deleteGroup(groupID: FriendGroup.ID) async throws
 }
 
 /// Start Push flow output. `recipientIDs` are the flow's tokens

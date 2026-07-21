@@ -29,22 +29,34 @@ final class AppDataContainer {
         return try await preparedLive(
             store: store,
             currentUserID: currentUserID,
-            photoStorage: SupabaseProfilePhotoStorage(client: client)
+            photoStorage: SupabaseProfilePhotoStorage(client: client),
+            groupPhotoStorage: SupabaseGroupPhotoStorage(client: client)
         )
     }
 
     static func prepareLive(loader: LiveDataLoading, currentUserID: Person.ID) async throws -> AppDataContainer {
         let store = LiveDataStore(loader: loader)
-        return try await preparedLive(store: store, currentUserID: currentUserID, photoStorage: nil)
+        return try await preparedLive(
+            store: store,
+            currentUserID: currentUserID,
+            photoStorage: nil,
+            groupPhotoStorage: nil
+        )
     }
 
     private static func preparedLive(
         store: LiveDataStore,
         currentUserID: Person.ID,
-        photoStorage: ProfilePhotoStoring?
+        photoStorage: ProfilePhotoStoring?,
+        groupPhotoStorage: GroupPhotoStoring?
     ) async throws -> AppDataContainer {
         try await store.warm()
-        let container = live(store: store, currentUserID: currentUserID, photoStorage: photoStorage)
+        let container = live(
+            store: store,
+            currentUserID: currentUserID,
+            photoStorage: photoStorage,
+            groupPhotoStorage: groupPhotoStorage
+        )
         _ = try await container.friends.currentUser()
         return container
     }
@@ -118,7 +130,8 @@ final class AppDataContainer {
             store: LiveDataStore(loader: SupabaseLiveDataLoader(client: client)),
             currentUserID: currentUserID,
             referenceDate: referenceDate,
-            photoStorage: SupabaseProfilePhotoStorage(client: client)
+            photoStorage: SupabaseProfilePhotoStorage(client: client),
+            groupPhotoStorage: SupabaseGroupPhotoStorage(client: client)
         )
     }
 
@@ -126,14 +139,15 @@ final class AppDataContainer {
         store: LiveDataStore,
         currentUserID: Person.ID,
         referenceDate: Date = Date(),
-        photoStorage: ProfilePhotoStoring? = nil
+        photoStorage: ProfilePhotoStoring? = nil,
+        groupPhotoStorage: GroupPhotoStoring? = nil
     ) -> AppDataContainer {
         AppDataContainer(
             currentUserID: currentUserID,
             referenceDate: referenceDate,
             liveStore: store,
             friends: SupabaseFriendRepository(store: store, currentUserID: currentUserID),
-            groups: SupabaseGroupRepository(store: store),
+            groups: SupabaseGroupRepository(store: store, photoStorage: groupPhotoStorage),
             pushes: SupabasePushRepository(store: store, currentUserID: currentUserID),
             profile: SupabaseProfileRepository(
                 store: store, currentUserID: currentUserID, photoStorage: photoStorage
