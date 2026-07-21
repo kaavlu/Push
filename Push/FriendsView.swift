@@ -43,14 +43,11 @@ struct FriendsView: View {
     @ViewBuilder
     private var content: some View {
         if mode == .groups, let group = groupsViewModel.group(for: groupsViewModel.presentedGroupID) {
-            GroupDetailView(
+            GroupDetailHost(
+                viewModel: groupsViewModel,
                 group: group,
-                members: groupsViewModel.members(for: group),
-                sessionImage: groupsViewModel.sessionImage(for: group),
                 onStartPush: { launchStartPush(.group(group.id)) }
-            ) {
-                groupsViewModel.closeDetail()
-            }
+            )
         } else {
             mainScreen
         }

@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8F7E56FFC11CB99D0AB3A000 /* GroupDetailHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752E7BDA0403ABDCF49693B9 /* GroupDetailHost.swift */; };
+		1289A8F9D2A3F220F1BC1790 /* GroupDetailSheets.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFE3B5725FB0A3CDD544E54C /* GroupDetailSheets.swift */; };
+		4CB2A72284A6B87CA61BA674 /* GroupDetailManageViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F4317903BF3371CC8FEB1D /* GroupDetailManageViews.swift */; };
 		B09184B45A2F199F704FDE82 /* GroupsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CCC97BC34B987E4477716B9 /* GroupsViewModel.swift */; };
 		EDDCACAA80E4405F903DBF31 /* GroupPhotoFileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60EED318024ABC7E2B3FDF27 /* GroupPhotoFileStore.swift */; };
 		5FB6C20A375CDF8F5B078ED5 /* InMemoryDatabase+GroupLifecycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1805E47125FE669081B952 /* InMemoryDatabase+GroupLifecycle.swift */; };
@@ -222,6 +225,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		752E7BDA0403ABDCF49693B9 /* GroupDetailHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GroupDetailHost.swift"; sourceTree = "<group>"; };
+		CFE3B5725FB0A3CDD544E54C /* GroupDetailSheets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GroupDetailSheets.swift"; sourceTree = "<group>"; };
+		B5F4317903BF3371CC8FEB1D /* GroupDetailManageViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GroupDetailManageViews.swift"; sourceTree = "<group>"; };
 		9CCC97BC34B987E4477716B9 /* GroupsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GroupsViewModel.swift"; sourceTree = "<group>"; };
 		60EED318024ABC7E2B3FDF27 /* GroupPhotoFileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "GroupPhotoFileStore.swift"; path = "Data/GroupPhotoFileStore.swift"; sourceTree = "<group>"; };
 		3E1805E47125FE669081B952 /* InMemoryDatabase+GroupLifecycle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "InMemoryDatabase+GroupLifecycle.swift"; path = "Data/Store/InMemoryDatabase+GroupLifecycle.swift"; sourceTree = "<group>"; };
@@ -474,6 +480,9 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				752E7BDA0403ABDCF49693B9 /* GroupDetailHost.swift */,
+				CFE3B5725FB0A3CDD544E54C /* GroupDetailSheets.swift */,
+				B5F4317903BF3371CC8FEB1D /* GroupDetailManageViews.swift */,
 				9CCC97BC34B987E4477716B9 /* GroupsViewModel.swift */,
 				60EED318024ABC7E2B3FDF27 /* GroupPhotoFileStore.swift */,
 				3E1805E47125FE669081B952 /* InMemoryDatabase+GroupLifecycle.swift */,
@@ -829,6 +838,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				8F7E56FFC11CB99D0AB3A000 /* GroupDetailHost.swift in Sources */,
+				1289A8F9D2A3F220F1BC1790 /* GroupDetailSheets.swift in Sources */,
+				4CB2A72284A6B87CA61BA674 /* GroupDetailManageViews.swift in Sources */,
 				B09184B45A2F199F704FDE82 /* GroupsViewModel.swift in Sources */,
 				EDDCACAA80E4405F903DBF31 /* GroupPhotoFileStore.swift in Sources */,
 				5FB6C20A375CDF8F5B078ED5 /* InMemoryDatabase+GroupLifecycle.swift in Sources */,

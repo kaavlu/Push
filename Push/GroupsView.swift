@@ -32,13 +32,11 @@ struct GroupsView: View {
     @ViewBuilder
     private var content: some View {
         if let group = viewModel.group(for: viewModel.presentedGroupID) {
-            GroupDetailView(
+            GroupDetailHost(
+                viewModel: viewModel,
                 group: group,
-                members: viewModel.members(for: group),
                 onStartPush: { startPushContext = .group(group.id) }
-            ) {
-                viewModel.closeDetail()
-            }
+            )
         } else {
             groupsList
         }
