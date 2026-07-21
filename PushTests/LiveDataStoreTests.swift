@@ -128,6 +128,80 @@ final class LiveDataStoreTests: XCTestCase {
         XCTAssertEqual(profile.chosenAvailability, .freeNow)
         XCTAssertEqual(container.storeRevision, 0)
     }
+
+    func testRefreshClearsCachesAndRefetchesOnce() async throws {
+        let loader = LiveDataLoaderSpy()
+        loader.pushRows = [Self.samplePushRow(id: "push-1", creator: "self")]
+        let store = LiveDataStore(loader: loader)
+        try await store.warm()
+        XCTAssertEqual(loader.loadCounts, [1, 1, 1, 1, 1, 1])
+
+        loader.pushRows = [
+            Self.samplePushRow(id: "push-1", creator: "self"),
+            Self.samplePushRow(id: "push-2", creator: "friend")
+        ]
+        var revisions: [Int] = []
+        let sub = store.onChange { revisions.append($0) }
+
+        try await store.refresh()
+
+        let pushes = try await store.pushes()
+        XCTAssertEqual(pushes.map(\.id), ["push-1", "push-2"])
+        XCTAssertEqual(loader.loadCounts, [2, 2, 2, 2, 2, 2])
+        XCTAssertEqual(revisions, [1])
+        XCTAssertEqual(store.revision, 1)
+        _ = sub
+    }
+
+    func testConcurrentRefreshSharesOneInFlight() async throws {
+        let loader = LiveDataLoaderSpy()
+        let store = LiveDataStore(loader: loader)
+        try await store.warm()
+        loader.loadCounts = [0, 0, 0, 0, 0, 0]
+
+        async let a: Void = store.refresh()
+        async let b: Void = store.refresh()
+        _ = try await (a, b)
+
+        XCTAssertEqual(loader.loadCounts, [1, 1, 1, 1, 1, 1])
+        XCTAssertEqual(store.revision, 1)
+    }
+
+    func testFailedRefreshLeavesCacheAndRevisionUntouched() async throws {
+        let loader = LiveDataLoaderSpy()
+        loader.pushRows = [Self.samplePushRow(id: "push-1", creator: "self")]
+        let store = LiveDataStore(loader: loader)
+        try await store.warm()
+        let before = store.revision
+        loader.shouldFailLoads = true
+
+        do {
+            try await store.refresh()
+            XCTFail("expected throw")
+        } catch {
+            // expected
+        }
+
+        loader.shouldFailLoads = false
+        let pushes = try await store.pushes()
+        XCTAssertEqual(pushes.map(\.id), ["push-1"])
+        XCTAssertEqual(store.revision, before)
+    }
+
+    func testRefreshSessionOnPreparedContainerRefetches() async throws {
+        let loader = LiveDataLoaderSpy()
+        let container = try await AppDataContainer.prepareLive(loader: loader, currentUserID: "self")
+        XCTAssertEqual(loader.loadCounts, [1, 1, 1, 1, 1, 1])
+        try await container.refreshSession()
+        XCTAssertEqual(loader.loadCounts, [2, 2, 2, 2, 2, 2])
+    }
+
+    func testRefreshSessionOnMockIsNoOp() async throws {
+        let container = AppDataContainer(seed: .standard())
+        let before = container.storeRevision
+        try await container.refreshSession()
+        XCTAssertEqual(container.storeRevision, before)
+    }
 }
 
 // Not `private`: reused by `SupabasePushRepositoryTests` for stateful push
@@ -138,6 +212,7 @@ final class LiveDataLoaderSpy: LiveDataLoading {
     var loadCounts = [0, 0, 0, 0, 0, 0]
     var maximumConcurrentLoads = 0
     var writeError: Error?
+    var shouldFailLoads = false
     var duplicateProfiles = false
     var pushRows: [PushRow] = []
     var responseRows: [PushResponseRow] = []
@@ -191,6 +266,7 @@ final class LiveDataLoaderSpy: LiveDataLoading {
     }
 
     private func load(index: Int) async throws {
+        if shouldFailLoads { throw TestFailure.expected }
         loadCounts[index] += 1
         activeLoads += 1
         maximumConcurrentLoads = max(maximumConcurrentLoads, activeLoads)

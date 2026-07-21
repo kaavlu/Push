@@ -77,6 +77,12 @@ final class AppDataContainer {
         return liveRevision.dropFirst().sink(receiveValue: handler)
     }
 
+    /// Live: re-warm the session snapshot. Mock: no-op success.
+    func refreshSession() async throws {
+        guard let liveStore else { return }
+        try await liveStore.refresh()
+    }
+
     /// MOCK: unchanged behavior — InMemoryDatabase + Local* repos.
     init(seed: SeedData, referenceDate: Date = Date()) {
         let database = InMemoryDatabase(seed: seed)

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		74E5ED98452F902FB59D46ED /* SessionRefreshConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 302309E0CF78B089472018B9 /* SessionRefreshConstants.swift */; };
 		5FAB0B553AFFCA8F7157CCFD /* MapPuckHitTestingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30EC8288ED6D5DFC46693E12 /* MapPuckHitTestingTests.swift */; };
 		07CCE2B52DAC859603B5A453 /* MapPuckHitTesting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88BD1A7599AF82CCE11F237E /* MapPuckHitTesting.swift */; };
 		B00A9F868BBB73CD5878C563 /* GroupRequestCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D441287507AB63FE03C26733 /* GroupRequestCard.swift */; };
@@ -203,6 +204,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		302309E0CF78B089472018B9 /* SessionRefreshConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SessionRefreshConstants.swift"; path = "Data/SessionRefreshConstants.swift"; sourceTree = "<group>"; };
 		30EC8288ED6D5DFC46693E12 /* MapPuckHitTestingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MapPuckHitTestingTests.swift"; sourceTree = "<group>"; };
 		88BD1A7599AF82CCE11F237E /* MapPuckHitTesting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MapPuckHitTesting.swift"; sourceTree = "<group>"; };
 		D441287507AB63FE03C26733 /* GroupRequestCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GroupRequestCard.swift"; sourceTree = "<group>"; };
@@ -436,6 +438,7 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				302309E0CF78B089472018B9 /* SessionRefreshConstants.swift */,
 				88BD1A7599AF82CCE11F237E /* MapPuckHitTesting.swift */,
 				D441287507AB63FE03C26733 /* GroupRequestCard.swift */,
 				BB8CC3E7DC54B6D8F764187B /* AddGroupStep3ReviewView.swift */,
@@ -772,6 +775,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				74E5ED98452F902FB59D46ED /* SessionRefreshConstants.swift in Sources */,
 				07CCE2B52DAC859603B5A453 /* MapPuckHitTesting.swift in Sources */,
 				B00A9F868BBB73CD5878C563 /* GroupRequestCard.swift in Sources */,
 				14F2A9AC97337702850AC6E1 /* AddGroupStep3ReviewView.swift in Sources */,

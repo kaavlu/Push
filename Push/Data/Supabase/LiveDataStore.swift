@@ -134,6 +134,8 @@ final class LiveDataStore {
     private var pushesTask: Task<[PushRow], Error>?
     private var responsesTask: Task<[PushResponseRow], Error>?
     private let revisionSubject = CurrentValueSubject<Int, Never>(0)
+    private var refreshTask: Task<Void, Error>?
+    private var lastSuccessfulRefreshAt: Date?
 
     init(loader: LiveDataLoading) { self.loader = loader }
 
@@ -151,6 +153,83 @@ final class LiveDataStore {
         async let pushes = pushes()
         async let responses = pushResponses()
         _ = try await (profiles, groups, memberships, policies, pushes, responses)
+    }
+
+    /// Clears session caches, re-warms, and publishes one revision on success.
+    /// Concurrent callers await the same in-flight task. A new refresh started
+    /// within `SessionRefreshConstants.minimumInterval` of a successful one is a no-op.
+    /// Failed re-warms restore the prior snapshot and do not bump revision.
+    func refresh() async throws {
+        if let refreshTask {
+            try await refreshTask.value
+            return
+        }
+        if let lastSuccessfulRefreshAt,
+           Date().timeIntervalSince(lastSuccessfulRefreshAt) < SessionRefreshConstants.minimumInterval {
+            return
+        }
+        let task = Task { try await performRefresh() }
+        refreshTask = task
+        do {
+            try await task.value
+            refreshTask = nil
+        } catch {
+            refreshTask = nil
+            throw error
+        }
+    }
+
+    private func performRefresh() async throws {
+        let snapshot = SessionCacheSnapshot(
+            profileRows: profileRows,
+            groupRows: groupRows,
+            membershipRows: membershipRows,
+            policyRows: policyRows,
+            pushRows: pushRows,
+            responseRows: responseRows
+        )
+        clearAllSessionCaches()
+        do {
+            try await warm()
+            lastSuccessfulRefreshAt = Date()
+            revisionSubject.value += 1
+        } catch {
+            restoreSessionCaches(from: snapshot)
+            throw error
+        }
+    }
+
+    private func clearAllSessionCaches() {
+        profileRows = nil
+        groupRows = nil
+        membershipRows = nil
+        policyRows = nil
+        pushRows = nil
+        responseRows = nil
+        profilesTask = nil
+        groupsTask = nil
+        membershipsTask = nil
+        policiesTask = nil
+        pushesTask = nil
+        responsesTask = nil
+    }
+
+    private func restoreSessionCaches(from snapshot: SessionCacheSnapshot) {
+        profileRows = snapshot.profileRows
+        groupRows = snapshot.groupRows
+        membershipRows = snapshot.membershipRows
+        policyRows = snapshot.policyRows
+        pushRows = snapshot.pushRows
+        responseRows = snapshot.responseRows
+    }
+
+    private struct SessionCacheSnapshot {
+        let profileRows: [ProfileRow]?
+        let groupRows: [GroupRow]?
+        let membershipRows: [GroupMembershipRow]?
+        let policyRows: [SharingPolicyRow]?
+        let pushRows: [PushRow]?
+        let responseRows: [PushResponseRow]?
     }
 
     func profiles() async throws -> [ProfileRow] {
