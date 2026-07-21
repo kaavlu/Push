@@ -116,6 +116,10 @@ final class ProfileViewModel: ObservableObject {
         ProfileRoute.allCases.filter { $0.section == .privacy }
     }
 
+    var legalDestinations: [LegalDestination] {
+        LegalDestinations.all
+    }
+
     var visibilitySummary: String {
         if isGhostModeEnabled {
             return "Hidden from friends' map and social context until you turn Ghost Mode off."

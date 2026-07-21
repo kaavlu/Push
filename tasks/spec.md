@@ -568,3 +568,33 @@ Replace placeholder friend and group mock data with local real-life seed data re
 - Friend pucks and group members use images under `assets/friends`.
 - Groups list is derived from the real folders: `India`, `Exec`, and `Michigan`.
 - Tests assert the real seed names, memberships, and asset paths.
+# Legal Destinations (Issue #36)
+
+## Goal
+Make Terms of Service and Privacy Policy actions real and consistent across the app while production documents are still awaiting hosting.
+
+## Contract
+- `LegalDestinations` is the single source of truth for both URLs and legal-row metadata.
+- Until hosted documents exist, both destinations use reachable HTTPS placeholder pages with distinct query markers.
+- Production auth welcome and the DEBUG onboarding lab render tappable inline Terms and Privacy links.
+- Profile exposes a Legal card whose rows open the same destinations outside the app.
+- No legal-looking text remains styled as interactive without an action.
+- `docs/app-store-privacy.md` records current disclosure inputs and clearly separates implemented collection from future features.
+
+## Replacement Procedure
+1. Publish the final legal documents at stable public HTTPS URLs that require no authentication.
+2. Replace `termsURL` and `privacyURL` in `Push/LegalDestinations.swift`.
+3. Run `LegalDestinationsTests`, the build, and manually open all four entry points in a Release build.
+4. Re-check `docs/app-store-privacy.md` against the shipping binary before App Store submission.
+
+## Acceptance Criteria
+- Both centralized URLs are valid HTTPS URLs and open a reachable destination.
+- Onboarding Terms and Privacy are individually tappable.
+- Profile contains Terms of Service and Privacy Policy rows.
+- Focused tests guard titles, URLs, HTTPS, and the placeholder marker.
+- App Store privacy disclosure inputs are documented.
+
+## Release Blocker
+The placeholder URLs do not contain Push's legal documents. They must be replaced before public distribution.
+
+---
