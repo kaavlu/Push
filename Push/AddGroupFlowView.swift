@@ -136,7 +136,10 @@ struct AddGroupFlowView: View {
 
     private func submitAndFinish() async {
         guard let groupID = await viewModel.submit() else { return }
-        onCreated(groupID, viewModel.pickedImage)
+        // Only register a session photo when upload succeeded — otherwise the
+        // UI would show an image that was never saved (create OK, photo fail).
+        let sessionPhoto = viewModel.actionError == nil ? viewModel.pickedImage : nil
+        onCreated(groupID, sessionPhoto)
         dismiss()
     }
 }
