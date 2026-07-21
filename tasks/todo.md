@@ -1,3 +1,20 @@
+# Account Deletion (Issue #48)
+
+- [x] Design: `docs/superpowers/specs/2026-07-20-account-deletion-design.md`
+- [x] Plan: `docs/superpowers/plans/2026-07-20-account-deletion.md`
+- [x] Migration `0013_delete_account` (parameterless RPC; transfer-then-delete groups)
+- [x] `AuthService.deleteAccount` + Fake + user message
+- [x] `RootView` `DeleteAccountAction` (live-only; gate only after RPC success)
+- [x] Profile confirmation + busy + recoverable `ActionErrorBanner`
+- [x] Focused tests `DeleteAccountTests` (6) + pbxproj registration
+- [ ] Apply migration to remote Supabase (MCP auth unavailable in this session)
+- [ ] Live smoke: throwaway user delete → sign-in fails
+
+## Verification
+- [x] `scripts/test.sh suite DeleteAccountTests` — 6 tests, 0 failures
+
+---
+
 # Legal Destinations (Issue #36)
 
 - [x] Define feature contract and replacement procedure.

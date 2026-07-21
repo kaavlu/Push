@@ -12,10 +12,14 @@ struct ProfileView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.pushLayout) private var layout
     @Environment(\.signOut) private var signOut
+    @Environment(\.deleteAccount) private var deleteAccount
     @StateObject private var viewModel: ProfileViewModel
     @State private var navigationPath: [ProfileRoute] = []
     @State private var isSignOutConfirmationPresented = false
     @State private var isSigningOut = false
+    @State private var isDeleteAccountConfirmationPresented = false
+    @State private var isDeletingAccount = false
+    @State private var deleteAccountError: ActionErrorState?
     private let onClose: (() -> Void)?
 
     @MainActor
@@ -97,6 +101,16 @@ struct ProfileView: View {
             Button("Sign Out", role: .destructive) { performSignOut() }
             Button("Cancel", role: .cancel) { }
         }
+        .confirmationDialog(
+            "Delete Account?",
+            isPresented: $isDeleteAccountConfirmationPresented,
+            titleVisibility: .visible
+        ) {
+            Button("Delete Account", role: .destructive) { performDeleteAccount() }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text(ProfileCopy.deleteAccountConfirmationMessage)
+        }
     }
 
     private var profileContent: some View {
@@ -117,11 +131,25 @@ struct ProfileView: View {
                 ProfileRoutesCard(title: "Privacy", routes: viewModel.privacyRoutes)
                 ProfileConnectCard(viewModel: viewModel)
                 ProfileLegalCard(destinations: viewModel.legalDestinations)
+                if let deleteAccountError {
+                    ActionErrorBanner(
+                        message: deleteAccountError.message,
+                        onRetry: { performDeleteAccount() },
+                        onDismiss: { self.deleteAccountError = nil }
+                    )
+                    .padding(.top, ProfileLayout.signOutTopPadding)
+                }
                 if signOut.isAvailable {
                     SignOutButton(isBusy: isSigningOut) {
                         isSignOutConfirmationPresented = true
                     }
                     .padding(.top, ProfileLayout.signOutTopPadding)
+                }
+                if deleteAccount.isAvailable {
+                    DeleteAccountButton(isBusy: isDeletingAccount) {
+                        isDeleteAccountConfirmationPresented = true
+                    }
+                    .padding(.top, ProfileLayout.deleteAccountTopPadding)
                 }
             }
             .padding(.horizontal, ProfileLayout.horizontalPadding(layout))
@@ -146,6 +174,29 @@ struct ProfileView: View {
             isSigningOut = false
         }
     }
+
+    /// RPC must succeed before RootView leaves `.app`. Failures stay signed in
+    /// and surface a recoverable banner (never optimistic dismiss).
+    private func performDeleteAccount() {
+        guard !isDeletingAccount else { return }
+        isDeletingAccount = true
+        deleteAccountError = nil
+        Task {
+            do {
+                try await deleteAccount()
+            } catch {
+                deleteAccountError = ActionErrorState(
+                    message: AuthUserMessage.message(for: error, context: .deleteAccount)
+                )
+            }
+            isDeletingAccount = false
+        }
+    }
+}
+
+private enum ProfileCopy {
+    static let deleteAccountConfirmationMessage =
+        "This permanently deletes your account, profile, friend connections, group membership, and pushes you created. This cannot be undone."
 }
 
 private struct ProfileLegalCard: View {
@@ -305,12 +356,37 @@ private struct SignOutButton: View {
     }
 }
 
+private struct DeleteAccountButton: View {
+    let isBusy: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: ProfileLayout.signOutSpacing) {
+                if isBusy {
+                    ProgressView()
+                } else {
+                    Text("Delete Account")
+                        .font(.subheadline.weight(.bold))
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, ProfileLayout.signOutVerticalPadding)
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(.red)
+        .disabled(isBusy)
+        .accessibilityLabel("Delete account")
+    }
+}
+
 #if DEBUG
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
         PushPreviewMatrix {
             ProfileView()
                 .environment(\.signOut, SignOutAction { })
+                .environment(\.deleteAccount, DeleteAccountAction { })
         }
     }
 }

@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-20  
 **Issue:** [kaavlu/Push#48](https://github.com/kaavlu/Push/issues/48)  
-**Status:** Approved design — ready for implementation plan
+**Status:** Implemented (client + migration file); remote apply + live smoke pending
 
 ## Problem
 

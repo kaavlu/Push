@@ -53,6 +53,7 @@ enum ProfileLayout {
     static let signOutTopPadding: CGFloat = 4
     static let signOutVerticalPadding: CGFloat = 14
     static let signOutSpacing: CGFloat = 8
+    static let deleteAccountTopPadding: CGFloat = 8
 }
 
 enum ProfileColor {
