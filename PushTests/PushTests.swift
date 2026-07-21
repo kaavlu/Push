@@ -243,10 +243,12 @@ final class PushTests: XCTestCase {
     }
 
     @MainActor
-    func testProfileViewModelExposesPhotoEditingPlaceholder() async throws {
+    func testProfileViewModelExposesPhotoEditingSheet() async throws {
         let viewModel = await loadedProfileViewModel()
 
         XCTAssertFalse(viewModel.isPhotoEditorPresented)
+        // Seed user has a bundled profile image.
+        XCTAssertTrue(viewModel.hasProfilePhoto)
 
         viewModel.beginPhotoEditing()
 

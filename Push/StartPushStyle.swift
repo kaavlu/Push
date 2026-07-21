@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 enum StartPushLayout {
     static func horizontalPadding(_ layout: PushAdaptiveLayout) -> CGFloat { layout.modalHorizontalPadding }
@@ -166,16 +167,21 @@ struct RecipientAvatarView: View {
     let imageAssetName: String?
     let initials: String
     let size: CGFloat
+    @State private var remoteImage: UIImage?
 
     var body: some View {
         avatarContent
             .frame(width: size, height: size)
             .clipShape(Circle())
+            .task(id: imageAssetName) {
+                remoteImage = nil
+                remoteImage = await AvatarImageLoader.image(for: imageAssetName)
+            }
     }
 
     @ViewBuilder
     private var avatarContent: some View {
-        if let image = PushImageAssets.image(named: imageAssetName) {
+        if let image = remoteImage ?? AvatarImageLoader.localImage(for: imageAssetName) {
             Image(uiImage: image)
                 .resizable()
                 .scaledToFill()

@@ -9,11 +9,12 @@ import UIKit
 struct ProfilePhotoAvatar: View {
     let imageAssetName: String?
     let fallbackInitials: String
+    @State private var remoteImage: UIImage?
 
     var body: some View {
         GeometryReader { proxy in
             Group {
-                if let image = PushImageAssets.image(named: imageAssetName) {
+                if let image = displayImage {
                     Image(uiImage: image)
                         .resizable()
                         .scaledToFill()
@@ -38,6 +39,14 @@ struct ProfilePhotoAvatar: View {
             }
         }
         .clipShape(Circle())
+        .task(id: imageAssetName) {
+            remoteImage = nil
+            remoteImage = await AvatarImageLoader.image(for: imageAssetName)
+        }
+    }
+
+    private var displayImage: UIImage? {
+        remoteImage ?? AvatarImageLoader.localImage(for: imageAssetName)
     }
 }
 

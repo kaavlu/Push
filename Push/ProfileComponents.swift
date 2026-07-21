@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct ProfileHeader: View {
     @Environment(\.pushLayout) private var layout
@@ -55,6 +56,7 @@ struct ProfileAvatar: View {
     let initials: String
     let imageAssetName: String?
     let action: () -> Void
+    @State private var remoteImage: UIImage?
 
     var body: some View {
         Button(action: action) {
@@ -71,22 +73,27 @@ struct ProfileAvatar: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Edit profile photo")
+        .task(id: imageAssetName) {
+            remoteImage = nil
+            remoteImage = await AvatarImageLoader.image(for: imageAssetName)
+        }
     }
 
     @ViewBuilder
     private var avatarContent: some View {
-        if let image = PushImageAssets.image(named: imageAssetName) {
+        let size = ProfileLayout.avatarSize(layout)
+        if let image = remoteImage ?? AvatarImageLoader.localImage(for: imageAssetName) {
             Image(uiImage: image)
                 .resizable()
                 .scaledToFill()
-                .frame(width: ProfileLayout.avatarSize(layout), height: ProfileLayout.avatarSize(layout))
+                .frame(width: size, height: size)
                 .clipShape(Circle())
                 .overlay(ProfileAvatarStroke())
         } else {
             Text(initials)
                 .font(.system(size: ProfileLayout.avatarTextSize(layout), weight: .bold, design: .rounded))
                 .foregroundStyle(PushControlColors.activeForeground)
-                .frame(width: ProfileLayout.avatarSize(layout), height: ProfileLayout.avatarSize(layout))
+                .frame(width: size, height: size)
                 .background(Circle().fill(PushControlColors.activeFill))
                 .overlay(ProfileAvatarStroke())
         }
