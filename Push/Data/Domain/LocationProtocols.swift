@@ -25,7 +25,7 @@ protocol LocationProviding: AnyObject {
 // MARK: - Session (app lifetime)
 
 /// App-lifetime owner of tracking state. Retained by prepared `AppDataContainer`
-/// in a later PR — not by `MapViewModel`.
+/// — not by `MapViewModel`.
 @MainActor
 protocol LocationSessioning: AnyObject {
     var state: LocationTrackingState { get }
@@ -34,8 +34,11 @@ protocol LocationSessioning: AnyObject {
     func startIfEligible() async
     func stop()
     /// Explicit teardown: stop provider, cancel upload tasks, drop streams. Idempotent.
-    /// Does not itself guarantee server unpublish — lifecycle matrix is a later PR.
+    /// Does not itself guarantee server unpublish — see `unpublishBestEffort()`.
     func shutdown()
+    /// Best-effort presence unpublish (short timeout). Does not throw; safe offline.
+    /// Call while auth JWT may still be valid, before `shutdown()`.
+    func unpublishBestEffort() async
     func handleLifecyclePhase(_ phase: LocationLifecyclePhase) async
 }
 
@@ -66,5 +69,8 @@ protocol PresenceInferring: Sendable {
 /// Network/upload edge for current presence. Must not require MainActor execution.
 protocol PresenceSyncing: AnyObject, Sendable {
     func upsertCurrentPresence(_ draft: PresenceStatusDraft) async throws
+    /// Clear friend-visible presence (Ghost / sign-out / permission loss).
+    /// Implementations may no-op until live write lands.
+    func unpublishCurrentPresence() async throws
     func flushPending() async throws
 }
