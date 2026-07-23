@@ -381,7 +381,8 @@ final class InMemoryDatabase: ObservableObject {
                 activity: status.activity, placeID: status.placeID,
                 statusNote: status.statusNote, confidence: status.confidence,
                 observedAt: status.observedAt, updatedAt: Date(),
-                expiresAt: status.expiresAt, source: .manualOverride
+                expiresAt: status.expiresAt, source: .manualOverride,
+                isPublished: status.isPublished
             )
         }
         profile = UserProfile(
