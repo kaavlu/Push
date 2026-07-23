@@ -20,7 +20,7 @@ final class AppDataContainer {
     @discardableResult
     static func installLive(client: SupabaseClient, currentUserID: Person.ID) -> AppDataContainer {
         let container = live(client: client, currentUserID: currentUserID)
-        shared = container
+        installPreparedLive(container)
         return container
     }
 
@@ -61,8 +61,25 @@ final class AppDataContainer {
         return container
     }
 
+    /// Install a prepared live container. Shuts down the previous session first
+    /// (no unpublish — mid-session swap of the same user must not clear presence).
     static func installPreparedLive(_ container: AppDataContainer) {
+        shared.shutdownLocationSession()
         shared = container
+        Task { await container.locationSession?.startIfEligible() }
+    }
+
+    /// Sign-out / delete-account path: optional best-effort unpublish → session
+    /// shutdown → safe idle mock container. Never blocks forever on network.
+    /// - Parameter attemptUnpublish: `true` for sign-out (JWT still valid).
+    ///   `false` after successful account deletion (server cascade owns presence).
+    static func shutdownSharedAndReinstallMock(attemptUnpublish: Bool = true) async {
+        if attemptUnpublish {
+            await shared.teardownLocationForSignOut()
+        } else {
+            shared.shutdownLocationSession()
+        }
+        shared = AppDataContainer(seed: .standard())
     }
 
     /// Present only in mock mode; live mode has no local store (reads-only Day 1).
@@ -78,6 +95,10 @@ final class AppDataContainer {
     let referenceDate: Date
 
     let currentUserID: Person.ID
+
+    /// App-lifetime location pipeline. Independent of map tab visibility.
+    /// Tests may inject a `FakeLocationSession`; production uses factory defaults.
+    private(set) var locationSession: LocationSessioning?
 
     /// Prepared live mode publishes snapshot write-through revisions. The fallback
     /// subject keeps the synchronous, unprepared constructor useful in isolation tests.
@@ -101,12 +122,25 @@ final class AppDataContainer {
         try await liveStore.refresh()
     }
 
+    /// Stop the location pipeline without unpublish (container swap / idle).
+    func shutdownLocationSession() {
+        locationSession?.shutdown()
+        locationSession = nil
+    }
+
+    /// Sign-out order: best-effort unpublish while JWT may still be valid, then shutdown.
+    func teardownLocationForSignOut() async {
+        await locationSession?.unpublishBestEffort()
+        shutdownLocationSession()
+    }
+
     /// MOCK: unchanged behavior — InMemoryDatabase + Local* repos.
     /// `clock` is for lifecycle filtering in tests that freeze seed time; app uses wall clock.
     init(
         seed: SeedData,
         referenceDate: Date = Date(),
-        clock: (@Sendable () -> Date)? = nil
+        clock: (@Sendable () -> Date)? = nil,
+        locationSession: LocationSessioning? = nil
     ) {
         let database = InMemoryDatabase(seed: seed)
         self.database = database
@@ -121,6 +155,13 @@ final class AppDataContainer {
         self.sharing = LocalSharingRepository(database: database)
         self.feed = LocalFeedRepository(database: database)
         self.alerts = LocalAlertRepository(database: database)
+        // Explicit nil means "build default"; pass FakeLocationSession for tests.
+        // Use a sentinel-free approach: optional with default factory when not injected.
+        if let locationSession {
+            self.locationSession = locationSession
+        } else {
+            self.locationSession = LocationSessionFactory.makeDefault(personID: database.currentUserID)
+        }
     }
 
     /// LIVE: Supabase-backed reads; identity from the auth session.
@@ -140,7 +181,8 @@ final class AppDataContainer {
         currentUserID: Person.ID,
         referenceDate: Date = Date(),
         photoStorage: ProfilePhotoStoring? = nil,
-        groupPhotoStorage: GroupPhotoStoring? = nil
+        groupPhotoStorage: GroupPhotoStoring? = nil,
+        locationSession: LocationSessioning? = nil
     ) -> AppDataContainer {
         AppDataContainer(
             currentUserID: currentUserID,
@@ -154,14 +196,25 @@ final class AppDataContainer {
             ),
             sharing: SupabaseSharingRepository(store: store),
             feed: EmptyLiveFeedRepository(),
-            alerts: SupabaseAlertRepository(store: store, currentUserID: currentUserID)
+            alerts: SupabaseAlertRepository(store: store, currentUserID: currentUserID),
+            locationSession: locationSession
+                ?? LocationSessionFactory.makeDefault(personID: currentUserID)
         )
     }
 
-    private init(currentUserID: Person.ID, referenceDate: Date, liveStore: LiveDataStore,
-                 friends: FriendRepository, groups: GroupRepository, pushes: PushRepository,
-                 profile: ProfileRepository, sharing: SharingRepository, feed: FeedRepository,
-                 alerts: AlertRepository) {
+    private init(
+        currentUserID: Person.ID,
+        referenceDate: Date,
+        liveStore: LiveDataStore,
+        friends: FriendRepository,
+        groups: GroupRepository,
+        pushes: PushRepository,
+        profile: ProfileRepository,
+        sharing: SharingRepository,
+        feed: FeedRepository,
+        alerts: AlertRepository,
+        locationSession: LocationSessioning?
+    ) {
         self.database = nil
         self.currentUserID = currentUserID
         self.referenceDate = referenceDate
@@ -169,5 +222,6 @@ final class AppDataContainer {
         self.friends = friends; self.groups = groups; self.pushes = pushes
         self.profile = profile; self.sharing = sharing; self.feed = feed
         self.alerts = alerts
+        self.locationSession = locationSession
     }
 }

@@ -77,8 +77,8 @@ final class FakeLocationProvider: LocationProviding {
 
     func stopUpdating() {
         stopCount += 1
-        continuation?.finish()
-        continuation = nil
+        // Keep the stream open so session restart can re-subscribe without
+        // rebuilding the provider (matches SimulatedLocationProvider).
     }
 
     func emit(_ observation: LocationObservation) {
@@ -98,7 +98,11 @@ final class FakeLocationSession: LocationSessioning {
     private(set) var startIfEligibleCount = 0
     private(set) var stopCount = 0
     private(set) var shutdownCount = 0
+    private(set) var unpublishCount = 0
     private(set) var lastLifecyclePhase: LocationLifecyclePhase?
+    /// When true, `unpublishBestEffort` delays briefly so tests can observe ordering.
+    var unpublishDelayNanoseconds: UInt64 = 0
+    private var isShutDown = false
 
     var statePublisher: AnyPublisher<LocationTrackingState, Never> {
         $state.eraseToAnyPublisher()
@@ -110,6 +114,7 @@ final class FakeLocationSession: LocationSessioning {
 
     func startIfEligible() async {
         startIfEligibleCount += 1
+        guard !isShutDown else { return }
         if state.isEligibleToPublish {
             state.isTrackingEnabled = true
         }
@@ -122,10 +127,18 @@ final class FakeLocationSession: LocationSessioning {
 
     func shutdown() {
         shutdownCount += 1
+        isShutDown = true
         state.isTrackingEnabled = false
         state.lastObservation = nil
         state.lastAcceptedAt = nil
         state.lastUploadAt = nil
+    }
+
+    func unpublishBestEffort() async {
+        unpublishCount += 1
+        if unpublishDelayNanoseconds > 0 {
+            try? await Task.sleep(nanoseconds: unpublishDelayNanoseconds)
+        }
     }
 
     func handleLifecyclePhase(_ phase: LocationLifecyclePhase) async {
@@ -201,7 +214,11 @@ final class FakePresenceSync: PresenceSyncing, @unchecked Sendable {
     private let lock = NSLock()
     private var _drafts: [PresenceStatusDraft] = []
     private var _flushCount = 0
+    private var _unpublishCount = 0
     var errorToThrow: Error?
+    var unpublishErrorToThrow: Error?
+    /// Optional delay so session cancellation/timeout tests can race.
+    var upsertDelayNanoseconds: UInt64 = 0
 
     var drafts: [PresenceStatusDraft] {
         lock.lock()
@@ -215,10 +232,26 @@ final class FakePresenceSync: PresenceSyncing, @unchecked Sendable {
         return _flushCount
     }
 
+    var unpublishCount: Int {
+        lock.lock()
+        defer { lock.unlock() }
+        return _unpublishCount
+    }
+
     func upsertCurrentPresence(_ draft: PresenceStatusDraft) async throws {
+        if upsertDelayNanoseconds > 0 {
+            try? await Task.sleep(nanoseconds: upsertDelayNanoseconds)
+        }
         if let errorToThrow { throw errorToThrow }
         lock.lock()
         _drafts.append(draft)
+        lock.unlock()
+    }
+
+    func unpublishCurrentPresence() async throws {
+        if let unpublishErrorToThrow { throw unpublishErrorToThrow }
+        lock.lock()
+        _unpublishCount += 1
         lock.unlock()
     }
 
@@ -228,4 +261,15 @@ final class FakePresenceSync: PresenceSyncing, @unchecked Sendable {
         _flushCount += 1
         lock.unlock()
     }
+}
+
+/// Phase 1 default until live presence writes land — no network.
+final class NoOpPresenceSync: PresenceSyncing, @unchecked Sendable {
+    func upsertCurrentPresence(_ draft: PresenceStatusDraft) async throws {
+        _ = draft
+    }
+
+    func unpublishCurrentPresence() async throws {}
+
+    func flushPending() async throws {}
 }

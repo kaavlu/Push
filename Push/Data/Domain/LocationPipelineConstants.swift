@@ -41,6 +41,11 @@ enum LocationPipelineConstants {
     static let nearDuplicateTimeInterval: TimeInterval = 1
     /// Mean Earth radius for great-circle distance (WGS84 spherical approximation).
     static let earthRadiusMeters: Double = 6_371_000
+
+    // MARK: Session lifecycle (PR3 / Issue #69)
+
+    /// Cap wait for best-effort unpublish during sign-out (never block logout forever).
+    static let unpublishBestEffortTimeout: TimeInterval = 3
 }
 
 /// Soft-stale vs hard-expiry windows for friend-visible presence.

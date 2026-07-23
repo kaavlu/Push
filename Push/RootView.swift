@@ -144,6 +144,9 @@ struct RootView: View {
 
     @MainActor
     private func performSignOut() async {
+        // Unpublish → location shutdown → mock container before killing JWT / gate
+        // so presence cannot outlive the authenticated session (Issue #69 / §2.9.1).
+        await AppDataContainer.shutdownSharedAndReinstallMock()
         try? await auth.signOut()
         // Clears the stale `authedUser` so `AuthGateView`'s `onChange` fires
         // again if the same user signs back in (Equatable value would
@@ -152,10 +155,13 @@ struct RootView: View {
         enter(.gate)
     }
 
-    /// RPC must succeed before local session teardown or gate transition.
+    /// RPC must succeed before local teardown or gate transition. On failure the
+    /// user stays signed in with a live location session (recoverable).
     @MainActor
     private func performDeleteAccount() async throws {
         try await auth.deleteAccount()
+        // Server cascade removes presence; skip client unpublish, still stop pipeline.
+        await AppDataContainer.shutdownSharedAndReinstallMock(attemptUnpublish: false)
         authModel.signOutReset()
         enter(.gate)
     }
@@ -194,6 +200,12 @@ struct RootView: View {
     /// Mock mode keeps the default seed container.
     private func enter(_ next: BootstrapState) {
         state = next
+        // App-lifetime location: start when the authenticated (or mock) app shell
+        // is shown. Live install already calls startIfEligible; mock needs this
+        // so `--sim-location` dogfood runs without map ownership.
+        if case .app = next {
+            Task { await AppDataContainer.shared.locationSession?.startIfEligible() }
+        }
     }
 }
 
