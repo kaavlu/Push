@@ -43,11 +43,11 @@ This is a **high-fidelity prototype** that can become production later.
 ## What NOT to Build Yet
 
 - Live writes to social graph (friends/groups/sharing), realtime/subscriptions — profile self-writes (basics, toggles, availability, photo), push coordination (create/edit/cancel/delete, RSVP), friend-request coordination (search/send/cancel/accept/deny via `0009`/`0013`; remove via `0010`/`0013`), group creation + group-invite coordination (`0011`) + group lifecycle (`0015`), and user block/unblock via `0016` are allowed
-- Real-time location sharing
+- Production location pipeline (Core Location, Supabase `current_presence`, Realtime — Issue #64 spec only until Phase 1 PRs land)
 - Real activity inference
 - Push notifications
 - iMessage extension
-- Ghost Mode
+- Ghost orthogonal publish backend (follow Issue #64 Phase 1 PR order; legacy `.ghost` availability today)
 - Large groups
 - Dating / social graph features
 
@@ -85,7 +85,7 @@ See `coding-standards.md` for the full reference. Key rules for this project:
 
 ### Session Resume Protocol
 
-Read: `CLAUDE.md` → `tasks/lessons.md` → `tasks/todo.md` → `git log --oneline -5`. When implementing a multi-task feature, also read the matching file under `docs/superpowers/specs/` (design) or `docs/superpowers/plans/` (execution). For data-layer, seed, or Supabase work, also read `supabase/README.md`, `docs/data-architecture.md`, and `tasks/spec.md` (Issue #27); use repo `.claude/skills/supabase*` skills for schema/RLS. For visual/design work, read `Design/PushDesignBrief.md` and `Design/PushThemeAudit.md`; live source is `Push/` — `Design/CoreDesignFiles/` are read-only snapshots.
+Read: `CLAUDE.md` → `tasks/lessons.md` → `tasks/todo.md` → `git log --oneline -5`. When implementing a multi-task feature, also read the matching file under `docs/superpowers/specs/` (design) or `docs/superpowers/plans/` (execution). For data-layer, seed, or Supabase work, also read `supabase/README.md`, `docs/data-architecture.md`, and `tasks/spec.md` (Issue #27); use repo `.claude/skills/supabase*` skills for schema/RLS. Location/presence work: also read `docs/superpowers/specs/2026-07-23-location-presence-architecture-design.md` (Issue #64) and `AGENTS.md` Location/presence bullet. For visual/design work, read `Design/PushDesignBrief.md` and `Design/PushThemeAudit.md`; live source is `Push/` — `Design/CoreDesignFiles/` are read-only snapshots.
 
 Do not ask the user to re-explain context that is in these files.
 

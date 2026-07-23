@@ -1,24 +1,29 @@
-# Issue #61 — Restore Apple and Google Authentication
+# Issue #64 — Audit repository architecture for location tracking and activity inference
 
-**Issue:** https://github.com/kaavlu/Push/issues/61  
-**Design:** `docs/superpowers/specs/2026-07-21-restore-apple-google-auth-design.md`
+**Issue:** https://github.com/kaavlu/Push/issues/64  
+**Design:** `docs/superpowers/specs/2026-07-23-location-presence-architecture-design.md`
 
 ## Status
 
-- [x] Design: native Apple id-token + Google OAuth web session
-- [x] `AuthService.signInWithApple` / `signInWithGoogle` + FakeAuthService
-- [x] Apple presentation (`SocialAuthSignIn`) with nonce
-- [x] Auth URL: `.signedIn` vs password recovery
-- [x] Welcome + Sign in UI (Apple / Google)
-- [x] Sign in with Apple entitlements
-- [x] Migration `0017_oauth_profile_handle` (applied remotely via MCP)
-- [x] Unit tests for social + OAuth callback
-- [x] Fix pre-existing FriendRepository test doubles for full test compile
-- [ ] Dashboard: enable Apple Client IDs + Google provider + redirect URLs (operator)
-- [ ] Live smoke on simulator/device with providers configured
+- [x] Audit current map/presence data flow with concrete file references
+- [x] Recommend ownership (LocationSession, sync, presence, inference, presentation)
+- [x] Domain model + protocol boundaries (mock / sim / Core Location)
+- [x] Supabase conceptual shape (`current_presence`, RLS, Realtime → revision)
+- [x] Privacy matrix (SharingPolicy + orthogonal Ghost)
+- [x] Testing strategy without physical movement
+- [x] Phase 1 follow-up issue plan + PR plan
+- [x] Key Decisions (all 10 audit questions)
+- [x] Design review loop (3 rounds → approve, 0 open issues)
+- [x] Phase 0 final clarifications (rev 4): Ghost orthogonal, unpublish lifecycle, freshness, throttle bypasses, availability canonical field, Realtime required for completed surface, CL type boundary, Phase 1 non-goals, split CL provider vs permission UX
+- [x] Commit design document and close #64
+
+## Non-goals (confirmed)
+
+- No Core Location integration
+- No migrations / Realtime / inference implementation
+- No mock puck replacement
 
 ## Verification
 
-- [x] `scripts/test.sh suite AuthViewModelTests` — 25/25, 0 failures
-- [x] `scripts/test.sh suite AuthBootstrapTests` — 4/4, 0 failures
-- [ ] `scripts/test.sh build`
+- Architecture doc present (rev 4 Phase 0 clarifications)
+- No production location code introduced
