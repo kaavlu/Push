@@ -43,7 +43,7 @@ This is a **high-fidelity prototype** that can become production later.
 ## What NOT to Build Yet
 
 - Live writes to social graph (friends/groups/sharing), realtime/subscriptions — profile self-writes (basics, toggles, availability, photo), push coordination (create/edit/cancel/delete, RSVP), friend-request coordination (search/send/cancel/accept/deny via `0009`/`0013`; remove via `0010`/`0013`), group creation + group-invite coordination (`0011`) + group lifecycle (`0015`), and user block/unblock via `0016` are allowed
-- Production location pipeline (Core Location, Supabase `current_presence`, Realtime — Issue #64 spec only until Phase 1 PRs land)
+- Production location provider and live sync (Core Location, Supabase `current_presence`, Realtime — Issue #64 Phase 1 PR4+; PR3 session orchestration via doubles only)
 - Real activity inference
 - Push notifications
 - iMessage extension
