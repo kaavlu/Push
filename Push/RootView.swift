@@ -160,13 +160,16 @@ struct RootView: View {
         enter(.gate)
     }
 
-    /// Recovery emails open `pushapp://auth/reset…`. Establish the recovery
-    /// session on the service, show set-password on the gate, and leave `.app`
-    /// if the user was already signed in.
+    /// Recovery: `pushapp://auth/reset…` → set-password on the gate.
+    /// OAuth: `pushapp://auth/callback…` → signed-in user → prepare/app.
     @MainActor
     private func handleOpenURL(_ url: URL) async {
         let handled = await authModel.handleOpenURL(url)
-        if handled {
+        guard handled else { return }
+        if let user = authModel.authedUser, !authModel.pendingPasswordRecovery {
+            enter(.preparing(user))
+            await prepare(user)
+        } else {
             enter(.gate)
         }
     }

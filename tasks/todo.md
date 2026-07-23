@@ -1,65 +1,24 @@
-# Honest Empty States (Issue #49)
+# Issue #61 — Restore Apple and Google Authentication
 
-Design: `docs/superpowers/specs/2026-07-20-honest-empty-states-design.md`
-Plan: `docs/superpowers/plans/2026-07-20-honest-empty-states.md`
-
-- [x] Shared empty-surface kit (`SurfaceContentPhase`, `EmptySurfaceCopy`, cream empty view)
-- [x] Map empty/failed overlay + `MapViewModel.surfacePhase` (Add friends CTA; self-only → empty)
-- [x] Friends empty + Add friends CTA; hide filter chips when zero friends; loading/failed phases
-- [x] Friends hidden-presence rows remain `.content` (not empty)
-- [x] Feed deferred full-screen (copy only, no CTA; not CreatePlaceholder)
-- [x] Calendar honest empty footer; hide History when empty; suppress most-active / best-day
-- [x] Keep Your/Active push empty cards unchanged
-- [x] Seed helpers + focused `EmptySurfaceTests`; mock populated seed preserved
-- [x] Out of scope: presence/Feed/History backends, offline detector
-
-## Verification
-- [x] `scripts/test.sh build` SUCCEEDED
-- [x] `scripts/test.sh suite EmptySurfaceTests` — 11/11, 0 failures
-- [x] `scripts/test.sh suite DataLayerTests` — 26/26, 0 failures
-- [x] `scripts/test.sh suite PlansViewModelTests` — 25/25, 0 failures
-
----
-
-# Issue #52 — Block / Unblock
-
-- [x] Design + plan
-- [x] Migration `0016_user_blocks` (renumbered after main's 0013–0015)
-- [x] Mock store + FriendRepository
-- [x] Live RPC path
-- [x] Friends Block UI
-- [x] Soft-hide / pickers
-- [x] Profile Blocked list
-- [ ] Apply migration on remote (if not done)
-- [ ] Live smoke: block friend, search empty, unblock, re-request
-
-## Verification
-- [x] `scripts/test.sh suite BlockUserTests`
-- [x] `scripts/test.sh suite DataLayerTests`
-- [x] `scripts/test.sh suite LiveDataStoreTests`
-- [x] `scripts/test.sh suite AlertsTests`
-- [x] `scripts/test.sh build`
-
----
-
-# Issue #56 — Create a Comprehensive Project README
-
-**Issue:** https://github.com/kaavlu/Push/issues/56
+**Issue:** https://github.com/kaavlu/Push/issues/61  
+**Design:** `docs/superpowers/specs/2026-07-21-restore-apple-google-auth-design.md`
 
 ## Status
 
-- [x] Inspect codebase, setup scripts, Supabase docs, MVP product doc
-- [x] Capture fresh simulator screenshots (map, friends, pushes, profile, alerts, onboarding)
-- [x] Write root `README.md`
-- [x] DEBUG launch args for screenshot targets (`--plans`, `--profile`, `--alerts`)
-- [x] Verify `scripts/test.sh build` and document verified setup steps
-- [ ] Open PR / close issue
+- [x] Design: native Apple id-token + Google OAuth web session
+- [x] `AuthService.signInWithApple` / `signInWithGoogle` + FakeAuthService
+- [x] Apple presentation (`SocialAuthSignIn`) with nonce
+- [x] Auth URL: `.signedIn` vs password recovery
+- [x] Welcome + Sign in UI (Apple / Google)
+- [x] Sign in with Apple entitlements
+- [x] Migration `0017_oauth_profile_handle` (applied remotely via MCP)
+- [x] Unit tests for social + OAuth callback
+- [x] Fix pre-existing FriendRepository test doubles for full test compile
+- [ ] Dashboard: enable Apple Client IDs + Google provider + redirect URLs (operator)
+- [ ] Live smoke on simulator/device with providers configured
 
-## Acceptance criteria check
+## Verification
 
-- [x] New developer can understand and run Push from the README
-- [x] Setup steps verified (`run-ios-sim.sh`, `test.sh build`)
-- [x] Screenshots reflect current mock UI
-- [x] Implemented / partial / planned clearly separated
-- [x] No secrets, service-role keys, or machine-local paths
-- [x] No placeholder boilerplate in README
+- [x] `scripts/test.sh suite AuthViewModelTests` — 25/25, 0 failures
+- [x] `scripts/test.sh suite AuthBootstrapTests` — 4/4, 0 failures
+- [ ] `scripts/test.sh build`

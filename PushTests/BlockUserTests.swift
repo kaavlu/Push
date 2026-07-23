@@ -289,8 +289,12 @@ private final class BlockFailingFriendRepository: FriendRepository {
     func searchPeople(query: String) async throws -> [PersonSearchResult] {
         try await backing.searchPeople(query: query)
     }
-    func sendFriendRequest(to personID: Person.ID) async throws {
+    @discardableResult
+    func sendFriendRequest(to personID: Person.ID) async throws -> FriendRequest.ID {
         try await backing.sendFriendRequest(to: personID)
+    }
+    func cancelFriendRequest(id: FriendRequest.ID) async throws {
+        try await backing.cancelFriendRequest(id: id)
     }
     func removeFriend(_ personID: Person.ID) async throws {
         try await backing.removeFriend(personID)
@@ -328,8 +332,12 @@ private final class UnblockFailingFriendRepository: FriendRepository {
     func searchPeople(query: String) async throws -> [PersonSearchResult] {
         try await backing.searchPeople(query: query)
     }
-    func sendFriendRequest(to personID: Person.ID) async throws {
+    @discardableResult
+    func sendFriendRequest(to personID: Person.ID) async throws -> FriendRequest.ID {
         try await backing.sendFriendRequest(to: personID)
+    }
+    func cancelFriendRequest(id: FriendRequest.ID) async throws {
+        try await backing.cancelFriendRequest(id: id)
     }
     func removeFriend(_ personID: Person.ID) async throws {
         try await backing.removeFriend(personID)

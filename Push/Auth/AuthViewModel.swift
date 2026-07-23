@@ -116,6 +116,18 @@ final class AuthViewModel: ObservableObject {
         }
     }
 
+    func signInWithApple() async {
+        await runSocial {
+            self.authedUser = try await self.auth.signInWithApple()
+        }
+    }
+
+    func signInWithGoogle() async {
+        await runSocial {
+            self.authedUser = try await self.auth.signInWithGoogle()
+        }
+    }
+
     func submitSignUp() async {
         guard canSubmitSignUp else { return }
         errorMessage = nil
@@ -166,6 +178,7 @@ final class AuthViewModel: ObservableObject {
 
     /// Returns true when the URL was handled as a password-recovery callback
     /// so the root can force the auth gate if the user was already in-app.
+    /// Returns true when the URL was handled as recovery or social/OAuth session.
     @discardableResult
     func handleOpenURL(_ url: URL) async -> Bool {
         errorMessage = nil
@@ -183,13 +196,20 @@ final class AuthViewModel: ObservableObject {
                 pendingPasswordRecovery = true
                 screen = .setNewPassword
                 return true
+            case .signedIn(let user):
+                pendingPasswordRecovery = false
+                authedUser = user
+                return true
             case .ignored:
                 return false
             }
         } catch {
             errorMessage = AuthUserMessage.message(for: error, context: .openURL)
             pendingPasswordRecovery = false
-            screen = .forgotPassword
+            // Only force forgot-password for recovery-shaped links.
+            if isLikelyRecoveryURL(url) {
+                screen = .forgotPassword
+            }
             return true
         }
     }
@@ -247,6 +267,30 @@ final class AuthViewModel: ObservableObject {
         } catch {
             errorMessage = AuthUserMessage.message(for: error, context: context)
         }
+    }
+
+    private func runSocial(_ action: @escaping () async throws -> Void) async {
+        guard !isBusy else { return }
+        errorMessage = nil
+        infoMessage = nil
+        isBusy = true
+        defer { isBusy = false }
+        do {
+            try await action()
+        } catch {
+            if SocialAuthCancellation.isCancellation(error) { return }
+            let message = AuthUserMessage.message(for: error, context: .socialSignIn)
+            if !message.isEmpty {
+                errorMessage = message
+            }
+        }
+    }
+
+    private func isLikelyRecoveryURL(_ url: URL) -> Bool {
+        let lower = url.absoluteString.lowercased()
+        return lower.contains("type=recovery")
+            || url.path.lowercased().contains("reset")
+            || (url.host?.lowercased() == "auth" && url.path.lowercased().contains("reset"))
     }
 
     private func clearCredentialFields() {

@@ -348,5 +348,15 @@ private final class ControllableFriendRepository: FriendRepository {
     func removeFriend(_ personID: Person.ID) async throws {
         if shouldFailMutations { throw URLError(.notConnectedToInternet) }
     }
+
+    func blockUser(_ personID: Person.ID) async throws {
+        if shouldFailMutations { throw URLError(.notConnectedToInternet) }
+    }
+
+    func unblockUser(_ personID: Person.ID) async throws {
+        if shouldFailMutations { throw URLError(.notConnectedToInternet) }
+    }
+
+    func blockedUsers() async throws -> [BlockedPerson] { [] }
 }
 

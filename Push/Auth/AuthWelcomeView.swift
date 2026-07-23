@@ -1,8 +1,7 @@
 // Push/Auth/AuthWelcomeView.swift
 import SwiftUI
 
-/// Production front door: hero + wordmark + email continue. Social methods
-/// are intentionally omitted until they are implemented.
+/// Production front door: hero + wordmark + Apple / Google / email continue.
 struct AuthWelcomeView: View {
     @ObservedObject var model: AuthViewModel
 
@@ -47,9 +46,22 @@ struct AuthWelcomeView: View {
 
     private var authButtons: some View {
         VStack(spacing: 12) {
+            if let error = model.errorMessage {
+                Text(error)
+                    .font(OnboardingLabFont.text(14, .medium))
+                    .foregroundStyle(.red)
+                    .multilineTextAlignment(.center)
+            }
+            AuthSocialButtons(
+                isBusy: model.isBusy,
+                onApple: { Task { await model.signInWithApple() } },
+                onGoogle: { Task { await model.signInWithGoogle() } }
+            )
             OnboardingCTAButton(title: "Continue with email") {
                 model.showSignUp()
             }
+            .disabled(model.isBusy)
+            .opacity(model.isBusy ? 0.5 : 1)
             OnboardingAuthSwitchLink(
                 prompt: "Already have an account?",
                 action: "Sign in"
