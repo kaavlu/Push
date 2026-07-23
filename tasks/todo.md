@@ -1,29 +1,43 @@
-# Issue #66 — Add Location and Presence Domain Foundations
+# Issue #68 — Add Simulated Location Provider and Observation Validator
 
-**Issue:** https://github.com/kaavlu/Push/issues/66  
-**Design:** `docs/superpowers/specs/2026-07-23-location-presence-architecture-design.md` (PR1 / §10)
+**Issue:** https://github.com/kaavlu/Push/issues/68  
+**Design:** `docs/superpowers/specs/2026-07-23-location-presence-architecture-design.md` (PR2 / §10)  
+**Builds on:** Issue #66 domain contracts
 
 ## Status
 
-- [x] Extend `PresenceStatus` with orthogonal `isPublished` (+ legacy `.ghost` mapping)
-- [x] Domain types: `LocationObservation`, auth/tracking state, drafts, freshness, sync triggers
-- [x] Protocols: `LocationProviding`, `LocationSessioning`, validator, inferrer, `PresenceSyncing`
-- [x] Phase 1 constants centralized (`LocationPipelineConstants`, `PresenceFreshness`)
-- [x] Test doubles: Null/Fake provider, Fake session/sync, accept/reject validator, passthrough inferrer
-- [x] Unit tests: `LocationPresenceFoundationTests`
-- [x] Build + suite green
-- [x] PR limited to foundations (no sim provider, validation logic, session wiring, Supabase)
+- [x] Validation thresholds centralized in `LocationPipelineConstants`
+- [x] `GeoDistance` haversine helper (app Doubles only)
+- [x] `LocationObservationValidator` (`LocationObservationValidating`, pure/Sendable)
+- [x] `SimulatedLocationRoute` + representative fixtures
+- [x] `SimulatedLocationProvider` (manual + timed, injectable sleep)
+- [x] Unit tests: `LocationObservationValidatorTests`, `LocationSimulatedProviderTests`
+- [x] No Core Location / Supabase / LocationSession / map wiring
+
+## Thresholds added beyond architecture doc (document in PR)
+
+| Constant | Value | Why |
+|---|---|---|
+| `maxObservationAge` | 5 min | Drop stale GPS fixes |
+| `futureTimestampTolerance` | 60 s | Device clock skew |
+| `highConfidenceAccuracyMeters` | 20 m | High vs medium confidence |
+| `highConfidenceMaxAge` | 30 s | High vs medium confidence |
+| `maxPlausibleSpeedMetersPerSecond` | 90 m/s (~324 km/h) | Reject teleports; allow highway |
+| `nearDuplicateDistanceMeters` | 1 m | Drop near-duplicate noise |
+| `nearDuplicateTimeInterval` | 1 s | Drop near-duplicate noise |
+| `earthRadiusMeters` | 6_371_000 | Haversine |
+
+Architecture already locked `maxHorizontalAccuracyMeters` = 100.
 
 ## Non-goals (this issue)
 
-- Core Location / Info.plist / permission UX
-- Simulated route playback / observation validation implementation
-- `LocationSession` container wiring / sign-out teardown
-- Supabase migrations / live presence reads-writes / Realtime
-- Map UI / Ghost Profile migration / throttle execution
+- `LocationSession` / AppDataContainer wiring
+- Presence draft / sync / Supabase
+- Core Location / permission UX
+- Map / Ghost migration / inference
 
 ## Verification
 
-- [x] `scripts/test.sh suite LocationPresenceFoundationTests` — 20 passed
-- [x] `scripts/test.sh suite DataLayerTests` / `DerivationTests` / `EmptySurfaceTests` / `MapRenderTests` — green
-- [x] No `import CoreLocation` in new location domain files
+- [x] `scripts/test.sh suite LocationObservationValidatorTests` — 18 passed
+- [x] `scripts/test.sh suite LocationSimulatedProviderTests` — 8 passed
+- [x] `scripts/test.sh suite LocationPresenceFoundationTests` — foundation still green

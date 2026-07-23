@@ -8,7 +8,7 @@
 
 import Foundation
 
-/// Accuracy, movement throttle, heartbeat, and Realtime coalesce defaults.
+/// Accuracy, movement throttle, heartbeat, Realtime coalesce, and observation-validation defaults.
 enum LocationPipelineConstants {
     /// Minimum time between displacement-throttled presence uploads.
     static let minUploadInterval: TimeInterval = 60
@@ -20,6 +20,27 @@ enum LocationPipelineConstants {
     static let presenceHeartbeatInterval: TimeInterval = 15 * 60
     /// Coalesce Realtime presence patches into one store revision.
     static let realtimePatchDebounce: TimeInterval = 0.35
+
+    // MARK: Observation validation (PR2 / Issue #68)
+
+    /// Maximum age of a fix (`now - recordedAt`) still accepted.
+    static let maxObservationAge: TimeInterval = 5 * 60
+    /// Allow small future skew between device fix time and evaluation clock.
+    static let futureTimestampTolerance: TimeInterval = 60
+    /// Horizontal accuracy at or below this (with fresh age) → high confidence.
+    static let highConfidenceAccuracyMeters: Double = 20
+    /// Age at or below this with high-confidence accuracy → high confidence.
+    static let highConfidenceMaxAge: TimeInterval = 30
+    /// Max plausible ground speed between accepted fixes (m/s).
+    /// ~90 m/s ≈ 324 km/h — allows highway vehicles with margin; rejects teleports.
+    /// Documented beyond architecture doc defaults (architecture locked accuracy/throttle only).
+    static let maxPlausibleSpeedMetersPerSecond: Double = 90
+    /// Near-duplicate distance gate (meters) vs previous accepted fix.
+    static let nearDuplicateDistanceMeters: Double = 1
+    /// Near-duplicate time gate (seconds) vs previous accepted fix.
+    static let nearDuplicateTimeInterval: TimeInterval = 1
+    /// Mean Earth radius for great-circle distance (WGS84 spherical approximation).
+    static let earthRadiusMeters: Double = 6_371_000
 }
 
 /// Soft-stale vs hard-expiry windows for friend-visible presence.

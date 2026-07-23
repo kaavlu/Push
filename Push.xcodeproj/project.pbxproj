@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C3C8ABAFFF476A714A43DA05 /* LocationObservationValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFD807272EF80EB1C46AF619 /* LocationObservationValidatorTests.swift */; };
+		EFA4EC6D9D9196ABA691BCB2 /* LocationSimulatedProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B4FD3317832063091D8542F /* LocationSimulatedProviderTests.swift */; };
+		6F7362712AE246F7629BEF13 /* SimulatedLocationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B776645568E59066B2FAA481 /* SimulatedLocationProvider.swift */; };
+		2B58EB118780C117E9C17C07 /* SimulatedLocationRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3656B062075681A985A6F6F4 /* SimulatedLocationRoute.swift */; };
+		029F2D429C4103D28491C576 /* LocationObservationValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AA2650EBC9015BA7E66ABC9 /* LocationObservationValidator.swift */; };
+		FA97C0550A1D7A754E90B053 /* GeoDistance.swift in Sources */ = {isa = PBXBuildFile; fileRef = F357A85C70CD8BC985286BE7 /* GeoDistance.swift */; };
 		FF3CC9C6F8E4BA5B6D3662D4 /* LocationPresenceFoundationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89C3393A5BF5CDD70ED090FD /* LocationPresenceFoundationTests.swift */; };
 		5D7F8DCB46F312AC439D3C7D /* LocationTestDoubles.swift in Sources */ = {isa = PBXBuildFile; fileRef = E707706539DCA7C5D9C23833 /* LocationTestDoubles.swift */; };
 		73ABCEE9B93F133D43B73720 /* LocationProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91DC8BC324A5DD539D50BE89 /* LocationProtocols.swift */; };
@@ -258,6 +264,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		FFD807272EF80EB1C46AF619 /* LocationObservationValidatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LocationObservationValidatorTests.swift"; sourceTree = "<group>"; };
+		1B4FD3317832063091D8542F /* LocationSimulatedProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LocationSimulatedProviderTests.swift"; sourceTree = "<group>"; };
+		B776645568E59066B2FAA481 /* SimulatedLocationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SimulatedLocationProvider.swift"; path = "Data/Domain/SimulatedLocationProvider.swift"; sourceTree = "<group>"; };
+		3656B062075681A985A6F6F4 /* SimulatedLocationRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SimulatedLocationRoute.swift"; path = "Data/Domain/SimulatedLocationRoute.swift"; sourceTree = "<group>"; };
+		7AA2650EBC9015BA7E66ABC9 /* LocationObservationValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "LocationObservationValidator.swift"; path = "Data/Domain/LocationObservationValidator.swift"; sourceTree = "<group>"; };
+		F357A85C70CD8BC985286BE7 /* GeoDistance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "GeoDistance.swift"; path = "Data/Domain/GeoDistance.swift"; sourceTree = "<group>"; };
 		89C3393A5BF5CDD70ED090FD /* LocationPresenceFoundationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LocationPresenceFoundationTests.swift"; sourceTree = "<group>"; };
 		E707706539DCA7C5D9C23833 /* LocationTestDoubles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "LocationTestDoubles.swift"; path = "Data/Domain/LocationTestDoubles.swift"; sourceTree = "<group>"; };
 		91DC8BC324A5DD539D50BE89 /* LocationProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "LocationProtocols.swift"; path = "Data/Domain/LocationProtocols.swift"; sourceTree = "<group>"; };
@@ -546,6 +558,10 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				B776645568E59066B2FAA481 /* SimulatedLocationProvider.swift */,
+				3656B062075681A985A6F6F4 /* SimulatedLocationRoute.swift */,
+				7AA2650EBC9015BA7E66ABC9 /* LocationObservationValidator.swift */,
+				F357A85C70CD8BC985286BE7 /* GeoDistance.swift */,
 				E707706539DCA7C5D9C23833 /* LocationTestDoubles.swift */,
 				91DC8BC324A5DD539D50BE89 /* LocationProtocols.swift */,
 				88BEF29476AD41D9C531F4DA /* PresenceDrafts.swift */,
@@ -755,6 +771,8 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				FFD807272EF80EB1C46AF619 /* LocationObservationValidatorTests.swift */,
+				1B4FD3317832063091D8542F /* LocationSimulatedProviderTests.swift */,
 				89C3393A5BF5CDD70ED090FD /* LocationPresenceFoundationTests.swift */,
 				3ABD426A9B011973748F5AC9 /* EmptySurfaceTests.swift */,
 				8BD4FE2BC15FDEA7270058EB /* BlockUserTests.swift */,
@@ -939,6 +957,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				6F7362712AE246F7629BEF13 /* SimulatedLocationProvider.swift in Sources */,
+				2B58EB118780C117E9C17C07 /* SimulatedLocationRoute.swift in Sources */,
+				029F2D429C4103D28491C576 /* LocationObservationValidator.swift in Sources */,
+				FA97C0550A1D7A754E90B053 /* GeoDistance.swift in Sources */,
 				5D7F8DCB46F312AC439D3C7D /* LocationTestDoubles.swift in Sources */,
 				73ABCEE9B93F133D43B73720 /* LocationProtocols.swift in Sources */,
 				5917EB58B7E4BA95A492B4CF /* PresenceDrafts.swift in Sources */,
@@ -1139,6 +1161,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				C3C8ABAFFF476A714A43DA05 /* LocationObservationValidatorTests.swift in Sources */,
+				EFA4EC6D9D9196ABA691BCB2 /* LocationSimulatedProviderTests.swift in Sources */,
 				FF3CC9C6F8E4BA5B6D3662D4 /* LocationPresenceFoundationTests.swift in Sources */,
 				43012B6BF8D27F4028176FD5 /* EmptySurfaceTests.swift in Sources */,
 				B1EBA7BAEDD508D15FEB0980 /* BlockUserTests.swift in Sources */,
