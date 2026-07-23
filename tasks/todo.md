@@ -1,29 +1,29 @@
-# Issue #64 — Audit repository architecture for location tracking and activity inference
+# Issue #66 — Add Location and Presence Domain Foundations
 
-**Issue:** https://github.com/kaavlu/Push/issues/64  
-**Design:** `docs/superpowers/specs/2026-07-23-location-presence-architecture-design.md`
+**Issue:** https://github.com/kaavlu/Push/issues/66  
+**Design:** `docs/superpowers/specs/2026-07-23-location-presence-architecture-design.md` (PR1 / §10)
 
 ## Status
 
-- [x] Audit current map/presence data flow with concrete file references
-- [x] Recommend ownership (LocationSession, sync, presence, inference, presentation)
-- [x] Domain model + protocol boundaries (mock / sim / Core Location)
-- [x] Supabase conceptual shape (`current_presence`, RLS, Realtime → revision)
-- [x] Privacy matrix (SharingPolicy + orthogonal Ghost)
-- [x] Testing strategy without physical movement
-- [x] Phase 1 follow-up issue plan + PR plan
-- [x] Key Decisions (all 10 audit questions)
-- [x] Design review loop (3 rounds → approve, 0 open issues)
-- [x] Phase 0 final clarifications (rev 4): Ghost orthogonal, unpublish lifecycle, freshness, throttle bypasses, availability canonical field, Realtime required for completed surface, CL type boundary, Phase 1 non-goals, split CL provider vs permission UX
-- [x] Commit design document and close #64
+- [x] Extend `PresenceStatus` with orthogonal `isPublished` (+ legacy `.ghost` mapping)
+- [x] Domain types: `LocationObservation`, auth/tracking state, drafts, freshness, sync triggers
+- [x] Protocols: `LocationProviding`, `LocationSessioning`, validator, inferrer, `PresenceSyncing`
+- [x] Phase 1 constants centralized (`LocationPipelineConstants`, `PresenceFreshness`)
+- [x] Test doubles: Null/Fake provider, Fake session/sync, accept/reject validator, passthrough inferrer
+- [x] Unit tests: `LocationPresenceFoundationTests`
+- [x] Build + suite green
+- [x] PR limited to foundations (no sim provider, validation logic, session wiring, Supabase)
 
-## Non-goals (confirmed)
+## Non-goals (this issue)
 
-- No Core Location integration
-- No migrations / Realtime / inference implementation
-- No mock puck replacement
+- Core Location / Info.plist / permission UX
+- Simulated route playback / observation validation implementation
+- `LocationSession` container wiring / sign-out teardown
+- Supabase migrations / live presence reads-writes / Realtime
+- Map UI / Ghost Profile migration / throttle execution
 
 ## Verification
 
-- Architecture doc present (rev 4 Phase 0 clarifications)
-- No production location code introduced
+- [x] `scripts/test.sh suite LocationPresenceFoundationTests` — 20 passed
+- [x] `scripts/test.sh suite DataLayerTests` / `DerivationTests` / `EmptySurfaceTests` / `MapRenderTests` — green
+- [x] No `import CoreLocation` in new location domain files

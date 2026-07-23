@@ -7,6 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FF3CC9C6F8E4BA5B6D3662D4 /* LocationPresenceFoundationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89C3393A5BF5CDD70ED090FD /* LocationPresenceFoundationTests.swift */; };
+		5D7F8DCB46F312AC439D3C7D /* LocationTestDoubles.swift in Sources */ = {isa = PBXBuildFile; fileRef = E707706539DCA7C5D9C23833 /* LocationTestDoubles.swift */; };
+		73ABCEE9B93F133D43B73720 /* LocationProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91DC8BC324A5DD539D50BE89 /* LocationProtocols.swift */; };
+		5917EB58B7E4BA95A492B4CF /* PresenceDrafts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88BEF29476AD41D9C531F4DA /* PresenceDrafts.swift */; };
+		D0A3C38E7E466D1316881132 /* LocationPipelineConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 868C83D2D3D3223AE456424E /* LocationPipelineConstants.swift */; };
+		DBBCC64276A9FF62FD924C0D /* LocationTracking.swift in Sources */ = {isa = PBXBuildFile; fileRef = AED11003B4F1CE24B7A4B99D /* LocationTracking.swift */; };
+		40D7729896255ABAAAD3AF67 /* LocationObservation.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD9BE90DD00845933290C238 /* LocationObservation.swift */; };
 		B6C29F693FC64B91A5D35D6E /* FakeAuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37FB45BF69501B533041420D /* FakeAuthService.swift */; };
 		E36337AF64C8EF85F8D06D2F /* AuthSocialButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B466898FBC1D567AD990E5 /* AuthSocialButtons.swift */; };
 		A7C8880D4143D13C8566DD41 /* SocialAuthSignIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FDFA7C3A655A371198C45EE /* SocialAuthSignIn.swift */; };
@@ -251,6 +258,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		89C3393A5BF5CDD70ED090FD /* LocationPresenceFoundationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LocationPresenceFoundationTests.swift"; sourceTree = "<group>"; };
+		E707706539DCA7C5D9C23833 /* LocationTestDoubles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "LocationTestDoubles.swift"; path = "Data/Domain/LocationTestDoubles.swift"; sourceTree = "<group>"; };
+		91DC8BC324A5DD539D50BE89 /* LocationProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "LocationProtocols.swift"; path = "Data/Domain/LocationProtocols.swift"; sourceTree = "<group>"; };
+		88BEF29476AD41D9C531F4DA /* PresenceDrafts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PresenceDrafts.swift"; path = "Data/Domain/PresenceDrafts.swift"; sourceTree = "<group>"; };
+		868C83D2D3D3223AE456424E /* LocationPipelineConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "LocationPipelineConstants.swift"; path = "Data/Domain/LocationPipelineConstants.swift"; sourceTree = "<group>"; };
+		AED11003B4F1CE24B7A4B99D /* LocationTracking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "LocationTracking.swift"; path = "Data/Domain/LocationTracking.swift"; sourceTree = "<group>"; };
+		FD9BE90DD00845933290C238 /* LocationObservation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "LocationObservation.swift"; path = "Data/Domain/LocationObservation.swift"; sourceTree = "<group>"; };
 		37FB45BF69501B533041420D /* FakeAuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "FakeAuthService.swift"; path = "Data/Supabase/FakeAuthService.swift"; sourceTree = "<group>"; };
 		23B466898FBC1D567AD990E5 /* AuthSocialButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "AuthSocialButtons.swift"; path = "Auth/AuthSocialButtons.swift"; sourceTree = "<group>"; };
 		3FDFA7C3A655A371198C45EE /* SocialAuthSignIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SocialAuthSignIn.swift"; path = "Data/Supabase/SocialAuthSignIn.swift"; sourceTree = "<group>"; };
@@ -532,6 +546,12 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				E707706539DCA7C5D9C23833 /* LocationTestDoubles.swift */,
+				91DC8BC324A5DD539D50BE89 /* LocationProtocols.swift */,
+				88BEF29476AD41D9C531F4DA /* PresenceDrafts.swift */,
+				868C83D2D3D3223AE456424E /* LocationPipelineConstants.swift */,
+				AED11003B4F1CE24B7A4B99D /* LocationTracking.swift */,
+				FD9BE90DD00845933290C238 /* LocationObservation.swift */,
 				37FB45BF69501B533041420D /* FakeAuthService.swift */,
 				23B466898FBC1D567AD990E5 /* AuthSocialButtons.swift */,
 				3FDFA7C3A655A371198C45EE /* SocialAuthSignIn.swift */,
@@ -735,6 +755,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				89C3393A5BF5CDD70ED090FD /* LocationPresenceFoundationTests.swift */,
 				3ABD426A9B011973748F5AC9 /* EmptySurfaceTests.swift */,
 				8BD4FE2BC15FDEA7270058EB /* BlockUserTests.swift */,
 				495DA5007C746FA1C7F586EC /* GroupLifecycleTests.swift */,
@@ -918,6 +939,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				5D7F8DCB46F312AC439D3C7D /* LocationTestDoubles.swift in Sources */,
+				73ABCEE9B93F133D43B73720 /* LocationProtocols.swift in Sources */,
+				5917EB58B7E4BA95A492B4CF /* PresenceDrafts.swift in Sources */,
+				D0A3C38E7E466D1316881132 /* LocationPipelineConstants.swift in Sources */,
+				DBBCC64276A9FF62FD924C0D /* LocationTracking.swift in Sources */,
+				40D7729896255ABAAAD3AF67 /* LocationObservation.swift in Sources */,
 				B6C29F693FC64B91A5D35D6E /* FakeAuthService.swift in Sources */,
 				E36337AF64C8EF85F8D06D2F /* AuthSocialButtons.swift in Sources */,
 				A7C8880D4143D13C8566DD41 /* SocialAuthSignIn.swift in Sources */,
@@ -1112,6 +1139,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				FF3CC9C6F8E4BA5B6D3662D4 /* LocationPresenceFoundationTests.swift in Sources */,
 				43012B6BF8D27F4028176FD5 /* EmptySurfaceTests.swift in Sources */,
 				B1EBA7BAEDD508D15FEB0980 /* BlockUserTests.swift in Sources */,
 				A756BA0079C06B309FD4CF54 /* GroupLifecycleTests.swift in Sources */,
