@@ -1,9 +1,12 @@
 # Push Design System
 
+**Status: operational (Waves 0–9).**
+
 **Agent entry point.** Canonical catalog: [`docs/design-system.md`](../../docs/design-system.md).  
 Decisions: [`tasks/design-system-decision-log.md`](../../tasks/design-system-decision-log.md) (DS-001–DS-089).  
-Spec / waves: [`docs/superpowers/specs/2026-07-21-push-design-system-specification.md`](../../docs/superpowers/specs/2026-07-21-push-design-system-specification.md).  
-Handoff: [`tasks/design-system-handoff.md`](../../tasks/design-system-handoff.md).
+Spec: [`docs/superpowers/specs/2026-07-21-push-design-system-specification.md`](../../docs/superpowers/specs/2026-07-21-push-design-system-specification.md).  
+Handoff (history): [`tasks/design-system-handoff.md`](../../tasks/design-system-handoff.md).  
+Pre-system visual extraction (read-only): [`Design/PushThemeAudit.md`](../../Design/PushThemeAudit.md) — **catalog + decisions override** on conflict.
 
 ## Rules (short)
 
@@ -11,126 +14,52 @@ Handoff: [`tasks/design-system-handoff.md`](../../tasks/design-system-handoff.md
 2. Choose a **named surface**, then a **catalog component**.
 3. Prefer variant/slot over a new type.
 4. No local glass/cream recipes, no third primary CTA, no DIY pucks.
-5. Preserve approved appearance — extract/rename, do not redesign.
+5. Use `PushMotion` / opacity / radius / availability tokens — no ad-hoc shared magic numbers.
+6. Preserve approved appearance — extract/rename, do not redesign.
 
 ## Layout
 
 ```
 DesignSystem/
-  README.md                 # This file
-  Tokens/                   # Color, type, spacing, motion (Wave 4+)
-  Surfaces/                 # Named glass / cream / modal backgrounds (Wave 4+)
+  README.md
+  Tokens/          # availability, motion, opacity, radius, typography
+  Surfaces/        # control / map / puck / plans / review glass, cream, modal
   Components/
-    Buttons/                # Wave 1 — circle utility, solid sunbeam, glass rim
-    Rows/                   # Wave 2+
+    Buttons/
+    Rows/
     Cards/
     Chips/
     Avatars/
     Navigation/
     Sheets/
-    EmptyStates/            # Wave 3+
+    EmptyStates/
     Selectors/
-  Catalog/                  # Optional DEBUG previews
 ```
 
 ## Wave status
 
 | Wave | Focus | Status |
 |---|---|---|
-| 0 | Scaffold + catalog + AGENTS links | Done |
-| 1 | Buttons & primary CTAs | Done |
-| 2 | Cream lists & person system | Done |
-| 3 | Empty / loading / error | Done |
-| 4 | Named surfaces + cream tokens | Done |
-| 5 | Availability, chips, avatars, pucks | Done |
-| 6 | Selectors, headers, sheets | Done |
-| 7 | Plan cards & subcomponents | Done |
-| 8 | Tokens & motion | Done |
-| 9 | Docs polish | Not started |
+| 0–8 | Scaffold → tokens | Done |
+| 9 | Docs polish | Done |
 
-## Migrated components
+Full component inventory and **do-not-recreate** tables live in `docs/design-system.md`.
 
-### Wave 1 — Buttons
+## Quick “use this, not that”
 
-| Type | File | Replaces |
-|---|---|---|
-| `PushCircleIconButton` | `Components/Buttons/PushCircleIconButton.swift` | `FriendsCircleButton`, `PushModalIconButton`, inline close/trash circles |
-| `PushSolidSunbeamButton` | `Components/Buttons/PushSolidSunbeamButton.swift` | `StartPushPrimaryButton`, recovery CTAs |
-| `PushGlassRimButton` | `Components/Buttons/PushGlassRimButton.swift` | Plans `StartPlanButton` |
-| `PushCreateMenuIconCircle` | `Components/Buttons/PushCreateMenuIconCircle.swift` | Create-menu sunbeam icon circle |
-
-### Wave 2 — Cream lists & person system
-
-| Type | File | Replaces |
-|---|---|---|
-| `PushIvoryPageBackground` / `pushSolidCreamCard` | `Surfaces/PushCreamSurfaces.swift` | `FriendsBackground`, `friendsCard` |
-| `PushPersonRow` | `Components/Rows/PushPersonRow.swift` | `FriendRowCard`; blocked fork |
-| `PushExpandablePersonRow` + rail | `Components/Rows/PushExpandable*.swift` | `ExpandableFriendRow` internals |
-| `PushGroupRow` | `Components/Rows/PushGroupRow.swift` | `FriendGroupCard` |
-| `PushHistoryRow` | `Components/Rows/PushHistoryRow.swift` | Plans history private row |
-| `PushListSectionHeader` | `Components/Rows/PushListSectionHeader.swift` | `FriendsSectionHeader` |
-
-### Wave 3 — Empty / loading / error
-
-| Type | File | Replaces |
-|---|---|---|
-| `SurfaceContentPhase` / `EmptySurfaceCopy` / layout | `Components/EmptyStates/PushEmptySurfaceModels.swift` | Feature-local empty copy forks |
-| `EmptySurfaceView` / `EmptySurfaceStateView` / `FriendsEmptyState` | `Components/EmptyStates/PushEmptySurfaceView.swift` | Blocked/Alerts/AddFriends state views |
-| `MapEmptyOverlay` | `Components/EmptyStates/PushMapEmptyOverlay.swift` | Map empty chrome (branded CTAs) |
-
-Error routing: hard load → full-page/map failed; mutations → `ActionErrorBanner`; soft reload keeps content. See `docs/design-system.md`.
-
-### Wave 4 — Named surfaces
-
-| Type | File | Legacy shim |
-|---|---|---|
-| `pushControlGlass` | `Surfaces/PushControlGlass.swift` | `pushGlassBackground` |
-| `pushMapControlGlass` / `MapPopupSheetBackground` | `Surfaces/PushMapGlass.swift` | ContentView `topControlBackground` |
-| `pushPuckGlass` | `Surfaces/PushPuckGlass.swift` | `puckGlassBackground` |
-| `pushPlansCardGlass` / `pushReviewDeckGlass` | `Surfaces/PushCardGlass.swift` | `plansGlassCard` / `reviewGlassCard` |
-| `PushModalBackground` | `Surfaces/PushModalSurface.swift` | — |
-| Cream tokens | `PushCreamTokens` + `PushGlassCreamTokens` | `PlansColor` cream aliases |
-
-### Wave 5 — Availability, chips, avatars
-
-| Type | File | Notes |
-|---|---|---|
-| `PushAvailabilityTokens` | `Tokens/PushAvailabilityTokens.swift` | `PuckColorTokens` typealias |
-| `PushAvailabilityChip` | `Components/Chips/PushAvailabilityChip.swift` | compact + sheet density |
-| `PushBrandSunbeamPill` | `Components/Chips/PushBrandSunbeamPill.swift` | profile / plan time / group status |
-| `PushPersonAvatar` | `Components/Avatars/PushPersonAvatar.swift` | dark + sunbeam fallbacks |
-| Map pucks | existing `FriendPuck*` / `SelfPuckView` / `RegionalActivityPuck` | catalog only — no DIY |
-
-### Wave 6 — Selectors, navigation, sheets
-
-| Type | File |
+| Need | Use |
 |---|---|
-| `PushIvorySegmentedControl` | `Components/Selectors/` |
-| `PushIvoryFilterChipRow` | `Components/Selectors/` |
-| `PushSingleSelectRow` | `Components/Selectors/` |
-| `PushModalChoicePill` | `Components/Selectors/` |
-| `PushCreamPageHeader` | `Components/Navigation/` |
-| `PushModalCloseButtonBar` | `Components/Navigation/PushModalFlowChrome.swift` |
-| `pushTextLinkStyle` | `Components/Navigation/PushTextLinkStyle.swift` |
-| `PushMapBottomSheetChrome` | `Components/Sheets/` |
+| Glass button / floating chrome | `pushControlGlass` / `PushCircleIconButton` |
+| Primary CTA | `PushSolidSunbeamButton` or `PushGlassRimButton` |
+| Ivory page / list card | `PushIvoryPageBackground` / `pushSolidCreamCard` |
+| Person list | `PushPersonRow` (+ optional expand) |
+| Empty / load fail | `EmptySurfaceView` / `EmptySurfaceStateView` |
+| Mutation error | `ActionErrorBanner` |
+| Map empty | `MapEmptyOverlay` |
+| Availability color / chip | `PushAvailabilityTokens` / `PushAvailabilityChip` |
+| Person face | `PushPersonAvatar` |
+| Plan preview card | `PushPlansPlanCard` (or shims) |
+| Review swipe card | `PushReviewPlanCard` |
+| Motion | `PushMotion.selection` / `.expand` / `.sheet` / … |
 
-### Wave 7 — Plan cards
-
-| Type | File |
-|---|---|
-| `PushPlansPlanCard` | `Components/Cards/PushPlansPlanCard.swift` |
-| `PushReviewPlanCard` | `Components/Cards/PushReviewPlanCard.swift` |
-| `PushPlanStatusPill` / `PushPlanAvatarStrip` | `Components/Cards/PushPlanCardSubcomponents.swift` |
-
-Calendar module remains feature-local (`PlansCalendarView`) — do not restyle into plan cards.
-
-### Wave 8 — Tokens
-
-| Module | Role |
-|---|---|
-| `Tokens/PushMotion.swift` | selection / expand / sheet / press / mapPulse |
-| `Tokens/PushOpacityTokens.swift` | disabled, inactive, scrim, min text scale |
-| `Tokens/PushRadiusTokens.swift` | card / control / segmented / review |
-| `Tokens/PushTypographyTokens.swift` | section label + rounded initials helper |
-
-Temporary typealiases keep call sites compiling during renames.
+Temporary typealiases (`FriendsCircleButton`, `FriendRowCard`, `StartPushPrimaryButton`, …) keep legacy call sites compiling during renames.

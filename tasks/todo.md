@@ -2,19 +2,13 @@
 
 ## Status
 
-- [x] Waves 0–8 complete
-- [ ] Wave 9 — Docs polish
-- [ ] Commit / PR
+- [x] Waves 0–9 complete — design system operational
+- [ ] Optional: open PR for Issue #63
 
-## Wave 8
+## Done
 
-| Module | Role |
-|---|---|
-| `PushMotion` | Named selection/expand/sheet/press/mapPulse |
-| `PushOpacityTokens` | Disabled / inactive / scrim / min scale |
-| `PushRadiusTokens` | Role radii |
-| `PushTypographyTokens` | Section label helper |
+Catalog (`docs/design-system.md`), `Push/DesignSystem/`, decision log, AGENTS links, waves 0–9.
 
 ## Next
 
-Wave 9 — complete catalog do-not-recreate list and handoff polish.
+Open PR when ready; re-audit with `scripts/test.sh full` before merge if desired.

@@ -1,6 +1,6 @@
 # Push Design System — Living Decision Log
 
-_Interview complete (Categories 1–12). Decisions DS-001–DS-089. Specification approved. Wave 0–1 implemented (Issue #63); Waves 2–9 remaining. Handoff: `tasks/design-system-handoff.md`._
+_Interview complete (Categories 1–12). Decisions DS-001–DS-089. Specification approved. Waves 0–9 implemented (Issue #63) — system operational via `docs/design-system.md` and `Push/DesignSystem/`. Handoff history: `tasks/design-system-handoff.md`._
 
 ## Status
 

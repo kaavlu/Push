@@ -1,10 +1,11 @@
 # Push Design System — Specification & Migration Plan
 
-**Status:** Approved — Wave 0–1 implemented (Issue #63); Waves 2–9 remaining  
+**Status:** Approved — **Waves 0–9 implemented** (Issue #63); system operational  
 **Date:** 2026-07-21  
 **Decision source:** `tasks/design-system-decision-log.md` (DS-001–DS-089)  
 **Handoff:** `tasks/design-system-handoff.md`  
-**Catalog:** `docs/design-system.md`  
+**Catalog:** `docs/design-system.md` (agent entry)  
+**Code:** `Push/DesignSystem/`  
 **Scope:** iOS SwiftUI UI centralization for discoverability and reuse by humans and coding agents  
 **Non-goals this pass:** Visual redesign, onboarding/auth restyle into main app, freeform glass APIs, custom destructive alerts, Feed/activity-row design
 
@@ -441,9 +442,9 @@ Every system component ships `#if DEBUG` previews; use `PushPreviewMatrix` for a
 | Specification matches interview decisions | **Approved** (2026-07-21) |
 | Migration wave order | **Accepted** as written (§8.3) |
 | Module path | **`Push/DesignSystem/`** |
-| Implementation | **In progress** — Wave 0–1 done; continue Wave 2+ per handoff |
+| Implementation | **Complete** — Waves 0–9 (Issue #63); catalog operational |
 
-When implementing: wave-by-wave appearance-preserving extractions, catalog updates, scoped verification. Follow `tasks/design-system-handoff.md`.
+Ongoing work: open `docs/design-system.md` first; new families need an explicit design-system decision.
 
 ---
 

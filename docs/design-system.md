@@ -1,10 +1,11 @@
 # Push Design System — Agent Catalog
 
-**Status:** Waves 0–8 complete (through tokens & motion).  
+**Status:** **Operational** — Waves 0–9 complete (Issue #63).  
 **Decisions:** `tasks/design-system-decision-log.md` (DS-001–DS-089) — product law.  
 **Spec:** `docs/superpowers/specs/2026-07-21-push-design-system-specification.md`.  
 **Code home:** `Push/DesignSystem/` (+ temporary typealiases at legacy call sites).  
-**Handoff:** `tasks/design-system-handoff.md`.
+**Handoff:** `tasks/design-system-handoff.md` (historical wave tracking).  
+**Pre-system snapshot (read-only):** `Design/PushThemeAudit.md` — superseded for *implementation*; decisions + this catalog win on conflict.
 
 Open this file **before** creating UI chrome. Discover → reuse → extend → only then propose a new family (DS-086).
 
@@ -16,19 +17,45 @@ Open this file **before** creating UI chrome. Discover → reuse → extend → 
 2. **Named surfaces only** — no freeform tint/stroke/shadow knobs in feature code (DS-016).
 3. **Semantic components** — person row, group row, request card stay separate (DS-023).
 4. **Onboarding/auth is domain-local** until a future alignment pass (DS-006).
+5. **Token discipline** — new shared values go in tokens or need a DS decision (DS-083).
 
 ---
 
-## Hard bans (DS-088)
+## Hard bans (DS-088) — do not recreate
 
-- No new glass / material / cream recipes in feature files
-- No `.borderedProminent` as product chrome (use branded CTAs — DS-002 / DS-003)
-- No second person-row, circular utility button, or full empty/error implementation
-- No raw color hex/RGB in feature views once tokens land (prefer `PushControlColors` / palette roles)
-- No third primary CTA treatment
-- No DIY live-map pucks
-- No custom popover/action panels (use system `Menu` / `contextMenu` / `confirmationDialog`)
-- No secondary tab bars on ivory screens
+| Do not ship… | Use instead |
+|---|---|
+| Local glass / material / cream recipes | Named surfaces (§ Named surfaces) |
+| `.borderedProminent` / system tint product chrome | `PushSolidSunbeamButton` or `PushGlassRimButton` |
+| Third primary CTA treatment | Only solid sunbeam **or** glass+rim |
+| Second person-row / circular utility / full empty-error stack | `PushPersonRow`, `PushCircleIconButton`, `EmptySurface*` |
+| Raw hex/RGB in feature views | `PushColorPalette`, `PushControlColors`, cream/availability tokens |
+| DIY live-map pucks | `FriendPuck` / cluster / `RegionalActivityPuck` / `SelfPuckView` |
+| Custom popover/action panels | System `Menu` / `contextMenu` / `confirmationDialog` |
+| Secondary tab bars on ivory screens | Map `BottomNavigationBar` only |
+| Parallel availability color tables | `PushAvailabilityTokens` |
+| New status capsule recipes | Chip menu (§ Availability / chips) |
+| New spring/duration literals for shared motion | `PushMotion` |
+| Freeform elevation / shadow APIs | Inside named surfaces only |
+| Feed/activity-row chrome | Deferred until Feed ships (DS-033) |
+| Onboarding CTAs inside main app | Domain-local until alignment pass |
+
+---
+
+## Banned API notes (future lint hints)
+
+Not enforced by CI yet. Agents and optional future lint should flag:
+
+```
+.buttonStyle(.borderedProminent)     // product chrome → branded CTAs
+.ultraThinMaterial                   // in feature Views → named surface
+Color(red:green:blue:)               // in feature Views → semantic tokens
+.spring(response:dampingFraction:)   // ad-hoc → PushMotion.*
+// Local parallel types (examples of what not to reintroduce):
+// BlockedPersonRow, FriendsCircleButton reimplementation, private empty StateView forks
+```
+
+Exceptions: onboarding/auth domain (DS-016), PuckLab/Onboarding Lab fixtures, infrastructure packages.
 
 ---
 
@@ -102,8 +129,6 @@ Map profile control, bottom-nav raised +, product circles with intentionally dif
 - `FriendsSectionHeader` → `PushListSectionHeader`
 - `HistoryListRow` → `PushHistoryRow`
 - `ExpandableFriendRow` → Friends convenience over `PushExpandablePersonRow`
-
-### Later waves
 
 ### Empty / loading / error (Wave 3)
 
@@ -201,6 +226,40 @@ Map profile control, bottom-nav raised +, product circles with intentionally dif
 
 ---
 
+## Code map (`Push/DesignSystem/`)
+
+| Path | Contents |
+|---|---|
+| `Tokens/` | `PushAvailabilityTokens`, `PushMotion`, `PushOpacityTokens`, `PushRadiusTokens`, `PushTypographyTokens` |
+| `Surfaces/` | Control / map / puck / card glass, cream, modal |
+| `Components/Buttons/` | Circle, solid sunbeam, glass rim, create-menu icon |
+| `Components/Rows/` | Person, expandable, group, history, section header |
+| `Components/Cards/` | Plans plan card, review card, plan subcomponents |
+| `Components/Chips/` | Availability chip, brand sunbeam pill |
+| `Components/Avatars/` | Person avatar |
+| `Components/EmptyStates/` | EmptySurface family, map overlay |
+| `Components/Selectors/` | Segmented, filter chips, single-select, modal choice pill |
+| `Components/Navigation/` | Cream header, modal close, text link |
+| `Components/Sheets/` | Map bottom-sheet chrome |
+| `README.md` | In-repo pointer + wave history |
+
+Feature still owns composition: ViewModels, routes, unique copy, map shell (`ContentView`, `BottomNavigationBar`), calendar module, request lifecycle wiring, onboarding domain.
+
+---
+
+## Explicitly deferred (not this system pass)
+
+| Item | When |
+|---|---|
+| Onboarding/auth visual alignment with main app | Future DS pass |
+| Feed / activity-row system | When Feed is implemented |
+| Custom branded destructive alerts | Future DS pass |
+| Freeform parametric glass API | Never (unless DS-016 overturned) |
+| Calendar day tiles as global card type | Not this pass |
+| Merging Review + Plans cards into one component | Not this pass |
+
+---
+
 ## Wave tracking
 
 | Wave | Focus | Status |
@@ -214,6 +273,6 @@ Map profile control, bottom-nav raised +, product circles with intentionally dif
 | 6 | Selectors, headers, sheets | Done |
 | 7 | Plan cards & subcomponents | Done |
 | 8 | Tokens & motion | Done |
-| 9 | Docs polish | Pending |
+| 9 | Docs polish | **Done** |
 
-Update `tasks/design-system-handoff.md` when a wave finishes.
+Issue #63 implementation is complete for the approved wave plan. Further UI work uses this catalog; new families require a design-system decision.
