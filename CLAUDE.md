@@ -43,7 +43,7 @@ This is a **high-fidelity prototype** that can become production later.
 ## What NOT to Build Yet
 
 - Live writes to social graph (friends/groups/sharing), Realtime/subscriptions beyond `current_presence` — profile self-writes (basics, toggles, availability, photo), push coordination (create/edit/cancel/delete, RSVP), friend-request coordination (search/send/cancel/accept/deny via `0009`/`0013`; remove via `0010`/`0013`), group creation + group-invite coordination (`0011`) + group lifecycle (`0015`), user block/unblock via `0016`, and presence Realtime (`PresenceRealtimeBridge`, migration `0020`) are allowed
-- Real activity inference
+- Production activity inference (`LocationSession`/presence/UI wiring; deterministic rules) — domain types/protocol only via I1 (#92)
 - Push notifications
 - iMessage extension
 - Large groups
