@@ -188,6 +188,49 @@ final class SupabaseLiveDataLoader: LiveDataLoading {
         }
     }
 
+    func discoverProfiles(limit: Int) async throws -> [SearchProfileRow] {
+        try await PushLog.logged("discoverProfiles") {
+            try await client
+                .rpc(
+                    "discover_profiles",
+                    params: DiscoverProfilesParams(result_limit: limit)
+                )
+                .execute()
+                .value
+        }
+    }
+
+    func setGlobalSharingDefaults(
+        location: String,
+        activity: String,
+        availability: String
+    ) async throws -> SharingPolicyRow {
+        try await PushLog.logged("setGlobalSharingDefaults") {
+            try await client
+                .rpc(
+                    "set_global_sharing_defaults",
+                    params: SetGlobalSharingDefaultsParams(
+                        p_location_visibility: location,
+                        p_activity_visibility: activity,
+                        p_availability_visibility: availability
+                    )
+                )
+                .single()
+                .execute()
+                .value
+        }
+    }
+
+    func completeOnboarding() async throws -> ProfileRow {
+        try await PushLog.logged("completeOnboarding") {
+            try await client
+                .rpc("complete_onboarding")
+                .single()
+                .execute()
+                .value
+        }
+    }
+
     func sendFriendRequest(targetUserID: String) async throws -> FriendshipRow {
         try await PushLog.logged("sendFriendRequest") {
             try await client
@@ -361,6 +404,16 @@ final class SupabaseLiveDataLoader: LiveDataLoading {
 private struct SearchProfilesParams: Encodable {
     let search_query: String
     let result_limit: Int
+}
+
+private struct DiscoverProfilesParams: Encodable {
+    let result_limit: Int
+}
+
+private struct SetGlobalSharingDefaultsParams: Encodable {
+    let p_location_visibility: String
+    let p_activity_visibility: String
+    let p_availability_visibility: String
 }
 
 private struct SendFriendRequestParams: Encodable {

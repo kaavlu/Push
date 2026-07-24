@@ -4,11 +4,22 @@ import Foundation
 /// Screens the production auth gate can show.
 enum AuthGateScreen: Equatable {
     case welcome
-    case signUp
+    case signUpProfile
+    case signUpCredentials
     case signIn
     case checkEmail
     case forgotPassword
     case setNewPassword
+
+    /// In-frame back chevron (lab shell). Welcome / done-style destinations hide it.
+    var showsBackButton: Bool {
+        switch self {
+        case .welcome, .checkEmail:
+            return false
+        case .signUpProfile, .signUpCredentials, .signIn, .forgotPassword, .setNewPassword:
+            return true
+        }
+    }
 }
 
 @MainActor
@@ -21,6 +32,11 @@ final class AuthViewModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var infoMessage: String?
     @Published var isBusy = false
+    /// True while decoding/compressing a picked profile photo on the sign-up step.
+    @Published private(set) var isPhotoBusy = false
+    @Published var photoErrorMessage: String?
+    /// JPEG ready for Storage upload after the live session is prepared.
+    @Published private(set) var pendingProfilePhotoJPEG: Data?
     @Published private(set) var authedUser: AuthedUser?
     @Published private(set) var screen: AuthGateScreen = .welcome
     /// True after a recovery deep link until password is updated or the user leaves the flow.
@@ -72,6 +88,12 @@ final class AuthViewModel: ObservableObject {
         isEmailValid && isPasswordNonEmpty && !isBusy
     }
 
+    /// Profile step only — name + handle before collecting credentials.
+    /// Photo is optional.
+    var canContinueSignUpProfile: Bool {
+        isDisplayNameValid && isHandleValid && !isBusy && !isPhotoBusy
+    }
+
     var canSubmitSignUp: Bool {
         isDisplayNameValid && isHandleValid && isEmailValid && isPasswordStrongEnough && !isBusy
     }
@@ -83,6 +105,8 @@ final class AuthViewModel: ObservableObject {
     var canSubmitNewPassword: Bool {
         isPasswordStrongEnough && passwordsMatch && !isBusy
     }
+
+    var hasPendingProfilePhoto: Bool { pendingProfilePhotoJPEG != nil }
 
     /// Sign-in form binding (AuthFormModel).
     var canSubmit: Bool { canSubmitSignIn }
@@ -100,8 +124,36 @@ final class AuthViewModel: ObservableObject {
         clearAllFields()
         errorMessage = nil
         infoMessage = nil
+        photoErrorMessage = nil
         pendingPasswordRecovery = false
         screen = .welcome
+    }
+
+    // MARK: - Profile photo (sign-up)
+
+    /// Decode + compress picker bytes; upload happens after live prepare.
+    func applyPickedProfilePhoto(rawData: Data) {
+        guard !isPhotoBusy else { return }
+        isPhotoBusy = true
+        photoErrorMessage = nil
+        defer { isPhotoBusy = false }
+        guard let jpeg = ProfilePhotoProcessor.jpegData(from: rawData) else {
+            photoErrorMessage = "Couldn't process that photo. Try another one."
+            return
+        }
+        pendingProfilePhotoJPEG = jpeg
+    }
+
+    func clearPendingProfilePhoto() {
+        pendingProfilePhotoJPEG = nil
+        photoErrorMessage = nil
+    }
+
+    /// Takes ownership of the pending JPEG for post-prepare upload (nil if none).
+    func consumePendingProfilePhoto() -> Data? {
+        let data = pendingProfilePhotoJPEG
+        pendingProfilePhotoJPEG = nil
+        return data
     }
 
     // MARK: - Actions
@@ -137,8 +189,10 @@ final class AuthViewModel: ObservableObject {
             )
             switch result {
             case .authenticated(let user):
+                // Keep pending photo for RootView prepare → Storage upload.
                 authedUser = user
             case .confirmationRequired(let email):
+                // Account created but no session yet — hold photo until first sign-in.
                 self.email = email
                 screen = .checkEmail
             }
@@ -170,8 +224,6 @@ final class AuthViewModel: ObservableObject {
         }
     }
 
-    /// Returns true when the URL was handled as a password-recovery callback
-    /// so the root can force the auth gate if the user was already in-app.
     /// Returns true when the URL was handled as recovery or social/OAuth session.
     @discardableResult
     func handleOpenURL(_ url: URL) async -> Bool {
@@ -214,22 +266,41 @@ final class AuthViewModel: ObservableObject {
         clearCredentialFields()
         errorMessage = nil
         infoMessage = nil
+        // Leaving sign-up for returning-user path: drop pending photo.
+        clearPendingProfilePhoto()
         screen = .signIn
     }
 
+    /// Email sign-up step 1: name + handle (+ optional photo).
     func showSignUp() {
         clearCredentialFields()
         displayName = ""
         handle = ""
+        clearPendingProfilePhoto()
         errorMessage = nil
         infoMessage = nil
-        screen = .signUp
+        screen = .signUpProfile
+    }
+
+    func continueSignUpProfile() {
+        guard canContinueSignUpProfile else { return }
+        errorMessage = nil
+        infoMessage = nil
+        // Fresh credentials when advancing; name/handle/photo stay.
+        clearCredentialFields()
+        screen = .signUpCredentials
+    }
+
+    /// Handle is lowercased and restricted to the production allow-set.
+    func setHandle(_ raw: String) {
+        handle = String(raw.lowercased().unicodeScalars.filter { Validation.handleAllowed.contains($0) })
     }
 
     func showWelcome() {
         clearAllFields()
         errorMessage = nil
         infoMessage = nil
+        photoErrorMessage = nil
         pendingPasswordRecovery = false
         screen = .welcome
     }
@@ -246,7 +317,29 @@ final class AuthViewModel: ObservableObject {
         password = ""
         errorMessage = nil
         infoMessage = nil
+        // Keep pending photo so first sign-in after confirm can still upload it.
         screen = .signIn
+    }
+
+    /// Lab-style top-chrome back: deterministic parent, not a free history stack.
+    func goBack() {
+        errorMessage = nil
+        infoMessage = nil
+        switch screen {
+        case .signUpProfile, .signIn:
+            showWelcome()
+        case .signUpCredentials:
+            // Keep name/handle/photo; drop password so the user re-enters on return.
+            clearCredentialFields()
+            screen = .signUpProfile
+        case .forgotPassword:
+            showSignIn()
+        case .setNewPassword:
+            pendingPasswordRecovery = false
+            showForgotPassword()
+        case .welcome, .checkEmail:
+            break
+        }
     }
 
     // MARK: - Private
@@ -297,5 +390,6 @@ final class AuthViewModel: ObservableObject {
         clearCredentialFields()
         displayName = ""
         handle = ""
+        clearPendingProfilePhoto()
     }
 }

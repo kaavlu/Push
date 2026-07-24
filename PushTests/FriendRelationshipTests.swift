@@ -321,6 +321,10 @@ private final class ControllableFriendRepository: FriendRepository {
         }
     }
 
+    func discoverPeople(limit: Int) async throws -> [PersonSearchResult] {
+        Array(results.prefix(limit))
+    }
+
     func sendFriendRequest(to personID: Person.ID) async throws -> FriendRequest.ID {
         if shouldFailMutations { throw URLError(.notConnectedToInternet) }
         let id = "req-\(personID)"

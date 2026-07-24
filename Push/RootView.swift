@@ -58,6 +58,8 @@ enum BootstrapState: Equatable {
     case gate
     case preparing(AuthedUser)
     case preparationFailed(AuthedUser, String)
+    /// Live first-run setup (privacy / location / notifications / friends).
+    case onboarding(AuthedUser)
     case app(AuthedUser?)   // nil user = mock mode (identity comes from the seed container).
 
     static func initial(mode: AppMode, restored: AuthedUser?) -> BootstrapState {
@@ -120,6 +122,16 @@ struct RootView: View {
                 },
                 signOut: { Task { await performSignOut() } }
             )
+        case .onboarding:
+            PostAuthOnboardingView {
+                if case .onboarding(let user) = state {
+                    enter(.app(user))
+                } else {
+                    enter(.app(authModel.authedUser))
+                }
+            }
+            .environment(\.signOut, signOutAction)
+            .environment(\.deleteAccount, deleteAccountAction)
         case .app:
             // ViewModels default to AppDataContainer.shared (installed in `enter`).
             ContentView()
@@ -187,11 +199,34 @@ struct RootView: View {
                 client: SupabaseClientProvider.shared.client, currentUserID: user.id
             )
             AppDataContainer.installPreparedLive(container)
+            // Sign-up may have held a JPEG until the session + profile row exist.
+            await uploadPendingSignUpPhotoIfNeeded(using: container)
             PushLog.bootstrap.log("live data ready")
-            enter(.app(user))
+            let needsOnboarding = (try? await container.profile.needsPostAuthOnboarding()) ?? false
+            if needsOnboarding {
+                PushLog.bootstrap.log("post-auth onboarding required")
+                enter(.onboarding(user))
+            } else {
+                enter(.app(user))
+            }
         } catch {
             PushLog.bootstrap.error("live data preparation failed: \(PushLog.safeDescription(for: error), privacy: .public)")
             enter(.preparationFailed(user, error.localizedDescription))
+        }
+    }
+
+    /// Best-effort avatar upload after signup (or first sign-in post-confirm).
+    /// Failure must not block entering the app — Profile can retry.
+    @MainActor
+    private func uploadPendingSignUpPhotoIfNeeded(using container: AppDataContainer) async {
+        guard let jpeg = authModel.consumePendingProfilePhoto() else { return }
+        do {
+            try await container.profile.updateProfilePhoto(jpegData: jpeg)
+            PushLog.bootstrap.log("sign-up profile photo uploaded")
+        } catch {
+            PushLog.bootstrap.error(
+                "sign-up profile photo upload failed: \(PushLog.safeDescription(for: error), privacy: .public)"
+            )
         }
     }
 

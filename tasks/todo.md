@@ -1,29 +1,32 @@
-# Issue #81 — Live App Cleanup
-
-**Issue:** https://github.com/kaavlu/Push/issues/81  
-**Base:** main (includes #79 Core Location)
+# Live onboarding (auth + post-auth setup)
 
 ## Status
 
-- [x] Plan from issue
-- [x] Map empty CTA only when `friendsCount == 0` (not when friends hide presence)
-- [x] Open map on user GPS/self presence instead of SF default
-- [x] Session-cache friendships + blocked users; warm with social graph (lag fix)
-- [x] Remove shadow from Start Push location typing bar
-- [x] Tests (EmptySurfaceTests, LiveDataStoreTests, FriendRelationshipTests)
-- [ ] PR
+- [x] Multi-step email sign-up + photo upload
+- [x] Migration `0019` sharing defaults / complete / discover
+- [x] Post-auth flow: privacy → location → notifications → friends → done
+- [x] `PostAuthOnboardingTests` green
+- [ ] Commit / PR
 
-## Fixes
+## Live flow
 
-| # | Bug | Fix |
-|---|---|---|
-| 1 | Add-friends map popup when friends exist but no presence | `MapViewModel.surfacePhase` uses friend count |
-| 2 | Map opens in SF | Initial focus from GPS (prefer) or self presence |
-| 3 | Visible lag on friends/pushes | Cache `friendships` + blocked in `LiveDataStore.warm` |
-| 4 | Location field shadow | `pushGlassBackground(showsShadow: false)` on Where field |
+1. Auth gate (signup/signin)  
+2. prepareLive (+ photo upload)  
+3. If `onboarding_completed_at` null → PostAuthOnboarding  
+4. App
+
+## Backend map
+
+| Step | Backend |
+|---|---|
+| Privacy | `set_global_sharing_defaults` + Ghost + `updatePrivacy` |
+| Location | `LocationSession.startIfEligible` (when-in-use) |
+| Notifications | System permission only (no APNs yet) |
+| Friends | `discover_profiles` + `send_friend_request` |
+| Done | `complete_onboarding` |
 
 ## Non-goals
 
-- Realtime subscriptions
-- Custom location permission onboarding UI
-- Feed backend
+- Phone auth
+- Contact-book import
+- Remote push delivery

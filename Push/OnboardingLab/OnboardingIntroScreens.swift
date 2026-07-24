@@ -28,26 +28,27 @@ struct OnboardingWelcomeScreen: View {
     }
 
     private var hero: some View {
+        // Same decorative pucks as production AuthWelcomeView.
         ZStack {
             FriendPuck(
-                friend: OnboardingLabFixtures.heroPucks[0],
-                size: OnboardingWelcomeHeroLayout.leadingPuckSize
+                friend: AuthHeroFixtures.pucks[0],
+                size: AuthWelcomeHeroLayout.leadingPuckSize
             )
-            .offset(x: OnboardingWelcomeHeroLayout.leadingOffsetX, y: OnboardingWelcomeHeroLayout.leadingOffsetY)
+            .offset(x: AuthWelcomeHeroLayout.leadingOffsetX, y: AuthWelcomeHeroLayout.leadingOffsetY)
 
             FriendPuck(
-                friend: OnboardingLabFixtures.heroPucks[1],
-                size: OnboardingWelcomeHeroLayout.trailingPuckSize
+                friend: AuthHeroFixtures.pucks[1],
+                size: AuthWelcomeHeroLayout.trailingPuckSize
             )
-            .offset(x: OnboardingWelcomeHeroLayout.trailingOffsetX, y: OnboardingWelcomeHeroLayout.trailingOffsetY)
+            .offset(x: AuthWelcomeHeroLayout.trailingOffsetX, y: AuthWelcomeHeroLayout.trailingOffsetY)
 
             FriendPuck(
-                friend: OnboardingLabFixtures.heroPucks[2],
-                size: OnboardingWelcomeHeroLayout.centerPuckSize
+                friend: AuthHeroFixtures.pucks[2],
+                size: AuthWelcomeHeroLayout.centerPuckSize
             )
-            .offset(x: OnboardingWelcomeHeroLayout.centerOffsetX, y: OnboardingWelcomeHeroLayout.centerOffsetY)
+            .offset(x: AuthWelcomeHeroLayout.centerOffsetX, y: AuthWelcomeHeroLayout.centerOffsetY)
         }
-        .frame(width: OnboardingWelcomeHeroLayout.width, height: OnboardingWelcomeHeroLayout.height)
+        .frame(width: AuthWelcomeHeroLayout.width, height: AuthWelcomeHeroLayout.height)
     }
 
     private var wordmark: some View {
@@ -79,22 +80,8 @@ struct OnboardingWelcomeScreen: View {
 
 }
 
-private enum OnboardingWelcomeHeroLayout {
-    static let width: CGFloat = 260
-    static let height: CGFloat = 172
-    static let leadingPuckSize: CGFloat = 74
-    static let trailingPuckSize: CGFloat = 68
-    static let centerPuckSize: CGFloat = 64
-    static let leadingOffsetX: CGFloat = -94
-    static let leadingOffsetY: CGFloat = -8
-    static let trailingOffsetX: CGFloat = 92
-    static let trailingOffsetY: CGFloat = -42
-    static let centerOffsetX: CGFloat = 4
-    static let centerOffsetY: CGFloat = 52
-}
-
-// `OnboardingAuthButton` now lives in OnboardingAuthComponents.swift
-// (promoted out of DEBUG so the production auth gate can reuse it).
+// Hero layout + fixtures live on AuthWelcomeView (production + lab share them).
+// `OnboardingAuthButton` lives in OnboardingAuthComponents.swift.
 
 // MARK: - Value preview
 

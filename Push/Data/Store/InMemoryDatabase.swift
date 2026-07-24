@@ -24,6 +24,45 @@ final class InMemoryDatabase: ObservableObject {
     private(set) var placesByID: [Place.ID: Place]
     private(set) var statusesByPersonID: [Person.ID: PresenceStatus]
     private(set) var policies: [SharingPolicy]
+
+    /// Upserts the current user's global_default policy (mock mirror of
+    /// `set_global_sharing_defaults`).
+    func setGlobalSharingDefaults(
+        location: SharingPolicy.LocationVisibility,
+        activity: SharingPolicy.DetailVisibility,
+        availability: SharingPolicy.AvailabilityVisibility
+    ) {
+        let owner = currentUserID
+        if let index = policies.firstIndex(where: {
+            $0.ownerPersonID == owner && $0.audienceType == .globalDefault
+        }) {
+            let existing = policies[index]
+            policies[index] = SharingPolicy(
+                id: existing.id,
+                ownerPersonID: owner,
+                audienceType: .globalDefault,
+                audienceID: nil,
+                locationVisibility: location,
+                activityVisibility: activity,
+                availabilityVisibility: availability,
+                expiresAt: existing.expiresAt
+            )
+        } else {
+            policies.append(
+                SharingPolicy(
+                    id: "policy-global-\(owner)",
+                    ownerPersonID: owner,
+                    audienceType: .globalDefault,
+                    audienceID: nil,
+                    locationVisibility: location,
+                    activityVisibility: activity,
+                    availabilityVisibility: availability,
+                    expiresAt: nil
+                )
+            )
+        }
+        didMutate()
+    }
     var plansByID: [PushPlan.ID: PushPlan]
     private(set) var responses: [PushResponse]
     private(set) var hangouts: [PastHangout]

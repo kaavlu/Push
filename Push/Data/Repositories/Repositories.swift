@@ -20,6 +20,8 @@ protocol FriendRepository {
     func setCurrentUserAvailability(_ availability: FriendAvailabilityState) async throws
     /// Discover people by display name and/or handle. Never returns the current user.
     func searchPeople(query: String) async throws -> [PersonSearchResult]
+    /// First-run suggestions: people on Push who are not yet accepted friends.
+    func discoverPeople(limit: Int) async throws -> [PersonSearchResult]
     /// Creates (or re-opens) a pending outgoing request.
     /// Returns the active request id (existing or newly created).
     @discardableResult
@@ -112,10 +114,20 @@ protocol ProfileRepository {
     func updateProfilePhoto(jpegData: Data) async throws
     /// Clears the profile photo path and removes the stored image when possible.
     func removeProfilePhoto() async throws
+    /// New live accounts start incomplete; mock is always complete.
+    func needsPostAuthOnboarding() async throws -> Bool
+    /// Marks first-run setup finished (idempotent).
+    func completeOnboarding() async throws
 }
 
 protocol SharingRepository {
     func allPolicies() async throws -> [SharingPolicy]
+    /// Upserts the caller's global_default sharing policy (R3).
+    func setGlobalDefaults(
+        location: SharingPolicy.LocationVisibility,
+        activity: SharingPolicy.DetailVisibility,
+        availability: SharingPolicy.AvailabilityVisibility
+    ) async throws
 }
 
 protocol FeedRepository {

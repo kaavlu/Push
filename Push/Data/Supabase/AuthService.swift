@@ -158,6 +158,8 @@ final class SupabaseAuthService: AuthService {
         displayName: String,
         handle: String
     ) async throws -> SignUpResult {
+        // Confirm-email links must NOT use the reset path: `handleAuthURL` treats
+        // `…/auth/reset` as password recovery even when type=signup.
         let response = try await client.auth.signUp(
             email: email,
             password: password,
@@ -165,7 +167,7 @@ final class SupabaseAuthService: AuthService {
                 "first_name": .string(displayName),
                 "handle": .string(handle),
             ],
-            redirectTo: AuthRedirect.resetURL
+            redirectTo: AuthRedirect.oauthCallbackURL
         )
         if let session = response.session {
             let user = Self.map(session.user)

@@ -85,6 +85,20 @@ final class SupabaseFriendRepository: FriendRepository {
             }
     }
 
+    func discoverPeople(limit: Int) async throws -> [PersonSearchResult] {
+        let hits = try await store.discoverProfiles(limit: limit)
+        let friendships = try await store.friendships()
+        return hits
+            .filter { $0.id.caseInsensitiveCompare(currentUserID) != .orderedSame }
+            .map { row in
+                PersonSearchResult(
+                    person: row.person(),
+                    handle: row.handle,
+                    relation: relation(to: row.id, friendships: friendships)
+                )
+            }
+    }
+
     @discardableResult
     func sendFriendRequest(to personID: Person.ID) async throws -> FriendRequest.ID {
         try await store.sendFriendRequest(targetUserID: personID)

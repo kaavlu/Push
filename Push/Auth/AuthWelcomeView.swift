@@ -1,7 +1,8 @@
 // Push/Auth/AuthWelcomeView.swift
 import SwiftUI
 
-/// Production front door: hero + wordmark + Google / email continue.
+/// Production front door — lab welcome layout: hero pucks, wordmark,
+/// Google + email continue, sign-in switch, legal consent.
 struct AuthWelcomeView: View {
     @ObservedObject var model: AuthViewModel
 
@@ -69,13 +70,10 @@ struct AuthWelcomeView: View {
             LegalConsentText()
         }
     }
-
 }
 
-/// Layout constants for the three-puck hero cluster, mirrored from the
-/// DEBUG onboarding lab's `OnboardingWelcomeHeroLayout` so the production
-/// gate renders identically.
-private enum AuthWelcomeHeroLayout {
+/// Layout constants for the three-puck hero cluster (shared with lab welcome).
+enum AuthWelcomeHeroLayout {
     static let width: CGFloat = 260
     static let height: CGFloat = 172
     static let leadingPuckSize: CGFloat = 74
@@ -89,10 +87,8 @@ private enum AuthWelcomeHeroLayout {
     static let centerOffsetY: CGFloat = 52
 }
 
-/// Decorative hero pucks for the production gate. A small standalone
-/// fixture (not `OnboardingLabFixtures`, which is DEBUG-only) so this
-/// screen has no dependency on the design lab's compile target.
-private enum AuthHeroFixtures {
+/// Decorative hero pucks for production + DEBUG lab welcome (not seed data).
+enum AuthHeroFixtures {
     static let pucks: [FriendPuckData] = [
         FriendPuckData(
             id: "auth-hero-free-now",

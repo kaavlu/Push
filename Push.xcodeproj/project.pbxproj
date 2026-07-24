@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C4163DCFC240B76B5D45C3DB /* PostAuthOnboardingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDFAB9C6CED1AF162483B9B0 /* PostAuthOnboardingTests.swift */; };
+		1E7B691585CD8E9BAD8AE8B8 /* PostAuthOnboardingScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0BAC0CC1F1F86B76DBC4E39 /* PostAuthOnboardingScreens.swift */; };
+		48F82A476D1993946C05A85F /* PostAuthOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD7C63B59BC53EFB3FC7E90D /* PostAuthOnboardingView.swift */; };
+		88C74DE2B9EDD0094999D737 /* PostAuthOnboardingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 053332943A4451D80B66BD6A /* PostAuthOnboardingViewModel.swift */; };
+		A5BA2816D76F2B380F5AA662 /* OnboardingPrivacyOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97BFD348CFB56F3FCCD5DDAD /* OnboardingPrivacyOption.swift */; };
 		D74ABA9AC7A765028035F776 /* CoreLocationProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A6B9A9B7679969653EAD8CA /* CoreLocationProviderTests.swift */; };
 		58D92613BDD184CCDE44B88A /* CoreLocationLocationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10FD91F9CF0773D314241FE /* CoreLocationLocationProvider.swift */; };
 		BF8D2A6AA0BF59C6496AB341 /* CoreLocationMapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A2BE65D4665ADCED775D8D2 /* CoreLocationMapping.swift */; };
@@ -280,6 +285,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		EDFAB9C6CED1AF162483B9B0 /* PostAuthOnboardingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PostAuthOnboardingTests.swift"; sourceTree = "<group>"; };
+		D0BAC0CC1F1F86B76DBC4E39 /* PostAuthOnboardingScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PostAuthOnboardingScreens.swift"; path = "Auth/PostAuthOnboardingScreens.swift"; sourceTree = "<group>"; };
+		FD7C63B59BC53EFB3FC7E90D /* PostAuthOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PostAuthOnboardingView.swift"; path = "Auth/PostAuthOnboardingView.swift"; sourceTree = "<group>"; };
+		053332943A4451D80B66BD6A /* PostAuthOnboardingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PostAuthOnboardingViewModel.swift"; path = "Auth/PostAuthOnboardingViewModel.swift"; sourceTree = "<group>"; };
+		97BFD348CFB56F3FCCD5DDAD /* OnboardingPrivacyOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "OnboardingPrivacyOption.swift"; path = "Auth/OnboardingPrivacyOption.swift"; sourceTree = "<group>"; };
 		0A6B9A9B7679969653EAD8CA /* CoreLocationProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CoreLocationProviderTests.swift"; sourceTree = "<group>"; };
 		A10FD91F9CF0773D314241FE /* CoreLocationLocationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "CoreLocationLocationProvider.swift"; path = "Data/Location/CoreLocationLocationProvider.swift"; sourceTree = "<group>"; };
 		6A2BE65D4665ADCED775D8D2 /* CoreLocationMapping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "CoreLocationMapping.swift"; path = "Data/Location/CoreLocationMapping.swift"; sourceTree = "<group>"; };
@@ -590,6 +600,10 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				D0BAC0CC1F1F86B76DBC4E39 /* PostAuthOnboardingScreens.swift */,
+				FD7C63B59BC53EFB3FC7E90D /* PostAuthOnboardingView.swift */,
+				053332943A4451D80B66BD6A /* PostAuthOnboardingViewModel.swift */,
+				97BFD348CFB56F3FCCD5DDAD /* OnboardingPrivacyOption.swift */,
 				A10FD91F9CF0773D314241FE /* CoreLocationLocationProvider.swift */,
 				6A2BE65D4665ADCED775D8D2 /* CoreLocationMapping.swift */,
 				C14FFC01FBEB4C9F17E2FD22 /* LocalPresenceSync.swift */,
@@ -812,6 +826,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				EDFAB9C6CED1AF162483B9B0 /* PostAuthOnboardingTests.swift */,
 				0A6B9A9B7679969653EAD8CA /* CoreLocationProviderTests.swift */,
 				D7200BFE2778A623FC14579E /* LocationPresenceThrottleTests.swift */,
 				F6986EEED12A68F773E3F1B9 /* PresencePublishPolicyTests.swift */,
@@ -1005,6 +1020,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				1E7B691585CD8E9BAD8AE8B8 /* PostAuthOnboardingScreens.swift in Sources */,
+				48F82A476D1993946C05A85F /* PostAuthOnboardingView.swift in Sources */,
+				88C74DE2B9EDD0094999D737 /* PostAuthOnboardingViewModel.swift in Sources */,
+				A5BA2816D76F2B380F5AA662 /* OnboardingPrivacyOption.swift in Sources */,
 				58D92613BDD184CCDE44B88A /* CoreLocationLocationProvider.swift in Sources */,
 				BF8D2A6AA0BF59C6496AB341 /* CoreLocationMapping.swift in Sources */,
 				F753CECC7AC5FB43A7BB938E /* LocalPresenceSync.swift in Sources */,
@@ -1218,6 +1237,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				C4163DCFC240B76B5D45C3DB /* PostAuthOnboardingTests.swift in Sources */,
 				D74ABA9AC7A765028035F776 /* CoreLocationProviderTests.swift in Sources */,
 				844B8119CC75C70F595E9D1A /* LocationPresenceThrottleTests.swift in Sources */,
 				5B39C41A8D8AF6FF50B9D614 /* PresencePublishPolicyTests.swift in Sources */,

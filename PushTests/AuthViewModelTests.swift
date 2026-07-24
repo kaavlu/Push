@@ -1,4 +1,5 @@
 // PushTests/AuthViewModelTests.swift
+import UIKit
 import XCTest
 @testable import Push
 
@@ -45,14 +46,141 @@ final class AuthViewModelTests: XCTestCase {
         XCTAssertEqual(vm.screen, .signIn)
     }
 
-    func testShowSignUpNavigatesAndClearsFields() {
+    func testShowSignUpNavigatesToProfileStepAndClearsFields() {
         let vm = AuthViewModel(auth: FakeAuthService())
         vm.email = "x@push.test"
         vm.showSignUp()
-        XCTAssertEqual(vm.screen, .signUp)
+        XCTAssertEqual(vm.screen, .signUpProfile)
         XCTAssertEqual(vm.email, "")
         XCTAssertEqual(vm.displayName, "")
         XCTAssertEqual(vm.handle, "")
+    }
+
+    func testContinueSignUpProfileRequiresValidNameAndHandle() {
+        let vm = AuthViewModel(auth: FakeAuthService())
+        vm.showSignUp()
+        vm.displayName = "Alice"
+        vm.handle = "al"
+        XCTAssertFalse(vm.canContinueSignUpProfile)
+        vm.continueSignUpProfile()
+        XCTAssertEqual(vm.screen, .signUpProfile)
+
+        vm.handle = "alice"
+        XCTAssertTrue(vm.canContinueSignUpProfile)
+        vm.continueSignUpProfile()
+        XCTAssertEqual(vm.screen, .signUpCredentials)
+    }
+
+    func testBackFromCredentialsReturnsToProfilePreservingNameHandle() {
+        let vm = AuthViewModel(auth: FakeAuthService())
+        vm.showSignUp()
+        vm.displayName = "Alice"
+        vm.handle = "alice"
+        vm.continueSignUpProfile()
+        vm.email = "alice@push.test"
+        vm.password = "longenough"
+        XCTAssertEqual(vm.screen, .signUpCredentials)
+
+        vm.goBack()
+
+        XCTAssertEqual(vm.screen, .signUpProfile)
+        XCTAssertEqual(vm.displayName, "Alice")
+        XCTAssertEqual(vm.handle, "alice")
+        XCTAssertEqual(vm.email, "")
+        XCTAssertEqual(vm.password, "")
+    }
+
+    func testBackFromSignInReturnsToWelcome() {
+        let vm = AuthViewModel(auth: FakeAuthService())
+        vm.showSignIn()
+        vm.email = "x@push.test"
+        vm.goBack()
+        XCTAssertEqual(vm.screen, .welcome)
+        XCTAssertEqual(vm.email, "")
+    }
+
+    func testSetHandleFiltersDisallowedCharacters() {
+        let vm = AuthViewModel(auth: FakeAuthService())
+        vm.setHandle("Alice.Name!")
+        XCTAssertEqual(vm.handle, "alicename")
+    }
+
+    func testApplyPickedProfilePhotoStoresJPEG() {
+        let vm = AuthViewModel(auth: FakeAuthService())
+        let raw = solidJPEGData(width: 80, height: 80) ?? Data()
+        XCTAssertFalse(raw.isEmpty)
+        vm.applyPickedProfilePhoto(rawData: raw)
+        XCTAssertTrue(vm.hasPendingProfilePhoto)
+        XCTAssertNotNil(vm.pendingProfilePhotoJPEG)
+        XCTAssertNil(vm.photoErrorMessage)
+    }
+
+    func testApplyPickedProfilePhotoRejectsGarbage() {
+        let vm = AuthViewModel(auth: FakeAuthService())
+        vm.applyPickedProfilePhoto(rawData: Data("not-an-image".utf8))
+        XCTAssertFalse(vm.hasPendingProfilePhoto)
+        XCTAssertNotNil(vm.photoErrorMessage)
+    }
+
+    func testPendingPhotoSurvivesCredentialsBackAndConfirmPath() async {
+        let fake = FakeAuthService()
+        fake.signUpResult = .success(.confirmationRequired(email: "new@push.test"))
+        let vm = AuthViewModel(auth: fake)
+        vm.showSignUp()
+        vm.displayName = "New"
+        vm.handle = "newbie"
+        let raw = solidJPEGData(width: 48, height: 48) ?? Data()
+        vm.applyPickedProfilePhoto(rawData: raw)
+        XCTAssertTrue(vm.hasPendingProfilePhoto)
+
+        vm.continueSignUpProfile()
+        XCTAssertEqual(vm.screen, .signUpCredentials)
+        XCTAssertTrue(vm.hasPendingProfilePhoto)
+
+        vm.goBack()
+        XCTAssertEqual(vm.screen, .signUpProfile)
+        XCTAssertTrue(vm.hasPendingProfilePhoto)
+
+        vm.continueSignUpProfile()
+        vm.email = "new@push.test"
+        vm.password = "longenough"
+        await vm.submitSignUp()
+        XCTAssertEqual(vm.screen, .checkEmail)
+        XCTAssertTrue(vm.hasPendingProfilePhoto, "hold photo until first session")
+
+        vm.showSignInFromCheckEmail()
+        XCTAssertEqual(vm.screen, .signIn)
+        XCTAssertTrue(vm.hasPendingProfilePhoto)
+    }
+
+    func testConsumePendingProfilePhotoClearsBuffer() {
+        let vm = AuthViewModel(auth: FakeAuthService())
+        let raw = solidJPEGData(width: 32, height: 32) ?? Data()
+        vm.applyPickedProfilePhoto(rawData: raw)
+        let jpeg = vm.consumePendingProfilePhoto()
+        XCTAssertNotNil(jpeg)
+        XCTAssertFalse(vm.hasPendingProfilePhoto)
+        XCTAssertNil(vm.consumePendingProfilePhoto())
+    }
+
+    func testShowSignInAbandonsPendingSignUpPhoto() {
+        let vm = AuthViewModel(auth: FakeAuthService())
+        vm.showSignUp()
+        let raw = solidJPEGData(width: 32, height: 32) ?? Data()
+        vm.applyPickedProfilePhoto(rawData: raw)
+        vm.showSignIn()
+        XCTAssertFalse(vm.hasPendingProfilePhoto)
+    }
+
+    private func solidJPEGData(width: Int, height: Int) -> Data? {
+        let size = CGSize(width: width, height: height)
+        let format = UIGraphicsImageRendererFormat.default()
+        format.scale = 1
+        let image = UIGraphicsImageRenderer(size: size, format: format).image { ctx in
+            UIColor.systemBlue.setFill()
+            ctx.fill(CGRect(origin: .zero, size: size))
+        }
+        return image.jpegData(compressionQuality: 0.9)
     }
 
     func testShowWelcomeClearsFieldsAndError() async {

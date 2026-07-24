@@ -42,48 +42,7 @@ enum OnboardingAuthMethod {
     case google, mobile
 }
 
-/// Location-sharing choice on the privacy screen.
-enum OnboardingPrivacyOption: String, CaseIterable, Identifiable {
-    case exactActivity, exact, vague, ghost
-
-    var id: String { rawValue }
-
-    var title: String {
-        switch self {
-        case .exactActivity: return "Exact location + activity"
-        case .exact: return "Exact location only"
-        case .vague: return "Vague location"
-        case .ghost: return "Ghost mode"
-        }
-    }
-
-    var subtitle: String {
-        switch self {
-        case .exactActivity: return "Where you are and what you're up to"
-        case .exact: return "Show your spot, skip the activity"
-        case .vague: return "Just your neighborhood"
-        case .ghost: return "Go invisible. See friends, stay hidden."
-        }
-    }
-
-    var symbolName: String {
-        switch self {
-        case .exactActivity: return "mappin.and.ellipse"
-        case .exact: return "map"
-        case .vague: return "cloud.fill"
-        case .ghost: return "eye.slash"
-        }
-    }
-
-    var iconTint: Color {
-        switch self {
-        case .exactActivity: return OnboardingLabColor.stateJoinable
-        case .exact: return OnboardingLabColor.sage
-        case .vague: return OnboardingLabColor.stateVague
-        case .ghost: return OnboardingLabColor.walnut
-        }
-    }
-}
+// `OnboardingPrivacyOption` is production-shared (`Push/Auth/OnboardingPrivacyOption.swift`).
 
 /// A friend surfaced on the value-preview map + rows.
 struct OnboardingPreviewFriend: Identifiable {
@@ -171,73 +130,12 @@ enum OnboardingLabFixtures {
 
     static let profileImageAssetName = "assets/profile/manav.jpeg"
 
-    static let heroPucks: [FriendPuckData] = [
-        heroFriend(
-            id: "onboarding-free-now",
-            name: "ava",
-            initials: "AV",
-            activity: "Coffee",
-            symbolName: "cup.and.saucer.fill",
-            displayText: "Blue Bottle",
-            availability: .freeNow,
-            venueStatusText: "At Blue Bottle",
-            locationLabel: "Hayes Valley"
-        ),
-        heroFriend(
-            id: "onboarding-joinable",
-            name: "leo",
-            initials: "LE",
-            activity: "Gym",
-            symbolName: "figure.strengthtraining.traditional",
-            displayText: "Crunch",
-            availability: .joinable,
-            venueStatusText: "At Crunch",
-            locationLabel: "Mission"
-        ),
-        heroFriend(
-            id: "onboarding-maybe-down",
-            name: "mia",
-            initials: "MI",
-            activity: "Park",
-            symbolName: "leaf.fill",
-            displayText: "Dolores",
-            availability: .maybeDown,
-            venueStatusText: "Near Dolores",
-            locationLabel: "Dolores"
-        ),
-    ]
-
-    /// Floating avatars on the welcome / done hero, with ring colors.
+    /// Floating avatars on the done hero, with ring colors.
+    /// Welcome hero pucks live in production `AuthHeroFixtures` (shared).
     static let heroFriends: [(asset: String, ring: Color)] = [
         ("assets/friends/ryan.png", OnboardingLabColor.stateFree),
         ("assets/friends/pranay.png", OnboardingLabColor.stateJoinable),
         ("assets/friends/roh.png", OnboardingLabColor.stateMaybe),
     ]
-
-    private static func heroFriend(
-        id: String,
-        name: String,
-        initials: String,
-        activity: String,
-        symbolName: String,
-        displayText: String,
-        availability: FriendAvailabilityState,
-        venueStatusText: String,
-        locationLabel: String
-    ) -> FriendPuckData {
-        FriendPuckData(
-            id: id,
-            name: name,
-            avatarPlaceholder: initials,
-            profileImageAssetName: nil,
-            activity: activity,
-            activitySymbolName: symbolName,
-            activityDisplayText: displayText,
-            availability: availability,
-            venueStatusText: venueStatusText,
-            locationLabel: locationLabel,
-            placeName: displayText
-        )
-    }
 }
 #endif

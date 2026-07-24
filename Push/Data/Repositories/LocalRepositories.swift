@@ -89,6 +89,22 @@ final class LocalFriendRepository: FriendRepository {
             }
     }
 
+    func discoverPeople(limit: Int) async throws -> [PersonSearchResult] {
+        let accepted = database.acceptedFriendIDs
+        return database.orderedPeople
+            .filter { $0.id != database.currentUserID }
+            .filter { !accepted.contains($0.id) }
+            .filter { !database.isBlocked(database.currentUserID, $0.id) }
+            .prefix(max(limit, 0))
+            .map { person in
+                PersonSearchResult(
+                    person: person,
+                    handle: database.handle(for: person.id),
+                    relation: database.relation(to: person.id)
+                )
+            }
+    }
+
     @discardableResult
     func sendFriendRequest(to personID: Person.ID) async throws -> FriendRequest.ID {
         guard let request = database.sendFriendRequest(to: personID) else {
@@ -464,6 +480,15 @@ final class LocalProfileRepository: ProfileRepository {
         ProfilePhotoFileStore.remove(userID: database.currentUserID)
         AvatarImageLoader.invalidate(path: previous)
     }
+
+    func needsPostAuthOnboarding() async throws -> Bool {
+        // Mock skips the live first-run gate entirely.
+        false
+    }
+
+    func completeOnboarding() async throws {
+        // No-op in mock.
+    }
 }
 
 @MainActor
@@ -476,6 +501,18 @@ final class LocalSharingRepository: SharingRepository {
 
     func allPolicies() async throws -> [SharingPolicy] {
         database.policies
+    }
+
+    func setGlobalDefaults(
+        location: SharingPolicy.LocationVisibility,
+        activity: SharingPolicy.DetailVisibility,
+        availability: SharingPolicy.AvailabilityVisibility
+    ) async throws {
+        database.setGlobalSharingDefaults(
+            location: location,
+            activity: activity,
+            availability: availability
+        )
     }
 }
 

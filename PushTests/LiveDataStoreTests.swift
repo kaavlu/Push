@@ -621,6 +621,33 @@ final class LiveDataLoaderSpy: LiveDataLoading {
             .map { $0 }
     }
 
+    func discoverProfiles(limit: Int) async throws -> [SearchProfileRow] {
+        Array(searchRows.prefix(limit))
+    }
+
+    func setGlobalSharingDefaults(
+        location: String,
+        activity: String,
+        availability: String
+    ) async throws -> SharingPolicyRow {
+        if let writeError { throw writeError }
+        return SharingPolicyRow(
+            id: "policy-global-self",
+            owner_person_id: "self",
+            audience_type: "global_default",
+            audience_id: nil,
+            location_visibility: location,
+            activity_visibility: activity,
+            availability_visibility: availability,
+            expires_at: nil
+        )
+    }
+
+    func completeOnboarding() async throws -> ProfileRow {
+        if let writeError { throw writeError }
+        return .fixture(id: "self", name: "Self")
+    }
+
     func sendFriendRequest(targetUserID: String) async throws -> FriendshipRow {
         if let writeError { throw writeError }
         if let existing = friendshipRows.first(where: {
@@ -817,7 +844,8 @@ private extension ProfileRow {
             id: id, first_name: name, handle: handle, image_asset_path: imagePath,
             availability_choice: availability, visibility_note: "Visible",
             settings_activity_visibility: nil, settings_map_preferences: nil,
-            settings_close_friends: nil
+            settings_close_friends: nil,
+            onboarding_completed_at: "2026-01-01T00:00:00Z"
         )
     }
 }

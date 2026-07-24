@@ -20,6 +20,13 @@ struct ProfileRow: Decodable {
     let settings_activity_visibility: [String: Bool]?
     let settings_map_preferences: [String: Bool]?
     let settings_close_friends: [String: Bool]?
+    /// Null means first-run setup is still required (new accounts after 0019).
+    let onboarding_completed_at: String?
+
+    var hasCompletedOnboarding: Bool {
+        guard let onboarding_completed_at, !onboarding_completed_at.isEmpty else { return false }
+        return true
+    }
 
     func person() -> Person {
         Person(id: id, firstName: first_name, imageAssetPath: image_asset_path)

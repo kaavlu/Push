@@ -421,6 +421,9 @@ struct ThrowingFriendRepository: FriendRepository {
     func searchPeople(query: String) async throws -> [PersonSearchResult] {
         throw URLError(.badServerResponse)
     }
+    func discoverPeople(limit: Int) async throws -> [PersonSearchResult] {
+        throw URLError(.badServerResponse)
+    }
     func sendFriendRequest(to personID: Person.ID) async throws -> FriendRequest.ID {
         throw URLError(.badServerResponse)
     }

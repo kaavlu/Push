@@ -88,6 +88,15 @@ final class SupabaseProfileRepository: ProfileRepository {
             try? await photoStorage.delete(objectPath: previousObject)
         }
     }
+
+    func needsPostAuthOnboarding() async throws -> Bool {
+        let row = try await store.profile(userID: currentUserID)
+        return !row.hasCompletedOnboarding
+    }
+
+    func completeOnboarding() async throws {
+        try await store.completeOnboarding(userID: currentUserID)
+    }
 }
 
 private extension Array where Element == ProfileToggleItem {

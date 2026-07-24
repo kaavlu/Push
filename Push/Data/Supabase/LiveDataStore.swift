@@ -26,6 +26,13 @@ protocol LiveDataLoading: AnyObject {
     func deleteResponses(pushID: String, personIDs: [String]) async throws
     func loadFriendships() async throws -> [FriendshipRow]
     func searchProfiles(query: String, limit: Int) async throws -> [SearchProfileRow]
+    func discoverProfiles(limit: Int) async throws -> [SearchProfileRow]
+    func setGlobalSharingDefaults(
+        location: String,
+        activity: String,
+        availability: String
+    ) async throws -> SharingPolicyRow
+    func completeOnboarding() async throws -> ProfileRow
     func sendFriendRequest(targetUserID: String) async throws -> FriendshipRow
     func resolveFriendRequest(id: String, accept: Bool) async throws -> FriendshipRow
     func cancelFriendRequest(id: String) async throws
@@ -672,6 +679,51 @@ final class LiveDataStore {
 
     func searchProfiles(query: String, limit: Int = 20) async throws -> [SearchProfileRow] {
         try await loader.searchProfiles(query: query, limit: limit)
+    }
+
+    func discoverProfiles(limit: Int = 20) async throws -> [SearchProfileRow] {
+        try await loader.discoverProfiles(limit: limit)
+    }
+
+    func setGlobalSharingDefaults(
+        location: String,
+        activity: String,
+        availability: String
+    ) async throws {
+        let row = try await loader.setGlobalSharingDefaults(
+            location: location,
+            activity: activity,
+            availability: availability
+        )
+        // Refresh policy cache so map builders see the new defaults.
+        if var cached = policyRows {
+            cached.removeAll {
+                $0.owner_person_id.caseInsensitiveCompare(row.owner_person_id) == .orderedSame
+                    && $0.audience_type == "global_default"
+            }
+            cached.append(row)
+            policyRows = cached
+        } else {
+            policyRows = nil
+            policiesTask = nil
+        }
+        revisionSubject.value += 1
+    }
+
+    func completeOnboarding(userID: String) async throws {
+        let row = try await loader.completeOnboarding()
+        // Write-through current-user profile cache.
+        if var cached = profileRows,
+           let index = cached.firstIndex(where: {
+               $0.id.caseInsensitiveCompare(userID) == .orderedSame
+           }) {
+            cached[index] = row
+            profileRows = cached
+        } else {
+            profileRows = nil
+            profilesTask = nil
+        }
+        revisionSubject.value += 1
     }
 
     @discardableResult

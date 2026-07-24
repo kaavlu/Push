@@ -1,8 +1,8 @@
 // Push/Auth/AuthSignInView.swift
 import SwiftUI
 
-/// Production returning-user sign-in: email/password against Supabase,
-/// forgot-password, plus Google.
+/// Production returning-user sign-in — lab layout: email/password,
+/// forgot password, Google, switch to sign-up.
 struct AuthSignInView: View {
     @ObservedObject var model: AuthViewModel
     @Environment(\.pushLayout) private var layout
@@ -74,5 +74,6 @@ struct AuthSignInView: View {
                 .frame(minHeight: 44)
         }
         .buttonStyle(.plain)
+        .disabled(model.isBusy)
     }
 }

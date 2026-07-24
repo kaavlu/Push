@@ -15,4 +15,16 @@ final class SupabaseSharingRepository: SharingRepository {
         let rows = try await store.policies()
         return rows.map { $0.policy() }
     }
+
+    func setGlobalDefaults(
+        location: SharingPolicy.LocationVisibility,
+        activity: SharingPolicy.DetailVisibility,
+        availability: SharingPolicy.AvailabilityVisibility
+    ) async throws {
+        try await store.setGlobalSharingDefaults(
+            location: location.rawValue,
+            activity: activity.rawValue,
+            availability: availability.rawValue
+        )
+    }
 }
