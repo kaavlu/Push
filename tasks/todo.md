@@ -1,26 +1,28 @@
-# Issue #84 — Realtime Presence Synchronization
+# Issue #92 — Activity Inference Domain and Engine Interface (I1)
 
 ## Status
 
-- [x] Design spec approved
-- [x] Implementation plan
-- [x] Migration `0020_current_presence_realtime` (file + remote apply)
-- [x] Applicator + LiveDataStore remote APIs
-- [x] PresenceRealtimeBridge + fake source + tests
-- [x] AppDataContainer start/stop wiring
-- [x] `PresenceRealtimeTests` (28) green
-- [ ] Optional: two-account manual dogfood
-- [x] Open PR (merge with main)
+- [x] Domain types (`InferredActivityKind`, `InferredActivityResult`)
+- [x] `ActivityInferenceEngine` protocol + `UnknownActivityInferenceEngine`
+- [x] Centralized `ActivityInferenceConfiguration`
+- [x] Observation-window helpers + deterministic fixtures
+- [x] Unit tests (`ActivityInferenceTests`) — 17 green
+- [x] Verify suite green
+- [x] Commit
 
-## Done
+## Scope (from issue)
 
-See `docs/superpowers/specs/2026-07-24-realtime-presence-sync-design.md` and
-`docs/superpowers/plans/2026-07-24-realtime-presence-sync.md`.
+Create only domain types, protocol, configuration, and deterministic test fixtures.
+No real inference logic beyond returning `unknown`.
 
----
+### Out of scope
 
-# Issue #83 — Audit and Standardize Confirmation Popups (merged to main)
+- Arrived / left
+- Stateful transitions
+- `LocationSession` integration
+- Presence drafts / Supabase / UI / venue / co-presence
 
-## Status
+## Follow-ups
 
-- [x] Complete — see design system decision DS-090 and `PushConfirmationTests`
+- Issue #93 — Deterministic movement and chilling rules (I2)
+- Issue #94 — Integrate into presence pipeline (I3)
