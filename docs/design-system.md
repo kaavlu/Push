@@ -186,6 +186,7 @@ Map profile control, bottom-nav raised +, product circles with intentionally dif
 | Bottom nav (DS-057) | `BottomNavigationBar` | Map shell only |
 | System menus (DS-066) | `Menu` / `contextMenu` / photo `confirmationDialog` | Overflow, secondary card actions, multi-action photo menus |
 | Destructive confirmation (DS-090) | `.pushConfirmation` / `PushConfirmationDialog` | Sign out, delete, remove, block, leave, cancel push, etc. |
+| Multi-action menu (DS-090) | `.pushActionMenu` / `PushActionMenuDialog` | Overflow choices (e.g. Remove friend / Block) before confirm |
 
 ### Plan cards (Wave 7)
 

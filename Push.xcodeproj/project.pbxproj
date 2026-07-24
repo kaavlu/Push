@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BE3F9ACD402CA9C1BA11DEF6 /* PushActionMenuModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58E6FC42FA97626BA96435A1 /* PushActionMenuModifier.swift */; };
+		3CED1716F3571F4BD449D22F /* PushActionMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = F838D6DD384D7AAB8C9D6D0A /* PushActionMenu.swift */; };
 		A8D98FC74D36769A91CA5BBE /* PushConfirmationModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D82F5588AB8252EA50429CB /* PushConfirmationModifier.swift */; };
 		A4100FD68152784ECABD6B81 /* PushConfirmationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2858D7F10E02E7C349858004 /* PushConfirmationTests.swift */; };
 		1582DBA2BEA0C73D0B74817F /* PushConfirmationDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879A0A300BD2CE4051B817BA /* PushConfirmationDialog.swift */; };
@@ -326,6 +328,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		58E6FC42FA97626BA96435A1 /* PushActionMenuModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushActionMenuModifier.swift"; path = "DesignSystem/Components/Dialogs/PushActionMenuModifier.swift"; sourceTree = "<group>"; };
+		F838D6DD384D7AAB8C9D6D0A /* PushActionMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushActionMenu.swift"; path = "DesignSystem/Components/Dialogs/PushActionMenu.swift"; sourceTree = "<group>"; };
 		2D82F5588AB8252EA50429CB /* PushConfirmationModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushConfirmationModifier.swift"; path = "DesignSystem/Components/Dialogs/PushConfirmationModifier.swift"; sourceTree = "<group>"; };
 		2858D7F10E02E7C349858004 /* PushConfirmationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PushConfirmationTests.swift"; sourceTree = "<group>"; };
 		879A0A300BD2CE4051B817BA /* PushConfirmationDialog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushConfirmationDialog.swift"; path = "DesignSystem/Components/Dialogs/PushConfirmationDialog.swift"; sourceTree = "<group>"; };
@@ -682,6 +686,8 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				58E6FC42FA97626BA96435A1 /* PushActionMenuModifier.swift */,
+				F838D6DD384D7AAB8C9D6D0A /* PushActionMenu.swift */,
 				2D82F5588AB8252EA50429CB /* PushConfirmationModifier.swift */,
 				879A0A300BD2CE4051B817BA /* PushConfirmationDialog.swift */,
 				778C15F07F8469E15E655D2C /* PushTypographyTokens.swift */,
@@ -1143,6 +1149,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				BE3F9ACD402CA9C1BA11DEF6 /* PushActionMenuModifier.swift in Sources */,
+				3CED1716F3571F4BD449D22F /* PushActionMenu.swift in Sources */,
 				A8D98FC74D36769A91CA5BBE /* PushConfirmationModifier.swift in Sources */,
 				1582DBA2BEA0C73D0B74817F /* PushConfirmationDialog.swift in Sources */,
 				D1CC800A8E472611E25B082E /* PushTypographyTokens.swift in Sources */,

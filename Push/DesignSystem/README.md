@@ -57,6 +57,7 @@ Full component inventory and **do-not-recreate** tables live in `docs/design-sys
 | Empty / load fail | `EmptySurfaceView` / `EmptySurfaceStateView` |
 | Mutation error | `ActionErrorBanner` |
 | Destructive confirmation | `.pushConfirmation` / `PushConfirmationDialog` |
+| Multi-action overflow menu | `.pushActionMenu` / `PushActionMenuDialog` |
 | Map empty | `MapEmptyOverlay` |
 | Availability color / chip | `PushAvailabilityTokens` / `PushAvailabilityChip` |
 | Person face | `PushPersonAvatar` |

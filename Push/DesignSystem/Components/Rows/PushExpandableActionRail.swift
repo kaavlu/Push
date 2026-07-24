@@ -142,24 +142,20 @@ struct PushExpandableRailOverflowGlyph: View {
     }
 }
 
-/// Overflow menu whose label matches primary rail action chrome (not system Menu chrome).
-struct PushExpandableRailOverflowMenu<MenuContent: View>: View {
+/// Overflow ellipsis button — opens a Push action menu (not system `Menu`).
+struct PushExpandableRailOverflowButton: View {
     var isBusy: Bool = false
     let accessibilityLabel: String
     var accessibilityHint: String? = nil
-    @ViewBuilder var menuContent: () -> MenuContent
+    let action: () -> Void
 
     var body: some View {
-        Menu {
-            menuContent()
-        } label: {
+        Button(action: action) {
             PushExpandableRailOverflowChrome(isBusy: isBusy) {
                 PushExpandableRailOverflowGlyph()
             }
         }
         .buttonStyle(.plain)
-        .menuStyle(.button)
-        .menuIndicator(.hidden)
         .disabled(isBusy)
         .accessibilityLabel(accessibilityLabel)
         .modifier(OptionalAccessibilityHint(hint: accessibilityHint))
@@ -215,13 +211,11 @@ struct PushExpandableActionRail_Previews: PreviewProvider {
                     )
                 ]
             ) {
-                PushExpandableRailOverflowMenu(
+                PushExpandableRailOverflowButton(
                     accessibilityLabel: "More actions",
-                    accessibilityHint: "Remove friend or block"
-                ) {
-                    Button("Remove friend", role: .destructive) {}
-                    Button("Block", role: .destructive) {}
-                }
+                    accessibilityHint: "Remove friend or block",
+                    action: {}
+                )
             }
             .padding()
             .pushSolidCreamCard(cornerRadius: 20)

@@ -8,7 +8,7 @@
 import SwiftUI
 
 /// Expandable shell around `PushPersonRow` with a configurable action rail.
-/// Owns expand animation and confirmation dialogs for overflow actions.
+/// Owns expand animation, Push action menu, and confirmation dialogs for overflow.
 struct PushExpandablePersonRow: View {
     @Environment(\.pushLayout) private var layout
     let row: FriendRowModel
@@ -22,8 +22,36 @@ struct PushExpandablePersonRow: View {
     let onRemove: () -> Void
     let onBlock: () -> Void
 
+    @State private var isOverflowMenuPresented = false
     @State private var isConfirmingRemove = false
     @State private var isConfirmingBlock = false
+    /// Queued after the action menu dismisses so two window overlays don't race.
+    @State private var pendingConfirmation: OverflowConfirmation?
+
+    private enum OverflowConfirmation {
+        case remove
+        case block
+    }
+
+    private enum OverflowActionID {
+        static let remove = "remove"
+        static let block = "block"
+    }
+
+    private var overflowMenuItems: [PushActionMenuItem] {
+        [
+            PushActionMenuItem(
+                id: OverflowActionID.remove,
+                title: "Remove friend",
+                role: .destructive
+            ),
+            PushActionMenuItem(
+                id: OverflowActionID.block,
+                title: "Block",
+                role: .destructive
+            )
+        ]
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -31,17 +59,12 @@ struct PushExpandablePersonRow: View {
 
             if isExpanded {
                 PushExpandableActionRail(actions: railActions, isBusy: isBusy) {
-                    PushExpandableRailOverflowMenu(
+                    PushExpandableRailOverflowButton(
                         isBusy: isBusy,
                         accessibilityLabel: "More actions",
                         accessibilityHint: "Remove friend or block"
                     ) {
-                        Button("Remove friend", role: .destructive) {
-                            isConfirmingRemove = true
-                        }
-                        Button("Block", role: .destructive) {
-                            isConfirmingBlock = true
-                        }
+                        isOverflowMenuPresented = true
                     }
                 }
                 .padding(.horizontal, FriendsLayout.cardPadding(layout))
@@ -58,6 +81,23 @@ struct PushExpandablePersonRow: View {
         .pushSolidCreamCard(cornerRadius: FriendsLayout.cardCornerRadius)
         .clipShape(RoundedRectangle(cornerRadius: FriendsLayout.cardCornerRadius, style: .continuous))
         .animation(PushMotion.expand, value: isExpanded)
+        .pushActionMenu(
+            isPresented: $isOverflowMenuPresented,
+            title: "More actions",
+            items: overflowMenuItems,
+            onSelect: handleOverflowSelection
+        )
+        .onChange(of: isOverflowMenuPresented) { presented in
+            guard !presented, let pending = pendingConfirmation else { return }
+            pendingConfirmation = nil
+            // Present confirm after the menu host has dismissed.
+            DispatchQueue.main.async {
+                switch pending {
+                case .remove: isConfirmingRemove = true
+                case .block: isConfirmingBlock = true
+                }
+            }
+        }
         .pushConfirmation(
             isPresented: $isConfirmingRemove,
             title: "Remove \(row.friend.name)?",
@@ -72,6 +112,17 @@ struct PushExpandablePersonRow: View {
             confirmTitle: "Block",
             onConfirm: onBlock
         )
+    }
+
+    private func handleOverflowSelection(_ item: PushActionMenuItem) {
+        switch item.id {
+        case OverflowActionID.remove:
+            pendingConfirmation = .remove
+        case OverflowActionID.block:
+            pendingConfirmation = .block
+        default:
+            break
+        }
     }
 }
 
