@@ -127,37 +127,13 @@ struct AddGroupStep3ReviewView: View {
     }
 
     private var createButton: some View {
-        Button {
+        PushSolidSunbeamButton(
+            title: "Create group",
+            isEnabled: !viewModel.isSubmitting,
+            isLoading: viewModel.isSubmitting
+        ) {
             Task { await onSubmit() }
-        } label: {
-            ZStack {
-                Text("Create group")
-                    .opacity(viewModel.isSubmitting ? 0 : 1)
-                if viewModel.isSubmitting {
-                    ProgressView()
-                        .tint(PushControlColors.activeForeground)
-                }
-            }
-            .font(.headline.weight(.bold))
-            .foregroundStyle(
-                viewModel.isSubmitting
-                    ? PushControlColors.inactiveForeground
-                    : PushControlColors.activeForeground
-            )
-            .frame(maxWidth: .infinity)
-            .frame(height: StartPushLayout.primaryButtonHeight(layout))
-            .background(
-                Capsule().fill(
-                    viewModel.isSubmitting
-                        ? PushControlColors.activeFill.opacity(0.45)
-                        : PushControlColors.activeFill
-                )
-            )
         }
-        .buttonStyle(.plain)
-        .disabled(viewModel.isSubmitting)
-        .animation(.easeInOut(duration: 0.18), value: viewModel.isSubmitting)
-        .accessibilityLabel("Create group")
     }
 }
 

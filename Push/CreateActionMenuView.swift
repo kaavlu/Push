@@ -41,11 +41,7 @@ private struct CreateActionMenuRow: View {
 
     var body: some View {
         HStack(spacing: CreateActionMenuLayout.iconSpacing(layout)) {
-            Image(systemName: item.symbolName)
-                .font(.system(size: CreateActionMenuLayout.iconSize, weight: .bold))
-                .foregroundStyle(PushControlColors.activeForeground)
-                .frame(width: CreateActionMenuLayout.iconFrame(layout), height: CreateActionMenuLayout.iconFrame(layout))
-                .background(Circle().fill(PushControlColors.activeFill))
+            PushCreateMenuIconCircle(systemImageName: item.symbolName)
 
             VStack(alignment: .leading, spacing: CreateActionMenuLayout.textSpacing) {
                 Text(item.title)

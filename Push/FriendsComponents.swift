@@ -35,24 +35,6 @@ extension View {
     }
 }
 
-struct FriendsCircleButton: View {
-    let systemImageName: String
-    let accessibilityLabel: String
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Image(systemName: systemImageName)
-                .font(.system(size: FriendsLayout.headerButtonIconSize, weight: .semibold))
-                .foregroundStyle(PushControlColors.activeForeground)
-                .frame(width: FriendsLayout.headerButtonSize, height: FriendsLayout.headerButtonSize)
-                .pushGlassBackground(cornerRadius: FriendsLayout.headerButtonSize / 2)
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(accessibilityLabel)
-    }
-}
-
 struct FriendsAvailabilityChip: View {
     let availability: FriendAvailabilityState
 
@@ -271,11 +253,11 @@ struct FriendsEmptyState: View {
                 .multilineTextAlignment(.center)
 
             if let onAddFriends, !isSearching, mode == .friends {
-                Button(EmptySurfaceCopy.addFriendsAction, action: onAddFriends)
-                    .buttonStyle(.borderedProminent)
-                    .tint(PushControlColors.activeFill)
-                    .foregroundStyle(PushControlColors.activeForeground)
-                    .padding(.top, EmptySurfaceLayout.actionTopPadding)
+                PushSolidSunbeamButton(
+                    title: EmptySurfaceCopy.addFriendsAction,
+                    action: onAddFriends
+                )
+                .padding(.top, EmptySurfaceLayout.actionTopPadding)
             }
         }
         .frame(maxWidth: .infinity)

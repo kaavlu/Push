@@ -77,7 +77,13 @@ struct PlansView: View {
             Spacer(minLength: PlansLayout.pushesModuleSpacing(layout))
             ActivePushesModule(viewModel: viewModel)
             Spacer(minLength: 0)
-            StartPlanButton { viewModel.isStartPushPresented = true }
+            PushGlassRimButton(
+                title: "Start Push",
+                systemImageName: "plus.circle.fill",
+                accessibilityLabel: "Start a new push"
+            ) {
+                viewModel.isStartPushPresented = true
+            }
                 .frame(maxWidth: .infinity)
                 .padding(.top, PlansLayout.startButtonTopSpacing)
         }
@@ -102,15 +108,11 @@ private struct PlansPageHeader: View {
                     .foregroundStyle(PushControlColors.inactiveForeground)
             }
             Spacer()
-            Button(action: dismissAction) {
-                Image(systemName: "xmark")
-                    .font(.system(size: ProfileLayout.closeIconSize, weight: .bold))
-                    .foregroundStyle(PushColorPalette.Accent.walnut)
-                    .frame(width: ProfileLayout.closeButtonSize, height: ProfileLayout.closeButtonSize)
-                    .pushGlassBackground(cornerRadius: ProfileLayout.closeButtonSize / 2)
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("Close pushes")
+            PushCircleIconButton(
+                systemImageName: "xmark",
+                accessibilityLabel: "Close pushes",
+                action: dismissAction
+            )
         }
         // Match the Friends screen's header-to-top spacing exactly.
         .padding(.top, FriendsLayout.topPadding)
@@ -275,42 +277,6 @@ struct YourPushesListView: View {
         if viewModel.yourPushes.isEmpty {
             dismiss()
         }
-    }
-}
-
-private struct StartPlanButton: View {
-    @Environment(\.pushLayout) private var layout
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 7) {
-                Image(systemName: "plus.circle.fill")
-                    .font(.system(size: 17, weight: .bold))
-                Text("Start Push")
-                    .font(.headline.weight(.bold))
-            }
-            // Brown accenting, no near-black espresso text.
-            .foregroundStyle(PushColorPalette.Accent.walnut)
-            .padding(.horizontal, PlansLayout.startPlanButtonHorizontalPadding(layout))
-            .frame(height: PlansLayout.startPlanButtonHeight)
-            .background {
-                Capsule()
-                    .fill(PlansColor.primaryGlow)
-                    .blur(radius: 16)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 8)
-            }
-            // True liquid-glass control treatment (glassEffect on iOS 26+),
-            // matching the header buttons rather than the flat cream cards.
-            .pushGlassBackground(cornerRadius: PlansLayout.startPlanButtonCornerRadius)
-            .overlay {
-                RoundedRectangle(cornerRadius: PlansLayout.startPlanButtonCornerRadius, style: .continuous)
-                    .stroke(PlansColor.startButtonBorder, lineWidth: PlansColor.startButtonBorderWidth)
-            }
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Start a new push")
     }
 }
 

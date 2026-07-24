@@ -135,34 +135,6 @@ struct StartPushHeader: View {
     }
 }
 
-struct StartPushPrimaryButton: View {
-    @Environment(\.pushLayout) private var layout
-    let title: String
-    let isEnabled: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.headline.weight(.bold))
-                .foregroundStyle(isEnabled
-                                 ? PushControlColors.activeForeground
-                                 : PushControlColors.inactiveForeground)
-                .frame(maxWidth: .infinity)
-                .frame(height: StartPushLayout.primaryButtonHeight(layout))
-                .background(
-                    Capsule().fill(isEnabled
-                                   ? PushControlColors.activeFill
-                                   : PushControlColors.activeFill.opacity(0.45))
-                )
-        }
-        .buttonStyle(.plain)
-        .disabled(!isEnabled)
-        .animation(.easeInOut(duration: 0.18), value: isEnabled)
-        .accessibilityLabel(title)
-    }
-}
-
 struct RecipientAvatarView: View {
     let imageAssetName: String?
     let initials: String

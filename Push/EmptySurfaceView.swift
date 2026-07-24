@@ -21,10 +21,7 @@ struct EmptySurfaceView: View {
                 .foregroundStyle(PushControlColors.textSecondary)
                 .multilineTextAlignment(.center)
             if let actionTitle, let action {
-                Button(actionTitle, action: action)
-                    .buttonStyle(.borderedProminent)
-                    .tint(PushControlColors.activeFill)
-                    .foregroundStyle(PushControlColors.activeForeground)
+                PushSolidSunbeamButton(title: actionTitle, action: action)
                     .padding(.top, EmptySurfaceLayout.actionTopPadding)
             }
         }
@@ -64,10 +61,7 @@ enum EmptySurfaceStateView {
             Text(EmptySurfaceCopy.failedMessage)
                 .font(.subheadline)
                 .foregroundStyle(PushControlColors.textSecondary)
-            Button(EmptySurfaceCopy.retryAction, action: retry)
-                .buttonStyle(.borderedProminent)
-                .tint(PushControlColors.activeFill)
-                .foregroundStyle(PushControlColors.activeForeground)
+            PushSolidSunbeamButton(title: EmptySurfaceCopy.retryAction, action: retry)
         }
         .multilineTextAlignment(.center)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)

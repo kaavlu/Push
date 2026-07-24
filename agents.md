@@ -64,6 +64,8 @@ This is a **high-fidelity prototype** that can become production later.
 
 **Design reference (`Design/`):** Handoff bundle for visual work — `PushDesignBrief.md`, `PushThemeAudit.md`, verbatim snapshots in `CoreDesignFiles/`, copied imagery in `Assets/`. Read-only references; implement changes in `Push/`, not in `Design/`.
 
+**Design system (Issue #63):** Before adding UI chrome, open **`docs/design-system.md`** (catalog) and prefer `Push/DesignSystem/` components. Decisions: `tasks/design-system-decision-log.md` (DS-001–DS-089). Spec/waves: `docs/superpowers/specs/2026-07-21-push-design-system-specification.md`. Handoff: `tasks/design-system-handoff.md`. **Named surfaces only** — no local glass/cream recipes. **Primaries:** `PushSolidSunbeamButton` or `PushGlassRimButton` only (no `.borderedProminent` product chrome, no third primary). Generic circular utility → `PushCircleIconButton`. Onboarding/auth CTAs stay domain-local until a future alignment pass. Preserve approved appearance; extract/rename, do not redesign.
+
 **Appearance:** Light-only for now — `UIUserInterfaceStyle` Light in `Info.plist` plus `PushApp` `.preferredColorScheme(.light)`. Brand hex and cream/glass chrome do not adapt; do not add Dark Mode variants or `@Environment(\.colorScheme)` branching unless explicitly scoped.
 
 ---
@@ -122,14 +124,17 @@ See `coding-standards.md` for the full reference. Key rules for this project:
 | `tasks/todo.md` | Current plan and progress tracking |
 | `tasks/spec.md` | Active feature spec (write before implementation) |
 | `docs/data-architecture.md` | Seed workflow, derivation rules, test suites, Supabase migration seam |
+| `docs/design-system.md` | Agent UI catalog — open before adding chrome (Issue #63) |
 | `docs/app-store-privacy.md` | App Store Connect privacy disclosure inventory; re-audit before submission |
 | `docs/superpowers/specs/*.md` | Dated design specs per feature; read the relevant file before implementing |
 | `docs/superpowers/plans/*.md` | Step-by-step implementation plans for multi-task rollouts; follow task-by-task |
+| `tasks/design-system-handoff.md` | Design-system wave tracking and implementation constraints |
+| `tasks/design-system-decision-log.md` | DS-001–DS-089 product decisions (law) |
 | `tasks/lessons.md` | Project-specific learnings and gotchas |
 
 ### Session Resume Protocol
 
-Read: `CLAUDE.md` → `tasks/lessons.md` → `tasks/todo.md` → `git log --oneline -5`. Supabase/backend work: also read `supabase/README.md`, `tasks/spec.md` (Issue #27), and repo Supabase skills. Location/presence work: also read `docs/superpowers/specs/2026-07-23-location-presence-architecture-design.md` (Issue #64).
+Read: `CLAUDE.md` → `tasks/lessons.md` → `tasks/todo.md` → `git log --oneline -5`. Supabase/backend work: also read `supabase/README.md`, `tasks/spec.md` (Issue #27), and repo Supabase skills. Location/presence work: also read `docs/superpowers/specs/2026-07-23-location-presence-architecture-design.md` (Issue #64). Design-system work (Issue #63): also read `docs/design-system.md`, `tasks/design-system-handoff.md`, and `docs/superpowers/specs/2026-07-21-push-design-system-specification.md`.
 
 Do not ask the user to re-explain context that is in these files.
 

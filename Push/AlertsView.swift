@@ -217,10 +217,7 @@ private enum AlertsStateView {
             Text("Try again in a moment.")
                 .font(.subheadline)
                 .foregroundStyle(PushControlColors.textSecondary)
-            Button("Try again", action: retry)
-                .buttonStyle(.borderedProminent)
-                .tint(PushControlColors.activeFill)
-                .foregroundStyle(PushControlColors.activeForeground)
+            PushSolidSunbeamButton(title: "Try again", action: retry)
         }
         .multilineTextAlignment(.center)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)

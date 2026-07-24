@@ -228,10 +228,7 @@ private enum AddFriendsStateView {
             title: "Couldn't search",
             message: "Try again in a moment."
         ) {
-            Button("Try again", action: retry)
-                .buttonStyle(.borderedProminent)
-                .tint(PushControlColors.activeFill)
-                .foregroundStyle(PushControlColors.activeForeground)
+            PushSolidSunbeamButton(title: "Try again", action: retry)
         }
     }
 

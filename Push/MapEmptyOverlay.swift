@@ -27,10 +27,7 @@ struct MapEmptyOverlay: View {
                 .foregroundStyle(PushControlColors.textSecondary)
                 .multilineTextAlignment(.center)
             if let actionTitle, let action {
-                Button(actionTitle, action: action)
-                    .buttonStyle(.borderedProminent)
-                    .tint(PushControlColors.activeFill)
-                    .foregroundStyle(PushControlColors.activeForeground)
+                PushSolidSunbeamButton(title: actionTitle, action: action)
                     .padding(.top, MapEmptyOverlayLayout.actionTopPadding)
             }
         }

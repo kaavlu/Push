@@ -86,8 +86,8 @@ struct PushModalCloseButtonBar: View {
         HStack {
             Spacer(minLength: 0)
 
-            PushModalIconButton(
-                symbolName: "xmark",
+            PushCircleIconButton(
+                systemImageName: "xmark",
                 accessibilityLabel: accessibilityLabel,
                 action: action
             )
@@ -98,20 +98,19 @@ struct PushModalCloseButtonBar: View {
     }
 }
 
+/// Migration shim mapping `symbolName` → `PushCircleIconButton` (DS-001).
 struct PushModalIconButton: View {
     let symbolName: String
     let accessibilityLabel: String
+    var foreground: Color = PushControlColors.activeForeground
     let action: () -> Void
 
     var body: some View {
-        Button(action: action) {
-            Image(systemName: symbolName)
-                .font(.system(size: ProfileLayout.closeIconSize, weight: .bold))
-                .foregroundStyle(PushControlColors.activeForeground)
-                .frame(width: ProfileLayout.closeButtonSize, height: ProfileLayout.closeButtonSize)
-                .pushGlassBackground(cornerRadius: ProfileLayout.closeButtonSize / 2)
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(accessibilityLabel)
+        PushCircleIconButton(
+            systemImageName: symbolName,
+            accessibilityLabel: accessibilityLabel,
+            foreground: foreground,
+            action: action
+        )
     }
 }

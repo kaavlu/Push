@@ -1,32 +1,22 @@
-# Live onboarding (auth + post-auth setup)
+# Issue #63 — Push Design System
 
 ## Status
 
-- [x] Multi-step email sign-up + photo upload
-- [x] Migration `0019` sharing defaults / complete / discover
-- [x] Post-auth flow: privacy → location → notifications → friends → done
-- [x] `PostAuthOnboardingTests` green
+- [x] Copy design-system source docs into repo
+- [x] Wave 0 — `Push/DesignSystem/` skeleton, `docs/design-system.md`, AGENTS/Claude links
+- [x] Wave 1 — Circle icon button, solid sunbeam CTA, glass-rim CTA, create-menu icon, recovery CTAs
+- [ ] Wave 2+ (see handoff)
 - [ ] Commit / PR
 
-## Live flow
+## Wave 1 deliverables
 
-1. Auth gate (signup/signin)  
-2. prepareLive (+ photo upload)  
-3. If `onboarding_completed_at` null → PostAuthOnboarding  
-4. App
-
-## Backend map
-
-| Step | Backend |
+| Component | Path |
 |---|---|
-| Privacy | `set_global_sharing_defaults` + Ghost + `updatePrivacy` |
-| Location | `LocationSession.startIfEligible` (when-in-use) |
-| Notifications | System permission only (no APNs yet) |
-| Friends | `discover_profiles` + `send_friend_request` |
-| Done | `complete_onboarding` |
+| `PushCircleIconButton` | `Push/DesignSystem/Components/Buttons/` |
+| `PushSolidSunbeamButton` | same (+ `StartPushPrimaryButton` typealias) |
+| `PushGlassRimButton` | Plans Start Push CTA |
+| `PushCreateMenuIconCircle` | Create menu rows |
 
-## Non-goals
+## Next
 
-- Phone auth
-- Contact-book import
-- Remote push delivery
+Wave 2 — solid cream foundation + `PushPersonRow` (migrate Blocked fork).
