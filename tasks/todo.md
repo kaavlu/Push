@@ -1,48 +1,49 @@
-# Issue #69 — LocationSession, App-Lifetime Wiring, Safe Teardown
+# Issue #71 — Supabase `current_presence` Schema, RLS, and Expiry
 
-**Issue:** https://github.com/kaavlu/Push/issues/69  
-**Design:** `docs/superpowers/specs/2026-07-23-location-presence-architecture-design.md` (PR3 / §2.2–2.5, §2.9, §2.9.1, §10)  
-**Builds on:** Issue #66 domain contracts, Issue #68 simulated provider + validator
+**Issue:** https://github.com/kaavlu/Push/issues/71  
+**Design:** `docs/superpowers/specs/2026-07-23-location-presence-architecture-design.md` (PR4 / §2.4, §2.6, §2.7, §2.7.1, §2.9.1, §5, §10)  
+**Builds on:** Issue #64 architecture; social-graph helpers (`private.is_friend`, `private.shares_group`, `private.is_blocked`)
 
 ## Status
 
-- [x] `PresenceSyncing.unpublishCurrentPresence` + `NoOpPresenceSync` / fake tracking
-- [x] Concrete `LocationSession` (`LocationSessioning`) — provider → validator → inferrer → sync
-- [x] Eligibility (auth + publish + not shut down); no duplicate consumption starts
-- [x] Idempotent `stop` / `shutdown`; best-effort `unpublishBestEffort` (timeout)
-- [x] `AppDataContainer.locationSession` ownership + inject fake for tests
-- [x] DEBUG null default / `--sim-location` simulated provider (`LocationSessionFactory`)
-- [x] `installPreparedLive` shuts down previous session (no unpublish)
-- [x] `shutdownSharedAndReinstallMock` unpublish → shutdown → mock
-- [x] RootView sign-out / delete-account teardown order
-- [x] Mock `.app` entry calls `startIfEligible` (sim dogfood)
-- [x] Focused tests: `LocationSessionTests`, `LocationSessionContainerTests`
+- [x] Migration `0018_current_presence.sql` — table, constraints, indexes, RLS, RPCs
+- [x] Verification script `supabase/tests/0018_current_presence_verify.sql`
+- [x] `supabase/README.md` layout entry
+- [x] Apply migration to remote via Supabase MCP `apply_migration` (`0018_current_presence`)
+- [x] Run verification SQL on remote (all asserts passed; fixtures cleaned; test profiles restored)
+- [ ] PR with architecture deviations documented (if any)
 
 ## Non-goals (this issue)
 
-- Core Location / `CLLocationManager`
-- Permission UI / Info.plist
-- Supabase migrations / live presence writes
-- Movement throttle / heartbeat execution
-- Ghost UI migration / map changes
-- Realtime / synthetic Place / inference
+- Swift DTOs / row mapping / `LiveDataStore` presence cache
+- `SupabaseFriendRepository.presenceStatuses()` / synthetic Place
+- Live presence writes, throttle, heartbeat execution
+- Core Location / permission UI / Realtime subscriptions
+- Map or puck changes / seed presence rows
 
-## Verification
+## Deliverables
 
-- [x] `scripts/test.sh suite LocationSessionTests` — 15 passed
-- [x] `scripts/test.sh suite LocationSessionContainerTests` — 8 passed
-- [x] `scripts/test.sh suite LocationPresenceFoundationTests` — 20 passed
-- [x] `scripts/test.sh suite LocationSimulatedProviderTests` — 8 passed
-- [x] `scripts/test.sh suite LocationObservationValidatorTests` — 18 passed
-- [x] `scripts/test.sh suite LiveContainerIsolationTests` — 4 passed
-- [x] `scripts/test.sh suite DeleteAccountTests` — 6 passed
-
-## Deviations from architecture doc (document in PR)
-
-| Item | Note |
+| Path | Purpose |
 |---|---|
-| `PresenceSyncing.unpublishCurrentPresence` | Added for sign-out best-effort seam; was not on PR1 protocol sketch |
-| `LocationSessioning.unpublishBestEffort` | Session-facing timeout wrapper (3s) over sync unpublish |
-| No movement throttle / heartbeat | Explicitly deferred to live-write PR (PR6) |
-| `NoOpPresenceSync` default | Until live presence writer lands; pipeline still exercises upsert path in tests |
-| Delete-account unpublish | Skipped after successful delete (server cascade); pipeline still shut down |
+| `supabase/migrations/0018_current_presence.sql` | Schema + RLS + `unpublish_current_presence` + `set_availability_choice` |
+| `supabase/tests/0018_current_presence_verify.sql` | Privileged SQL checks (self/friend/block/unpublish/dual-write/anon) |
+
+## Design choices (document in PR)
+
+| Item | Decision |
+|---|---|
+| `is_published` default | `false` — unpublished until client publishes (safer than default true) |
+| Friend SELECT | Approach B: full row for allowed subjects; client `VisiblePresenceBuilder` projects |
+| Graph access | `private.is_friend` **or** `private.shares_group`, minus `private.is_blocked` either way |
+| Legacy ghost | Friend SELECT also requires `availability <> 'ghost'`; new Ghost path is `unpublish_current_presence` |
+| Presence upsert | Direct table INSERT/UPDATE under self RLS (no upsert RPC); live-write PR owns client writer |
+| Availability RPC | `set_availability_choice` dual-writes profile + existing presence mirror; does **not** invent a presence row or change coords/`is_published` |
+| DELETE | No client DELETE grant/policy; unpublish RPC; cascade via `profiles` on account delete |
+| Seed | No presence rows in `seed.sql` |
+
+## Apply + verify
+
+1. Authenticate Supabase MCP (project `tzzvwjhvjduyqywlszqc`).
+2. `apply_migration` name `0018_current_presence` with file contents.
+3. `execute_sql` with `supabase/tests/0018_current_presence_verify.sql`.
+4. Confirm notice: `0018_current_presence verification OK`.
