@@ -2,9 +2,8 @@
 //  LocationSession.swift
 //  Push
 //
-//  App-lifetime orchestration: provider → validator → inferrer → throttle → sync.
-//  Owned by AppDataContainer — never by MapViewModel / presentation.
-//  No Core Location. Movement throttle + heartbeat + Ghost: Issue #76.
+//  App-lifetime: provider → validator → inferrer → throttle → sync.
+//  Owned by AppDataContainer — never MapViewModel. No Core Location types.
 //
 
 import Combine
@@ -26,7 +25,6 @@ final class LocationSession: LocationSessioning {
     private let availabilityProvider: @MainActor () -> FriendAvailabilityState?
     private let now: @MainActor () -> Date
     private let unpublishTimeout: TimeInterval
-    /// Injectable sleep for heartbeat loop (tests can no-op / short-circuit).
     private let sleep: @MainActor (TimeInterval) async -> Void
 
     private var observationTask: Task<Void, Never>?
@@ -37,7 +35,6 @@ final class LocationSession: LocationSessioning {
     private var previousAccepted: LocationObservation?
     private var lastAcceptedValidated: ValidatedObservation?
     private var publishSnapshot = PresencePublishSnapshot()
-    /// Pending trigger for the in-flight upsert (for lastUpload bookkeeping).
     private var pendingTrigger: PresenceSyncTrigger?
 
     /// Exposed for tests that need the same sync instance assertions.
@@ -53,10 +50,7 @@ final class LocationSession: LocationSessioning {
         isTrackingDesired: Bool = true,
         now: @escaping @MainActor () -> Date = { Date() },
         unpublishTimeout: TimeInterval = LocationPipelineConstants.unpublishBestEffortTimeout,
-        sleep: @escaping @MainActor (TimeInterval) async -> Void = { interval in
-            let ns = UInt64(max(0, interval) * 1_000_000_000)
-            try? await Task.sleep(nanoseconds: ns)
-        }
+        sleep: (@MainActor (TimeInterval) async -> Void)? = nil
     ) {
         self.provider = provider
         self.validator = validator
@@ -66,12 +60,19 @@ final class LocationSession: LocationSessioning {
         self.availabilityProvider = availabilityProvider
         self.now = now
         self.unpublishTimeout = unpublishTimeout
-        self.sleep = sleep
+        self.sleep = sleep ?? { interval in
+            let ns = UInt64(max(0, interval) * 1_000_000_000)
+            try? await Task.sleep(nanoseconds: ns)
+        }
         self.state = LocationTrackingState(
             authorization: provider.authorizationState,
             isTrackingEnabled: isTrackingDesired,
             isPresencePublishingEnabled: isPresencePublishingEnabled
         )
+        provider.setAuthorizationChangeHandler { [weak self] in
+            guard let self else { return }
+            Task { await self.handleAuthorizationStateChanged() }
+        }
     }
 
     // MARK: - LocationSessioning
@@ -79,6 +80,9 @@ final class LocationSession: LocationSessioning {
     func startIfEligible() async {
         guard !isShutDown else { return }
 
+        if provider.authorizationState == .notDetermined {
+            await provider.requestAuthorization(mode: .whenInUse)
+        }
         state.authorization = provider.authorizationState
 
         guard canRunPipeline else {
@@ -131,7 +135,9 @@ final class LocationSession: LocationSessioning {
         lastAcceptedValidated = nil
         publishSnapshot = PresencePublishSnapshot()
         pendingTrigger = nil
+        provider.setAuthorizationChangeHandler(nil)
         provider.stopUpdating()
+        provider.prepareForShutdown()
         sync.shutdown()
         state.isTrackingEnabled = false
         state.lastObservation = nil
@@ -152,36 +158,34 @@ final class LocationSession: LocationSessioning {
 
     // MARK: - Publish / auth updates (Ghost + permission seams)
 
-    /// Orthogonal Ghost flag. Does not change availability.
-    /// Ghost on → immediate unpublish (throttle bypass). Ghost off → republish last fix.
+    /// Orthogonal Ghost. On → unpublish; off → republish last fix.
     func setPresencePublishingEnabled(_ enabled: Bool) async {
         guard !isShutDown else { return }
         let wasEnabled = state.isPresencePublishingEnabled
         state.isPresencePublishingEnabled = enabled
 
         if !enabled {
-            // Ghost on: stop publish path immediately; keep lastAccepted for resume.
             pauseConsumption(clearTrackingEnabled: false)
             stopHeartbeatLoop()
             await performUnpublish(timeout: unpublishTimeout, recordError: true)
             return
         }
 
-        // Ghost off: resume pipeline and republish immediately when possible.
         if !wasEnabled || !isConsuming {
             await startIfEligible()
         }
         republishLastAcceptedIfPossible()
     }
 
-    /// Permission loss / restore (Core Location wiring later). Throttle bypass.
+    /// Permission restore / revoke. Unpublish only after losing prior when-in-use.
     func handleAuthorizationStateChanged() async {
         guard !isShutDown else { return }
+        let previous = state.authorization
         state.authorization = provider.authorizationState
         if state.authorization.allowsWhenInUseUpdates {
             await startIfEligible()
             republishLastAcceptedIfPossible()
-        } else {
+        } else if previous.allowsWhenInUseUpdates {
             pauseConsumption(clearTrackingEnabled: true)
             stopHeartbeatLoop()
             await performUnpublish(timeout: unpublishTimeout, recordError: true)
@@ -190,12 +194,10 @@ final class LocationSession: LocationSessioning {
 
     // MARK: - Test hooks
 
-    /// Advances heartbeat evaluation without waiting on the sleep loop.
     func checkHeartbeatDueForTesting() {
         processHeartbeatIfDue()
     }
 
-    /// Current publish bookkeeping (tests only).
     var publishSnapshotForTesting: PresencePublishSnapshot { publishSnapshot }
 
     // MARK: - Private
@@ -267,7 +269,6 @@ final class LocationSession: LocationSessioning {
         state.lastAcceptedAt = now()
         state.authorization = provider.authorizationState
 
-        // Prefer heartbeat when due (stationary stays visible) even if movement skips.
         if case .publish = PresencePublishPolicy.decisionForHeartbeat(
             now: now(), snapshot: publishSnapshot
         ) {
@@ -314,7 +315,6 @@ final class LocationSession: LocationSessioning {
         enqueueSync(draft, trigger: trigger)
     }
 
-    /// Location never invents availability — only mirrors profile choice.
     private func mirroredAvailability() -> FriendAvailabilityState? {
         let value = availabilityProvider()
         if value == .ghost { return .maybeDown }
@@ -323,7 +323,6 @@ final class LocationSession: LocationSessioning {
 
     private func enqueueSync(_ draft: PresenceStatusDraft, trigger: PresenceSyncTrigger) {
         guard !isShutDown else { return }
-        // Unpublished drafts must not go through movement path.
         guard draft.isPublished else { return }
 
         pendingTrigger = trigger
@@ -362,16 +361,13 @@ final class LocationSession: LocationSessioning {
     }
 
     private func performUnpublish(timeout: TimeInterval, recordError: Bool) async {
-        // Drop in-flight upsert so Ghost/privacy wins immediately.
         syncTask?.cancel()
         syncTask = nil
         pendingTrigger = nil
         publishSnapshot = PresencePublishPolicy.recordingUnpublish(on: publishSnapshot)
 
         let sync = self.sync
-        let work = Task {
-            try await sync.unpublishCurrentPresence()
-        }
+        let work = Task { try await sync.unpublishCurrentPresence() }
         let timeoutTask = Task {
             let nanoseconds = UInt64(max(0, timeout) * 1_000_000_000)
             try? await Task.sleep(nanoseconds: nanoseconds)
@@ -381,9 +377,7 @@ final class LocationSession: LocationSessioning {
 
         do {
             try await work.value
-            if !isShutDown {
-                state.lastErrorCode = nil
-            }
+            if !isShutDown { state.lastErrorCode = nil }
         } catch {
             if recordError, !isShutDown {
                 state.lastErrorCode = LocationSessionErrorCode.unpublishFailed
@@ -392,9 +386,4 @@ final class LocationSession: LocationSessioning {
     }
 }
 
-/// PushLog-safe codes only — never localized OS strings.
-enum LocationSessionErrorCode {
-    static let providerStartFailed = "location_provider_start_failed"
-    static let upsertFailed = "location_upsert_failed"
-    static let unpublishFailed = "location_unpublish_failed"
-}
+

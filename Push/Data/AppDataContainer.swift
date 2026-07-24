@@ -222,6 +222,7 @@ final class AppDataContainer {
         let sync = SupabasePresenceSync(userID: currentUserID, store: store)
         return LocationSessionFactory.makeDefault(
             personID: currentUserID,
+            usesCoreLocation: true,
             availabilityProvider: {
                 store.cachedAvailability(userID: currentUserID)
             },

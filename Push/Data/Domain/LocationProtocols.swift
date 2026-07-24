@@ -11,7 +11,7 @@ import Foundation
 
 // MARK: - Location (device edge)
 
-/// Device / simulated location source. Core Location types stay inside a future
+/// Device / simulated location source. Core Location types stay inside the
 /// infrastructure provider only — this protocol exposes app-owned observations.
 @MainActor
 protocol LocationProviding: AnyObject {
@@ -20,6 +20,18 @@ protocol LocationProviding: AnyObject {
     func requestAuthorization(mode: LocationAuthorizationRequest) async
     func startUpdating() async throws
     func stopUpdating()
+    /// Invoked on MainActor when OS authorization changes (Core Location only).
+    func setAuthorizationChangeHandler(_ handler: (@MainActor () -> Void)?)
+    /// Final teardown (drop manager delegate, refuse further starts). Idempotent.
+    func prepareForShutdown()
+}
+
+extension LocationProviding {
+    func setAuthorizationChangeHandler(_ handler: (@MainActor () -> Void)?) {
+        _ = handler
+    }
+
+    func prepareForShutdown() {}
 }
 
 // MARK: - Session (app lifetime)

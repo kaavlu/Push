@@ -101,12 +101,31 @@ final class LocationSessionContainerTests: XCTestCase {
         XCTAssertTrue(provider is SimulatedLocationProvider)
     }
 
-    func testFactorySelectsNullProviderByDefault() {
+    func testFactorySelectsNullProviderByDefaultForMock() {
         let provider = LocationSessionFactory.makeProvider(
             personID: personID,
-            arguments: []
+            arguments: [],
+            usesCoreLocation: false
         )
         XCTAssertTrue(provider is NullLocationProvider)
+    }
+
+    func testFactorySelectsCoreLocationForLiveWithoutSimFlag() {
+        let provider = LocationSessionFactory.makeProvider(
+            personID: personID,
+            arguments: [],
+            usesCoreLocation: true
+        )
+        XCTAssertTrue(provider is CoreLocationLocationProvider)
+    }
+
+    func testFactoryPrefersSimulatedOverCoreLocationWhenFlagSet() {
+        let provider = LocationSessionFactory.makeProvider(
+            personID: personID,
+            arguments: [LocationSessionLaunchArgument.simLocation],
+            usesCoreLocation: true
+        )
+        XCTAssertTrue(provider is SimulatedLocationProvider)
     }
 
     func testTeardownLocationForSignOutOrdersUnpublishBeforeShutdown() async {

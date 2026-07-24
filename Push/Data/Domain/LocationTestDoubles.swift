@@ -54,6 +54,7 @@ final class FakeLocationProvider: LocationProviding {
     private(set) var authorizationState: LocationAuthorizationState
     private(set) var startCount = 0
     private(set) var stopCount = 0
+    private(set) var requestAuthorizationCount = 0
     private var continuation: AsyncStream<LocationObservation>.Continuation?
     private var stream: AsyncStream<LocationObservation>!
 
@@ -68,7 +69,10 @@ final class FakeLocationProvider: LocationProviding {
 
     func requestAuthorization(mode: LocationAuthorizationRequest) async {
         _ = mode
-        authorizationState = .whenInUse
+        requestAuthorizationCount += 1
+        if authorizationState == .notDetermined {
+            authorizationState = .whenInUse
+        }
     }
 
     func startUpdating() async throws {

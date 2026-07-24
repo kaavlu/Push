@@ -65,6 +65,13 @@ enum LocationPipelineConstants {
     static let vagueCoordinateQuantumDegrees = 0.01
 }
 
+/// PushLog-safe location session codes only — never localized OS strings.
+enum LocationSessionErrorCode {
+    static let providerStartFailed = "location_provider_start_failed"
+    static let upsertFailed = "location_upsert_failed"
+    static let unpublishFailed = "location_unpublish_failed"
+}
+
 /// Soft-stale vs hard-expiry windows for friend-visible presence.
 enum PresenceFreshness {
     /// Soften relative copy / confidence only; still map-visible if policy allows and published.
