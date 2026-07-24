@@ -133,6 +133,13 @@ struct ProfileView: View {
                     viewModel.beginPhotoEditing()
                 }
                 AvailabilityOptionsCard(viewModel: viewModel)
+                if let actionError = viewModel.actionError {
+                    ActionErrorBanner(
+                        message: actionError.message,
+                        onRetry: { viewModel.retryActionError() },
+                        onDismiss: { viewModel.dismissActionError() }
+                    )
+                }
                 ProfileRoutesCard(title: "Settings", routes: viewModel.settingsRoutes)
                 ProfileRoutesCard(title: "Privacy", routes: viewModel.privacyRoutes)
                 ProfileConnectCard(viewModel: viewModel)

@@ -395,8 +395,63 @@ final class LiveDataStore {
         replace(try await loader.updatePrivacy(userID: userID, payload: payload))
     }
 
+    /// Dual-write via `set_availability_choice`: canonical profile + presence mirror.
+    /// One revision on success only; does not invent presence or flip is_published.
     func updateAvailability(userID: String, rawValue: String) async throws {
-        replace(try await loader.updateAvailability(userID: userID, rawValue: rawValue))
+        let row = try await loader.updateAvailability(userID: userID, rawValue: rawValue)
+        applyAvailabilityDualWrite(profileRow: row, rawValue: rawValue)
+    }
+
+    /// Sync read of profile availability for location draft mirroring (never invents).
+    func cachedAvailability(userID: String) -> FriendAvailabilityState? {
+        guard let row = profileRows?.first(where: {
+            $0.id.caseInsensitiveCompare(userID) == .orderedSame
+        }) else { return nil }
+        return row.userProfile().chosenAvailability
+    }
+
+    /// Patch profile + existing presence availability after successful RPC — one bump.
+    private func applyAvailabilityDualWrite(profileRow: ProfileRow, rawValue: String) {
+        if var rows = profileRows,
+           let index = rows.firstIndex(where: {
+               $0.id.caseInsensitiveCompare(profileRow.id) == .orderedSame
+           }) {
+            rows[index] = profileRow
+            profileRows = rows
+        } else if profileRows != nil {
+            profileRows?.append(profileRow)
+        } else {
+            // Snapshot not warm — still bump so listeners reload from network.
+            revisionSubject.value += 1
+            return
+        }
+
+        if var presence = presenceRows,
+           let index = presence.firstIndex(where: {
+               $0.user_id.caseInsensitiveCompare(profileRow.id) == .orderedSame
+           }) {
+            let old = presence[index]
+            presence[index] = CurrentPresenceRow(
+                user_id: old.user_id,
+                availability: rawValue,
+                is_published: old.is_published,
+                activity_name: old.activity_name,
+                activity_symbol: old.activity_symbol,
+                place_id: old.place_id,
+                status_note: old.status_note,
+                latitude: old.latitude,
+                longitude: old.longitude,
+                vague_latitude: old.vague_latitude,
+                vague_longitude: old.vague_longitude,
+                confidence: old.confidence,
+                observed_at: old.observed_at,
+                updated_at: old.updated_at,
+                expires_at: old.expires_at,
+                source: old.source
+            )
+            presenceRows = presence
+        }
+        revisionSubject.value += 1
     }
 
     func updateImagePath(userID: String, imageAssetPath: String?) async throws {

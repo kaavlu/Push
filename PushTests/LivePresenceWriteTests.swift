@@ -258,6 +258,60 @@ final class LivePresenceWriteTests: XCTestCase {
         XCTAssertTrue(session.presenceSync is SupabasePresenceSync)
     }
 
+    // MARK: - Availability dual-write (Issue #76)
+
+    func testAvailabilityDualWriteUpdatesProfileAndPresenceOnce() async throws {
+        let loader = LiveDataLoaderSpy()
+        loader.presenceOwnerUserID = selfID
+        loader.presenceRows = [
+            CurrentPresenceRow.fixture(
+                userID: selfID, availability: "free_now", lat: 37.77, lng: -122.42
+            )
+        ]
+        let store = LiveDataStore(loader: loader)
+        try await store.warm()
+        let revisionBefore = store.revision
+
+        try await store.updateAvailability(userID: selfID, rawValue: "busy")
+
+        XCTAssertEqual(loader.setAvailabilityChoiceCallCount, 1)
+        XCTAssertEqual(loader.lastAvailabilityRawValue, "busy")
+        XCTAssertEqual(store.revision, revisionBefore + 1, "one revision for dual-write")
+
+        let profile = try await store.profile(userID: selfID)
+        XCTAssertEqual(profile.availability_choice, "busy")
+
+        let presence = try await store.currentPresence()
+        let selfRow = try XCTUnwrap(presence.first {
+            $0.user_id.caseInsensitiveCompare(selfID) == .orderedSame
+        })
+        XCTAssertEqual(selfRow.availability, "busy")
+        XCTAssertTrue(selfRow.is_published, "availability must not flip publish flag")
+        XCTAssertEqual(selfRow.latitude, 37.77)
+    }
+
+    func testFailedAvailabilityDoesNotBumpRevision() async throws {
+        let loader = LiveDataLoaderSpy()
+        loader.presenceRows = [
+            CurrentPresenceRow.fixture(userID: selfID, availability: "free_now", lat: 1, lng: 2)
+        ]
+        let store = LiveDataStore(loader: loader)
+        try await store.warm()
+        let revisionBefore = store.revision
+
+        loader.writeError = WriteFailure.expected
+        do {
+            try await store.updateAvailability(userID: selfID, rawValue: "busy")
+            XCTFail("expected throw")
+        } catch {
+            // expected
+        }
+
+        XCTAssertEqual(store.revision, revisionBefore)
+        let profile = try await store.profile(userID: selfID)
+        XCTAssertEqual(profile.availability_choice, "free_now")
+    }
+
     // MARK: - Helpers
 
     private func makeDraft(

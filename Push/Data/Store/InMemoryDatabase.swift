@@ -374,10 +374,14 @@ final class InMemoryDatabase: ObservableObject {
     /// Writes the user's chosen availability to both their PresenceStatus (with
     /// source .manualOverride) and their UserProfile.chosenAvailability so both
     /// the map layer and profile screen read from the same source of truth.
+    /// Does **not** change `isPublished` (Ghost is orthogonal — Issue #76).
     func setAvailability(_ availability: FriendAvailabilityState) {
+        // Social availability only — never treat `.ghost` as a publish flag here.
+        let social = availability == .ghost ? profile.chosenAvailability : availability
+        let resolved = social == .ghost ? FriendAvailabilityState.maybeDown : social
         if let status = statusesByPersonID[currentUserID] {
             statusesByPersonID[currentUserID] = PresenceStatus(
-                id: status.id, personID: status.personID, availability: availability,
+                id: status.id, personID: status.personID, availability: resolved,
                 activity: status.activity, placeID: status.placeID,
                 statusNote: status.statusNote, confidence: status.confidence,
                 observedAt: status.observedAt, updatedAt: Date(),
@@ -387,11 +391,60 @@ final class InMemoryDatabase: ObservableObject {
         }
         profile = UserProfile(
             personID: profile.personID, handle: profile.handle,
-            chosenAvailability: availability, visibilityNote: profile.visibilityNote,
+            chosenAvailability: resolved, visibilityNote: profile.visibilityNote,
             availabilityOptions: profile.availabilityOptions,
             activityVisibility: profile.activityVisibility,
             mapPreferences: profile.mapPreferences,
             closeFriends: profile.closeFriends, connectors: profile.connectors
+        )
+        didMutate()
+    }
+
+    /// Mock presence upsert from `LocalPresenceSync` (location / heartbeat / republish).
+    /// One revision; mirrors draft availability; sets hard-expire window.
+    func upsertOwnPresence(_ draft: PresenceStatusDraft, at now: Date = Date()) {
+        let existing = statusesByPersonID[currentUserID]
+        let personID = currentUserID
+        let placeID = draft.placeID ?? existing?.placeID
+        // Keep synthetic place coords when a place row exists; location drafts
+        // primarily drive publish flag + freshness for mock friend visibility.
+        statusesByPersonID[personID] = PresenceStatus(
+            id: existing?.id ?? "presence-\(personID)",
+            personID: personID,
+            availability: draft.availability == .ghost ? .maybeDown : draft.availability,
+            activity: draft.activity,
+            placeID: placeID,
+            statusNote: draft.statusNote ?? existing?.statusNote,
+            confidence: draft.confidence,
+            observedAt: draft.observedAt,
+            updatedAt: now,
+            expiresAt: now.addingTimeInterval(PresenceFreshness.hardExpire),
+            source: draft.source,
+            isPublished: draft.isPublished
+        )
+        didMutate()
+    }
+
+    /// Orthogonal Ghost / privacy unpublish — clears friend-visible publish flag.
+    /// Preserves social availability (Busy + Ghost stays Busy).
+    func unpublishOwnPresence(at now: Date = Date()) {
+        guard let status = statusesByPersonID[currentUserID] else {
+            didMutate()
+            return
+        }
+        statusesByPersonID[currentUserID] = PresenceStatus(
+            id: status.id,
+            personID: status.personID,
+            availability: status.availability == .ghost ? .maybeDown : status.availability,
+            activity: status.activity,
+            placeID: status.placeID,
+            statusNote: status.statusNote,
+            confidence: status.confidence,
+            observedAt: status.observedAt,
+            updatedAt: now,
+            expiresAt: now,
+            source: status.source,
+            isPublished: false
         )
         didMutate()
     }

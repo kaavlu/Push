@@ -43,11 +43,10 @@ This is a **high-fidelity prototype** that can become production later.
 ## What NOT to Build Yet
 
 - Live writes to social graph (friends/groups/sharing), realtime/subscriptions — profile self-writes (basics, toggles, availability, photo), push coordination (create/edit/cancel/delete, RSVP), friend-request coordination (search/send/cancel/accept/deny via `0009`/`0013`; remove via `0010`/`0013`), group creation + group-invite coordination (`0011`) + group lifecycle (`0015`), and user block/unblock via `0016` are allowed
-- Production location provider, presence movement throttle/heartbeat, and Realtime (Issue #64 — live presence upsert/unpublish via `SupabasePresenceSync`/`LocationSession` landed #75; read warm #73; throttle #76)
+- Production location provider and Realtime (Issue #64 — live presence upsert/unpublish #75; read warm #73; movement throttle/heartbeat/Ghost #76)
 - Real activity inference
 - Push notifications
 - iMessage extension
-- Ghost UI still persists `.ghost` via `setCurrentUserAvailability`; orthogonal `is_published` unpublish is wired on `LocationSession`/`SupabasePresenceSync` (#75) — migrate Ghost toggle in a follow-up
 - Large groups
 - Dating / social graph features
 

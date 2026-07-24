@@ -20,6 +20,8 @@ final class ProfileViewModel: ObservableObject {
     @Published private(set) var profileImageAssetName: String?
     @Published private(set) var selectedAvailability: FriendAvailabilityState = .maybeDown
     @Published private(set) var selectedStatusID: String = FriendAvailabilityState.maybeDown.title
+    /// Orthogonal Ghost (publish off). Independent of `selectedAvailability` (Busy+Ghost).
+    @Published private(set) var isGhostModeEnabled = false
     @Published var isPhotoEditorPresented = false
     @Published var isPhotoPickerPresented = false
     @Published var photoPickerItem: PhotosPickerItem?
@@ -31,12 +33,16 @@ final class ProfileViewModel: ObservableObject {
     @Published private(set) var closeFriends: [ProfileToggleItem] = []
     @Published private(set) var connectors: [ProfileConnector] = []
     @Published private(set) var loadState: LoadState<ProfileData> = .idle
+    @Published private(set) var actionError: ActionErrorState?
 
     private let container: AppDataContainer?
     // Holds the active store-change subscription; nil when container is absent.
     private var storeChangeSub: AnyCancellable?
     // Tracks the last revision we loaded so the subscription skips redundant reloads.
     private var lastSeenRevision = 0
+    private var pendingAvailability: FriendAvailabilityState?
+    private var pendingPublishEnabled: Bool?
+    private var statusRollback: (availability: FriendAvailabilityState, statusID: String, ghost: Bool)?
 
     // `container` defaults via `?? .shared` (not `= .shared`) because default-argument
     // expressions are checked in a nonisolated context even inside a @MainActor
@@ -75,6 +81,14 @@ final class ProfileViewModel: ObservableObject {
             let data = ProfileContentBuilder.profileData(
                 profile: userProfile, person: user, presence: presence
             )
+            // Ghost from session publish flag, then self presence, then legacy availability.
+            if let session = container.locationSession {
+                isGhostModeEnabled = !session.state.isPresencePublishingEnabled
+            } else if let selfStatus = statuses.first(where: { $0.personID == user.id }) {
+                isGhostModeEnabled = !selfStatus.isEffectivelyPublished
+            } else {
+                isGhostModeEnabled = userProfile.chosenAvailability == .ghost
+            }
             apply(data: data, userProfile: userProfile)
             loadState = .loaded(data)
             // Stamp the revision so the subscription guard can detect duplicates.
@@ -91,12 +105,12 @@ final class ProfileViewModel: ObservableObject {
         // A store reload is authoritative: resets typed initials, which stay UI-only.
         initials = data.initials
         profileImageAssetName = data.imageAssetName
-        selectedAvailability = data.availability
-        // Ghost Mode is persisted as a `FriendAvailabilityState` case, so its id
-        // (not `.title`) is what round-trips through `selectedStatusID`.
-        selectedStatusID = data.availability == .ghost
+        // Social availability only — never surface legacy `.ghost` as the chip.
+        let social = data.availability == .ghost ? FriendAvailabilityState.maybeDown : data.availability
+        selectedAvailability = social
+        selectedStatusID = isGhostModeEnabled
             ? ProfileStatusOption.ghostMode.id
-            : data.availability.title
+            : social.title
         activityVisibility = userProfile.activityVisibility
         mapPreferences = userProfile.mapPreferences
         closeFriends = userProfile.closeFriends
@@ -135,10 +149,6 @@ final class ProfileViewModel: ObservableObject {
         return profile.visibilityNote
     }
 
-    var isGhostModeEnabled: Bool {
-        selectedStatusID == ProfileStatusOption.ghostMode.id
-    }
-
     var statusOptions: [ProfileStatusOption] {
         [.ghostMode] + profile.availabilityOptions.map(ProfileStatusOption.availability)
     }
@@ -155,40 +165,113 @@ final class ProfileViewModel: ObservableObject {
     // live profiles can carry a `chosenAvailability` outside the 3 quick-pick
     // options (e.g. joinable, driving), and those users are not hidden.
     private var selectedStatusOption: ProfileStatusOption {
-        statusOptions.first { $0.id == selectedStatusID }
+        if isGhostModeEnabled { return .ghostMode }
+        return statusOptions.first { $0.id == selectedStatusID }
             ?? .availability(ProfileAvailabilityOption(availability: selectedAvailability, subtitle: ""))
     }
 
     func isSelected(_ option: ProfileAvailabilityOption) -> Bool {
-        selectedStatusID == ProfileStatusOption.availability(option).id
+        !isGhostModeEnabled && selectedAvailability == option.availability
     }
 
     func isSelected(_ option: ProfileStatusOption) -> Bool {
-        selectedStatusID == option.id
+        switch option {
+        case .ghostMode:
+            return isGhostModeEnabled
+        case .availability(let availabilityOption):
+            // Allow Busy + Ghost: availability can stay selected while Ghost is on.
+            return selectedAvailability == availabilityOption.availability
+        }
     }
 
     func select(_ option: ProfileAvailabilityOption) {
-        selectedAvailability = option.availability
-        selectedStatusID = ProfileStatusOption.availability(option).id
-        guard let container else { return }
-        Task { try? await container.friends.setCurrentUserAvailability(option.availability) }
+        commitAvailability(option.availability)
     }
 
     func select(_ option: ProfileStatusOption) {
-        selectedStatusID = option.id
-
-        // Ghost Mode persists as `.ghost`, the same `FriendAvailabilityState` write
-        // path as a real availability pick, so the toggle survives reload.
-        let availability: FriendAvailabilityState
         switch option {
         case .ghostMode:
-            availability = .ghost
+            // Toggle orthogonal publish flag — never write availability `.ghost`.
+            commitGhostEnabled(!isGhostModeEnabled)
         case .availability(let availabilityOption):
-            availability = availabilityOption.availability
+            commitAvailability(availabilityOption.availability)
         }
-        selectedAvailability = availability
+    }
+
+    func dismissActionError() {
+        actionError = nil
+        pendingAvailability = nil
+        pendingPublishEnabled = nil
+        statusRollback = nil
+    }
+
+    func retryActionError() {
+        if let pendingAvailability {
+            Task { await persistAvailability(pendingAvailability) }
+            return
+        }
+        if let pendingPublishEnabled {
+            Task { await persistGhostEnabled(pendingPublishEnabled) }
+        }
+    }
+
+    private func commitAvailability(_ availability: FriendAvailabilityState) {
+        let social = availability == .ghost ? FriendAvailabilityState.maybeDown : availability
+        statusRollback = (selectedAvailability, selectedStatusID, isGhostModeEnabled)
+        selectedAvailability = social
+        if !isGhostModeEnabled {
+            selectedStatusID = social.title
+        }
+        pendingAvailability = social
+        pendingPublishEnabled = nil
+        actionError = nil
+        Task { await persistAvailability(social) }
+    }
+
+    private func commitGhostEnabled(_ ghostOn: Bool) {
+        statusRollback = (selectedAvailability, selectedStatusID, isGhostModeEnabled)
+        isGhostModeEnabled = ghostOn
+        selectedStatusID = ghostOn
+            ? ProfileStatusOption.ghostMode.id
+            : selectedAvailability.title
+        pendingPublishEnabled = !ghostOn
+        pendingAvailability = nil
+        actionError = nil
+        Task { await persistGhostEnabled(!ghostOn) }
+    }
+
+    private func persistAvailability(_ availability: FriendAvailabilityState) async {
         guard let container else { return }
-        Task { try? await container.friends.setCurrentUserAvailability(availability) }
+        do {
+            try await container.friends.setCurrentUserAvailability(availability)
+            pendingAvailability = nil
+            statusRollback = nil
+            actionError = nil
+            lastSeenRevision = container.storeRevision
+        } catch {
+            rollBackStatus()
+            pendingAvailability = availability
+            actionError = ActionErrorState(message: ProfileMutationCopy.availabilityFailed)
+        }
+    }
+
+    private func persistGhostEnabled(_ publishEnabled: Bool) async {
+        guard let container else { return }
+        // Best-effort: local Ghost state wins even if network unpublish fails
+        // (server hardExpire is the offline safety net — design §2.9.1).
+        await container.locationSession?.setPresencePublishingEnabled(publishEnabled)
+        pendingPublishEnabled = nil
+        statusRollback = nil
+        actionError = nil
+        isGhostModeEnabled = !publishEnabled
+        lastSeenRevision = container.storeRevision
+    }
+
+    private func rollBackStatus() {
+        guard let statusRollback else { return }
+        selectedAvailability = statusRollback.availability
+        selectedStatusID = statusRollback.statusID
+        isGhostModeEnabled = statusRollback.ghost
     }
 
     func setProfileBasics(name: String, handle: String, initials: String) {
@@ -308,4 +391,8 @@ private extension Array where Element == ProfileToggleItem {
 
         self[index].isEnabled.toggle()
     }
+}
+
+enum ProfileMutationCopy {
+    static let availabilityFailed = "Couldn't update your status. Check your connection and try again."
 }

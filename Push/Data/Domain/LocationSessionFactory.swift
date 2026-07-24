@@ -11,6 +11,8 @@ import Foundation
 enum LocationSessionLaunchArgument {
     /// DEBUG dogfood: scripted `SimulatedLocationProvider` instead of null.
     static let simLocation = "--sim-location"
+    /// DEBUG dogfood: 20s stationary heartbeat instead of 15m (Issue #76).
+    static let fastPresenceHeartbeat = "--fast-presence-heartbeat"
 }
 
 enum LocationSessionFactory {

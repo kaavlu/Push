@@ -16,8 +16,22 @@ enum LocationPipelineConstants {
     static let minDisplacementMeters: Double = 50
     /// Reject fixes with horizontal accuracy worse than this (meters).
     static let maxHorizontalAccuracyMeters: Double = 100
-    /// Re-touch `expires_at` / freshness while stationary (must be < hardExpire).
-    static let presenceHeartbeatInterval: TimeInterval = 15 * 60
+    /// Production re-touch window for stationary users (must be < hardExpire).
+    static let presenceHeartbeatIntervalDefault: TimeInterval = 15 * 60
+    /// DEBUG dogfood only (`--fast-presence-heartbeat`) — short enough to observe without a 15m wait.
+    static let presenceHeartbeatIntervalDogfood: TimeInterval = 20
+    /// Re-touch `expires_at` / freshness while stationary.
+    /// DEBUG may inject a shorter interval for dogfood; Release always uses the default.
+    static var presenceHeartbeatInterval: TimeInterval {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains(
+            LocationSessionLaunchArgument.fastPresenceHeartbeat
+        ) {
+            return presenceHeartbeatIntervalDogfood
+        }
+        #endif
+        return presenceHeartbeatIntervalDefault
+    }
     /// Coalesce Realtime presence patches into one store revision.
     static let realtimePatchDebounce: TimeInterval = 0.35
 

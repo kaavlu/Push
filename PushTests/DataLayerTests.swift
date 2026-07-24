@@ -357,11 +357,31 @@ extension DataLayerTests {
     }
 
     @MainActor
-    func test_setAvailability_ghost_persistsToProfile() async throws {
+    func test_setAvailability_rejectsGhostAsSocialValue() async throws {
+        // Issue #76: Ghost is orthogonal publish state — writers must not
+        // persist `.ghost` as availability (Busy + Ghost remains representable).
         let container = AppDataContainer(seed: .standard())
+        try await container.friends.setCurrentUserAvailability(.busy)
         try await container.friends.setCurrentUserAvailability(.ghost)
         let profile = try await container.profile.userProfile()
-        XCTAssertEqual(profile.chosenAvailability, .ghost)
+        XCTAssertEqual(profile.chosenAvailability, .busy)
+        let status = try await container.friends.presenceStatuses()
+            .first { $0.personID == container.currentUserID }
+        XCTAssertEqual(status?.availability, .busy)
+        XCTAssertTrue(status?.isPublished == true)
+    }
+
+    @MainActor
+    func test_ghostUnpublishIsOrthogonalToAvailability() async throws {
+        let container = AppDataContainer(seed: .standard())
+        try await container.friends.setCurrentUserAvailability(.busy)
+        let session = try XCTUnwrap(container.locationSession as? LocationSession)
+        await session.setPresencePublishingEnabled(false)
+
+        let status = try await container.friends.presenceStatuses()
+            .first { $0.personID == container.currentUserID }
+        XCTAssertEqual(status?.availability, .busy)
+        XCTAssertFalse(status?.isEffectivelyPublished == true)
     }
 
     @MainActor
