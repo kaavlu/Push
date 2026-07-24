@@ -39,9 +39,8 @@ final class PushEditTests: XCTestCase {
         let container = AppDataContainer(seed: .standard())
         let beforeCount = try await container.pushes.activePlans().count
         let beforeRevision = container.storeRevision
-        let startsAt = try XCTUnwrap(Calendar.current.date(from: DateComponents(
-            year: 2026, month: 7, day: 10, hour: 18
-        )))
+        // Keep startsAt in the future so PushLifecycle still surfaces the plan as active.
+        let startsAt = Date().addingTimeInterval(3 * 60 * 60)
         let draft = PushDraft(
             title: "Lift then dinner",
             recipientIDs: ["friend_chitty", "friend_ishan"],

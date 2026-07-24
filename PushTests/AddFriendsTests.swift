@@ -80,7 +80,11 @@ final class AddFriendsTests: XCTestCase {
             alerts: ThrowingAlertRepository()
         )
         viewModel.onSearchTextChanged("anyone")
-        try? await Task.sleep(nanoseconds: AddFriendsLayout.searchDebounceNanoseconds + 50_000_000)
+        // Debounce then wait for the throwing search to settle (avoid flaky single sleep).
+        for _ in 0..<40 {
+            if case .failed = viewModel.contentState { return }
+            try? await Task.sleep(nanoseconds: 50_000_000)
+        }
         XCTAssertEqual(viewModel.contentState, .failed)
     }
 
