@@ -1,7 +1,7 @@
 # Push Design System — Agent Catalog
 
 **Status:** **Operational** — Waves 0–9 complete (Issue #63).  
-**Decisions:** `tasks/design-system-decision-log.md` (DS-001–DS-089) — product law.  
+**Decisions:** `tasks/design-system-decision-log.md` (DS-001–DS-090) — product law.  
 **Spec:** `docs/superpowers/specs/2026-07-21-push-design-system-specification.md`.  
 **Code home:** `Push/DesignSystem/` (+ temporary typealiases at legacy call sites).  
 **Handoff:** `tasks/design-system-handoff.md` (historical wave tracking).  
@@ -31,7 +31,7 @@ Open this file **before** creating UI chrome. Discover → reuse → extend → 
 | Second person-row / circular utility / full empty-error stack | `PushPersonRow`, `PushCircleIconButton`, `EmptySurface*` |
 | Raw hex/RGB in feature views | `PushColorPalette`, `PushControlColors`, cream/availability tokens |
 | DIY live-map pucks | `FriendPuck` / cluster / `RegionalActivityPuck` / `SelfPuckView` |
-| Custom popover/action panels | System `Menu` / `contextMenu` / `confirmationDialog` |
+| Freeform custom popover/action panels | DS-090 `.pushConfirmation` for destructive confirms; system `Menu` / `contextMenu` / photo `confirmationDialog` otherwise |
 | Secondary tab bars on ivory screens | Map `BottomNavigationBar` only |
 | Parallel availability color tables | `PushAvailabilityTokens` |
 | New status capsule recipes | Chip menu (§ Availability / chips) |
@@ -184,7 +184,8 @@ Map profile control, bottom-nav raised +, product circles with intentionally dif
 | Map bottom sheet (DS-064) | `PushMapBottomSheetChrome` / drag indicator | Custom map sheets (not system `.sheet`) |
 | Text link (DS-062) | `Text.pushTextLinkStyle()` | Secondary text actions on cream |
 | Bottom nav (DS-057) | `BottomNavigationBar` | Map shell only |
-| System menus (DS-066) | `Menu` / `confirmationDialog` | Overflow and destructive confirms |
+| System menus (DS-066) | `Menu` / `contextMenu` / photo `confirmationDialog` | Overflow, secondary card actions, multi-action photo menus |
+| Destructive confirmation (DS-090) | `.pushConfirmation` / `PushConfirmationDialog` | Sign out, delete, remove, block, leave, cancel push, etc. |
 
 ### Plan cards (Wave 7)
 
@@ -241,6 +242,7 @@ Map profile control, bottom-nav raised +, product circles with intentionally dif
 | `Components/Selectors/` | Segmented, filter chips, single-select, modal choice pill |
 | `Components/Navigation/` | Cream header, modal close, text link |
 | `Components/Sheets/` | Map bottom-sheet chrome |
+| `Components/Dialogs/` | Confirmation dialog (DS-090) |
 | `README.md` | In-repo pointer + wave history |
 
 Feature still owns composition: ViewModels, routes, unique copy, map shell (`ContentView`, `BottomNavigationBar`), calendar module, request lifecycle wiring, onboarding domain.
@@ -253,7 +255,7 @@ Feature still owns composition: ViewModels, routes, unique copy, map shell (`Con
 |---|---|
 | Onboarding/auth visual alignment with main app | Future DS pass |
 | Feed / activity-row system | When Feed is implemented |
-| Custom branded destructive alerts | Future DS pass |
+| Multi-action branded action sheets (photo menus, etc.) | Future DS pass if system dialogs prove insufficient |
 | Freeform parametric glass API | Never (unless DS-016 overturned) |
 | Calendar day tiles as global card type | Not this pass |
 | Merging Review + Plans cards into one component | Not this pass |

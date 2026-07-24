@@ -3,7 +3,7 @@
 **Status: operational (Waves 0–9).**
 
 **Agent entry point.** Canonical catalog: [`docs/design-system.md`](../../docs/design-system.md).  
-Decisions: [`tasks/design-system-decision-log.md`](../../tasks/design-system-decision-log.md) (DS-001–DS-089).  
+Decisions: [`tasks/design-system-decision-log.md`](../../tasks/design-system-decision-log.md) (DS-001–DS-090).  
 Spec: [`docs/superpowers/specs/2026-07-21-push-design-system-specification.md`](../../docs/superpowers/specs/2026-07-21-push-design-system-specification.md).  
 Handoff (history): [`tasks/design-system-handoff.md`](../../tasks/design-system-handoff.md).  
 Pre-system visual extraction (read-only): [`Design/PushThemeAudit.md`](../../Design/PushThemeAudit.md) — **catalog + decisions override** on conflict.
@@ -34,6 +34,7 @@ DesignSystem/
     Sheets/
     EmptyStates/
     Selectors/
+    Dialogs/       # confirmation (DS-090)
 ```
 
 ## Wave status
@@ -55,6 +56,7 @@ Full component inventory and **do-not-recreate** tables live in `docs/design-sys
 | Person list | `PushPersonRow` (+ optional expand) |
 | Empty / load fail | `EmptySurfaceView` / `EmptySurfaceStateView` |
 | Mutation error | `ActionErrorBanner` |
+| Destructive confirmation | `.pushConfirmation` / `PushConfirmationDialog` |
 | Map empty | `MapEmptyOverlay` |
 | Availability color / chip | `PushAvailabilityTokens` / `PushAvailabilityChip` |
 | Person face | `PushPersonAvatar` |

@@ -66,26 +66,20 @@ struct PushExpandablePersonRow: View {
         .pushSolidCreamCard(cornerRadius: FriendsLayout.cardCornerRadius)
         .clipShape(RoundedRectangle(cornerRadius: FriendsLayout.cardCornerRadius, style: .continuous))
         .animation(PushMotion.expand, value: isExpanded)
-        .confirmationDialog(
-            "Remove \(row.friend.name)?",
+        .pushConfirmation(
             isPresented: $isConfirmingRemove,
-            titleVisibility: .visible
-        ) {
-            Button(removeTitle, role: .destructive, action: onRemove)
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text(removeMessage)
-        }
-        .confirmationDialog(
-            "Block \(row.friend.name)?",
+            title: "Remove \(row.friend.name)?",
+            message: removeMessage,
+            confirmTitle: removeTitle,
+            onConfirm: onRemove
+        )
+        .pushConfirmation(
             isPresented: $isConfirmingBlock,
-            titleVisibility: .visible
-        ) {
-            Button("Block", role: .destructive, action: onBlock)
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text(blockMessage)
-        }
+            title: "Block \(row.friend.name)?",
+            message: blockMessage,
+            confirmTitle: "Block",
+            onConfirm: onBlock
+        )
     }
 }
 

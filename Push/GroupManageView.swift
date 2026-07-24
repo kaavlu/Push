@@ -77,46 +77,27 @@ struct GroupManageView: View {
                 pendingTransferMember = member
             }
         }
-        .confirmationDialog(
-            GroupDetailCopy.leaveTitle,
+        .pushConfirmation(
             isPresented: $isLeaveConfirmPresented,
-            titleVisibility: .visible
-        ) {
-            Button("Leave group", role: .destructive, action: onLeave)
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text(GroupDetailCopy.leaveMessage)
-        }
-        .confirmationDialog(
-            GroupDetailCopy.deleteTitle,
+            title: GroupDetailCopy.leaveTitle,
+            message: GroupDetailCopy.leaveMessage,
+            confirmTitle: "Leave group",
+            onConfirm: onLeave
+        )
+        .pushConfirmation(
             isPresented: $isDeleteConfirmPresented,
-            titleVisibility: .visible
-        ) {
-            Button("Delete group", role: .destructive, action: onDelete)
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text(GroupDetailCopy.deleteMessage)
-        }
-        .confirmationDialog(
-            memberPendingTransfer.map { "Make \($0.name) the owner?" } ?? "Transfer ownership?",
-            isPresented: Binding(
-                get: { memberPendingTransfer != nil },
-                set: { if !$0 { memberPendingTransfer = nil } }
-            ),
-            titleVisibility: .visible
-        ) {
-            Button("Transfer", role: .destructive) {
-                if let member = memberPendingTransfer { onTransfer(member.id) }
-                memberPendingTransfer = nil
-            }
-            Button("Cancel", role: .cancel) { memberPendingTransfer = nil }
-        } message: {
-            if let member = memberPendingTransfer {
-                Text(GroupDetailCopy.transferMessage(name: member.name))
-            } else {
-                Text("")
-            }
-        }
+            title: GroupDetailCopy.deleteTitle,
+            message: GroupDetailCopy.deleteMessage,
+            confirmTitle: "Delete group",
+            onConfirm: onDelete
+        )
+        .pushConfirmation(
+            item: $memberPendingTransfer,
+            title: { member in "Make \(member.name) the owner?" },
+            message: { member in GroupDetailCopy.transferMessage(name: member.name) },
+            confirmTitle: "Transfer",
+            onConfirm: { member in onTransfer(member.id) }
+        )
     }
 }
 

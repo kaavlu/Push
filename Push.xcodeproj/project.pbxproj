@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A8D98FC74D36769A91CA5BBE /* PushConfirmationModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D82F5588AB8252EA50429CB /* PushConfirmationModifier.swift */; };
+		A4100FD68152784ECABD6B81 /* PushConfirmationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2858D7F10E02E7C349858004 /* PushConfirmationTests.swift */; };
+		1582DBA2BEA0C73D0B74817F /* PushConfirmationDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879A0A300BD2CE4051B817BA /* PushConfirmationDialog.swift */; };
 		D1CC800A8E472611E25B082E /* PushTypographyTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 778C15F07F8469E15E655D2C /* PushTypographyTokens.swift */; };
 		A8927B79F5DCA0EA4AEDBF01 /* PushRadiusTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11AB53CC3528BDC1AD1F168 /* PushRadiusTokens.swift */; };
 		292E9CCCE4971654E86CE78A /* PushOpacityTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BC7FBF4D2390A57588E84D5 /* PushOpacityTokens.swift */; };
@@ -323,6 +326,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		2D82F5588AB8252EA50429CB /* PushConfirmationModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushConfirmationModifier.swift"; path = "DesignSystem/Components/Dialogs/PushConfirmationModifier.swift"; sourceTree = "<group>"; };
+		2858D7F10E02E7C349858004 /* PushConfirmationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PushConfirmationTests.swift"; sourceTree = "<group>"; };
+		879A0A300BD2CE4051B817BA /* PushConfirmationDialog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushConfirmationDialog.swift"; path = "DesignSystem/Components/Dialogs/PushConfirmationDialog.swift"; sourceTree = "<group>"; };
 		778C15F07F8469E15E655D2C /* PushTypographyTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushTypographyTokens.swift"; path = "DesignSystem/Tokens/PushTypographyTokens.swift"; sourceTree = "<group>"; };
 		F11AB53CC3528BDC1AD1F168 /* PushRadiusTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushRadiusTokens.swift"; path = "DesignSystem/Tokens/PushRadiusTokens.swift"; sourceTree = "<group>"; };
 		6BC7FBF4D2390A57588E84D5 /* PushOpacityTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushOpacityTokens.swift"; path = "DesignSystem/Tokens/PushOpacityTokens.swift"; sourceTree = "<group>"; };
@@ -676,6 +682,8 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				2D82F5588AB8252EA50429CB /* PushConfirmationModifier.swift */,
+				879A0A300BD2CE4051B817BA /* PushConfirmationDialog.swift */,
 				778C15F07F8469E15E655D2C /* PushTypographyTokens.swift */,
 				F11AB53CC3528BDC1AD1F168 /* PushRadiusTokens.swift */,
 				6BC7FBF4D2390A57588E84D5 /* PushOpacityTokens.swift */,
@@ -940,6 +948,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				2858D7F10E02E7C349858004 /* PushConfirmationTests.swift */,
 				EDFAB9C6CED1AF162483B9B0 /* PostAuthOnboardingTests.swift */,
 				0A6B9A9B7679969653EAD8CA /* CoreLocationProviderTests.swift */,
 				D7200BFE2778A623FC14579E /* LocationPresenceThrottleTests.swift */,
@@ -1134,6 +1143,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				A8D98FC74D36769A91CA5BBE /* PushConfirmationModifier.swift in Sources */,
+				1582DBA2BEA0C73D0B74817F /* PushConfirmationDialog.swift in Sources */,
 				D1CC800A8E472611E25B082E /* PushTypographyTokens.swift in Sources */,
 				A8927B79F5DCA0EA4AEDBF01 /* PushRadiusTokens.swift in Sources */,
 				292E9CCCE4971654E86CE78A /* PushOpacityTokens.swift in Sources */,
@@ -1389,6 +1400,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				A4100FD68152784ECABD6B81 /* PushConfirmationTests.swift in Sources */,
 				C4163DCFC240B76B5D45C3DB /* PostAuthOnboardingTests.swift in Sources */,
 				D74ABA9AC7A765028035F776 /* CoreLocationProviderTests.swift in Sources */,
 				844B8119CC75C70F595E9D1A /* LocationPresenceThrottleTests.swift in Sources */,
