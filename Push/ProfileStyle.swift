@@ -62,42 +62,5 @@ enum ProfileColor {
     static let iconFillOpacity = 0.38
 }
 
-// PushModalBackground lives in DesignSystem/Surfaces/PushModalSurface.swift (DS-015).
-
-struct PushModalCloseButtonBar: View {
-    @Environment(\.pushLayout) private var layout
-    let accessibilityLabel: String
-    let action: () -> Void
-
-    var body: some View {
-        HStack {
-            Spacer(minLength: 0)
-
-            PushCircleIconButton(
-                systemImageName: "xmark",
-                accessibilityLabel: accessibilityLabel,
-                action: action
-            )
-        }
-        .padding(.horizontal, ProfileLayout.horizontalPadding(layout))
-        .padding(.top, ProfileLayout.closeTopPadding)
-        .padding(.bottom, ProfileLayout.closeBottomPadding)
-    }
-}
-
-/// Migration shim mapping `symbolName` → `PushCircleIconButton` (DS-001).
-struct PushModalIconButton: View {
-    let symbolName: String
-    let accessibilityLabel: String
-    var foreground: Color = PushControlColors.activeForeground
-    let action: () -> Void
-
-    var body: some View {
-        PushCircleIconButton(
-            systemImageName: symbolName,
-            accessibilityLabel: accessibilityLabel,
-            foreground: foreground,
-            action: action
-        )
-    }
-}
+// PushModalBackground → DesignSystem/Surfaces/PushModalSurface.swift (DS-015).
+// PushModalCloseButtonBar / PushModalIconButton → DesignSystem Navigation (DS-061).

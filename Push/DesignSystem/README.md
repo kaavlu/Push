@@ -43,7 +43,8 @@ DesignSystem/
 | 3 | Empty / loading / error | Done |
 | 4 | Named surfaces + cream tokens | Done |
 | 5 | Availability, chips, avatars, pucks | Done |
-| 6–9 | See spec §8.3 | Not started |
+| 6 | Selectors, headers, sheets | Done |
+| 7–9 | See spec §8.3 | Not started |
 
 ## Migrated components
 
@@ -97,5 +98,18 @@ Error routing: hard load → full-page/map failed; mutations → `ActionErrorBan
 | `PushBrandSunbeamPill` | `Components/Chips/PushBrandSunbeamPill.swift` | profile / plan time / group status |
 | `PushPersonAvatar` | `Components/Avatars/PushPersonAvatar.swift` | dark + sunbeam fallbacks |
 | Map pucks | existing `FriendPuck*` / `SelfPuckView` / `RegionalActivityPuck` | catalog only — no DIY |
+
+### Wave 6 — Selectors, navigation, sheets
+
+| Type | File |
+|---|---|
+| `PushIvorySegmentedControl` | `Components/Selectors/` |
+| `PushIvoryFilterChipRow` | `Components/Selectors/` |
+| `PushSingleSelectRow` | `Components/Selectors/` |
+| `PushModalChoicePill` | `Components/Selectors/` |
+| `PushCreamPageHeader` | `Components/Navigation/` |
+| `PushModalCloseButtonBar` | `Components/Navigation/PushModalFlowChrome.swift` |
+| `pushTextLinkStyle` | `Components/Navigation/PushTextLinkStyle.swift` |
+| `PushMapBottomSheetChrome` | `Components/Sheets/` |
 
 Temporary typealiases keep call sites compiling during renames.

@@ -40,17 +40,8 @@ struct AlertsView: View {
     }
 
     private var header: some View {
-        HStack(alignment: .center) {
-            VStack(alignment: .leading, spacing: FriendsLayout.headerSubtitleSpacing) {
-                Text("Alerts")
-                    .font(.largeTitle.weight(.bold))
-                    .foregroundStyle(PushControlColors.activeForeground)
-                Text("What needs your attention")
-                    .font(.callout.weight(.semibold))
-                    .foregroundStyle(PushControlColors.inactiveForeground)
-            }
-            Spacer(minLength: 0)
-            FriendsCircleButton(
+        PushCreamPageHeader(title: "Alerts", subtitle: "What needs your attention") {
+            PushCircleIconButton(
                 systemImageName: "xmark",
                 accessibilityLabel: "Close alerts",
                 action: { dismiss() }

@@ -1,6 +1,6 @@
 # Push Design System — Agent Catalog
 
-**Status:** Waves 0–5 complete (through availability, chips, avatars).  
+**Status:** Waves 0–6 complete (through selectors, headers, sheets).  
 **Decisions:** `tasks/design-system-decision-log.md` (DS-001–DS-089) — product law.  
 **Spec:** `docs/superpowers/specs/2026-07-21-push-design-system-specification.md`.  
 **Code home:** `Push/DesignSystem/` (+ temporary typealiases at legacy call sites).  
@@ -144,16 +144,22 @@ Map profile control, bottom-nav raised +, product circles with intentionally dif
 | Map puck family (DS-052) | `FriendPuck`, `FriendClusterPuck` / group pucks, `RegionalActivityPuck`, `SelfPuckView` | **No DIY map pucks** |
 | Avatar stack / strip (DS-053) | `AvatarStack` / plan-card strips / `PushHistoryAvatarStack` | Offset stack vs linear strip |
 
-### Navigation & sheets (Wave 6)
+### Selectors, navigation & sheets (Wave 6)
 
-| Pattern | DS |
-|---|---|
-| Bottom nav (map shell) | DS-057 |
-| Map top chrome | DS-058 |
-| Cream page header | DS-060 |
-| Modal flow chrome | DS-061 |
-| Map bottom-sheet chrome | DS-064 |
-| System Menu / confirmationDialog | DS-066 |
+| Pattern | Named API | When to use |
+|---|---|---|
+| Ivory segmented switch (DS-035) | `PushIvorySegmentedControl` | Cream multi-mode (Friends\|Groups) |
+| Ivory filter chips (DS-036) | `PushIvoryFilterChipRow` | Walnut-selected filters on ivory (not sunbeam) |
+| Single-select row (DS-037) | `PushSingleSelectRow` | Sunbeam+check row; map dropdown consumes it |
+| Modal choice pill (DS-039) | `PushModalChoicePill` | AM/PM and compact modal choices |
+| Date/time pickers (DS-039) | `PushDatePicker` / `PushTimeClicker` | Modal timing fields |
+| Settings checkmark rows (DS-040) | `ProfileToggleRow` | Modal settings binaries only |
+| Cream page header (DS-060) | `PushCreamPageHeader` | Ivory title + trailing circular actions |
+| Modal flow chrome (DS-061) | `PushModalCloseButtonBar` | FullScreenCover close row |
+| Map bottom sheet (DS-064) | `PushMapBottomSheetChrome` / drag indicator | Custom map sheets (not system `.sheet`) |
+| Text link (DS-062) | `Text.pushTextLinkStyle()` | Secondary text actions on cream |
+| Bottom nav (DS-057) | `BottomNavigationBar` | Map shell only |
+| System menus (DS-066) | `Menu` / `confirmationDialog` | Overflow and destructive confirms |
 
 ### Plan cards (Wave 7)
 
@@ -201,7 +207,7 @@ Until token modules land, use existing shared sources:
 | 3 | Empty / loading / error | Done |
 | 4 | Named surfaces + cream tokens | Done |
 | 5 | Availability, chips, avatars, pucks | Done |
-| 6 | Selectors, headers, sheets | Pending |
+| 6 | Selectors, headers, sheets | Done |
 | 7 | Plan cards & subcomponents | Pending |
 | 8 | Tokens & motion | Pending |
 | 9 | Docs polish | Pending |

@@ -364,30 +364,7 @@ private struct FriendGroupDropdownRow: View {
     let isSelected: Bool
 
     var body: some View {
-        HStack(spacing: TopDropdownLayout.rowIconSpacing) {
-            Text(item.title)
-                .font(.subheadline.weight(isSelected ? .semibold : .medium))
-                .foregroundStyle(isSelected ? PushControlColors.activeForeground : PushControlColors.inactiveForeground)
-
-            Spacer(minLength: 0)
-
-            if isSelected {
-                Image(systemName: "checkmark")
-                    .font(.system(size: TopDropdownLayout.checkmarkSize, weight: .bold))
-                    .foregroundStyle(PushControlColors.activeForeground)
-            }
-        }
-        .padding(.horizontal, TopDropdownLayout.rowHorizontalPadding)
-        .padding(.vertical, TopDropdownLayout.rowVerticalPadding)
-        .background(rowBackground)
-    }
-
-    @ViewBuilder
-    private var rowBackground: some View {
-        if isSelected {
-            Capsule()
-                .fill(PushControlColors.activeFill)
-        }
+        PushSingleSelectRow(title: item.title, isSelected: isSelected)
     }
 }
 

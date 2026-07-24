@@ -97,17 +97,7 @@ private struct PlansPageHeader: View {
     let dismissAction: () -> Void
 
     var body: some View {
-        HStack(alignment: .center) {
-            VStack(alignment: .leading, spacing: PlansLayout.headerSubtitleSpacing) {
-                Text("Pushes")
-                    .font(.largeTitle.weight(.bold))
-                    .foregroundStyle(PushControlColors.activeForeground)
-
-                Text("Plan your next move")
-                    .font(.callout.weight(.semibold))
-                    .foregroundStyle(PushControlColors.inactiveForeground)
-            }
-            Spacer()
+        PushCreamPageHeader(title: "Pushes", subtitle: "Plan your next move") {
             PushCircleIconButton(
                 systemImageName: "xmark",
                 accessibilityLabel: "Close pushes",
@@ -281,9 +271,9 @@ struct YourPushesListView: View {
 }
 
 private extension Text {
+    /// Prefer `pushTextLinkStyle` (DS-062).
     func plansModuleActionText() -> some View {
-        font(.subheadline.weight(.semibold))
-            .foregroundStyle(PushColorPalette.Accent.walnut)
+        pushTextLinkStyle()
     }
 }
 

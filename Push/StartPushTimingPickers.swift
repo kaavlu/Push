@@ -320,27 +320,6 @@ private struct AmPmPillButton: View {
     let action: () -> Void
 
     var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(isSelected ? PushControlColors.activeForeground : PushControlColors.textSecondary)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 8)
-                .background(
-                    Capsule().fill(isSelected
-                                   ? PushControlColors.activeFill
-                                   : .white.opacity(StartPushColor.rowFillOpacity))
-                )
-                .overlay(
-                    Capsule().stroke(
-                        isSelected ? PushColorPalette.Accent.walnut.opacity(StartPushColor.pillSelectedStrokeOpacity) : .clear,
-                        lineWidth: StartPushLayout.pillStrokeWidth
-                    )
-                )
-        }
-        .buttonStyle(.plain)
-        .animation(.spring(response: 0.22, dampingFraction: 0.82), value: isSelected)
-        .accessibilityLabel(title)
-        .accessibilityValue(isSelected ? "Selected" : "Not selected")
+        PushModalChoicePill(title: title, isSelected: isSelected, action: action)
     }
 }

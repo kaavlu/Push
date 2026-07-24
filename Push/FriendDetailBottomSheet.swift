@@ -106,13 +106,7 @@ struct FriendDetailBottomSheet: View {
     }
 
     private var dragIndicator: some View {
-        Capsule()
-            .fill(PushColorPalette.Accent.walnut.opacity(FriendDetailBottomSheetLayout.indicatorOpacity))
-            .frame(
-                width: FriendDetailBottomSheetLayout.indicatorWidth,
-                height: FriendDetailBottomSheetLayout.indicatorHeight
-            )
-            .padding(.top, FriendDetailBottomSheetLayout.indicatorTopPadding)
+        PushMapBottomSheetDragIndicator()
     }
 
     private var dismissDrag: some Gesture {
@@ -199,30 +193,26 @@ private struct FriendDetailBottomSheetShape: Shape {
 }
 
 enum FriendDetailBottomSheetLayout {
-    static let indicatorWidth: CGFloat = 36
-    static let indicatorHeight: CGFloat = 5
-    static let indicatorTopPadding: CGFloat = 8
-    static let indicatorOpacity: CGFloat = 0.26
-    static let dragMinimumDistance: CGFloat = 12
-    static let dismissTranslation: CGFloat = 44
-    static let dismissPredictedTranslation: CGFloat = 120
-    /// Soft spring — scroll-like open/close without feeling sluggish.
-    static let animationResponse = 0.42
-    static let animationDamping = 0.86
-    static let animationBlendDuration = 0.12
-    /// Covers spring settle so the view isn't removed mid-slide.
-    static let dismissAnimationDuration = 0.40
-    /// Extra travel so the card starts fully under the home indicator.
-    static let presentationOvershoot: CGFloat = 12
-    /// Soft scale while closed (create-menu style).
-    static let closedScale: CGFloat = 0.96
-    static let zIndex: Double = 30
+    /// Prefer `PushMapBottomSheetChrome` for new map sheets (DS-064).
+    static let indicatorWidth = PushMapBottomSheetChrome.indicatorWidth
+    static let indicatorHeight = PushMapBottomSheetChrome.indicatorHeight
+    static let indicatorTopPadding = PushMapBottomSheetChrome.indicatorTopPadding
+    static let indicatorOpacity = PushMapBottomSheetChrome.indicatorOpacity
+    static let dragMinimumDistance = PushMapBottomSheetChrome.dragMinimumDistance
+    static let dismissTranslation = PushMapBottomSheetChrome.dismissTranslation
+    static let dismissPredictedTranslation = PushMapBottomSheetChrome.dismissPredictedTranslation
+    static let animationResponse = PushMapBottomSheetChrome.animationResponse
+    static let animationDamping = PushMapBottomSheetChrome.animationDamping
+    static let animationBlendDuration = PushMapBottomSheetChrome.animationBlendDuration
+    static let dismissAnimationDuration = PushMapBottomSheetChrome.dismissAnimationDuration
+    static let presentationOvershoot = PushMapBottomSheetChrome.presentationOvershoot
+    static let closedScale = PushMapBottomSheetChrome.closedScale
+    static let zIndex = PushMapBottomSheetChrome.zIndex
 
-    // Background surface — aligned with map All Friends dropdown chrome.
-    static let strokeWidth: CGFloat = 1
-    static let highlightWidth: CGFloat = 0.8
-    static let highlightInset: CGFloat = 1.2
-    static let sunbeamGlowRadius: CGFloat = 120
+    static let strokeWidth = PushMapGlassTokens.sheetStrokeWidth
+    static let highlightWidth = PushMapGlassTokens.sheetHighlightWidth
+    static let highlightInset = PushMapGlassTokens.sheetHighlightInset
+    static let sunbeamGlowRadius = PushMapGlassTokens.sheetSunbeamGlowRadius
 }
 
 /// Prefer `PushMapGlassTokens` for map sheet surface chrome (DS-011).
