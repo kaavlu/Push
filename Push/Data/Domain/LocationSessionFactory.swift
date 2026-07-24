@@ -42,10 +42,16 @@ enum LocationSessionFactory {
         arguments: [String] = ProcessInfo.processInfo.arguments
     ) -> LocationProviding {
         if usesSimulatedProvider(arguments: arguments) {
+            // Timed + wall-clock base so `--live --sim-location` dogfood emits
+            // fresh observations that pass age validation and reach presence sync.
+            // Unit tests construct providers with `.manual` / frozen baseDate.
             return SimulatedLocationProvider(
-                route: SimulatedLocationRouteFixtures.stationary(personID: personID),
+                route: SimulatedLocationRouteFixtures.stationary(
+                    personID: personID,
+                    baseDate: Date()
+                ),
                 authorizationState: .whenInUse,
-                mode: .manual
+                mode: .timed
             )
         }
         return NullLocationProvider(authorizationState: .notDetermined)
