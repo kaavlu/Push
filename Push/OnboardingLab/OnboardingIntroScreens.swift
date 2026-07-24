@@ -66,7 +66,6 @@ struct OnboardingWelcomeScreen: View {
 
     private var authButtons: some View {
         VStack(spacing: 12) {
-            OnboardingAuthButton(kind: .apple) { model.choose(.apple) }
             OnboardingAuthButton(kind: .google) { model.choose(.google) }
             OnboardingAuthButton(kind: .mobile) { model.choose(.mobile) }
             OnboardingAuthSwitchLink(

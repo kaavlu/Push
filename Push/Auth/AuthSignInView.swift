@@ -2,7 +2,7 @@
 import SwiftUI
 
 /// Production returning-user sign-in: email/password against Supabase,
-/// forgot-password, plus Apple / Google.
+/// forgot-password, plus Google.
 struct AuthSignInView: View {
     @ObservedObject var model: AuthViewModel
     @Environment(\.pushLayout) private var layout
@@ -25,7 +25,6 @@ struct AuthSignInView: View {
             AuthOrDivider().padding(.vertical, 20)
             AuthSocialButtons(
                 isBusy: model.isBusy,
-                onApple: { Task { await model.signInWithApple() } },
                 onGoogle: { Task { await model.signInWithGoogle() } }
             )
             Spacer(minLength: 24)

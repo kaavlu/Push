@@ -1,22 +1,18 @@
 // Push/Auth/AuthSocialButtons.swift
 import SwiftUI
 
-/// Apple + Google CTAs shared by production welcome and sign-in.
+/// Google CTA shared by production welcome and sign-in.
+/// Sign in with Apple is intentionally omitted so Personal Team builds
+/// do not require the `com.apple.developer.applesignin` entitlement.
 struct AuthSocialButtons: View {
     let isBusy: Bool
-    let onApple: () -> Void
     let onGoogle: () -> Void
 
     var body: some View {
-        VStack(spacing: 12) {
-            OnboardingAuthButton(kind: .apple, action: onApple)
-                .disabled(isBusy)
-                .opacity(isBusy ? AuthSocialButtonsLayout.disabledOpacity : 1)
-            OnboardingAuthButton(kind: .google, action: onGoogle)
-                .disabled(isBusy)
-                .opacity(isBusy ? AuthSocialButtonsLayout.disabledOpacity : 1)
-        }
-        .animation(OnboardingLabMotion.fast, value: isBusy)
+        OnboardingAuthButton(kind: .google, action: onGoogle)
+            .disabled(isBusy)
+            .opacity(isBusy ? AuthSocialButtonsLayout.disabledOpacity : 1)
+            .animation(OnboardingLabMotion.fast, value: isBusy)
     }
 }
 

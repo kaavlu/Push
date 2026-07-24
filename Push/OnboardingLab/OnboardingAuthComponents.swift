@@ -15,9 +15,10 @@ import SwiftUI
 
 // MARK: - Social / mobile CTA
 
-/// Sign-in button with the three brand-appropriate looks.
+/// Sign-in button with brand-appropriate looks (Google / mobile).
+/// Apple is omitted so Personal Team builds need no Sign in with Apple entitlement.
 struct OnboardingAuthButton: View {
-    enum Kind { case apple, google, mobile }
+    enum Kind { case google, mobile }
     let kind: Kind
     let action: () -> Void
 
@@ -44,7 +45,6 @@ struct OnboardingAuthButton: View {
 
     private var title: String {
         switch kind {
-        case .apple: return "Continue with Apple"
         case .google: return "Continue with Google"
         case .mobile: return "Use mobile number"
         }
@@ -53,7 +53,6 @@ struct OnboardingAuthButton: View {
     @ViewBuilder
     private var icon: some View {
         switch kind {
-        case .apple: Image(systemName: "apple.logo")
         case .google: googleLogo
         case .mobile: Image(systemName: "iphone")
         }
@@ -74,7 +73,6 @@ struct OnboardingAuthButton: View {
 
     private var labelColor: Color {
         switch kind {
-        case .apple: return .white
         case .google: return OnboardingLabColor.googleButtonText
         case .mobile: return OnboardingLabColor.walnut
         }
@@ -82,7 +80,6 @@ struct OnboardingAuthButton: View {
 
     private var fill: Color {
         switch kind {
-        case .apple: return OnboardingLabColor.appleButtonFill
         case .google: return .white
         case .mobile: return OnboardingLabColor.walnut.opacity(0.12)
         }

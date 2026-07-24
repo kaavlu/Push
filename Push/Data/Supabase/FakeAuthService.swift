@@ -7,7 +7,6 @@ final class FakeAuthService: AuthService {
     var restorable: AuthedUser?
     var signInResult: Result<AuthedUser, Error>?
     var signUpResult: Result<SignUpResult, Error>?
-    var signInWithAppleResult: Result<AuthedUser, Error>?
     var signInWithGoogleResult: Result<AuthedUser, Error>?
     var resetPasswordResult: Result<Void, Error>?
     var updatePasswordResult: Result<AuthedUser, Error>?
@@ -41,15 +40,6 @@ final class FakeAuthService: AuthService {
             return result
         case .failure(let e):
             throw e
-        }
-    }
-
-    func signInWithApple() async throws -> AuthedUser {
-        switch signInWithAppleResult
-            ?? .success(AuthedUser(id: "apple-user", email: "apple@push.test"))
-        {
-        case .success(let u): currentUser = u; return u
-        case .failure(let e): throw e
         }
     }
 

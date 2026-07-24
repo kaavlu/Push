@@ -79,7 +79,7 @@ Be honest about what’s real today. Mock mode is the full high-fidelity prototy
 - **Feed tab** — shell exists; live feed is empty (`EmptyLiveFeedRepository`).
 - **Ghost Mode** — shown in profile UI; not a real live privacy backend.
 - **Presence / places / “who’s nearby” in live** — no live location or activity inference; map won’t show friend pucks until that backend exists.
-- **Social providers** (Apple / Google on welcome + sign-in) — wired to Supabase Auth (native Apple id-token + Google OAuth web session); requires dashboard provider config.
+- **Social providers** (Google on welcome + sign-in) — wired to Supabase Auth (OAuth web session); requires dashboard provider config. Sign in with Apple is disabled for Personal Team provisioning.
 - **Legal URLs** — placeholders in `LegalDestinations`; **release blocker** before App Store.
 
 ### Not built yet (intentionally)
