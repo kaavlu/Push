@@ -15,6 +15,8 @@ protocol LiveDataLoading: AnyObject {
     func loadPushes() async throws -> [PushRow]
     func loadResponses() async throws -> [PushResponseRow]
     func loadPresence() async throws -> [CurrentPresenceRow]
+    func upsertCurrentPresence(_ payload: CurrentPresenceUpsertPayload) async throws -> CurrentPresenceRow
+    func unpublishCurrentPresence() async throws
     func insertPush(_ payload: PushInsertPayload) async throws -> PushRow
     func updatePush(id: String, payload: PushUpdatePayload) async throws -> PushRow
     func cancelPush(id: String, payload: PushCancelPayload) async throws -> PushRow
@@ -491,10 +493,10 @@ final class LiveDataStore {
 
     // MARK: - Presence
     //
-    // Session-cached like the social graph / pushes. Phase 1a is read-only:
-    // warm + refresh load `current_presence`; writes/Realtime land later.
-    // `notifyPresenceChanged()` clears the cache and bumps one revision so
-    // Map/Friends reload through the existing onStoreChange path.
+    // Session-cached like the social graph / pushes. Warm + refresh load
+    // `current_presence`; self writes replace the own row (write-through) and
+    // bump one revision. Realtime / external invalidation uses
+    // `notifyPresenceChanged()` which clears the cache.
 
     func currentPresence() async throws -> [CurrentPresenceRow] {
         if let presenceRows { return presenceRows }
@@ -508,7 +510,68 @@ final class LiveDataStore {
         )
     }
 
-    /// Drop the presence snapshot and publish one revision (Realtime / write path).
+    /// Network upsert then replace own cached row — one revision on success only.
+    @discardableResult
+    func upsertOwnPresence(
+        userID: String,
+        draft: PresenceStatusDraft,
+        now: Date = Date()
+    ) async throws -> CurrentPresenceRow {
+        let payload = CurrentPresenceWriteMapping.payload(
+            userID: userID, draft: draft, now: now
+        )
+        let row = try await loader.upsertCurrentPresence(payload)
+        applyPresenceWriteThrough(row)
+        return row
+    }
+
+    /// RPC unpublish then clear friend-visible fields on the own cached row.
+    func unpublishOwnPresence(userID: String, now: Date = Date()) async throws {
+        try await loader.unpublishCurrentPresence()
+        applyPresenceUnpublish(userID: userID, now: now)
+    }
+
+    /// Replace or append the returned presence row in the session cache.
+    func applyPresenceWriteThrough(_ row: CurrentPresenceRow) {
+        if var rows = presenceRows {
+            if let index = rows.firstIndex(where: {
+                $0.user_id.caseInsensitiveCompare(row.user_id) == .orderedSame
+            }) {
+                rows[index] = row
+            } else {
+                rows.append(row)
+            }
+            presenceRows = rows
+        }
+        // If the snapshot was never warm, leave it nil so the next read re-fetches
+        // friends + self together — still bump so listeners reload.
+        presenceTask = nil
+        revisionSubject.value += 1
+    }
+
+    /// Patch own row to unpublished after a successful unpublish RPC.
+    func applyPresenceUnpublish(userID: String, now: Date = Date()) {
+        if var rows = presenceRows {
+            let existing = rows.first {
+                $0.user_id.caseInsensitiveCompare(userID) == .orderedSame
+            }
+            let updated = CurrentPresenceWriteMapping.unpublishedRow(
+                from: existing, userID: userID, now: now
+            )
+            if let index = rows.firstIndex(where: {
+                $0.user_id.caseInsensitiveCompare(userID) == .orderedSame
+            }) {
+                rows[index] = updated
+            } else {
+                rows.append(updated)
+            }
+            presenceRows = rows
+        }
+        presenceTask = nil
+        revisionSubject.value += 1
+    }
+
+    /// Drop the presence snapshot and publish one revision (Realtime / external).
     func notifyPresenceChanged() {
         presenceRows = nil
         presenceTask = nil

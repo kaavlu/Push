@@ -46,6 +46,9 @@ enum LocationPipelineConstants {
 
     /// Cap wait for best-effort unpublish during sign-out (never block logout forever).
     static let unpublishBestEffortTimeout: TimeInterval = 3
+
+    /// ~1.1 km cells — Phase 1 default when writing / synthesizing vague coords.
+    static let vagueCoordinateQuantumDegrees = 0.01
 }
 
 /// Soft-stale vs hard-expiry windows for friend-visible presence.

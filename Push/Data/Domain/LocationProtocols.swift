@@ -72,5 +72,12 @@ protocol PresenceSyncing: AnyObject, Sendable {
     /// Clear friend-visible presence (Ghost / sign-out / permission loss).
     /// Implementations may no-op until live write lands.
     func unpublishCurrentPresence() async throws
+    /// Retry the newest buffered draft after a failed write (no-op when empty).
     func flushPending() async throws
+    /// Stop retries and reject future writes. Idempotent.
+    func shutdown()
+}
+
+extension PresenceSyncing {
+    func shutdown() {}
 }

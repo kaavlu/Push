@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		48C4DC9C2752004AF85ACAD1 /* LivePresenceWriteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23F1F328B36F7BA02E33311D /* LivePresenceWriteTests.swift */; };
+		A3468EB5EC4656FF0F81B495 /* SupabasePresenceSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200468BA1F72474FF611C572 /* SupabasePresenceSync.swift */; };
+		B1EA2541E4E75F24B708FDD1 /* CurrentPresenceWriteMapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7DC0DC89B653BAFFFA08B64 /* CurrentPresenceWriteMapping.swift */; };
 		A9465556C3AF870095EE5146 /* LivePresenceReadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0BE234607B2A379340ACF54 /* LivePresenceReadTests.swift */; };
 		8AD6AA02B6DE4338C63E7296 /* CurrentPresenceRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B8A434B44C3B5D5AB6B1AB3 /* CurrentPresenceRow.swift */; };
 		B41E04B41CEDE8CE58798BFC /* LocationSessionContainerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5647C2F31353FE9CCC2E3FD6 /* LocationSessionContainerTests.swift */; };
@@ -270,6 +273,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		23F1F328B36F7BA02E33311D /* LivePresenceWriteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LivePresenceWriteTests.swift"; sourceTree = "<group>"; };
+		200468BA1F72474FF611C572 /* SupabasePresenceSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SupabasePresenceSync.swift"; path = "Data/Supabase/SupabasePresenceSync.swift"; sourceTree = "<group>"; };
+		E7DC0DC89B653BAFFFA08B64 /* CurrentPresenceWriteMapping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "CurrentPresenceWriteMapping.swift"; path = "Data/Supabase/CurrentPresenceWriteMapping.swift"; sourceTree = "<group>"; };
 		F0BE234607B2A379340ACF54 /* LivePresenceReadTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LivePresenceReadTests.swift"; sourceTree = "<group>"; };
 		7B8A434B44C3B5D5AB6B1AB3 /* CurrentPresenceRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "CurrentPresenceRow.swift"; path = "Data/Supabase/Rows/CurrentPresenceRow.swift"; sourceTree = "<group>"; };
 		5647C2F31353FE9CCC2E3FD6 /* LocationSessionContainerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LocationSessionContainerTests.swift"; sourceTree = "<group>"; };
@@ -570,6 +576,8 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				200468BA1F72474FF611C572 /* SupabasePresenceSync.swift */,
+				E7DC0DC89B653BAFFFA08B64 /* CurrentPresenceWriteMapping.swift */,
 				7B8A434B44C3B5D5AB6B1AB3 /* CurrentPresenceRow.swift */,
 				6EF8A5F598840C8596B45397 /* LocationSessionFactory.swift */,
 				8E2F8176D5CC65A23BF865C3 /* LocationSession.swift */,
@@ -786,6 +794,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				23F1F328B36F7BA02E33311D /* LivePresenceWriteTests.swift */,
 				F0BE234607B2A379340ACF54 /* LivePresenceReadTests.swift */,
 				5647C2F31353FE9CCC2E3FD6 /* LocationSessionContainerTests.swift */,
 				1000C5A9AD77D1D3CCB12835 /* LocationSessionTests.swift */,
@@ -975,6 +984,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				A3468EB5EC4656FF0F81B495 /* SupabasePresenceSync.swift in Sources */,
+				B1EA2541E4E75F24B708FDD1 /* CurrentPresenceWriteMapping.swift in Sources */,
 				8AD6AA02B6DE4338C63E7296 /* CurrentPresenceRow.swift in Sources */,
 				1B9DD44C368C6CFE5303217A /* LocationSessionFactory.swift in Sources */,
 				A6655112F587EA95278165E4 /* LocationSession.swift in Sources */,
@@ -1182,6 +1193,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				48C4DC9C2752004AF85ACAD1 /* LivePresenceWriteTests.swift in Sources */,
 				A9465556C3AF870095EE5146 /* LivePresenceReadTests.swift in Sources */,
 				B41E04B41CEDE8CE58798BFC /* LocationSessionContainerTests.swift in Sources */,
 				B169654E7DAC2A0CA649BC08 /* LocationSessionTests.swift in Sources */,

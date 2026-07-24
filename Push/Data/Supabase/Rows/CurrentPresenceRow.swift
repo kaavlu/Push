@@ -140,7 +140,8 @@ extension CurrentPresenceRow {
     static let nearbyLabel = "Nearby"
     static let sharedLocationAddress = "Shared location"
     /// ~1.1 km cells — Phase 1 default when server omits vague pair.
-    static let vagueCoordinateQuantumDegrees = 0.01
+    static let vagueCoordinateQuantumDegrees =
+        LocationPipelineConstants.vagueCoordinateQuantumDegrees
 }
 
 // MARK: - Private helpers
