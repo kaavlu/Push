@@ -107,23 +107,7 @@ private struct ProfileAvatarStroke: View {
     }
 }
 
-struct StatusPill: View {
-    let title: String
-    let symbolName: String
-
-    var body: some View {
-        HStack(spacing: ProfileLayout.pillSpacing) {
-            Image(systemName: symbolName)
-                .font(.system(size: ProfileLayout.pillIconSize, weight: .bold))
-            Text(title)
-                .font(.subheadline.weight(.bold))
-        }
-        .foregroundStyle(PushControlColors.activeForeground)
-        .padding(.horizontal, ProfileLayout.pillHorizontalPadding)
-        .padding(.vertical, ProfileLayout.pillVerticalPadding)
-        .background(Capsule().fill(PushControlColors.activeFill))
-    }
-}
+// StatusPill → PushBrandSunbeamPill (DesignSystem Chips).
 
 struct ProfileRouteRow: View {
     let route: ProfileRoute

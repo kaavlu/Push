@@ -135,65 +135,7 @@ struct StartPushHeader: View {
     }
 }
 
-struct StartPushPrimaryButton: View {
-    @Environment(\.pushLayout) private var layout
-    let title: String
-    let isEnabled: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.headline.weight(.bold))
-                .foregroundStyle(isEnabled
-                                 ? PushControlColors.activeForeground
-                                 : PushControlColors.inactiveForeground)
-                .frame(maxWidth: .infinity)
-                .frame(height: StartPushLayout.primaryButtonHeight(layout))
-                .background(
-                    Capsule().fill(isEnabled
-                                   ? PushControlColors.activeFill
-                                   : PushControlColors.activeFill.opacity(0.45))
-                )
-        }
-        .buttonStyle(.plain)
-        .disabled(!isEnabled)
-        .animation(.easeInOut(duration: 0.18), value: isEnabled)
-        .accessibilityLabel(title)
-    }
-}
-
-struct RecipientAvatarView: View {
-    let imageAssetName: String?
-    let initials: String
-    let size: CGFloat
-    @State private var remoteImage: UIImage?
-
-    var body: some View {
-        avatarContent
-            .frame(width: size, height: size)
-            .clipShape(Circle())
-            .task(id: imageAssetName) {
-                remoteImage = nil
-                remoteImage = await AvatarImageLoader.image(for: imageAssetName)
-            }
-    }
-
-    @ViewBuilder
-    private var avatarContent: some View {
-        if let image = remoteImage ?? AvatarImageLoader.localImage(for: imageAssetName) {
-            Image(uiImage: image)
-                .resizable()
-                .scaledToFill()
-        } else {
-            Text(initials)
-                .font(.system(size: size * 0.32, weight: .bold, design: .rounded))
-                .foregroundStyle(PushControlColors.activeForeground)
-                .frame(width: size, height: size)
-                .background(Circle().fill(PushControlColors.activeFill))
-        }
-    }
-}
+// RecipientAvatarView → PushPersonAvatar sunbeam fallback (DesignSystem).
 
 struct StartPushSearchBar: View {
     @Binding var text: String
@@ -228,10 +170,7 @@ struct StartPushSectionLabel: View {
 
     var body: some View {
         Text(title)
-            .font(.footnote.weight(.bold))
-            .foregroundStyle(PushControlColors.textTertiary)
-            .textCase(.uppercase)
-            .kerning(0.5)
+            .pushSectionLabelStyle()
             .frame(maxWidth: .infinity, alignment: .leading)
     }
 }

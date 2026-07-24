@@ -47,16 +47,17 @@ enum PlansLayout {
 }
 
 enum PlansColor {
-    static let metadata = Color(red: 0.43, green: 0.29, blue: 0.17)
-    static let metadataSecondary = Color(red: 0.55, green: 0.43, blue: 0.31)
-    static let metadataTertiary = Color(red: 0.68, green: 0.58, blue: 0.47)
-    static let creamBase = Color(red: 1.00, green: 0.96, blue: 0.87)
-    static let creamSoft = Color(red: 0.98, green: 0.91, blue: 0.78)
-    static let cleanCardFill = creamBase.opacity(0.42)
-    static let warmCardTint = PushColorPalette.Accent.sunbeam.opacity(0.10)
-    static let glassStroke = creamBase.opacity(0.74)
-    static let innerGlassStroke = Color.white.opacity(0.46)
-    static let cardShadow = PushColorPalette.Accent.walnut.opacity(0.14)
+    /// Prefer `PushCreamTokens` / `PushGlassCreamTokens` for new code.
+    static let metadata = PushCreamTokens.metadata
+    static let metadataSecondary = PushCreamTokens.metadataSecondary
+    static let metadataTertiary = PushCreamTokens.metadataTertiary
+    static let creamBase = PushGlassCreamTokens.creamBase
+    static let creamSoft = PushGlassCreamTokens.creamSoft
+    static let cleanCardFill = PushGlassCreamTokens.cleanCardFill
+    static let warmCardTint = PushGlassCreamTokens.warmCardTint
+    static let glassStroke = PushGlassCreamTokens.glassStroke
+    static let innerGlassStroke = PushGlassCreamTokens.innerGlassStroke
+    static let cardShadow = PushGlassCreamTokens.cardShadow
     static let primaryGlow = PushColorPalette.Accent.sunbeam.opacity(0.32)
     static let pageTop = creamSoft.opacity(0.54)
     static let pageMiddle = creamBase.opacity(0.68)
@@ -64,8 +65,8 @@ enum PlansColor {
 
     // Subtle light-brown card border — mirrors the Friends screen cards so the
     // calendar and push cards read consistently against the ivory page.
-    static let walnutBorder = PushColorPalette.Accent.walnut.opacity(0.18)
-    static let walnutBorderWidth: CGFloat = 0.8
+    static let walnutBorder = PushGlassCreamTokens.walnutBorder
+    static let walnutBorderWidth = PushGlassCreamTokens.walnutBorderWidth
 
     // Start Push CTA: a more pronounced walnut rim so the primary button reads
     // as intentionally brown-accented against the liquid-glass fill.
@@ -81,141 +82,47 @@ enum PlansColor {
     static let passForeground = Color(red: 0.65, green: 0.20, blue: 0.16)
 }
 
-/// Tokens for the premium liquid-glass treatment on the Review deck card.
-/// Kept translucent so the warm modal gradient blurs through, rather than
-/// reading as a flat beige panel.
+/// Prefer `PushGlassCreamTokens` for new code; kept for Review card call sites.
 enum ReviewGlassStyle {
-    static let warmFill = PlansColor.creamBase.opacity(0.20)
-    static let sunbeamTint = PushColorPalette.Accent.sunbeam.opacity(0.08)
-    static let highlight = Color.white.opacity(0.34)
-    static let walnutStroke = PushColorPalette.Accent.walnut.opacity(0.10)
-    static let shadow = PushColorPalette.Accent.walnut.opacity(0.12)
-    static let shadowRadius: CGFloat = 28
-    static let shadowYOffset: CGFloat = 14
-    static let whiteStrokeWidth: CGFloat = 1
-    static let walnutStrokeWidth: CGFloat = 0.5
-
-    /// Specular edge: bright at the top-left, fading toward the bottom so the
-    /// rim catches light like real glass.
-    static let edgeSheen = LinearGradient(
-        colors: [Color.white.opacity(0.62), Color.white.opacity(0.18), Color.white.opacity(0.30)],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
+    static let warmFill = PushGlassCreamTokens.reviewWarmFill
+    static let sunbeamTint = PushGlassCreamTokens.reviewSunbeamTint
+    static let highlight = PushGlassCreamTokens.reviewHighlight
+    static let walnutStroke = PushGlassCreamTokens.reviewWalnutStroke
+    static let shadow = PushGlassCreamTokens.reviewShadow
+    static let shadowRadius = PushGlassCreamTokens.reviewShadowRadius
+    static let shadowYOffset = PushGlassCreamTokens.reviewShadowY
+    static let whiteStrokeWidth = PushGlassCreamTokens.reviewWhiteStrokeWidth
+    static let walnutStrokeWidth = PushGlassCreamTokens.reviewWalnutStrokeWidth
+    static let edgeSheen = PushGlassCreamTokens.reviewEdgeSheen
 }
 
 extension View {
-    /// Reusable liquid-glass card: blurred material + translucent warm fill,
-    /// a top-left sheen, layered white/walnut strokes, and a soft warm shadow.
+    /// Prefer `pushReviewDeckGlass` (DS-013).
     func reviewGlassCard(cornerRadius: CGFloat) -> some View {
-        let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-        return background(.ultraThinMaterial, in: shape)
-            .background(shape.fill(ReviewGlassStyle.warmFill))
-            .background(shape.fill(ReviewGlassStyle.sunbeamTint))
-            .overlay {
-                shape.fill(
-                    LinearGradient(
-                        colors: [ReviewGlassStyle.highlight, .clear],
-                        startPoint: .topLeading,
-                        endPoint: .center
-                    )
-                )
-                .allowsHitTesting(false)
-            }
-            .overlay {
-                shape.stroke(ReviewGlassStyle.walnutStroke, lineWidth: ReviewGlassStyle.walnutStrokeWidth)
-            }
-            .overlay {
-                shape.inset(by: 1)
-                    .stroke(ReviewGlassStyle.edgeSheen, lineWidth: ReviewGlassStyle.whiteStrokeWidth)
-            }
-            .overlay {
-                shape.stroke(PlansColor.walnutBorder, lineWidth: PlansColor.walnutBorderWidth)
-            }
-            .shadow(
-                color: ReviewGlassStyle.shadow,
-                radius: ReviewGlassStyle.shadowRadius,
-                y: ReviewGlassStyle.shadowYOffset
-            )
+        pushReviewDeckGlass(cornerRadius: cornerRadius)
     }
 
+    /// Prefer `pushPlansCardGlass` (DS-013).
     func plansGlassCard(cornerRadius: CGFloat) -> some View {
-        background(
-            .ultraThinMaterial,
-            in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-        )
-        .background(
-            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                .fill(PlansColor.cleanCardFill)
-        )
-        .background(
-            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                .fill(PlansColor.warmCardTint)
-        )
-        .overlay {
-            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                .stroke(PlansColor.glassStroke, lineWidth: PushGlassStyle.strokeWidth)
-        }
-        .overlay {
-            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                .stroke(PlansColor.innerGlassStroke, lineWidth: PushGlassStyle.strokeWidth)
-                .padding(1)
-        }
-        .overlay {
-            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                .stroke(PlansColor.walnutBorder, lineWidth: PlansColor.walnutBorderWidth)
-        }
-        .shadow(color: PlansColor.cardShadow, radius: 20, y: 10)
+        pushPlansCardGlass(cornerRadius: cornerRadius)
     }
 }
 
-struct PlanStatusPill: View {
-    let status: PlanStatus
-
-    var body: some View {
-        Text(status.pill)
-            .font(.footnote.weight(.semibold))
-            .foregroundStyle(foregroundColor)
-            .padding(.horizontal, PlansLayout.statusPillHorizontalPadding)
-            .padding(.vertical, PlansLayout.statusPillVerticalPadding)
-            .background(Capsule().fill(backgroundColor))
-    }
-
-    private var foregroundColor: Color {
-        switch status {
-        case .pending:   return PushColorPalette.Accent.walnut
-        case .joined:    return PushColorPalette.Accent.sageGreen
-        case .open:      return PlansColor.maybeForeground
-        case .waiting:   return PlansColor.passForeground
-        case .locked:    return PushColorPalette.Accent.walnut
-        case .happening: return PushColorPalette.Accent.walnut
-        }
-    }
-
-    private var backgroundColor: Color {
-        switch status {
-        case .pending:   return PushColorPalette.Accent.sunbeam.opacity(0.7)
-        case .joined:    return PushColorPalette.Accent.mintFoam
-        case .open:      return PlansColor.maybeBackground
-        case .waiting:   return PlansColor.passBackground
-        case .locked:    return PushColorPalette.Accent.sunbeam
-        case .happening: return PushColorPalette.Accent.sunbeam
-        }
-    }
-}
+// PlanStatusPill / YourPushAvatarRow / YourPushCardLayout → DesignSystem Cards (Wave 7).
+// Prefer PushPlanStatusPill, PushPlanAvatarStrip, PushPlanCardMetrics.
 
 enum YourPushCardLayout {
-    static let avatarSize: CGFloat = 28
-    static let avatarSpacing: CGFloat = 6
-    static let avatarStrokeWidth: CGFloat = 0.8
-    static let overflowAvatarSize: CGFloat = 28
-    static let maxVisibleAvatars: Int = 4
+    static let avatarSize = PushPlanCardMetrics.avatarSize
+    static let avatarSpacing = PushPlanCardMetrics.avatarSpacing
+    static let avatarStrokeWidth = PushPlanCardMetrics.avatarStrokeWidth
+    static let overflowAvatarSize = PushPlanCardMetrics.avatarSize
+    static let maxVisibleAvatars = PushPlanCardMetrics.maxVisibleAvatars
     static let timeChipHorizontalPadding: CGFloat = 8
     static let timeChipVerticalPadding: CGFloat = 4
     static let timeChipStrokeOpacity: Double = 0.40
-    static let footerTopPadding: CGFloat = 4
-    static let overflowFontSize: CGFloat = 11
-    static let headerSpacerMinLength: CGFloat = 8
+    static let footerTopPadding = PushPlanCardMetrics.footerTopPadding
+    static let overflowFontSize = PushPlanCardMetrics.overflowFontSize
+    static let headerSpacerMinLength = PushPlanCardMetrics.headerSpacerMinLength
     static let timeChipStrokeWidth: CGFloat = 1.0
-    static let avatarRingOpacity: Double = 0.86
+    static let avatarRingOpacity = PushPlanCardMetrics.avatarRingOpacity
 }

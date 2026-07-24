@@ -30,7 +30,7 @@ struct GroupRequestCard: View {
         }
         .padding(FriendsLayout.cardPadding(layout))
         .frame(maxWidth: .infinity, alignment: .leading)
-        .friendsCard(cornerRadius: FriendsLayout.cardCornerRadius)
+        .pushSolidCreamCard(cornerRadius: FriendsLayout.cardCornerRadius)
         .opacity(isDenying ? 0 : 1)
         .scaleEffect(isDenying ? 0.96 : 1, anchor: .center)
         .animation(.easeOut(duration: AlertsLayout.denyCollapseDuration), value: isDenying)

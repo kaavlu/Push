@@ -272,11 +272,11 @@ struct FriendsView: View {
     }
 
     private func triggerToast(_ message: String) {
-        withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
+        withAnimation(PushMotion.hangoutReveal) {
             toastMessage = message
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-            withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
+            withAnimation(PushMotion.hangoutReveal) {
                 toastMessage = nil
             }
         }
@@ -290,117 +290,43 @@ private struct FriendsHeader: View {
     let onClose: () -> Void
 
     var body: some View {
-        HStack(alignment: .center) {
-            VStack(alignment: .leading, spacing: FriendsLayout.headerSubtitleSpacing) {
-                Text("Friends")
-                    .font(.largeTitle.weight(.bold))
-                    .foregroundStyle(PushControlColors.activeForeground)
-
-                Text(mode.subtitle)
-                    .font(.callout.weight(.semibold))
-                    .foregroundStyle(PushControlColors.inactiveForeground)
-                    .animation(.easeInOut(duration: 0.2), value: mode)
-            }
-
-            Spacer(minLength: 0)
-
-            FriendsCircleButton(systemImageName: "xmark", accessibilityLabel: "Close friends", action: onClose)
+        PushCreamPageHeader(title: "Friends", subtitle: mode.subtitle) {
+            PushCircleIconButton(
+                systemImageName: "xmark",
+                accessibilityLabel: "Close friends",
+                action: onClose
+            )
         }
+        .animation(PushMotion.contentCrossfade, value: mode)
     }
 }
 
-// MARK: - Mode Switch
+// MARK: - Mode Switch (DS-035)
 
 private struct FriendsModeSwitch: View {
     @Binding var mode: FriendsMode
     let friendsCount: Int
     let groupsCount: Int
-    @Namespace private var namespace
 
-    private func count(for item: FriendsMode) -> Int {
-        item == .friends ? friendsCount : groupsCount
+    private var selectedID: Binding<String> {
+        Binding(
+            get: { mode.rawValue },
+            set: { mode = FriendsMode(rawValue: $0) ?? .friends }
+        )
+    }
+
+    private var items: [PushIvorySegmentedItem] {
+        FriendsMode.allCases.map { item in
+            PushIvorySegmentedItem(
+                id: item.rawValue,
+                title: item.title,
+                count: item == .friends ? friendsCount : groupsCount
+            )
+        }
     }
 
     var body: some View {
-        HStack(spacing: FriendsLayout.switchItemSpacing) {
-            ForEach(FriendsMode.allCases) { item in
-                segment(item)
-            }
-        }
-        .padding(FriendsLayout.switchPadding)
-        .background(
-            RoundedRectangle(cornerRadius: FriendsLayout.switchCornerRadius, style: .continuous)
-                .fill(FriendsColor.switchTrack)
-                .shadow(
-                    color: FriendsColor.switchTrackShadow.opacity(FriendsColor.switchContainerShadowOpacity),
-                    radius: FriendsLayout.switchContainerShadowRadius,
-                    y: FriendsLayout.switchContainerShadowYOffset
-                )
-        )
-        .overlay {
-            RoundedRectangle(cornerRadius: FriendsLayout.switchCornerRadius, style: .continuous)
-                .stroke(
-                    FriendsColor.switchTrackHighlight.opacity(FriendsColor.switchContainerHighlightOpacity),
-                    lineWidth: 0.8
-                )
-        }
-        .overlay(alignment: .bottom) {
-            RoundedRectangle(cornerRadius: FriendsLayout.switchCornerRadius, style: .continuous)
-                .stroke(
-                    FriendsColor.switchTrackShadow.opacity(FriendsColor.switchContainerInsetOpacity),
-                    lineWidth: 1
-                )
-        }
-    }
-
-    private func segment(_ item: FriendsMode) -> some View {
-        let isSelected = mode == item
-        return Button {
-            withAnimation(
-                .spring(
-                    response: FriendsLayout.switchAnimationResponse,
-                    dampingFraction: FriendsLayout.switchAnimationDamping
-                )
-            ) {
-                mode = item
-            }
-        } label: {
-            HStack(spacing: FriendsLayout.switchCountSpacing) {
-                Text(item.title)
-                    .font(.subheadline.weight(isSelected ? .bold : .semibold))
-                Text("\(count(for: item))")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(FriendsColor.switchCountText.opacity(isSelected ? 0.95 : 0.62))
-                    .padding(.horizontal, FriendsLayout.switchCountHorizontalPadding)
-                    .padding(.vertical, FriendsLayout.switchCountVerticalPadding)
-                    .background(
-                        Capsule().fill(
-                            isSelected
-                                ? FriendsColor.switchActiveCountFill
-                                : FriendsColor.switchInactiveCountFill.opacity(0.58)
-                        )
-                    )
-            }
-            .foregroundStyle(isSelected ? FriendsColor.switchActiveText : FriendsColor.switchInactiveText)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, FriendsLayout.switchItemVerticalPadding)
-            .background {
-                if isSelected {
-                    RoundedRectangle(cornerRadius: FriendsLayout.switchItemCornerRadius, style: .continuous)
-                        .fill(FriendsColor.switchSelectedCream)
-                        .shadow(
-                            color: FriendsColor.switchSelectedShadow.opacity(FriendsColor.switchSelectedShadowOpacity),
-                            radius: FriendsLayout.switchSelectedShadowRadius,
-                            y: FriendsLayout.switchSelectedShadowYOffset
-                        )
-                        .matchedGeometryEffect(id: "friendsModeSelection", in: namespace)
-                }
-            }
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(item.title)
-        .accessibilityValue("\(count(for: item))")
-        .accessibilityAddTraits(isSelected ? .isSelected : [])
+        PushIvorySegmentedControl(items: items, selectedID: selectedID)
     }
 }
 

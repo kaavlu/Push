@@ -155,7 +155,7 @@ private struct GroupIdentityRow: View {
 
             Spacer(minLength: 0)
 
-            GroupStatusPill(status: group.status)
+            PushGroupStatusPill(title: group.status.title)
         }
     }
 
@@ -204,20 +204,7 @@ private struct GroupFallbackTile: View {
     }
 }
 
-private struct GroupStatusPill: View {
-    let status: PushGroupStatus
-
-    var body: some View {
-        Text(status.title)
-            .font(.caption.weight(.bold))
-            .foregroundStyle(PushControlColors.activeForeground)
-            .lineLimit(1)
-            .minimumScaleFactor(GroupsLayout.minimumTextScale)
-            .padding(.horizontal, GroupsLayout.statusHorizontalPadding)
-            .padding(.vertical, GroupsLayout.statusVerticalPadding)
-            .background(Capsule().fill(PushControlColors.activeFill.opacity(GroupsColor.statusFillOpacity)))
-    }
-}
+// Group status → PushGroupStatusPill (DesignSystem brand sunbeam pill).
 
 private struct GroupStatsRow: View {
     let stats: [PushGroupStat]

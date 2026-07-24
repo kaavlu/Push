@@ -274,7 +274,7 @@ private struct LivePreparationFailureView: View {
                     .font(.title2.bold()).foregroundStyle(PushControlColors.textEspresso)
                 Text("Check your connection and try again. Your data hasn’t changed.")
                     .multilineTextAlignment(.center).foregroundStyle(PushControlColors.textSecondary)
-                Button("Try Again", action: retry).buttonStyle(.borderedProminent)
+                PushSolidSunbeamButton(title: "Try Again", action: retry)
                 Button("Sign Out", action: signOut).foregroundStyle(PushControlColors.textSecondary)
                 Text(message).font(.caption2).foregroundStyle(PushControlColors.textTertiary)
                     .lineLimit(2).multilineTextAlignment(.center)

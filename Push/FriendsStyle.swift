@@ -114,21 +114,22 @@ enum FriendsLayout {
     static let emptyStateIconSize: CGFloat = 30
     static let emptyStateTopPadding: CGFloat = 60
 
-    static let minimumTextScale = 0.82
+    static let minimumTextScale = PushOpacityTokens.minimumTextScale
 }
 
 enum FriendsColor {
-    static let cardStrokeOpacity = 0.18
-    static let cardStrokeWidth: CGFloat = 0.8
-    static let ringOpacity = 0.9
+    /// Prefer `PushCreamTokens` for new code; kept for feature-local call sites.
+    static let cardStrokeOpacity = PushCreamTokens.solidCardStrokeOpacity
+    static let cardStrokeWidth = PushCreamTokens.solidCardStrokeWidth
+    static let ringOpacity = PushCreamTokens.ringOpacity
     /// Soft ring when a row has no availability (e.g. friend-request alerts).
-    static let neutralRingOpacity = 0.28
+    static let neutralRingOpacity = PushCreamTokens.neutralRingOpacity
     static let chipStrokeOpacity = 0.30
 
-    // Warm cream / ivory system — keeps the screen off the gray system material.
-    static let pageIvory = Color(red: 0.988, green: 0.964, blue: 0.902)
-    static let cardCream = Color(red: 1.0, green: 0.992, blue: 0.955)
-    static let cardCreamOpacity = 0.58
+    // Warm cream / ivory system — single source: PushCreamTokens (DS-014).
+    static let pageIvory = PushCreamTokens.pageIvory
+    static let cardCream = PushCreamTokens.solidCard
+    static let cardCreamOpacity = PushCreamTokens.solidCardMutedOpacity
 
     // Segmented control: champagne track, ivory selection, walnut/gold details.
     static let switchTrack = Color(red: 0.925, green: 0.872, blue: 0.755)

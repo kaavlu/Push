@@ -201,57 +201,32 @@ private struct FriendsSearchField: View {
 
 private enum AddFriendsStateView {
     static var prompt: some View {
-        state(
-            symbol: "person.badge.plus",
-            title: "Search for friends",
-            message: "Try a name or username to find people on Push."
-        ) { EmptyView() }
+        EmptySurfaceView(
+            title: EmptySurfaceCopy.addFriendsPromptTitle,
+            message: EmptySurfaceCopy.addFriendsPromptMessage,
+            systemImage: "person.badge.plus",
+            expandsVertically: true
+        )
     }
 
     static var loading: some View {
-        state(symbol: "magnifyingglass", title: "Searching", message: "One moment…") {
-            ProgressView().tint(PushControlColors.activeForeground)
-        }
+        EmptySurfaceStateView.loading(message: EmptySurfaceCopy.addFriendsSearching)
     }
 
     static var noResults: some View {
-        state(
-            symbol: "person.slash",
-            title: "No people found",
-            message: "Check the spelling or try a different name."
-        ) { EmptyView() }
+        EmptySurfaceView(
+            title: EmptySurfaceCopy.addFriendsNoResultsTitle,
+            message: EmptySurfaceCopy.addFriendsNoResultsMessage,
+            systemImage: "person.slash",
+            expandsVertically: true
+        )
     }
 
     static func error(retry: @escaping () -> Void) -> some View {
-        state(
-            symbol: "exclamationmark.triangle",
-            title: "Couldn't search",
-            message: "Try again in a moment."
-        ) {
-            Button("Try again", action: retry)
-                .buttonStyle(.borderedProminent)
-                .tint(PushControlColors.activeFill)
-                .foregroundStyle(PushControlColors.activeForeground)
-        }
-    }
-
-    private static func state<Accessory: View>(
-        symbol: String,
-        title: String,
-        message: String,
-        @ViewBuilder accessory: () -> Accessory
-    ) -> some View {
-        VStack(spacing: AddFriendsLayout.stateSpacing) {
-            Image(systemName: symbol)
-                .font(.system(size: AddFriendsLayout.stateIconSize, weight: .semibold))
-                .foregroundStyle(PushControlColors.textSecondary)
-            Text(title).font(.headline).foregroundStyle(PushControlColors.textEspresso)
-            Text(message).font(.subheadline).foregroundStyle(PushControlColors.textSecondary)
-            accessory()
-        }
-        .multilineTextAlignment(.center)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-        .padding(.horizontal, AddFriendsLayout.stateHorizontalPadding)
+        EmptySurfaceStateView.failed(
+            title: EmptySurfaceCopy.addFriendsSearchFailedTitle,
+            retry: retry
+        )
     }
 }
 

@@ -62,7 +62,9 @@ This is a **high-fidelity prototype** that can become production later.
 
 **Adaptive layout:** `PushAdaptiveLayout` tiers by container width (compact <380, standard <420, large ≥420). `PushAdaptiveLayoutReader` at app root injects `@Environment(\.pushLayout)`; `*Style` helpers take `PushAdaptiveLayout` and use shared metrics (`pageHorizontalPadding`, `cardCornerRadius`, `puckScale`, etc.) — not one-off spacing constants. DEBUG previews: `PushPreviewMatrix` — wrap `*_Previews` in `#if DEBUG` so Release builds compile.
 
-**Design reference (`Design/`):** Handoff bundle for visual work — `PushDesignBrief.md`, `PushThemeAudit.md`, verbatim snapshots in `CoreDesignFiles/`, copied imagery in `Assets/`. Read-only references; implement changes in `Push/`, not in `Design/`.
+**Design reference (`Design/`):** Handoff bundle for visual work — `PushDesignBrief.md`, `PushThemeAudit.md` (historical pre-system snapshot; **superseded for implementation** by `docs/design-system.md`), verbatim snapshots in `CoreDesignFiles/`, copied imagery in `Assets/`. Read-only references; implement changes in `Push/` / `Push/DesignSystem/`, not in `Design/`.
+
+**Design system (Issue #63, operational):** Waves 0–9 complete — catalog-driven for UI chrome; new families need a DS decision. Before adding UI chrome, open **`docs/design-system.md`** (catalog) and prefer `Push/DesignSystem/` components. Decisions: `tasks/design-system-decision-log.md` (DS-001–DS-089). Spec/waves: `docs/superpowers/specs/2026-07-21-push-design-system-specification.md`. Handoff: `tasks/design-system-handoff.md`. **Named surfaces only** — no local glass/cream recipes. Control → `pushControlGlass`; map chrome → `pushMapControlGlass` / `MapPopupSheetBackground`; pucks → `pushPuckGlass`; Plans/Review cards → `pushPlansCardGlass` / `pushReviewDeckGlass`; ivory → `PushIvoryPageBackground`; dense lists → `pushSolidCreamCard`; modal flows → `PushModalBackground`. **Primaries:** `PushSolidSunbeamButton` or `PushGlassRimButton` only (no `.borderedProminent` product chrome, no third primary). Generic circular utility → `PushCircleIconButton`. Person lists → flat `PushPersonRow` (blocked is config, not a fork); expand via `PushExpandablePersonRow` + rail. Group/history/section header are separate cream components. Cream selectors → `PushIvorySegmentedControl` / `PushIvoryFilterChipRow` (walnut selected) / `PushSingleSelectRow` / `PushModalChoicePill`; page header → `PushCreamPageHeader`; modal close → `PushModalCloseButtonBar`; map bottom sheets → `PushMapBottomSheetChrome` (custom chrome, not system `.sheet`); cream text links → `Text.pushTextLinkStyle()`. Full-page empty/loading/failed → `EmptySurfaceView` / `EmptySurfaceStateView` only; map emptiness → `MapEmptyOverlay`; mutations → `ActionErrorBanner` (not full-screen failed). Availability colors → `PushAvailabilityTokens`; list/sheet availability → `PushAvailabilityChip`; person faces → `PushPersonAvatar` (dark/sunbeam); map pucks only via named puck family (no DIY). Plan cards (Wave 7) → `PushPlansPlanCard` (`.owner`/`.invited`; shims `YourPushCard`/`ActivePlanCard`), separate `PushReviewPlanCard` (shim `ReviewPushCard`); shared `PushPlanStatusPill`/`PushPlanAvatarStrip` — **leave `PlansCalendarView` whole**. Motion/opacity/radius/type (Wave 8) → `PushMotion` / `PushOpacityTokens` / `PushRadiusTokens` / `PushTypographyTokens` — pick named tokens; no new spring/duration/opacity/radius literals without promoting a token or DS decision. Onboarding/auth CTAs stay domain-local until a future alignment pass. Preserve approved appearance; extract/rename, do not redesign.
 
 **Appearance:** Light-only for now — `UIUserInterfaceStyle` Light in `Info.plist` plus `PushApp` `.preferredColorScheme(.light)`. Brand hex and cream/glass chrome do not adapt; do not add Dark Mode variants or `@Environment(\.colorScheme)` branching unless explicitly scoped.
 
@@ -122,14 +124,17 @@ See `coding-standards.md` for the full reference. Key rules for this project:
 | `tasks/todo.md` | Current plan and progress tracking |
 | `tasks/spec.md` | Active feature spec (write before implementation) |
 | `docs/data-architecture.md` | Seed workflow, derivation rules, test suites, Supabase migration seam |
+| `docs/design-system.md` | Agent UI catalog — open before adding chrome (Issue #63) |
 | `docs/app-store-privacy.md` | App Store Connect privacy disclosure inventory; re-audit before submission |
 | `docs/superpowers/specs/*.md` | Dated design specs per feature; read the relevant file before implementing |
 | `docs/superpowers/plans/*.md` | Step-by-step implementation plans for multi-task rollouts; follow task-by-task |
+| `tasks/design-system-handoff.md` | Design-system historical wave tracking (Issue #63 complete) |
+| `tasks/design-system-decision-log.md` | DS-001–DS-089 product decisions (law) |
 | `tasks/lessons.md` | Project-specific learnings and gotchas |
 
 ### Session Resume Protocol
 
-Read: `CLAUDE.md` → `tasks/lessons.md` → `tasks/todo.md` → `git log --oneline -5`. Supabase/backend work: also read `supabase/README.md`, `tasks/spec.md` (Issue #27), and repo Supabase skills. Location/presence work: also read `docs/superpowers/specs/2026-07-23-location-presence-architecture-design.md` (Issue #64).
+Read: `CLAUDE.md` → `tasks/lessons.md` → `tasks/todo.md` → `git log --oneline -5`. Supabase/backend work: also read `supabase/README.md`, `tasks/spec.md` (Issue #27), and repo Supabase skills. Location/presence work: also read `docs/superpowers/specs/2026-07-23-location-presence-architecture-design.md` (Issue #64). UI chrome: open `docs/design-system.md` first (Issue #63 operational; new families need a DS decision); `Design/PushThemeAudit.md` is read-only history superseded for implementation.
 
 Do not ask the user to re-explain context that is in these files.
 

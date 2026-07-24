@@ -62,56 +62,5 @@ enum ProfileColor {
     static let iconFillOpacity = 0.38
 }
 
-struct PushModalBackground: View {
-    var body: some View {
-        LinearGradient(
-            colors: [
-                PushColorPalette.Accent.sunbeam.opacity(ProfileColor.sunbeamTopOpacity),
-                .white,
-                PushColorPalette.Accent.walnut.opacity(ProfileColor.walnutBottomOpacity)
-            ],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-        .ignoresSafeArea()
-    }
-}
-
-struct PushModalCloseButtonBar: View {
-    @Environment(\.pushLayout) private var layout
-    let accessibilityLabel: String
-    let action: () -> Void
-
-    var body: some View {
-        HStack {
-            Spacer(minLength: 0)
-
-            PushModalIconButton(
-                symbolName: "xmark",
-                accessibilityLabel: accessibilityLabel,
-                action: action
-            )
-        }
-        .padding(.horizontal, ProfileLayout.horizontalPadding(layout))
-        .padding(.top, ProfileLayout.closeTopPadding)
-        .padding(.bottom, ProfileLayout.closeBottomPadding)
-    }
-}
-
-struct PushModalIconButton: View {
-    let symbolName: String
-    let accessibilityLabel: String
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Image(systemName: symbolName)
-                .font(.system(size: ProfileLayout.closeIconSize, weight: .bold))
-                .foregroundStyle(PushControlColors.activeForeground)
-                .frame(width: ProfileLayout.closeButtonSize, height: ProfileLayout.closeButtonSize)
-                .pushGlassBackground(cornerRadius: ProfileLayout.closeButtonSize / 2)
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(accessibilityLabel)
-    }
-}
+// PushModalBackground → DesignSystem/Surfaces/PushModalSurface.swift (DS-015).
+// PushModalCloseButtonBar / PushModalIconButton → DesignSystem Navigation (DS-061).

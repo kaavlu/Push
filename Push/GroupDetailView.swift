@@ -292,15 +292,11 @@ private struct GroupDetailBackButtonBar: View {
 
     var body: some View {
         HStack {
-            Button(action: action) {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: ProfileLayout.closeIconSize, weight: .bold))
-                    .foregroundStyle(PushControlColors.activeForeground)
-                    .frame(width: ProfileLayout.closeButtonSize, height: ProfileLayout.closeButtonSize)
-                    .pushGlassBackground(cornerRadius: ProfileLayout.closeButtonSize / 2)
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("Back to groups")
+            PushCircleIconButton(
+                systemImageName: "chevron.left",
+                accessibilityLabel: "Back to groups",
+                action: action
+            )
             Spacer(minLength: 0)
         }
         .padding(.horizontal, ProfileLayout.horizontalPadding(layout))

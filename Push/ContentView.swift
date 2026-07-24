@@ -364,30 +364,7 @@ private struct FriendGroupDropdownRow: View {
     let isSelected: Bool
 
     var body: some View {
-        HStack(spacing: TopDropdownLayout.rowIconSpacing) {
-            Text(item.title)
-                .font(.subheadline.weight(isSelected ? .semibold : .medium))
-                .foregroundStyle(isSelected ? PushControlColors.activeForeground : PushControlColors.inactiveForeground)
-
-            Spacer(minLength: 0)
-
-            if isSelected {
-                Image(systemName: "checkmark")
-                    .font(.system(size: TopDropdownLayout.checkmarkSize, weight: .bold))
-                    .foregroundStyle(PushControlColors.activeForeground)
-            }
-        }
-        .padding(.horizontal, TopDropdownLayout.rowHorizontalPadding)
-        .padding(.vertical, TopDropdownLayout.rowVerticalPadding)
-        .background(rowBackground)
-    }
-
-    @ViewBuilder
-    private var rowBackground: some View {
-        if isSelected {
-            Capsule()
-                .fill(PushControlColors.activeFill)
-        }
+        PushSingleSelectRow(title: item.title, isSelected: isSelected)
     }
 }
 
@@ -425,125 +402,13 @@ private struct TopIconButton: View {
 }
 
 private extension View {
+    /// Map top chrome — prefers DesignSystem `pushMapControlGlass` (DS-011).
     func topControlBackground(
         cornerRadius: CGFloat,
-        treatment: TopControlTreatment = .standard
+        treatment: PushMapControlTreatment = .standard
     ) -> some View {
-        let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-        return self
-            .background(.ultraThinMaterial, in: shape)
-            .background(shape.fill(TopControlColor.fill))
-            .background(shape.fill(treatment.centerHighlight))
-            .overlay {
-                shape
-                    .fill(treatment.surfaceGlow)
-                    .clipShape(shape)
-            }
-            .overlay {
-                shape.stroke(
-                    treatment.outerStroke,
-                    lineWidth: treatment.strokeWidth
-                )
-            }
-            .overlay {
-                shape
-                    .stroke(treatment.reflectiveHighlight, lineWidth: TopControlLayout.highlightWidth)
-                    .padding(TopControlLayout.highlightInset)
-            }
-            .shadow(
-                color: TopControlColor.shadow,
-                radius: TopControlLayout.shadowRadius,
-                y: TopControlLayout.shadowYOffset
-            )
+        pushMapControlGlass(cornerRadius: cornerRadius, treatment: treatment)
     }
-}
-
-private enum TopControlTreatment {
-    case standard
-    case filterPill
-    case profileButton
-
-    var centerHighlight: AnyShapeStyle {
-        switch self {
-        case .profileButton:
-            return AnyShapeStyle(Color.white.opacity(TopControlColor.profileCenterOpacity))
-        case .standard, .filterPill:
-            return AnyShapeStyle(Color.clear)
-        }
-    }
-
-    var surfaceGlow: AnyShapeStyle {
-        switch self {
-        case .filterPill:
-            return AnyShapeStyle(RadialGradient(
-                colors: [
-                    PushGlassStyle.warmTint.opacity(TopControlColor.pillCreamGlowOpacity),
-                    PushControlColors.activeFill.opacity(TopControlColor.pillGlowOpacity),
-                    .clear
-                ],
-                center: .bottom,
-                startRadius: 0,
-                endRadius: TopControlLayout.pillGlowRadius
-            ))
-        case .profileButton:
-            return AnyShapeStyle(RadialGradient(
-                colors: [
-                    Color.white.opacity(TopControlColor.profileCoreOpacity),
-                    PushGlassStyle.warmTint.opacity(TopControlColor.profileCreamGlowOpacity),
-                    .clear
-                ],
-                center: .center,
-                startRadius: 0,
-                endRadius: TopControlLayout.profileGlowRadius
-            ))
-        case .standard:
-            return AnyShapeStyle(Color.clear)
-        }
-    }
-
-    var outerStroke: AnyShapeStyle {
-        switch self {
-        case .profileButton:
-            return AnyShapeStyle(PushControlColors.activeFill.opacity(TopControlColor.profileRingOpacity))
-        case .standard, .filterPill:
-            return AnyShapeStyle(TopControlColor.stroke)
-        }
-    }
-
-    var reflectiveHighlight: AnyShapeStyle {
-        AnyShapeStyle(LinearGradient(
-            colors: [
-                Color.white.opacity(highlightTopOpacity),
-                Color.white.opacity(TopControlColor.highlightSideOpacity),
-                .clear
-            ],
-            startPoint: .top,
-            endPoint: .bottom
-        ))
-    }
-
-    var strokeWidth: CGFloat {
-        self == .profileButton ? TopControlLayout.profileRingWidth : TopControlLayout.strokeWidth
-    }
-
-    private var highlightTopOpacity: Double {
-        self == .filterPill ? TopControlColor.pillHighlightOpacity : TopControlColor.highlightOpacity
-    }
-}
-
-private enum TopControlColor {
-    static let fill = PushGlassStyle.warmTint.opacity(0.38)
-    static let stroke = Color.white.opacity(PushGlassStyle.strokeOpacity)
-    static let shadow = PushGlassStyle.shadowColor.opacity(PushGlassStyle.shadowOpacity)
-    static let pillCreamGlowOpacity = 0.28
-    static let pillGlowOpacity = 0.18
-    static let pillHighlightOpacity = 0.84
-    static let profileRingOpacity = 0.52
-    static let profileCenterOpacity = 0.16
-    static let profileCoreOpacity = 0.26
-    static let profileCreamGlowOpacity = 0.20
-    static let highlightOpacity = 0.72
-    static let highlightSideOpacity = 0.14
 }
 
 private enum MapDefaults {

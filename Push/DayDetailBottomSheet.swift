@@ -24,11 +24,7 @@ struct DayDetailBottomSheet: View {
     }
 
     private var presentationAnimation: Animation {
-        .interactiveSpring(
-            response: FriendDetailBottomSheetLayout.animationResponse,
-            dampingFraction: FriendDetailBottomSheetLayout.animationDamping,
-            blendDuration: FriendDetailBottomSheetLayout.animationBlendDuration
-        )
+        PushMotion.sheet
     }
 
     var body: some View {

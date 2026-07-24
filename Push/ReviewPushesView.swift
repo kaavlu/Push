@@ -46,15 +46,11 @@ struct ReviewPushesView: View {
                 .font(.largeTitle.weight(.bold))
                 .foregroundStyle(PushControlColors.activeForeground)
             Spacer(minLength: 0)
-            Button(action: dismissAction) {
-                Image(systemName: "xmark")
-                    .font(.system(size: ProfileLayout.closeIconSize, weight: .bold))
-                    .foregroundStyle(PushControlColors.activeForeground)
-                    .frame(width: ProfileLayout.closeButtonSize, height: ProfileLayout.closeButtonSize)
-                    .pushGlassBackground(cornerRadius: ProfileLayout.closeButtonSize / 2)
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("Close review")
+            PushCircleIconButton(
+                systemImageName: "xmark",
+                accessibilityLabel: "Close review",
+                action: dismissAction
+            )
         }
     }
 
@@ -77,7 +73,7 @@ struct ReviewPushesView: View {
                         }
                 )
                 .animation(
-                    .spring(response: 0.3, dampingFraction: 0.8),
+                    PushMotion.selection,
                     value: dragOffset
                 )
         } else {

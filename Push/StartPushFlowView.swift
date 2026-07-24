@@ -90,15 +90,13 @@ struct StartPushFlowView: View {
     }
 
     private var trashButton: some View {
-        Button { isDeleteConfirmationPresented = true } label: {
-            Image(systemName: "trash")
-                .font(.system(size: StartPushLayout.trashIconSize, weight: .bold))
-                .foregroundStyle(PushControlColors.destructive)
-                .frame(width: StartPushLayout.closeButtonSize, height: StartPushLayout.closeButtonSize)
-                .pushGlassBackground(cornerRadius: StartPushLayout.closeButtonSize / 2)
+        PushCircleIconButton(
+            systemImageName: "trash",
+            accessibilityLabel: "Delete push",
+            foreground: PushControlColors.destructive
+        ) {
+            isDeleteConfirmationPresented = true
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Delete push")
     }
 
     private var backButton: some View {
@@ -119,15 +117,12 @@ struct StartPushFlowView: View {
     }
 
     private var closeButton: some View {
-        Button { dismiss() } label: {
-            Image(systemName: "xmark")
-                .font(.system(size: StartPushLayout.closeIconSize, weight: .bold))
-                .foregroundStyle(PushControlColors.activeForeground)
-                .frame(width: StartPushLayout.closeButtonSize, height: StartPushLayout.closeButtonSize)
-                .pushGlassBackground(cornerRadius: StartPushLayout.closeButtonSize / 2)
+        PushCircleIconButton(
+            systemImageName: "xmark",
+            accessibilityLabel: "Close"
+        ) {
+            dismiss()
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Close")
     }
 
     private func advance() {

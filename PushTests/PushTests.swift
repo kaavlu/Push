@@ -267,30 +267,39 @@ final class PushTests: XCTestCase {
     func testProfileViewModelSelectsGhostModeExclusively() async throws {
         let viewModel = await loadedProfileViewModel()
         let freeNow = try XCTUnwrap(viewModel.profile.availabilityOptions.first)
+        let priorAvailability = viewModel.selectedAvailability
 
         viewModel.select(.ghostMode)
+        // Ghost is orthogonal publish — allow a brief async LocationSession write-through.
+        for _ in 0..<20 where !viewModel.isGhostModeEnabled {
+            try await Task.sleep(nanoseconds: 20_000_000)
+        }
 
         XCTAssertTrue(viewModel.isGhostModeEnabled)
         XCTAssertEqual(
             viewModel.visibilitySummary,
             "Hidden from friends' map and social context until you turn Ghost Mode off."
         )
-        // Ghost Mode now persists as `.ghost`, the same `FriendAvailabilityState`
-        // write path as a real availability pick.
-        XCTAssertEqual(viewModel.selectedAvailability, .ghost)
-        XCTAssertFalse(viewModel.isSelected(freeNow))
+        // Ghost never overwrites social availability (Busy+Ghost is allowed).
+        XCTAssertEqual(viewModel.selectedAvailability, priorAvailability)
 
         viewModel.select(.availability(freeNow))
+        for _ in 0..<20 where viewModel.selectedAvailability != .freeNow {
+            try await Task.sleep(nanoseconds: 20_000_000)
+        }
 
-        XCTAssertFalse(viewModel.isGhostModeEnabled)
-        XCTAssertTrue(viewModel.isSelected(freeNow))
+        // Social availability updates; Ghost stays on (orthogonal publish flag).
         XCTAssertEqual(viewModel.selectedAvailability, .freeNow)
+        XCTAssertTrue(viewModel.isGhostModeEnabled)
+        // Status-option path still marks freeNow selected under Ghost.
+        XCTAssertTrue(viewModel.isSelected(ProfileStatusOption.availability(freeNow)))
     }
 
     @MainActor
     func testProfileViewModelPersistsGhostModeAcrossReload() async throws {
         let container = AppDataContainer(seed: .standard())
-        try await container.friends.setCurrentUserAvailability(.ghost)
+        // Ghost is LocationSession publish flag, not availability `.ghost`.
+        await container.locationSession?.setPresencePublishingEnabled(false)
 
         let viewModel = ProfileViewModel(container: container)
         await viewModel.load()

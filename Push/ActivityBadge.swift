@@ -17,7 +17,7 @@ struct ActivityBadge: View {
         symbolName: String,
         availability: FriendAvailabilityState,
         tintColor: Color? = nil,
-        foregroundColor: Color = PuckColorTokens.badgeForeground
+        foregroundColor: Color = PushAvailabilityTokens.badgeForeground
     ) {
         self.text = text
         self.symbolName = symbolName

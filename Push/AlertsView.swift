@@ -40,17 +40,8 @@ struct AlertsView: View {
     }
 
     private var header: some View {
-        HStack(alignment: .center) {
-            VStack(alignment: .leading, spacing: FriendsLayout.headerSubtitleSpacing) {
-                Text("Alerts")
-                    .font(.largeTitle.weight(.bold))
-                    .foregroundStyle(PushControlColors.activeForeground)
-                Text("What needs your attention")
-                    .font(.callout.weight(.semibold))
-                    .foregroundStyle(PushControlColors.inactiveForeground)
-            }
-            Spacer(minLength: 0)
-            FriendsCircleButton(
+        PushCreamPageHeader(title: "Alerts", subtitle: "What needs your attention") {
+            PushCircleIconButton(
                 systemImageName: "xmark",
                 accessibilityLabel: "Close alerts",
                 action: { dismiss() }
@@ -181,50 +172,27 @@ struct AlertsView: View {
     }
 }
 
-// MARK: - States
+// MARK: - States (DS-071 EmptySurface family)
 
 private enum AlertsStateView {
     static var loading: some View {
-        VStack(spacing: AlertsLayout.stateSpacing) {
-            ProgressView()
-                .tint(PushControlColors.activeForeground)
-            Text("Checking alerts")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(PushControlColors.textSecondary)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+        EmptySurfaceStateView.loading(message: EmptySurfaceCopy.alertsLoading)
     }
 
-    /// Restrained empty state — title only, centered on the cream page.
+    /// Restrained empty — title only via EmptySurface (no fake list rows).
     static var empty: some View {
-        Text(AlertsCopy.emptyTitle)
-            .font(.subheadline.weight(.semibold))
-            .foregroundStyle(PushControlColors.textSecondary)
-            .multilineTextAlignment(.center)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-            .padding(.horizontal, AlertsLayout.stateHorizontalPadding)
-            .padding(.top, AlertsLayout.contentTopSpacing)
+        EmptySurfaceView(
+            title: EmptySurfaceCopy.alertsEmptyTitle,
+            systemImage: "bell",
+            expandsVertically: true
+        )
     }
 
     static func error(retry: @escaping () -> Void) -> some View {
-        VStack(spacing: AlertsLayout.stateSpacing) {
-            Image(systemName: "exclamationmark.triangle")
-                .font(.system(size: AlertsLayout.stateIconSize, weight: .semibold))
-                .foregroundStyle(PushControlColors.textSecondary)
-            Text("Couldn't load alerts")
-                .font(.headline.weight(.semibold))
-                .foregroundStyle(PushControlColors.textEspresso)
-            Text("Try again in a moment.")
-                .font(.subheadline)
-                .foregroundStyle(PushControlColors.textSecondary)
-            Button("Try again", action: retry)
-                .buttonStyle(.borderedProminent)
-                .tint(PushControlColors.activeFill)
-                .foregroundStyle(PushControlColors.activeForeground)
-        }
-        .multilineTextAlignment(.center)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-        .padding(.horizontal, AlertsLayout.stateHorizontalPadding)
+        EmptySurfaceStateView.failed(
+            surface: EmptySurfaceCopy.alertsSurfaceName,
+            retry: retry
+        )
     }
 }
 

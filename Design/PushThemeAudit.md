@@ -1,8 +1,19 @@
 # Push — Theme Audit
 
+> **Read-only historical snapshot** (pre–design-system interview).  
+> **Do not implement from this file.** For current UI rules use:
+>
+> - **`docs/design-system.md`** — agent catalog (when-to-use / do-not-recreate)
+> - **`tasks/design-system-decision-log.md`** — DS-001–DS-089 product law
+> - **`Push/DesignSystem/`** — live code
+>
+> Where this audit conflicts with decisions or the catalog (e.g. “three glass implementations,”
+> cream scatter), the **design system has centralized** those concerns. Issues flagged below
+> that are now resolved in `Push/DesignSystem/` should not be re-opened as new local forks.
+
 _A consolidated audit of every visual/theme decision discovered in the codebase, with the
-source file for each. This is an extraction only — **no inconsistencies were fixed.**
-Known inconsistencies are flagged at the bottom._
+source file for each. This is an extraction only — **no inconsistencies were fixed in the
+audit pass.** Known inconsistencies are flagged at the bottom (many later addressed by Issue #63)._
 
 Paths are relative to the repo root. Where a value lives in a copied file, the same file is
 in `CoreDesignFiles/`.
@@ -280,4 +291,6 @@ Source: `Push/StyledMapView.swift` (+ `Push/ContentView.swift`)
 7. **Shadow radius/opacity vary per surface** (24/0.18 global vs 20/0.14 plans) without a
    shared elevation scale.
 
-_These are documented for Claude Design's awareness. This task did not change any of them._
+_These were documented for Claude Design's awareness at audit time. Issue #63 design-system
+waves later centralized glass families, cream roles, availability tokens, and named surfaces
+in `Push/DesignSystem/` — see `docs/design-system.md`. Do not reintroduce the forks listed above._
