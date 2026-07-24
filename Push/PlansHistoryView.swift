@@ -79,105 +79,10 @@ struct PlansHistoryView: View {
     }
 }
 
-// MARK: - Row
-//
-// Mirrors `FriendRowCard` chrome: warm ivory `.friendsCard`, Friends padding /
-// corner radius / row spacing — history content only differs.
-
-private struct HistoryListRow: View {
-    @Environment(\.pushLayout) private var layout
-    let item: HistoryItemData
-
-    var body: some View {
-        HStack(alignment: .center, spacing: FriendsLayout.rowSpacing(layout)) {
-            HistoryListPuck(people: item.participants, avatarSize: FriendsLayout.rowAvatarSize(layout))
-            VStack(alignment: .leading, spacing: FriendsLayout.rowTextSpacing) {
-                Text(item.title)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(PushControlColors.textEspresso)
-                    .lineLimit(2)
-                Text(metaLine)
-                    .font(.caption)
-                    .foregroundStyle(PushControlColors.textSecondary)
-                    .lineLimit(1)
-                if !item.didHappen {
-                    Text("Almost happened")
-                        .font(.caption2.weight(.medium))
-                        .foregroundStyle(PushControlColors.textTertiary)
-                }
-            }
-            .layoutPriority(1)
-            Spacer(minLength: 0)
-        }
-        .padding(FriendsLayout.cardPadding(layout))
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .friendsCard(cornerRadius: FriendsLayout.cardCornerRadius)
-    }
-
-    private var metaLine: String {
-        PlansMetadata.joined([dayLabel, item.timeRange, item.locationHint])
-    }
-
-    private var dayLabel: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM d"
-        return formatter.string(from: item.date)
-    }
-}
-
-// MARK: - Puck (Friends row avatar size; no live availability chrome)
-
-private struct HistoryListPuck: View {
-    let people: [HangoutPerson]
-    let avatarSize: CGFloat
-
-    private var overlap: CGFloat { avatarSize * PlansHistoryLayout.puckOverlapScale }
-
-    var body: some View {
-        let shown = Array(people.prefix(PlansHistoryLayout.puckMaxFaces))
-        ZStack {
-            if shown.isEmpty {
-                Circle()
-                    .fill(FriendsColor.cardCream)
-                    .frame(width: avatarSize, height: avatarSize)
-                    .overlay {
-                        Circle()
-                            .stroke(
-                                PushColorPalette.Accent.walnut.opacity(FriendsColor.neutralRingOpacity),
-                                lineWidth: FriendsLayout.rowRingWidth
-                            )
-                    }
-            } else {
-                ForEach(Array(shown.enumerated()), id: \.element.id) { index, person in
-                    ProfilePhotoAvatar(
-                        imageAssetName: person.imageAssetName,
-                        fallbackInitials: person.initials
-                    )
-                    .frame(width: avatarSize, height: avatarSize)
-                    .clipShape(Circle())
-                    .overlay {
-                        Circle()
-                            .stroke(
-                                Color.white.opacity(FriendsColor.ringOpacity),
-                                lineWidth: FriendsLayout.rowRingWidth
-                            )
-                    }
-                    .offset(x: CGFloat(index) * overlap)
-                }
-            }
-        }
-        .frame(
-            width: avatarSize + CGFloat(max(shown.count - 1, 0)) * overlap,
-            height: avatarSize,
-            alignment: .leading
-        )
-    }
-}
+// History list row → PushHistoryRow (HistoryListRow typealias).
 
 private enum PlansHistoryLayout {
     static let closeIconSize: CGFloat = 14
     static let closeTapSize: CGFloat = 32
     static let emptySpacing: CGFloat = 8
-    static let puckOverlapScale: CGFloat = 0.38
-    static let puckMaxFaces = 3
 }

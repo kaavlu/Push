@@ -2,21 +2,23 @@
 
 ## Status
 
-- [x] Copy design-system source docs into repo
-- [x] Wave 0 — `Push/DesignSystem/` skeleton, `docs/design-system.md`, AGENTS/Claude links
-- [x] Wave 1 — Circle icon button, solid sunbeam CTA, glass-rim CTA, create-menu icon, recovery CTAs
-- [ ] Wave 2+ (see handoff)
+- [x] Wave 0 — Scaffold + catalog + AGENTS links
+- [x] Wave 1 — Buttons & primary CTAs
+- [x] Wave 2 — Cream lists & person system
+- [ ] Wave 3 — Empty / loading / error
+- [ ] Waves 4–9
 - [ ] Commit / PR
 
-## Wave 1 deliverables
+## Wave 2 deliverables
 
-| Component | Path |
+| Component | Notes |
 |---|---|
-| `PushCircleIconButton` | `Push/DesignSystem/Components/Buttons/` |
-| `PushSolidSunbeamButton` | same (+ `StartPushPrimaryButton` typealias) |
-| `PushGlassRimButton` | Plans Start Push CTA |
-| `PushCreateMenuIconCircle` | Create menu rows |
+| `PushIvoryPageBackground` / `pushSolidCreamCard` | DS-014/017 foundation |
+| `PushPersonRow` | Blocked migrated (no fork) |
+| `PushExpandablePersonRow` + `PushExpandableActionRail` | Configurable rail |
+| `PushGroupRow` / `PushHistoryRow` / `PushListSectionHeader` | On cream foundation |
+| `ActionErrorBanner` | Uses solid cream card |
 
 ## Next
 
-Wave 2 — solid cream foundation + `PushPersonRow` (migrate Blocked fork).
+Wave 3 — EmptySurface as sole full-page states; migrate remaining empty forks.

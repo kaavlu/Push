@@ -39,9 +39,12 @@ DesignSystem/
 |---|---|---|
 | 0 | Scaffold + catalog + AGENTS links | Done |
 | 1 | Buttons & primary CTAs | Done |
-| 2–9 | See spec §8.3 | Not started |
+| 2 | Cream lists & person system | Done |
+| 3–9 | See spec §8.3 | Not started |
 
-## Migrated components (Wave 1)
+## Migrated components
+
+### Wave 1 — Buttons
 
 | Type | File | Replaces |
 |---|---|---|
@@ -50,4 +53,15 @@ DesignSystem/
 | `PushGlassRimButton` | `Components/Buttons/PushGlassRimButton.swift` | Plans `StartPlanButton` |
 | `PushCreateMenuIconCircle` | `Components/Buttons/PushCreateMenuIconCircle.swift` | Create-menu sunbeam icon circle |
 
-Temporary typealiases keep call sites compiling during renames (`FriendsCircleButton`, `StartPushPrimaryButton`, `PushModalIconButton`).
+### Wave 2 — Cream lists & person system
+
+| Type | File | Replaces |
+|---|---|---|
+| `PushIvoryPageBackground` / `pushSolidCreamCard` | `Surfaces/PushCreamSurfaces.swift` | `FriendsBackground`, `friendsCard` |
+| `PushPersonRow` | `Components/Rows/PushPersonRow.swift` | `FriendRowCard`; blocked fork |
+| `PushExpandablePersonRow` + rail | `Components/Rows/PushExpandable*.swift` | `ExpandableFriendRow` internals |
+| `PushGroupRow` | `Components/Rows/PushGroupRow.swift` | `FriendGroupCard` |
+| `PushHistoryRow` | `Components/Rows/PushHistoryRow.swift` | Plans history private row |
+| `PushListSectionHeader` | `Components/Rows/PushListSectionHeader.swift` | `FriendsSectionHeader` |
+
+Temporary typealiases keep call sites compiling during renames.

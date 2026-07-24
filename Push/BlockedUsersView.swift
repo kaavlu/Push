@@ -118,10 +118,18 @@ struct BlockedUsersView: View {
         ScrollView(showsIndicators: false) {
             LazyVStack(alignment: .leading, spacing: FriendsLayout.listSpacing) {
                 ForEach(people) { person in
-                    BlockedPersonRow(
-                        person: person,
-                        isUnblocking: viewModel.unblockingIDs.contains(person.id),
-                        onUnblock: { personPendingUnblock = person }
+                    PushPersonRow(
+                        row: person.personRowModel,
+                        showsGroupLabel: false,
+                        showsStatusDetail: true,
+                        usesAvailabilityAppearance: false,
+                        customTrailing: AnyView(
+                            BlockedUnblockButton(
+                                person: person,
+                                isUnblocking: viewModel.unblockingIDs.contains(person.id),
+                                onUnblock: { personPendingUnblock = person }
+                            )
+                        )
                     )
                 }
             }
@@ -137,60 +145,36 @@ struct BlockedUsersView: View {
     }
 }
 
-// MARK: - Row
+// MARK: - Row (DS-032: person-row config — no BlockedPersonRow fork)
 
-private struct BlockedPersonRow: View {
-    @Environment(\.pushLayout) private var layout
+private extension BlockedPerson {
+    /// Maps blocked identity onto shared person-row presentation (handle as secondary).
+    var personRowModel: FriendRowModel {
+        FriendRowModel(
+            id: id,
+            friend: FriendPuckData(
+                id: id,
+                name: BlockedUsersCopy.displayName(self),
+                avatarPlaceholder: BlockedUsersCopy.initials(for: self),
+                profileImageAssetName: imageAssetPath,
+                activity: "",
+                activitySymbolName: "",
+                activityDisplayText: "",
+                availability: .unavailable,
+                venueStatusText: BlockedUsersCopy.displayHandle(self),
+                lastUpdated: ""
+            ),
+            groupLabel: nil
+        )
+    }
+}
+
+private struct BlockedUnblockButton: View {
     let person: BlockedPerson
     let isUnblocking: Bool
     let onUnblock: () -> Void
 
     var body: some View {
-        HStack(spacing: FriendsLayout.rowSpacing(layout)) {
-            avatar
-            identity
-                .layoutPriority(1)
-            Spacer(minLength: 0)
-            unblockButton
-        }
-        .padding(FriendsLayout.cardPadding(layout))
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .friendsCard(cornerRadius: FriendsLayout.cardCornerRadius)
-        .accessibilityElement(children: .contain)
-    }
-
-    private var avatar: some View {
-        ProfilePhotoAvatar(
-            imageAssetName: person.imageAssetPath,
-            fallbackInitials: BlockedUsersCopy.initials(for: person)
-        )
-        .frame(
-            width: FriendsLayout.rowAvatarSize(layout),
-            height: FriendsLayout.rowAvatarSize(layout)
-        )
-        .overlay {
-            Circle()
-                .stroke(
-                    PushColorPalette.Accent.walnut.opacity(FriendsColor.neutralRingOpacity),
-                    lineWidth: FriendsLayout.rowRingWidth
-                )
-        }
-    }
-
-    private var identity: some View {
-        VStack(alignment: .leading, spacing: FriendsLayout.rowTextSpacing) {
-            Text(BlockedUsersCopy.displayName(person))
-                .font(.headline.weight(.semibold))
-                .foregroundStyle(PushControlColors.textEspresso)
-                .lineLimit(1)
-            Text(BlockedUsersCopy.displayHandle(person))
-                .font(.caption.weight(.medium))
-                .foregroundStyle(PushControlColors.textSecondary)
-                .lineLimit(1)
-        }
-    }
-
-    private var unblockButton: some View {
         Button(action: onUnblock) {
             Text(BlockedUsersCopy.unblockButton)
                 .font(.caption.weight(.bold))

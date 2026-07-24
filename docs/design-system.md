@@ -1,6 +1,6 @@
 # Push Design System — Agent Catalog
 
-**Status:** Wave 0 scaffold complete; Wave 1 buttons live.  
+**Status:** Waves 0–2 complete (scaffold, buttons, cream lists / person system).  
 **Decisions:** `tasks/design-system-decision-log.md` (DS-001–DS-089) — product law.  
 **Spec:** `docs/superpowers/specs/2026-07-21-push-design-system-specification.md`.  
 **Code home:** `Push/DesignSystem/` (+ temporary typealiases at legacy call sites).  
@@ -41,8 +41,8 @@ Open this file **before** creating UI chrome. Discover → reuse → extend → 
 | Puck glass | Map annotations only | Feature-local (Wave 4) |
 | Plans card glass | Push cards & calendar shell on cream pages | `plansGlassCard` (Wave 4/7) |
 | Review deck glass | Review swipe deck over gradient | `reviewGlassCard` (Wave 4/7) |
-| Ivory page | Persistent destinations (Friends, Plans, Alerts, …) | `FriendsBackground` / page ivory (Wave 2/4) |
-| Solid cream card | Dense list cards on ivory | `friendsCard` (Wave 2/4) |
+| Ivory page | Persistent destinations (Friends, Plans, Alerts, …) | `PushIvoryPageBackground` (`FriendsBackground` shim) |
+| Solid cream card | Dense list cards on ivory | `pushSolidCreamCard` (`friendsCard` shim) |
 | Modal gradient | Focused full-screen flows (Start Push, Profile, Review, …) | `PushModalBackground` |
 | Onboarding/auth | Auth domain only | `OnboardingLab*` / auth components |
 
@@ -74,20 +74,31 @@ Map profile control, bottom-nav raised +, product circles with intentionally dif
 
 ---
 
-## Components — planned (later waves)
+## Components — Cream lists & people (Wave 2)
 
-### Cream lists & people (Wave 2)
-
-| Pattern | DS | Notes |
+| Component | When to use | Do not recreate |
 |---|---|---|
-| Solid cream list-card foundation | DS-017 | `friendsCard` today |
-| Person row | DS-018, DS-027 | `FriendRowCard` → `PushPersonRow` |
-| Expandable wrapper + rail | DS-028, DS-008 | `ExpandableFriendRow` |
-| Group row | DS-019 | |
-| Request cards | DS-020, DS-030 | Friend + group invite |
-| History row | DS-021 | |
-| Action error banner | DS-022 | `ActionErrorBanner` |
-| Blocked users | DS-032 | Config on person row — no fork |
+| **`PushIvoryPageBackground`** (DS-014/015) | Persistent ivory destinations | Local cream page fills |
+| **`pushSolidCreamCard`** (DS-014/017) | Dense list rows/banners on ivory | Local cream fill + walnut stroke recipes |
+| **`PushPersonRow`** (DS-018/027) | Default flat person lists | Parallel person cards; `BlockedPersonRow` forks |
+| **`PushExpandablePersonRow` + rail** (DS-028/008) | Multi-action expand under person row | Baking expand into base person row |
+| **`PushGroupRow`** (DS-019) | Group list identity cards | Forcing groups into person-row |
+| **`PushHistoryRow`** (DS-021) | Plans history list | DIY cream history chrome |
+| **`PushListSectionHeader`** (DS-034) | Alerts/Friends section titles + counts | One-off section header chrome |
+| **`ActionErrorBanner`** (DS-022) | Inline mutation recovery on cream foundation | Full-page `.failed` for mutation errors |
+| Request cards (DS-020) | Friend request via person-row + Accept/Deny; group via `GroupRequestCard` | New request chrome families |
+
+### Typealiases (Wave 2 shims)
+
+- `FriendsBackground` → `PushIvoryPageBackground`
+- `friendsCard` → `pushSolidCreamCard`
+- `FriendRowCard` → `PushPersonRow`
+- `FriendGroupCard` → `PushGroupRow`
+- `FriendsSectionHeader` → `PushListSectionHeader`
+- `HistoryListRow` → `PushHistoryRow`
+- `ExpandableFriendRow` → Friends convenience over `PushExpandablePersonRow`
+
+### Later waves
 
 ### Empty / loading / error (Wave 3)
 
@@ -162,8 +173,8 @@ Until token modules land, use existing shared sources:
 | Wave | Focus | Status |
 |---|---|---|
 | 0 | Scaffold + this catalog + AGENTS links | Done |
-| 1 | Buttons & primary CTAs | Done (this session) |
-| 2 | Cream lists & person system | Pending |
+| 1 | Buttons & primary CTAs | Done |
+| 2 | Cream lists & person system | Done |
 | 3 | Empty / loading / error | Pending |
 | 4 | Named surfaces + cream tokens | Pending |
 | 5 | Availability, chips, avatars, pucks | Pending |

@@ -27,7 +27,7 @@ struct ActionErrorBanner: View {
             .accessibilityLabel("Dismiss")
         }
         .padding(ActionErrorBannerLayout.padding)
-        .friendsCard(cornerRadius: ActionErrorBannerLayout.cornerRadius(layout))
+        .pushSolidCreamCard(cornerRadius: ActionErrorBannerLayout.cornerRadius(layout))
     }
 }
 

@@ -9,31 +9,8 @@
 
 import SwiftUI
 
-/// Warm cream/ivory page background — a single flat fill so the header, the
-/// scrollable list, and the safe-area edges are all the same color.
-struct FriendsBackground: View {
-    var body: some View {
-        FriendsColor.pageIvory
-            .ignoresSafeArea()
-    }
-}
-
-extension View {
-    /// A subtle premium card that sits directly on the cream page background.
-    func friendsCard(cornerRadius: CGFloat) -> some View {
-        background(
-            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                .fill(FriendsColor.cardCream)
-        )
-        .overlay {
-            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                .stroke(
-                    PushColorPalette.Accent.walnut.opacity(FriendsColor.cardStrokeOpacity),
-                    lineWidth: FriendsColor.cardStrokeWidth
-                )
-        }
-    }
-}
+// Ivory page + solid cream card live in DesignSystem (PushCreamSurfaces).
+// FriendsBackground / friendsCard remain as migration shims.
 
 struct FriendsAvailabilityChip: View {
     let availability: FriendAvailabilityState
@@ -131,104 +108,8 @@ struct FriendsFilterChipRow: View {
     }
 }
 
-// MARK: - Section Header
-
-struct FriendsSectionHeader: View {
-    let title: String
-    let count: Int
-
-    var body: some View {
-        HStack(spacing: FriendsLayout.sectionHeaderSpacing) {
-            Text(title.uppercased())
-                .font(.caption.weight(.bold))
-                .kerning(FriendsLayout.sectionHeaderKerning)
-                .foregroundStyle(PushControlColors.textTertiary)
-
-            Text("\(count)")
-                .font(.caption2.weight(.bold))
-                .foregroundStyle(PushControlColors.textSecondary)
-                .padding(.horizontal, FriendsLayout.sectionCountHorizontalPadding)
-                .padding(.vertical, FriendsLayout.sectionCountVerticalPadding)
-                .background(
-                    Capsule().fill(PushColorPalette.Accent.walnut.opacity(FriendsColor.sectionBadgeFillOpacity))
-                )
-
-            Spacer(minLength: 0)
-        }
-        .padding(.bottom, FriendsLayout.sectionHeaderBottomPadding)
-    }
-}
-
-// MARK: - Group Card
-
-struct FriendGroupCard: View {
-    @Environment(\.pushLayout) private var layout
-    let group: PushGroupData
-    let members: [PushGroupMemberData]
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: FriendsLayout.groupIdentitySpacing(layout)) {
-                avatar
-                identity
-                    .layoutPriority(1)
-                Spacer(minLength: 0)
-            }
-            .padding(FriendsLayout.cardPadding(layout))
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .friendsCard(cornerRadius: FriendsLayout.cardCornerRadius)
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(group.name)
-        .accessibilityValue(summaryText)
-    }
-
-    private var avatar: some View {
-        GroupListAvatar(
-            imageAssetName: group.imageAssetName,
-            fallbackInitials: group.fallbackInitials,
-            size: FriendsLayout.groupAvatarSize(layout),
-            cornerRadius: FriendsLayout.groupAvatarCornerRadius(layout)
-        )
-    }
-
-    private var identity: some View {
-        VStack(alignment: .leading, spacing: FriendsLayout.groupTextSpacing) {
-            Text(group.name)
-                .font(.headline.weight(.semibold))
-                .foregroundStyle(PushControlColors.textEspresso)
-                .lineLimit(1)
-                .minimumScaleFactor(FriendsLayout.minimumTextScale)
-
-            Text(memberCountText)
-                .font(.subheadline)
-                .foregroundStyle(PushControlColors.textSecondary)
-
-            Text(summaryText)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(group.status == .quiet ? PushControlColors.textTertiary : PushControlColors.textPrimary)
-                .lineLimit(1)
-                .minimumScaleFactor(FriendsLayout.minimumTextScale)
-        }
-    }
-
-    private var memberCountText: String {
-        "\(group.memberCount) member\(group.memberCount == 1 ? "" : "s")"
-    }
-
-    /// Prefers concrete live counts ("2 active now · 1 nearby") and falls back
-    /// to the derived status badge when the circle is quiet.
-    private var summaryText: String {
-        var parts: [String] = []
-        if group.activeNowCount > 0 { parts.append("\(group.activeNowCount) active now") }
-        if group.nearbyCount > 0 { parts.append("\(group.nearbyCount) nearby") }
-        if group.planCount > 0 {
-            parts.append("\(group.planCount) push\(group.planCount == 1 ? "" : "es")")
-        }
-        return parts.isEmpty ? group.status.title : parts.joined(separator: " · ")
-    }
-}
+// Section header → PushListSectionHeader (FriendsSectionHeader typealias).
+// Group card → PushGroupRow (FriendGroupCard typealias).
 
 // MARK: - Empty State
 
