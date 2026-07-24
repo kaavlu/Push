@@ -165,6 +165,83 @@ final class LocationPresenceThrottleTests: XCTestCase {
         XCTAssertTrue(sync.drafts.last?.isPublished == true)
     }
 
+    // MARK: - Heartbeat cancel (regression: no MainActor spin / hang)
+
+    func testStopCancelsHeartbeatLoopWithoutHang() async {
+        let clock = Clock(base)
+        let provider = FakeLocationProvider(authorizationState: .whenInUse)
+        let sync = FakePresenceSync()
+        // Sleep parks until cancelled — if stop() fails to cancel, this would hang.
+        let session = makeSession(provider: provider, sync: sync, clock: clock)
+
+        await session.startIfEligible()
+        await Task.yield()
+        provider.emit(observation(id: "arm", lat: 37.77, lng: -122.42, at: clock.now))
+        await waitUntil { sync.drafts.count == 1 && session.state.lastUploadAt != nil }
+
+        let started = Date()
+        session.stop()
+        // Yield so the cancelled heartbeat task can exit.
+        await Task.yield()
+        try? await Task.sleep(nanoseconds: 50_000_000)
+        let elapsed = Date().timeIntervalSince(started)
+
+        XCTAssertLessThan(elapsed, 1.0, "stop must cancel heartbeat without spinning")
+        XCTAssertFalse(session.state.isTrackingEnabled)
+
+        // Further fixes after stop must not write.
+        provider.emit(observation(id: "after-stop", lat: 37.78, lng: -122.41, at: clock.now))
+        try? await Task.sleep(nanoseconds: 40_000_000)
+        XCTAssertEqual(sync.drafts.count, 1)
+    }
+
+    func testShutdownAfterHeartbeatArmedDoesNotHangAndDropsWrites() async {
+        let clock = Clock(base)
+        let provider = FakeLocationProvider(authorizationState: .whenInUse)
+        let sync = FakePresenceSync()
+        let session = makeSession(provider: provider, sync: sync, clock: clock)
+
+        await session.startIfEligible()
+        await Task.yield()
+        provider.emit(observation(id: "arm2", lat: 37.77, lng: -122.42, at: clock.now))
+        await waitUntil { sync.drafts.count == 1 }
+
+        let started = Date()
+        session.shutdown()
+        await Task.yield()
+        try? await Task.sleep(nanoseconds: 50_000_000)
+        let elapsed = Date().timeIntervalSince(started)
+
+        XCTAssertLessThan(elapsed, 1.0, "shutdown must not hang on heartbeat cancel")
+        XCTAssertEqual(sync.shutdownCount, 1)
+
+        provider.emit(observation(id: "after-shutdown", lat: 37.79, lng: -122.40, at: clock.now))
+        try? await Task.sleep(nanoseconds: 40_000_000)
+        XCTAssertEqual(sync.drafts.count, 1, "no writes after shutdown")
+    }
+
+    func testSignOutStyleUnpublishThenShutdownDropsLaterFixes() async {
+        let clock = Clock(base)
+        let provider = FakeLocationProvider(authorizationState: .whenInUse)
+        let sync = FakePresenceSync()
+        let session = makeSession(provider: provider, sync: sync, clock: clock)
+
+        await session.startIfEligible()
+        await Task.yield()
+        provider.emit(observation(id: "pre", lat: 37.77, lng: -122.42, at: clock.now))
+        await waitUntil { sync.drafts.count == 1 }
+
+        // Mirrors AppDataContainer.teardownLocationForSignOut order.
+        await session.unpublishBestEffort()
+        session.shutdown()
+
+        XCTAssertEqual(sync.unpublishCount, 1)
+        provider.emit(observation(id: "post-signout", lat: 37.80, lng: -122.39, at: clock.now))
+        try? await Task.sleep(nanoseconds: 40_000_000)
+        XCTAssertEqual(sync.drafts.count, 1)
+        XCTAssertTrue(sync.isShutDown)
+    }
+
     // MARK: - Availability mirror
 
     func testLocationDraftMirrorsProfileAvailabilityNeverInvents() async {

@@ -193,12 +193,15 @@ final class LocationPresenceFoundationTests: XCTestCase {
         XCTAssertEqual(LocationPipelineConstants.minUploadInterval, 60)
         XCTAssertEqual(LocationPipelineConstants.minDisplacementMeters, 50)
         XCTAssertEqual(LocationPipelineConstants.maxHorizontalAccuracyMeters, 100)
+        XCTAssertEqual(LocationPipelineConstants.presenceHeartbeatIntervalDefault, 15 * 60)
+        XCTAssertEqual(LocationPipelineConstants.presenceHeartbeatIntervalDogfood, 20)
+        // Without `--fast-presence-heartbeat`, effective interval is production default.
         XCTAssertEqual(LocationPipelineConstants.presenceHeartbeatInterval, 15 * 60)
         XCTAssertEqual(LocationPipelineConstants.realtimePatchDebounce, 0.35, accuracy: 0.001)
         XCTAssertEqual(PresenceFreshness.softStale, 15 * 60)
         XCTAssertEqual(PresenceFreshness.hardExpire, 60 * 60)
         XCTAssertLessThan(
-            LocationPipelineConstants.presenceHeartbeatInterval,
+            LocationPipelineConstants.presenceHeartbeatIntervalDefault,
             PresenceFreshness.hardExpire
         )
     }
