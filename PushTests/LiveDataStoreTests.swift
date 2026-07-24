@@ -363,6 +363,85 @@ final class LiveDataLoaderSpy: LiveDataLoading {
         return presenceRows
     }
 
+    /// Stateful presence upserts for Issue #75 write-path tests.
+    var upsertPresenceCallCount = 0
+    var unpublishPresenceCallCount = 0
+    var lastUpsertPresencePayload: CurrentPresenceUpsertPayload?
+    /// Authenticated user the unpublish RPC would target (tests default to `self`).
+    var presenceOwnerUserID = "self"
+    /// When true, the next presence write throws `writeError` (if set) or `TestFailure.expected`.
+    var failNextPresenceWrite = false
+
+    func upsertCurrentPresence(_ payload: CurrentPresenceUpsertPayload) async throws -> CurrentPresenceRow {
+        upsertPresenceCallCount += 1
+        lastUpsertPresencePayload = payload
+        if failNextPresenceWrite {
+            failNextPresenceWrite = false
+            if let writeError { throw writeError }
+            throw TestFailure.expected
+        }
+        if let writeError { throw writeError }
+        let row = CurrentPresenceRow(
+            user_id: payload.user_id,
+            availability: payload.availability,
+            is_published: payload.is_published,
+            activity_name: payload.activity_name,
+            activity_symbol: payload.activity_symbol,
+            place_id: payload.place_id,
+            status_note: payload.status_note,
+            latitude: payload.latitude,
+            longitude: payload.longitude,
+            vague_latitude: payload.vague_latitude,
+            vague_longitude: payload.vague_longitude,
+            confidence: payload.confidence,
+            observed_at: payload.observed_at,
+            updated_at: payload.updated_at,
+            expires_at: payload.expires_at,
+            source: payload.source
+        )
+        if let index = presenceRows.firstIndex(where: {
+            $0.user_id.caseInsensitiveCompare(payload.user_id) == .orderedSame
+        }) {
+            presenceRows[index] = row
+        } else {
+            presenceRows.append(row)
+        }
+        return row
+    }
+
+    func unpublishCurrentPresence() async throws {
+        unpublishPresenceCallCount += 1
+        if failNextPresenceWrite {
+            failNextPresenceWrite = false
+            if let writeError { throw writeError }
+            throw TestFailure.expected
+        }
+        if let writeError { throw writeError }
+        let now = "2030-01-01T12:45:00Z"
+        let owner = presenceOwnerUserID
+        presenceRows = presenceRows.map { row in
+            guard row.user_id.caseInsensitiveCompare(owner) == .orderedSame else { return row }
+            return CurrentPresenceRow(
+                user_id: row.user_id,
+                availability: row.availability,
+                is_published: false,
+                activity_name: row.activity_name,
+                activity_symbol: row.activity_symbol,
+                place_id: row.place_id,
+                status_note: row.status_note,
+                latitude: nil,
+                longitude: nil,
+                vague_latitude: nil,
+                vague_longitude: nil,
+                confidence: row.confidence,
+                observed_at: row.observed_at,
+                updated_at: now,
+                expires_at: now,
+                source: row.source
+            )
+        }
+    }
+
     func insertPush(_ payload: PushInsertPayload) async throws -> PushRow {
         if let writeError { throw writeError }
         let row = PushRow(

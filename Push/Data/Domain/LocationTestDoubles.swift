@@ -195,6 +195,11 @@ struct PassthroughPresenceInferrer: PresenceInferring {
         let availability = manualAvailability
             ?? previous?.availability
             ?? .maybeDown
+        let observation = latest?.observation
+        let (vagueLat, vagueLng) = Self.vaguePair(
+            latitude: observation?.latitude,
+            longitude: observation?.longitude
+        )
         return PresenceStatusDraft(
             availability: availability,
             isPublished: isPublished,
@@ -202,10 +207,24 @@ struct PassthroughPresenceInferrer: PresenceInferring {
                 ?? PresenceActivity(name: "Nearby", symbolName: "location.fill"),
             placeID: previous?.placeID,
             statusNote: previous?.statusNote,
+            latitude: observation?.latitude,
+            longitude: observation?.longitude,
+            vagueLatitude: vagueLat,
+            vagueLongitude: vagueLng,
             confidence: latest?.confidence ?? .medium,
-            observedAt: latest?.observation.recordedAt ?? Date(),
+            observedAt: observation?.recordedAt ?? Date(),
             source: .location
         )
+    }
+
+    /// Phase 1 default: round exact coords to ~0.01° when writing vague pair.
+    private static func vaguePair(
+        latitude: Double?,
+        longitude: Double?
+    ) -> (Double?, Double?) {
+        guard let latitude, let longitude else { return (nil, nil) }
+        let q = LocationPipelineConstants.vagueCoordinateQuantumDegrees
+        return ((latitude / q).rounded() * q, (longitude / q).rounded() * q)
     }
 }
 
@@ -215,6 +234,8 @@ final class FakePresenceSync: PresenceSyncing, @unchecked Sendable {
     private var _drafts: [PresenceStatusDraft] = []
     private var _flushCount = 0
     private var _unpublishCount = 0
+    private var _shutdownCount = 0
+    private var _isShutDown = false
     var errorToThrow: Error?
     var unpublishErrorToThrow: Error?
     /// Optional delay so session cancellation/timeout tests can race.
@@ -238,10 +259,26 @@ final class FakePresenceSync: PresenceSyncing, @unchecked Sendable {
         return _unpublishCount
     }
 
+    var shutdownCount: Int {
+        lock.lock()
+        defer { lock.unlock() }
+        return _shutdownCount
+    }
+
+    var isShutDown: Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        return _isShutDown
+    }
+
     func upsertCurrentPresence(_ draft: PresenceStatusDraft) async throws {
         if upsertDelayNanoseconds > 0 {
             try? await Task.sleep(nanoseconds: upsertDelayNanoseconds)
         }
+        lock.lock()
+        let shutDown = _isShutDown
+        lock.unlock()
+        if shutDown { return }
         if let errorToThrow { throw errorToThrow }
         lock.lock()
         _drafts.append(draft)
@@ -249,6 +286,10 @@ final class FakePresenceSync: PresenceSyncing, @unchecked Sendable {
     }
 
     func unpublishCurrentPresence() async throws {
+        lock.lock()
+        let shutDown = _isShutDown
+        lock.unlock()
+        if shutDown { return }
         if let unpublishErrorToThrow { throw unpublishErrorToThrow }
         lock.lock()
         _unpublishCount += 1
@@ -256,14 +297,25 @@ final class FakePresenceSync: PresenceSyncing, @unchecked Sendable {
     }
 
     func flushPending() async throws {
+        lock.lock()
+        let shutDown = _isShutDown
+        lock.unlock()
+        if shutDown { return }
         if let errorToThrow { throw errorToThrow }
         lock.lock()
         _flushCount += 1
         lock.unlock()
     }
+
+    func shutdown() {
+        lock.lock()
+        _isShutDown = true
+        _shutdownCount += 1
+        lock.unlock()
+    }
 }
 
-/// Phase 1 default until live presence writes land — no network.
+/// Phase 1 default when live presence writes are not wired (mock / null provider).
 final class NoOpPresenceSync: PresenceSyncing, @unchecked Sendable {
     func upsertCurrentPresence(_ draft: PresenceStatusDraft) async throws {
         _ = draft
@@ -272,4 +324,6 @@ final class NoOpPresenceSync: PresenceSyncing, @unchecked Sendable {
     func unpublishCurrentPresence() async throws {}
 
     func flushPending() async throws {}
+
+    func shutdown() {}
 }

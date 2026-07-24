@@ -184,7 +184,10 @@ final class AppDataContainer {
         groupPhotoStorage: GroupPhotoStoring? = nil,
         locationSession: LocationSessioning? = nil
     ) -> AppDataContainer {
-        AppDataContainer(
+        let resolvedSession = locationSession ?? makeLiveLocationSession(
+            store: store, currentUserID: currentUserID
+        )
+        return AppDataContainer(
             currentUserID: currentUserID,
             referenceDate: referenceDate,
             liveStore: store,
@@ -197,8 +200,20 @@ final class AppDataContainer {
             sharing: SupabaseSharingRepository(store: store),
             feed: EmptyLiveFeedRepository(),
             alerts: SupabaseAlertRepository(store: store, currentUserID: currentUserID),
-            locationSession: locationSession
-                ?? LocationSessionFactory.makeDefault(personID: currentUserID)
+            locationSession: resolvedSession
+        )
+    }
+
+    /// Live presence writes go through `SupabasePresenceSync` (buffer + upsert).
+    /// Mock containers keep `NoOpPresenceSync` via the factory default.
+    private static func makeLiveLocationSession(
+        store: LiveDataStore,
+        currentUserID: Person.ID
+    ) -> LocationSession {
+        let sync = SupabasePresenceSync(userID: currentUserID, store: store)
+        return LocationSessionFactory.makeDefault(
+            personID: currentUserID,
+            sync: sync
         )
     }
 

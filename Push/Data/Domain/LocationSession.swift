@@ -117,6 +117,8 @@ final class LocationSession: LocationSessioning {
         isConsuming = false
         previousAccepted = nil
         provider.stopUpdating()
+        // Buffer must drop pending retries so no post-teardown network write.
+        sync.shutdown()
         state.isTrackingEnabled = false
         state.lastObservation = nil
         state.lastAcceptedAt = nil
