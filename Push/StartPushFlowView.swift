@@ -65,14 +65,13 @@ struct StartPushFlowView: View {
         }) {
             AddFriendsView()
         }
-        .confirmationDialog(
-            "Delete this push?",
+        .pushConfirmation(
             isPresented: $isDeleteConfirmationPresented,
-            titleVisibility: .visible
-        ) {
-            Button("Delete push", role: .destructive) { deleteAndDismiss() }
-            Button("Keep push", role: .cancel) {}
-        }
+            title: "Delete this push?",
+            confirmTitle: "Delete push",
+            cancelTitle: "Keep push",
+            onConfirm: { deleteAndDismiss() }
+        )
     }
 
     private var navBar: some View {

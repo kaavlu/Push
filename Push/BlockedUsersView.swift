@@ -50,33 +50,17 @@ struct BlockedUsersView: View {
         .task {
             await viewModel.load()
         }
-        .confirmationDialog(
-            unblockConfirmTitle,
-            isPresented: Binding(
-                get: { personPendingUnblock != nil },
-                set: { if !$0 { personPendingUnblock = nil } }
-            ),
-            titleVisibility: .visible
-        ) {
-            if let person = personPendingUnblock {
-                Button("Unblock", role: .destructive) {
-                    personPendingUnblock = nil
-                    Task { await viewModel.unblock(person) }
-                }
+        .pushConfirmation(
+            item: $personPendingUnblock,
+            title: { person in
+                "Unblock \(BlockedUsersCopy.displayName(person))?"
+            },
+            message: { _ in BlockedUsersCopy.unblockMessage },
+            confirmTitle: "Unblock",
+            onConfirm: { person in
+                Task { await viewModel.unblock(person) }
             }
-            Button("Cancel", role: .cancel) {
-                personPendingUnblock = nil
-            }
-        } message: {
-            Text(BlockedUsersCopy.unblockMessage)
-        }
-    }
-
-    private var unblockConfirmTitle: String {
-        if let person = personPendingUnblock {
-            return "Unblock \(BlockedUsersCopy.displayName(person))?"
-        }
-        return "Unblock?"
+        )
     }
 
     private var header: some View {

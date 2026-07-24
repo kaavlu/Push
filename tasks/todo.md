@@ -1,14 +1,21 @@
-# Issue #63 — Push Design System
+# Issue #83 — Audit and Standardize Confirmation Popups
 
 ## Status
 
-- [x] Waves 0–9 complete — design system operational
-- [ ] Optional: open PR for Issue #63
+- [x] Audit system `confirmationDialog` / `.alert` inventory
+- [x] Design approved (centered cream card, destructive-only migration)
+- [x] Spec: `docs/superpowers/specs/2026-07-24-confirmation-dialogs-design.md`
+- [x] DS-090 decision + catalog updates
+- [x] `PushConfirmationDialog` + `.pushConfirmation` (+ window bridge)
+- [x] Migrate destructive call sites
+- [x] Register new files in Xcode project
+- [x] Build + `PushConfirmationTests` (4/4 passed)
+- [ ] Commit / open PR when ready
 
-## Done
+## Migrated
 
-Catalog (`docs/design-system.md`), `Push/DesignSystem/`, decision log, AGENTS links, waves 0–9.
+Profile sign out / delete account; ExpandablePersonRow remove/block; Blocked unblock; Group leave/delete/transfer; Group remove member / cancel invite; Start Push delete; Plans cancel push.
 
-## Next
+## Intentionally system
 
-Open PR when ready; re-audit with `scripts/test.sh full` before merge if desired.
+Photo choose/remove menus; photo/connector info alerts; Menu / contextMenu; PhotosPicker / OS permissions.
