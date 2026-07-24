@@ -160,7 +160,16 @@ final class AppDataContainer {
         if let locationSession {
             self.locationSession = locationSession
         } else {
-            self.locationSession = LocationSessionFactory.makeDefault(personID: database.currentUserID)
+            // Mock presence writes go through LocalPresenceSync so Ghost/unpublish
+            // and sim location update friend-visible rows (Issue #76).
+            let sync = LocalPresenceSync(database: database)
+            self.locationSession = LocationSessionFactory.makeDefault(
+                personID: database.currentUserID,
+                availabilityProvider: { [weak database] in
+                    database?.profile.chosenAvailability
+                },
+                sync: sync
+            )
         }
     }
 
@@ -205,7 +214,7 @@ final class AppDataContainer {
     }
 
     /// Live presence writes go through `SupabasePresenceSync` (buffer + upsert).
-    /// Mock containers keep `NoOpPresenceSync` via the factory default.
+    /// Availability for drafts is always mirrored from the warm profile cache.
     private static func makeLiveLocationSession(
         store: LiveDataStore,
         currentUserID: Person.ID
@@ -213,6 +222,9 @@ final class AppDataContainer {
         let sync = SupabasePresenceSync(userID: currentUserID, store: store)
         return LocationSessionFactory.makeDefault(
             personID: currentUserID,
+            availabilityProvider: {
+                store.cachedAvailability(userID: currentUserID)
+            },
             sync: sync
         )
     }

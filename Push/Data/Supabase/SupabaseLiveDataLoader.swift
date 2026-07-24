@@ -56,10 +56,25 @@ final class SupabaseLiveDataLoader: LiveDataLoading {
         }
     }
 
+    /// Transactional dual-write: `profiles.availability_choice` + presence mirror
+    /// via `set_availability_choice` (migration 0018). Does not invent presence.
     func updateAvailability(userID: String, rawValue: String) async throws -> ProfileRow {
-        try await PushLog.logged("updateAvailability") {
-            try await client.from("profiles").update(AvailabilityPayload(availability_choice: rawValue))
-                .eq("id", value: userID).select().single().execute().value
+        _ = userID
+        try await PushLog.logged("set_availability_choice") {
+            try await client.rpc(
+                "set_availability_choice",
+                params: AvailabilityChoiceRPCParams(p_availability: rawValue)
+            ).execute()
+        }
+        // RPC returns void — return a synthetic row so the protocol type stays
+        // stable; LiveDataStore patches caches from `rawValue` after success.
+        return try await PushLog.logged("loadProfileAfterAvailability") {
+            try await client.from("profiles")
+                .select()
+                .eq("id", value: userID)
+                .single()
+                .execute()
+                .value
         }
     }
 
@@ -436,6 +451,10 @@ private struct ProfileBasicsPayload: Encodable {
 
 private struct AvailabilityPayload: Encodable {
     let availability_choice: String
+}
+
+private struct AvailabilityChoiceRPCParams: Encodable {
+    let p_availability: String
 }
 
 /// Explicit null encoding so remove-photo clears the column (default Optional

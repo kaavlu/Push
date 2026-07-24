@@ -326,8 +326,38 @@ final class LiveDataLoaderSpy: LiveDataLoading {
         return .fixture(id: userID, name: "Self")
     }
 
+    /// Mirrors dual-write RPC: updates last raw availability for presence spies.
+    var lastAvailabilityRawValue: String?
+    var setAvailabilityChoiceCallCount = 0
+
     func updateAvailability(userID: String, rawValue: String) async throws -> ProfileRow {
+        setAvailabilityChoiceCallCount += 1
+        lastAvailabilityRawValue = rawValue
         if let writeError { throw writeError }
+        // Also mirror presence row availability when tests seeded one (RPC parity).
+        if let index = presenceRows.firstIndex(where: {
+            $0.user_id.caseInsensitiveCompare(userID) == .orderedSame
+        }) {
+            let old = presenceRows[index]
+            presenceRows[index] = CurrentPresenceRow(
+                user_id: old.user_id,
+                availability: rawValue,
+                is_published: old.is_published,
+                activity_name: old.activity_name,
+                activity_symbol: old.activity_symbol,
+                place_id: old.place_id,
+                status_note: old.status_note,
+                latitude: old.latitude,
+                longitude: old.longitude,
+                vague_latitude: old.vague_latitude,
+                vague_longitude: old.vague_longitude,
+                confidence: old.confidence,
+                observed_at: old.observed_at,
+                updated_at: old.updated_at,
+                expires_at: old.expires_at,
+                source: old.source
+            )
+        }
         return .fixture(id: userID, name: "Self", availability: rawValue)
     }
 

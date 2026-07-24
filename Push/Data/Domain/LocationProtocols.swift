@@ -40,6 +40,8 @@ protocol LocationSessioning: AnyObject {
     /// Call while auth JWT may still be valid, before `shutdown()`.
     func unpublishBestEffort() async
     func handleLifecyclePhase(_ phase: LocationLifecyclePhase) async
+    /// Orthogonal Ghost control. `true` = publishing (Ghost off). Does not change availability.
+    func setPresencePublishingEnabled(_ enabled: Bool) async
 }
 
 // MARK: - Validation

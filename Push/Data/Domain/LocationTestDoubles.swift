@@ -145,8 +145,11 @@ final class FakeLocationSession: LocationSessioning {
         lastLifecyclePhase = phase
     }
 
-    func setPresencePublishingEnabled(_ enabled: Bool) {
+    func setPresencePublishingEnabled(_ enabled: Bool) async {
         state.isPresencePublishingEnabled = enabled
+        if !enabled {
+            unpublishCount += 1
+        }
     }
 
     func setAuthorization(_ authorization: LocationAuthorizationState) {

@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		844B8119CC75C70F595E9D1A /* LocationPresenceThrottleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7200BFE2778A623FC14579E /* LocationPresenceThrottleTests.swift */; };
+		5B39C41A8D8AF6FF50B9D614 /* PresencePublishPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6986EEED12A68F773E3F1B9 /* PresencePublishPolicyTests.swift */; };
+		F753CECC7AC5FB43A7BB938E /* LocalPresenceSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = C14FFC01FBEB4C9F17E2FD22 /* LocalPresenceSync.swift */; };
+		352AC1BE0B3A67930D5C5617 /* PresencePublishPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7959C539446233AD9A0B962 /* PresencePublishPolicy.swift */; };
 		48C4DC9C2752004AF85ACAD1 /* LivePresenceWriteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23F1F328B36F7BA02E33311D /* LivePresenceWriteTests.swift */; };
 		A3468EB5EC4656FF0F81B495 /* SupabasePresenceSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200468BA1F72474FF611C572 /* SupabasePresenceSync.swift */; };
 		B1EA2541E4E75F24B708FDD1 /* CurrentPresenceWriteMapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7DC0DC89B653BAFFFA08B64 /* CurrentPresenceWriteMapping.swift */; };
@@ -273,6 +277,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		D7200BFE2778A623FC14579E /* LocationPresenceThrottleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LocationPresenceThrottleTests.swift"; sourceTree = "<group>"; };
+		F6986EEED12A68F773E3F1B9 /* PresencePublishPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PresencePublishPolicyTests.swift"; sourceTree = "<group>"; };
+		C14FFC01FBEB4C9F17E2FD22 /* LocalPresenceSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "LocalPresenceSync.swift"; path = "Data/Domain/LocalPresenceSync.swift"; sourceTree = "<group>"; };
+		A7959C539446233AD9A0B962 /* PresencePublishPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PresencePublishPolicy.swift"; path = "Data/Domain/PresencePublishPolicy.swift"; sourceTree = "<group>"; };
 		23F1F328B36F7BA02E33311D /* LivePresenceWriteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LivePresenceWriteTests.swift"; sourceTree = "<group>"; };
 		200468BA1F72474FF611C572 /* SupabasePresenceSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SupabasePresenceSync.swift"; path = "Data/Supabase/SupabasePresenceSync.swift"; sourceTree = "<group>"; };
 		E7DC0DC89B653BAFFFA08B64 /* CurrentPresenceWriteMapping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "CurrentPresenceWriteMapping.swift"; path = "Data/Supabase/CurrentPresenceWriteMapping.swift"; sourceTree = "<group>"; };
@@ -576,6 +584,8 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				C14FFC01FBEB4C9F17E2FD22 /* LocalPresenceSync.swift */,
+				A7959C539446233AD9A0B962 /* PresencePublishPolicy.swift */,
 				200468BA1F72474FF611C572 /* SupabasePresenceSync.swift */,
 				E7DC0DC89B653BAFFFA08B64 /* CurrentPresenceWriteMapping.swift */,
 				7B8A434B44C3B5D5AB6B1AB3 /* CurrentPresenceRow.swift */,
@@ -794,6 +804,8 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				D7200BFE2778A623FC14579E /* LocationPresenceThrottleTests.swift */,
+				F6986EEED12A68F773E3F1B9 /* PresencePublishPolicyTests.swift */,
 				23F1F328B36F7BA02E33311D /* LivePresenceWriteTests.swift */,
 				F0BE234607B2A379340ACF54 /* LivePresenceReadTests.swift */,
 				5647C2F31353FE9CCC2E3FD6 /* LocationSessionContainerTests.swift */,
@@ -984,6 +996,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				F753CECC7AC5FB43A7BB938E /* LocalPresenceSync.swift in Sources */,
+				352AC1BE0B3A67930D5C5617 /* PresencePublishPolicy.swift in Sources */,
 				A3468EB5EC4656FF0F81B495 /* SupabasePresenceSync.swift in Sources */,
 				B1EA2541E4E75F24B708FDD1 /* CurrentPresenceWriteMapping.swift in Sources */,
 				8AD6AA02B6DE4338C63E7296 /* CurrentPresenceRow.swift in Sources */,
@@ -1193,6 +1207,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				844B8119CC75C70F595E9D1A /* LocationPresenceThrottleTests.swift in Sources */,
+				5B39C41A8D8AF6FF50B9D614 /* PresencePublishPolicyTests.swift in Sources */,
 				48C4DC9C2752004AF85ACAD1 /* LivePresenceWriteTests.swift in Sources */,
 				A9465556C3AF870095EE5146 /* LivePresenceReadTests.swift in Sources */,
 				B41E04B41CEDE8CE58798BFC /* LocationSessionContainerTests.swift in Sources */,

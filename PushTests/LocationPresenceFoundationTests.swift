@@ -265,7 +265,7 @@ final class LocationPresenceFoundationTests: XCTestCase {
         XCTAssertEqual(session.startIfEligibleCount, 1)
         XCTAssertTrue(session.state.isTrackingEnabled)
 
-        session.setPresencePublishingEnabled(false)
+        await session.setPresencePublishingEnabled(false)
         XCTAssertFalse(session.state.isEligibleToPublish)
 
         session.shutdown()
