@@ -43,7 +43,7 @@ This is a **high-fidelity prototype** that can become production later.
 ## What NOT to Build Yet
 
 - Live writes to social graph (friends/groups/sharing), realtime/subscriptions — profile self-writes (basics, toggles, availability, photo), push coordination (create/edit/cancel/delete, RSVP), friend-request coordination (search/send/cancel/accept/deny via `0009`/`0013`; remove via `0010`/`0013`), group creation + group-invite coordination (`0011`) + group lifecycle (`0015`), and user block/unblock via `0016` are allowed
-- Production location provider and Realtime (Issue #64 — live presence upsert/unpublish #75; read warm #73; movement throttle/heartbeat/Ghost #76)
+- Realtime presence bridge (Issue #64 — Core Location input #79; upsert/unpublish #75; read warm #73; throttle/heartbeat/Ghost #76)
 - Real activity inference
 - Push notifications
 - iMessage extension
@@ -65,7 +65,7 @@ This is a **high-fidelity prototype** that can become production later.
 See `coding-standards.md` for the full reference. Key rules for this project:
 
 - **MVVM strictly.** ViewModels own state and logic; Views are dumb.
-- **Mock by default.** DEBUG mock unless `--live`; auth/repos only via injected services (`AuthService`, repository protocols). No real location.
+- **Mock by default.** DEBUG mock unless `--live`; auth/repos only via injected services (`AuthService`, repository protocols). Mock: no GPS; live: when-in-use Core Location (see `AGENTS.md` Location/presence).
 - **Files ≤ 400 lines.** Split by responsibility.
 - **Functions ≤ 40 lines, single responsibility.**
 - **No magic numbers.** Named constants only.
