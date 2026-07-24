@@ -31,26 +31,18 @@ struct PushExpandablePersonRow: View {
 
             if isExpanded {
                 PushExpandableActionRail(actions: railActions, isBusy: isBusy) {
-                    Menu {
+                    PushExpandableRailOverflowMenu(
+                        isBusy: isBusy,
+                        accessibilityLabel: "More actions",
+                        accessibilityHint: "Remove friend or block"
+                    ) {
                         Button("Remove friend", role: .destructive) {
                             isConfirmingRemove = true
                         }
                         Button("Block", role: .destructive) {
                             isConfirmingBlock = true
                         }
-                    } label: {
-                        PushExpandableRailOverflowChrome(isBusy: isBusy) {
-                            Image(systemName: "ellipsis")
-                                .font(.system(
-                                    size: PushExpandableActionRailMetrics.overflowIconSize,
-                                    weight: .semibold
-                                ))
-                                .foregroundStyle(PushControlColors.textSecondary)
-                        }
                     }
-                    .disabled(isBusy)
-                    .accessibilityLabel("More actions")
-                    .accessibilityHint("Remove friend or block")
                 }
                 .padding(.horizontal, FriendsLayout.cardPadding(layout))
                 .padding(.bottom, PushExpandableActionRailMetrics.railBottomPadding)

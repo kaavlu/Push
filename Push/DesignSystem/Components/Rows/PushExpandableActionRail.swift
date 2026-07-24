@@ -111,6 +111,7 @@ struct PushExpandableRailOverflowChrome<Content: View>: View {
             if isBusy {
                 ProgressView()
                     .controlSize(.small)
+                    .tint(PushControlColors.textSecondary)
             } else {
                 content()
             }
@@ -119,7 +120,61 @@ struct PushExpandableRailOverflowChrome<Content: View>: View {
             width: PushExpandableActionRailMetrics.overflowWidth,
             height: PushExpandableActionRailMetrics.railHeight
         )
+        .contentShape(RoundedRectangle(
+            cornerRadius: PushExpandableActionRailMetrics.railCornerRadius,
+            style: .continuous
+        ))
         .pushExpandableRailSurface()
+    }
+}
+
+/// Ellipsis glyph used inside overflow chrome — same weight/color as rail actions.
+struct PushExpandableRailOverflowGlyph: View {
+    var body: some View {
+        Image(systemName: "ellipsis")
+            .font(.system(
+                size: PushExpandableActionRailMetrics.overflowIconSize,
+                weight: .semibold
+            ))
+            .foregroundStyle(PushControlColors.textSecondary)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .accessibilityHidden(true)
+    }
+}
+
+/// Overflow menu whose label matches primary rail action chrome (not system Menu chrome).
+struct PushExpandableRailOverflowMenu<MenuContent: View>: View {
+    var isBusy: Bool = false
+    let accessibilityLabel: String
+    var accessibilityHint: String? = nil
+    @ViewBuilder var menuContent: () -> MenuContent
+
+    var body: some View {
+        Menu {
+            menuContent()
+        } label: {
+            PushExpandableRailOverflowChrome(isBusy: isBusy) {
+                PushExpandableRailOverflowGlyph()
+            }
+        }
+        .buttonStyle(.plain)
+        .menuStyle(.button)
+        .menuIndicator(.hidden)
+        .disabled(isBusy)
+        .accessibilityLabel(accessibilityLabel)
+        .modifier(OptionalAccessibilityHint(hint: accessibilityHint))
+    }
+}
+
+private struct OptionalAccessibilityHint: ViewModifier {
+    let hint: String?
+
+    func body(content: Content) -> some View {
+        if let hint, !hint.isEmpty {
+            content.accessibilityHint(hint)
+        } else {
+            content
+        }
     }
 }
 
@@ -160,13 +215,12 @@ struct PushExpandableActionRail_Previews: PreviewProvider {
                     )
                 ]
             ) {
-                PushExpandableRailOverflowChrome {
-                    Image(systemName: "ellipsis")
-                        .font(.system(
-                            size: PushExpandableActionRailMetrics.overflowIconSize,
-                            weight: .semibold
-                        ))
-                        .foregroundStyle(PushControlColors.textSecondary)
+                PushExpandableRailOverflowMenu(
+                    accessibilityLabel: "More actions",
+                    accessibilityHint: "Remove friend or block"
+                ) {
+                    Button("Remove friend", role: .destructive) {}
+                    Button("Block", role: .destructive) {}
                 }
             }
             .padding()
