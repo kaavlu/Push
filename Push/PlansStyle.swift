@@ -108,53 +108,21 @@ extension View {
     }
 }
 
-struct PlanStatusPill: View {
-    let status: PlanStatus
-
-    var body: some View {
-        Text(status.pill)
-            .font(.footnote.weight(.semibold))
-            .foregroundStyle(foregroundColor)
-            .padding(.horizontal, PlansLayout.statusPillHorizontalPadding)
-            .padding(.vertical, PlansLayout.statusPillVerticalPadding)
-            .background(Capsule().fill(backgroundColor))
-    }
-
-    private var foregroundColor: Color {
-        switch status {
-        case .pending:   return PushColorPalette.Accent.walnut
-        case .joined:    return PushColorPalette.Accent.sageGreen
-        case .open:      return PlansColor.maybeForeground
-        case .waiting:   return PlansColor.passForeground
-        case .locked:    return PushColorPalette.Accent.walnut
-        case .happening: return PushColorPalette.Accent.walnut
-        }
-    }
-
-    private var backgroundColor: Color {
-        switch status {
-        case .pending:   return PushColorPalette.Accent.sunbeam.opacity(0.7)
-        case .joined:    return PushColorPalette.Accent.mintFoam
-        case .open:      return PlansColor.maybeBackground
-        case .waiting:   return PlansColor.passBackground
-        case .locked:    return PushColorPalette.Accent.sunbeam
-        case .happening: return PushColorPalette.Accent.sunbeam
-        }
-    }
-}
+// PlanStatusPill / YourPushAvatarRow / YourPushCardLayout → DesignSystem Cards (Wave 7).
+// Prefer PushPlanStatusPill, PushPlanAvatarStrip, PushPlanCardMetrics.
 
 enum YourPushCardLayout {
-    static let avatarSize: CGFloat = 28
-    static let avatarSpacing: CGFloat = 6
-    static let avatarStrokeWidth: CGFloat = 0.8
-    static let overflowAvatarSize: CGFloat = 28
-    static let maxVisibleAvatars: Int = 4
+    static let avatarSize = PushPlanCardMetrics.avatarSize
+    static let avatarSpacing = PushPlanCardMetrics.avatarSpacing
+    static let avatarStrokeWidth = PushPlanCardMetrics.avatarStrokeWidth
+    static let overflowAvatarSize = PushPlanCardMetrics.avatarSize
+    static let maxVisibleAvatars = PushPlanCardMetrics.maxVisibleAvatars
     static let timeChipHorizontalPadding: CGFloat = 8
     static let timeChipVerticalPadding: CGFloat = 4
     static let timeChipStrokeOpacity: Double = 0.40
-    static let footerTopPadding: CGFloat = 4
-    static let overflowFontSize: CGFloat = 11
-    static let headerSpacerMinLength: CGFloat = 8
+    static let footerTopPadding = PushPlanCardMetrics.footerTopPadding
+    static let overflowFontSize = PushPlanCardMetrics.overflowFontSize
+    static let headerSpacerMinLength = PushPlanCardMetrics.headerSpacerMinLength
     static let timeChipStrokeWidth: CGFloat = 1.0
-    static let avatarRingOpacity: Double = 0.86
+    static let avatarRingOpacity = PushPlanCardMetrics.avatarRingOpacity
 }

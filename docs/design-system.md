@@ -1,6 +1,6 @@
 # Push Design System — Agent Catalog
 
-**Status:** Waves 0–6 complete (through selectors, headers, sheets).  
+**Status:** Waves 0–7 complete (through plan cards).  
 **Decisions:** `tasks/design-system-decision-log.md` (DS-001–DS-089) — product law.  
 **Spec:** `docs/superpowers/specs/2026-07-21-push-design-system-specification.md`.  
 **Code home:** `Push/DesignSystem/` (+ temporary typealiases at legacy call sites).  
@@ -163,11 +163,13 @@ Map profile control, bottom-nav raised +, product circles with intentionally dif
 
 ### Plan cards (Wave 7)
 
-| Pattern | DS |
-|---|---|
-| Plans-glass plan card (owner / invited) | DS-024 |
-| Review deck card (separate) | DS-025 |
-| Weekly calendar module (frozen whole) | DS-026 |
+| Pattern | Named API | Notes |
+|---|---|---|
+| Plans-glass family (DS-024) | `PushPlansPlanCard` (`.owner` / `.invited`) | Shims: `YourPushCard`, `ActivePlanCard` |
+| Review deck card (DS-025) | `PushReviewPlanCard` | Separate glass family; shim `ReviewPushCard` |
+| Plan status pill (DS-046) | `PushPlanStatusPill` | Shared by Plans + Review |
+| Avatar strip (DS-053) | `PushPlanAvatarStrip` | Horizontal faces + overflow |
+| Weekly calendar (DS-026) | `PlansCalendarView` module | **Leave whole** — no redesign |
 
 ---
 
@@ -208,7 +210,7 @@ Until token modules land, use existing shared sources:
 | 4 | Named surfaces + cream tokens | Done |
 | 5 | Availability, chips, avatars, pucks | Done |
 | 6 | Selectors, headers, sheets | Done |
-| 7 | Plan cards & subcomponents | Pending |
+| 7 | Plan cards & subcomponents | Done |
 | 8 | Tokens & motion | Pending |
 | 9 | Docs polish | Pending |
 

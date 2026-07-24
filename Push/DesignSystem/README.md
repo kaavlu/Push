@@ -44,7 +44,8 @@ DesignSystem/
 | 4 | Named surfaces + cream tokens | Done |
 | 5 | Availability, chips, avatars, pucks | Done |
 | 6 | Selectors, headers, sheets | Done |
-| 7–9 | See spec §8.3 | Not started |
+| 7 | Plan cards & subcomponents | Done |
+| 8–9 | See spec §8.3 | Not started |
 
 ## Migrated components
 
@@ -111,5 +112,15 @@ Error routing: hard load → full-page/map failed; mutations → `ActionErrorBan
 | `PushModalCloseButtonBar` | `Components/Navigation/PushModalFlowChrome.swift` |
 | `pushTextLinkStyle` | `Components/Navigation/PushTextLinkStyle.swift` |
 | `PushMapBottomSheetChrome` | `Components/Sheets/` |
+
+### Wave 7 — Plan cards
+
+| Type | File |
+|---|---|
+| `PushPlansPlanCard` | `Components/Cards/PushPlansPlanCard.swift` |
+| `PushReviewPlanCard` | `Components/Cards/PushReviewPlanCard.swift` |
+| `PushPlanStatusPill` / `PushPlanAvatarStrip` | `Components/Cards/PushPlanCardSubcomponents.swift` |
+
+Calendar module remains feature-local (`PlansCalendarView`) — do not restyle into plan cards.
 
 Temporary typealiases keep call sites compiling during renames.

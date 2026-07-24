@@ -2,24 +2,20 @@
 
 ## Status
 
-- [x] Waves 0–6 complete
-- [ ] Wave 7 — Plan cards & subcomponents
-- [ ] Waves 8–9
+- [x] Waves 0–7 complete
+- [ ] Wave 8 — Tokens & motion cleanup
+- [ ] Wave 9 — Docs polish
 - [ ] Commit / PR
 
-## Wave 6 deliverables
+## Wave 7
 
 | API | Role |
 |---|---|
-| `PushIvorySegmentedControl` | Cream multi-mode switch |
-| `PushIvoryFilterChipRow` | Walnut filter chips |
-| `PushSingleSelectRow` | Map dropdown selected row |
-| `PushModalChoicePill` | AM/PM style modal pills |
-| `PushCreamPageHeader` | Ivory page headers |
-| `PushModalCloseButtonBar` | Modal close chrome |
-| `pushTextLinkStyle` | Secondary text links |
-| `PushMapBottomSheetChrome` | Map sheet metrics + drag indicator |
+| `PushPlansPlanCard` | Owner/invited Plans-glass family |
+| `PushReviewPlanCard` | Separate review deck card |
+| `PushPlanStatusPill` | Shared RSVP/status pill |
+| `PushPlanAvatarStrip` | Horizontal participant faces |
 
 ## Next
 
-Wave 7 — Plans-glass plan-card family + shared plan subcomponents.
+Wave 8 — motion/opacity tokens + remaining magic-number sweep.
