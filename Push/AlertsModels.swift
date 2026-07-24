@@ -26,7 +26,8 @@ struct FriendRequestAlertModel: Identifiable, Equatable {
 
 enum AlertsCopy {
     static let requestSubtitle = "Sent you a friend request."
-    static let emptyTitle = "You're all caught up."
+    /// Prefer `EmptySurfaceCopy.alertsEmptyTitle` for empty presentation.
+    static let emptyTitle = EmptySurfaceCopy.alertsEmptyTitle
     static let sectionTitle = "Friend Requests"
     static let groupSectionTitle = "Group Requests"
     static let addedLabel = "Added"

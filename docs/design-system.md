@@ -1,6 +1,6 @@
 # Push Design System — Agent Catalog
 
-**Status:** Waves 0–2 complete (scaffold, buttons, cream lists / person system).  
+**Status:** Waves 0–3 complete (scaffold, buttons, cream lists, empty/loading/error).  
 **Decisions:** `tasks/design-system-decision-log.md` (DS-001–DS-089) — product law.  
 **Spec:** `docs/superpowers/specs/2026-07-21-push-design-system-specification.md`.  
 **Code home:** `Push/DesignSystem/` (+ temporary typealiases at legacy call sites).  
@@ -102,14 +102,28 @@ Map profile control, bottom-nav raised +, product circles with intentionally dif
 
 ### Empty / loading / error (Wave 3)
 
-| Pattern | DS | Notes |
+| Pattern | Component | When to use |
 |---|---|---|
-| `SurfaceContentPhase` | DS-070 | |
-| `EmptySurfaceView` / `EmptySurfaceStateView` | DS-071 | Sole full-page empty/loading/failed |
-| Map empty overlay | DS-072 | `MapEmptyOverlay` + branded CTA |
-| Mutation banner vs load fail | DS-073 | `ActionErrorBanner` vs full-page failed |
-| Deferred empty | DS-074 | Feed |
-| Inline no-results | DS-075 | Search no-match stays content |
+| Phase model (DS-070) | `SurfaceContentPhase` | All primary surfaces |
+| Full-page empty (DS-071) | `EmptySurfaceView` | Ivory/modal empty; optional message/CTA |
+| Full-page loading/failed (DS-071) | `EmptySurfaceStateView` | Hard load spinner / retry |
+| Friends/groups empty | `FriendsEmptyState` | Convenience over EmptySurface |
+| Map empty/failed (DS-072) | `MapEmptyOverlay` | Control-glass card on map only |
+| Mutation error (DS-073) | `ActionErrorBanner` | Keep content visible; Retry + dismiss |
+| Deferred (DS-074) | EmptySurface + `.deferred` | Honest empty, no fake rows (Feed) |
+| Inline no-results (DS-075) | EmptySurface / `FriendsEmptyState(isSearching:)` | Stays `.content` phase |
+| Local busy (DS-075) | Control spinner / disabled | Never full-list spinner for one action |
+
+#### Error routing (DS-073) — pick the channel by failure type
+
+| Failure | Channel | Keep last content? |
+|---|---|---|
+| Initial / hard load fail | Full-page `EmptySurfaceStateView.failed` (or `MapEmptyOverlay` on map) | No (nothing loaded) |
+| Recoverable mutation fail | `ActionErrorBanner` | **Yes** |
+| Soft reload / pull-to-refresh | Stay on content; optional local refresh chrome | **Yes** |
+| Silent session refresh (foreground) | Silent | **Yes** |
+
+**Do not** use full-screen failed as the only channel for mutation errors.
 
 ### Avatars, chips, pucks (Wave 5)
 
@@ -175,7 +189,7 @@ Until token modules land, use existing shared sources:
 | 0 | Scaffold + this catalog + AGENTS links | Done |
 | 1 | Buttons & primary CTAs | Done |
 | 2 | Cream lists & person system | Done |
-| 3 | Empty / loading / error | Pending |
+| 3 | Empty / loading / error | Done |
 | 4 | Named surfaces + cream tokens | Pending |
 | 5 | Availability, chips, avatars, pucks | Pending |
 | 6 | Selectors, headers, sheets | Pending |

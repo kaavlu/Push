@@ -102,12 +102,18 @@ struct BlockedUsersView: View {
     private var content: some View {
         switch viewModel.loadState {
         case .idle, .loading:
-            BlockedUsersStateView.loading
+            EmptySurfaceStateView.loading(message: EmptySurfaceCopy.blockedLoading)
         case .failed:
-            BlockedUsersStateView.error { Task { await viewModel.load() } }
+            EmptySurfaceStateView.failed(surface: EmptySurfaceCopy.blockedSurfaceName) {
+                Task { await viewModel.load() }
+            }
         case .loaded(let people):
             if people.isEmpty {
-                BlockedUsersStateView.empty
+                EmptySurfaceView(
+                    title: EmptySurfaceCopy.blockedEmptyTitle,
+                    systemImage: "hand.raised",
+                    expandsVertically: true
+                )
             } else {
                 peopleList(people)
             }
@@ -190,58 +196,11 @@ private struct BlockedUnblockButton: View {
     }
 }
 
-// MARK: - States
-
-private enum BlockedUsersStateView {
-    static var loading: some View {
-        VStack(spacing: BlockedUsersLayout.stateSpacing) {
-            ProgressView()
-                .tint(PushControlColors.activeForeground)
-            Text(BlockedUsersCopy.loadingTitle)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(PushControlColors.textSecondary)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-    }
-
-    static var empty: some View {
-        Text(BlockedUsersCopy.emptyTitle)
-            .font(.subheadline.weight(.semibold))
-            .foregroundStyle(PushControlColors.textSecondary)
-            .multilineTextAlignment(.center)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-            .padding(.horizontal, BlockedUsersLayout.stateHorizontalPadding)
-            .padding(.top, BlockedUsersLayout.contentTopSpacing)
-    }
-
-    static func error(retry: @escaping () -> Void) -> some View {
-        VStack(spacing: BlockedUsersLayout.stateSpacing) {
-            Image(systemName: "exclamationmark.triangle")
-                .font(.system(size: BlockedUsersLayout.stateIconSize, weight: .semibold))
-                .foregroundStyle(PushControlColors.textSecondary)
-            Text(BlockedUsersCopy.errorTitle)
-                .font(.headline.weight(.semibold))
-                .foregroundStyle(PushControlColors.textEspresso)
-            Text(BlockedUsersCopy.errorSubtitle)
-                .font(.subheadline)
-                .foregroundStyle(PushControlColors.textSecondary)
-            PushSolidSunbeamButton(title: "Try again", action: retry)
-        }
-        .multilineTextAlignment(.center)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-        .padding(.horizontal, BlockedUsersLayout.stateHorizontalPadding)
-    }
-}
-
 // MARK: - Copy & layout
 
 private enum BlockedUsersCopy {
     static let title = "Blocked"
     static let subtitle = "People you've blocked"
-    static let emptyTitle = "No blocked people."
-    static let loadingTitle = "Loading blocked people"
-    static let errorTitle = "Couldn't load blocked people"
-    static let errorSubtitle = "Try again in a moment."
     static let unblockButton = "Unblock"
     static let unblockMessage =
         "You can send a friend request again later. Friendship is not restored automatically."

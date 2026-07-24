@@ -40,7 +40,8 @@ DesignSystem/
 | 0 | Scaffold + catalog + AGENTS links | Done |
 | 1 | Buttons & primary CTAs | Done |
 | 2 | Cream lists & person system | Done |
-| 3–9 | See spec §8.3 | Not started |
+| 3 | Empty / loading / error | Done |
+| 4–9 | See spec §8.3 | Not started |
 
 ## Migrated components
 
@@ -63,5 +64,15 @@ DesignSystem/
 | `PushGroupRow` | `Components/Rows/PushGroupRow.swift` | `FriendGroupCard` |
 | `PushHistoryRow` | `Components/Rows/PushHistoryRow.swift` | Plans history private row |
 | `PushListSectionHeader` | `Components/Rows/PushListSectionHeader.swift` | `FriendsSectionHeader` |
+
+### Wave 3 — Empty / loading / error
+
+| Type | File | Replaces |
+|---|---|---|
+| `SurfaceContentPhase` / `EmptySurfaceCopy` / layout | `Components/EmptyStates/PushEmptySurfaceModels.swift` | Feature-local empty copy forks |
+| `EmptySurfaceView` / `EmptySurfaceStateView` / `FriendsEmptyState` | `Components/EmptyStates/PushEmptySurfaceView.swift` | Blocked/Alerts/AddFriends state views |
+| `MapEmptyOverlay` | `Components/EmptyStates/PushMapEmptyOverlay.swift` | Map empty chrome (branded CTAs) |
+
+Error routing: hard load → full-page/map failed; mutations → `ActionErrorBanner`; soft reload keeps content. See `docs/design-system.md`.
 
 Temporary typealiases keep call sites compiling during renames.

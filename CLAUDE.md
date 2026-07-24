@@ -58,7 +58,7 @@ This is a **high-fidelity prototype** that can become production later.
 
 **Avoid:** Generic map app feel, surveillance dashboard feel, chat app feel, social media clone feel, enterprise dashboard feel.
 
-**Design system (Issue #63):** Open **`docs/design-system.md`** before adding UI chrome. Code home: `Push/DesignSystem/`. Decisions: `tasks/design-system-decision-log.md`. Spec/waves: `docs/superpowers/specs/2026-07-21-push-design-system-specification.md`. Handoff: `tasks/design-system-handoff.md`. Named surfaces only (`PushIvoryPageBackground`, `pushSolidCreamCard`); primaries are solid sunbeam or glass+walnut rim only; circular utility → `PushCircleIconButton`; person lists → `PushPersonRow` (expand optional). Preserve approved appearance.
+**Design system (Issue #63):** Open **`docs/design-system.md`** before adding UI chrome. Code home: `Push/DesignSystem/`. Decisions: `tasks/design-system-decision-log.md`. Spec/waves: `docs/superpowers/specs/2026-07-21-push-design-system-specification.md`. Handoff: `tasks/design-system-handoff.md`. Named surfaces only (`PushIvoryPageBackground`, `pushSolidCreamCard`); primaries are solid sunbeam or glass+walnut rim only; circular utility → `PushCircleIconButton`; person lists → `PushPersonRow` (expand optional); empty/loading/failed → `EmptySurface*` / map → `MapEmptyOverlay`; mutations → `ActionErrorBanner`. Preserve approved appearance.
 
 ---
 
