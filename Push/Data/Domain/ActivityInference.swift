@@ -2,8 +2,8 @@
 //  ActivityInference.swift
 //  Push
 //
-//  Issue #92 (I1) — domain types for local activity inference.
-//  No production rules, LocationSession wiring, or Supabase.
+//  Issue #92 (I1) / #93 (I2) — domain types for local activity inference.
+//  No LocationSession wiring, presence drafts, or Supabase.
 //
 
 import Foundation
@@ -89,16 +89,30 @@ struct InferredActivityResult: Codable, Equatable, Sendable {
 protocol ActivityInferenceEngine: Sendable {
     /// Classify activity from a chronological observation window.
     /// Empty or insufficient windows must return `.unknown` (never invent).
+    ///
+    /// - Parameter previous: Last committed result (hysteresis). Pass `nil`
+    ///   for a cold start. Engines that ignore hysteresis may discard it.
     func infer(
         from observations: [LocationObservation],
+        previous: InferredActivityResult?,
         at evaluationTime: Date
     ) -> InferredActivityResult
 }
 
+extension ActivityInferenceEngine {
+    /// Convenience cold-start inference (no prior result).
+    func infer(
+        from observations: [LocationObservation],
+        at evaluationTime: Date
+    ) -> InferredActivityResult {
+        infer(from: observations, previous: nil, at: evaluationTime)
+    }
+}
+
 // MARK: - Unknown-only implementation
 
-/// I1 / default engine — always returns `.unknown`.
-/// Safe to inject anywhere before deterministic rules (Issue #93) land.
+/// Always returns `.unknown`. Useful for tests and as a safe disabled path.
+/// Prefer `DeterministicActivityInferenceEngine` for real classification (I2).
 struct UnknownActivityInferenceEngine: ActivityInferenceEngine {
     /// Soft validity window for the constant unknown result (caching seam).
     var resultValidity: TimeInterval
@@ -109,9 +123,11 @@ struct UnknownActivityInferenceEngine: ActivityInferenceEngine {
 
     func infer(
         from observations: [LocationObservation],
+        previous: InferredActivityResult?,
         at evaluationTime: Date
     ) -> InferredActivityResult {
         _ = observations
+        _ = previous
         return .unknown(
             at: evaluationTime,
             confidence: .low,

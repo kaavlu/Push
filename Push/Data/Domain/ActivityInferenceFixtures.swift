@@ -76,13 +76,38 @@ enum ActivityObservationWindow {
         guard !values.isEmpty else { return nil }
         return values.reduce(0, +) / Double(values.count)
     }
+
+    /// Sum of great-circle segment lengths along the ordered path (meters).
+    static func pathLengthMeters(_ observations: [LocationObservation]) -> Double {
+        guard observations.count >= 2 else { return 0 }
+        var total: Double = 0
+        for index in 1..<observations.count {
+            total += GeoDistance.meters(
+                from: observations[index - 1],
+                to: observations[index]
+            )
+        }
+        return total
+    }
+
+    /// Drops samples with non-positive or worse-than-max horizontal accuracy.
+    static func accuracyFiltered(
+        _ observations: [LocationObservation],
+        maxAccuracyMeters: Double = ActivityInferenceConfiguration.maxHorizontalAccuracyMeters
+    ) -> [LocationObservation] {
+        observations.filter { observation in
+            let accuracy = observation.horizontalAccuracyMeters
+            guard accuracy.isFinite, accuracy > 0 else { return false }
+            return accuracy <= maxAccuracyMeters
+        }
+    }
 }
 
 // MARK: - Deterministic sequences
 
 /// Named observation sequences for activity-inference tests.
-/// Coordinates are SF-area points; labels describe intended I2 classification,
-/// not current engine output (I1 always returns `.unknown`).
+/// Coordinates are SF-area points; labels describe intended classification
+/// for `DeterministicActivityInferenceEngine` (Issue #93).
 enum ActivityInferenceFixtures {
     static let defaultPersonID: Person.ID = "activity-fixture-user"
     static let baseDate = Date(timeIntervalSince1970: 1_700_000_000)
@@ -180,11 +205,12 @@ enum ActivityInferenceFixtures {
         baseDate: Date = baseDate
     ) -> [LocationObservation] {
         // ~3.2 m/s — above walking band, below driving floor.
+        // 6 samples × 10s = 50s span (≥ minimumWindowDuration).
         makeSequence(
             idPrefix: "moving",
             personID: personID,
             baseDate: baseDate,
-            count: 5,
+            count: 6,
             interval: 10,
             latitude: 37.77000,
             longitude: -122.41000,

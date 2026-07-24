@@ -2,15 +2,14 @@
 //  ActivityInferenceConfiguration.swift
 //  Push
 //
-//  Issue #92 (I1) — centralized thresholds for activity inference.
-//  Values are placeholders for Issue #93 deterministic rules; keep all
-//  magic numbers out of engine implementations.
+//  Issue #92 (I1) / #93 (I2) — centralized thresholds for activity inference.
+//  All magic numbers for deterministic rules live here.
 //
 
 import Foundation
 
 /// Thresholds and window sizes for local activity inference.
-/// Grouped by concern so future rule engines share one source of truth.
+/// Grouped by concern so rule engines share one source of truth.
 enum ActivityInferenceConfiguration {
     // MARK: Observation window
 
@@ -66,17 +65,21 @@ enum ActivityInferenceConfiguration {
     /// Ignore single-sample speed spikes above this (m/s) when averaging.
     static let speedSpikeIgnoreThresholdMetersPerSecond: Double = 55
 
-    // MARK: Hysteresis (I2+)
+    // MARK: Hysteresis (I2)
 
     /// Extra duration a new kind must sustain before replacing the previous kind.
     static let kindChangeHysteresis: TimeInterval = 20
-    /// Soft validity assigned to unknown-only engine results (caching seam).
+    /// Soft validity assigned to unknown results (caching seam).
     static let unknownResultValidity: TimeInterval = 60
+    /// Soft validity for non-unknown results before consumers re-evaluate.
+    static let classifiedResultValidity: TimeInterval = 90
 
-    // MARK: Confidence mapping (I2+)
+    // MARK: Confidence mapping (I2)
 
     /// Window span at or above this with clean samples → high confidence.
     static let highConfidenceMinimumDuration: TimeInterval = 90
     /// Mean accuracy at or below this (meters) for high confidence.
     static let highConfidenceMaxMeanAccuracyMeters: Double = 25
+    /// Mean accuracy at or below this (meters) for at least medium confidence.
+    static let mediumConfidenceMaxMeanAccuracyMeters: Double = 50
 }

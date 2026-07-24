@@ -1,28 +1,32 @@
-# Issue #92 — Activity Inference Domain and Engine Interface (I1)
+# Issue #93 — Deterministic Movement and Chilling Inference (I2)
 
 ## Status
 
-- [x] Domain types (`InferredActivityKind`, `InferredActivityResult`)
-- [x] `ActivityInferenceEngine` protocol + `UnknownActivityInferenceEngine`
-- [x] Centralized `ActivityInferenceConfiguration`
-- [x] Observation-window helpers + deterministic fixtures
-- [x] Unit tests (`ActivityInferenceTests`) — 17 green
-- [x] Verify suite green
+- [x] Window helpers: path length, accuracy filter
+- [x] Protocol `previous` + hysteresis seam
+- [x] `DeterministicActivityInferenceEngine` rules
+- [x] Unit tests (`DeterministicActivityInferenceTests`) — 17 green
+- [x] Verify suite green (I1 suite also green)
 - [x] Commit
 
-## Scope (from issue)
+## Rules (input → output)
 
-Create only domain types, protocol, configuration, and deterministic test fixtures.
-No real inference logic beyond returning `unknown`.
+Recent `LocationObservation` → unknown | stationary | moving | walking | driving | chilling
 
-### Out of scope
+Uses: elapsed time, displacement, path length, speed, accuracy, min duration, hysteresis.
+
+## Out of scope
 
 - Arrived / left
-- Stateful transitions
 - `LocationSession` integration
-- Presence drafts / Supabase / UI / venue / co-presence
+- Supabase / Realtime / UI / Venues / Core Motion
 
 ## Follow-ups
 
-- Issue #93 — Deterministic movement and chilling rules (I2)
 - Issue #94 — Integrate into presence pipeline (I3)
+
+---
+
+# Issue #92 — Activity Inference Domain (I1) — done
+
+See commit history. Domain types, config, fixtures, unknown engine.
