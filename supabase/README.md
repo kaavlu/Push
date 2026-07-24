@@ -44,6 +44,12 @@ of the files in order reproduces the schema.
   ownership transfer (earliest other active member) or group delete when sole
   active, remove memberships/friendships, then `DELETE FROM auth.users` for
   `auth.uid()` (profiles and cascading FKs follow). No target-user argument.
+- `migrations/0018_current_presence.sql` — canonical `current_presence` (one row per
+  user): orthogonal `is_published`, exact/vague coords (nullable for unpublish),
+  availability mirror of `profiles.availability_choice`, expiry, RLS (self +
+  friend/co-member excluding blocked/unpublished/expired/legacy-ghost), RPCs
+  `unpublish_current_presence()` and `set_availability_choice(text)`. No seed rows.
+  Verify with `tests/0018_current_presence_verify.sql` after apply (privileged SQL).
 - `seed.sql` — idempotent public-graph seed keyed off **real** auth IDs (resolved by email).
 
 ## Security model
