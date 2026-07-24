@@ -64,6 +64,9 @@ enum VisiblePresenceBuilder {
         let isSelf = owner.id == viewerID
         var policy: SharingPolicy?
         if !isSelf {
+            // Defense in depth: unpublished / legacy Ghost never reach friends
+            // even if a status slips past repository filtering.
+            guard status.isEffectivelyPublished else { return nil }
             policy = resolvedPolicy(
                 ownerID: owner.id,
                 viewerID: viewerID,

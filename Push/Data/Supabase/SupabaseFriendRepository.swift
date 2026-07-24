@@ -50,8 +50,15 @@ final class SupabaseFriendRepository: FriendRepository {
             .map { $0.person() }
     }
 
-    // Presence is out of scope on Day 1 — no live presence data (R1).
-    func presenceStatuses() async throws -> [PresenceStatus] { [] }
+    /// Live `current_presence` via session cache. Never falls back to mock seed.
+    /// Hard-expired rows and non-self unpublished (Ghost) are filtered here;
+    /// RLS is the first gate, client filtering is defense in depth.
+    func presenceStatuses() async throws -> [PresenceStatus] {
+        let rows = try await store.currentPresence()
+        return CurrentPresenceRow.friendVisibleStatuses(
+            from: rows, viewerID: currentUserID
+        )
+    }
 
     // Availability is the user's own row (`profiles_update_self` RLS), so
     // Day-1 writes are supported here unlike the reads-only social graph.

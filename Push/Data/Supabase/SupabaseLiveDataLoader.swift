@@ -83,6 +83,12 @@ final class SupabaseLiveDataLoader: LiveDataLoading {
         }
     }
 
+    func loadPresence() async throws -> [CurrentPresenceRow] {
+        try await PushLog.logged("loadPresence") {
+            try await client.from("current_presence").select().execute().value
+        }
+    }
+
     func insertPush(_ payload: PushInsertPayload) async throws -> PushRow {
         try await PushLog.logged("insertPush") {
             try await client.from("pushes").insert(payload).select().single().execute().value
