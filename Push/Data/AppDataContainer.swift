@@ -26,11 +26,15 @@ final class AppDataContainer {
 
     static func prepareLive(client: SupabaseClient, currentUserID: Person.ID) async throws -> AppDataContainer {
         let store = LiveDataStore(loader: SupabaseLiveDataLoader(client: client))
+        let bridge = PresenceRealtimeBridge(
+            client: client, store: store, currentUserID: currentUserID
+        )
         return try await preparedLive(
             store: store,
             currentUserID: currentUserID,
             photoStorage: SupabaseProfilePhotoStorage(client: client),
-            groupPhotoStorage: SupabaseGroupPhotoStorage(client: client)
+            groupPhotoStorage: SupabaseGroupPhotoStorage(client: client),
+            presenceRealtimeBridge: bridge
         )
     }
 
@@ -40,7 +44,8 @@ final class AppDataContainer {
             store: store,
             currentUserID: currentUserID,
             photoStorage: nil,
-            groupPhotoStorage: nil
+            groupPhotoStorage: nil,
+            presenceRealtimeBridge: nil
         )
     }
 
@@ -48,14 +53,16 @@ final class AppDataContainer {
         store: LiveDataStore,
         currentUserID: Person.ID,
         photoStorage: ProfilePhotoStoring?,
-        groupPhotoStorage: GroupPhotoStoring?
+        groupPhotoStorage: GroupPhotoStoring?,
+        presenceRealtimeBridge: PresenceRealtimeBridging?
     ) async throws -> AppDataContainer {
         try await store.warm()
         let container = live(
             store: store,
             currentUserID: currentUserID,
             photoStorage: photoStorage,
-            groupPhotoStorage: groupPhotoStorage
+            groupPhotoStorage: groupPhotoStorage,
+            presenceRealtimeBridge: presenceRealtimeBridge
         )
         _ = try await container.friends.currentUser()
         return container
@@ -65,8 +72,12 @@ final class AppDataContainer {
     /// (no unpublish — mid-session swap of the same user must not clear presence).
     static func installPreparedLive(_ container: AppDataContainer) {
         shared.shutdownLocationSession()
+        shared.stopPresenceRealtimeBridge()
         shared = container
-        Task { await container.locationSession?.startIfEligible() }
+        Task {
+            await container.locationSession?.startIfEligible()
+            await container.presenceRealtimeBridge?.start()
+        }
     }
 
     /// Sign-out / delete-account path: optional best-effort unpublish → session
@@ -79,6 +90,7 @@ final class AppDataContainer {
         } else {
             shared.shutdownLocationSession()
         }
+        shared.stopPresenceRealtimeBridge()
         shared = AppDataContainer(seed: .standard())
     }
 
@@ -99,6 +111,9 @@ final class AppDataContainer {
     /// App-lifetime location pipeline. Independent of map tab visibility.
     /// Tests may inject a `FakeLocationSession`; production uses factory defaults.
     private(set) var locationSession: LocationSessioning?
+
+    /// Live Realtime presence bridge (Issue #84). Nil in mock and loader-only tests.
+    private(set) var presenceRealtimeBridge: PresenceRealtimeBridging?
 
     /// Prepared live mode publishes snapshot write-through revisions. The fallback
     /// subject keeps the synchronous, unprepared constructor useful in isolation tests.
@@ -128,10 +143,17 @@ final class AppDataContainer {
         locationSession = nil
     }
 
+    /// Stop Realtime presence subscription and release the bridge reference.
+    func stopPresenceRealtimeBridge() {
+        presenceRealtimeBridge?.stop()
+        presenceRealtimeBridge = nil
+    }
+
     /// Sign-out order: best-effort unpublish while JWT may still be valid, then shutdown.
     func teardownLocationForSignOut() async {
         await locationSession?.unpublishBestEffort()
         shutdownLocationSession()
+        stopPresenceRealtimeBridge()
     }
 
     /// MOCK: unchanged behavior — InMemoryDatabase + Local* repos.
@@ -155,6 +177,7 @@ final class AppDataContainer {
         self.sharing = LocalSharingRepository(database: database)
         self.feed = LocalFeedRepository(database: database)
         self.alerts = LocalAlertRepository(database: database)
+        self.presenceRealtimeBridge = nil
         // Explicit nil means "build default"; pass FakeLocationSession for tests.
         // Use a sentinel-free approach: optional with default factory when not injected.
         if let locationSession {
@@ -176,12 +199,17 @@ final class AppDataContainer {
     /// LIVE: Supabase-backed reads; identity from the auth session.
     static func live(client: SupabaseClient, currentUserID: Person.ID,
                      referenceDate: Date = Date()) -> AppDataContainer {
-        live(
-            store: LiveDataStore(loader: SupabaseLiveDataLoader(client: client)),
+        let store = LiveDataStore(loader: SupabaseLiveDataLoader(client: client))
+        let bridge = PresenceRealtimeBridge(
+            client: client, store: store, currentUserID: currentUserID
+        )
+        return live(
+            store: store,
             currentUserID: currentUserID,
             referenceDate: referenceDate,
             photoStorage: SupabaseProfilePhotoStorage(client: client),
-            groupPhotoStorage: SupabaseGroupPhotoStorage(client: client)
+            groupPhotoStorage: SupabaseGroupPhotoStorage(client: client),
+            presenceRealtimeBridge: bridge
         )
     }
 
@@ -191,7 +219,8 @@ final class AppDataContainer {
         referenceDate: Date = Date(),
         photoStorage: ProfilePhotoStoring? = nil,
         groupPhotoStorage: GroupPhotoStoring? = nil,
-        locationSession: LocationSessioning? = nil
+        locationSession: LocationSessioning? = nil,
+        presenceRealtimeBridge: PresenceRealtimeBridging? = nil
     ) -> AppDataContainer {
         let resolvedSession = locationSession ?? makeLiveLocationSession(
             store: store, currentUserID: currentUserID
@@ -209,7 +238,8 @@ final class AppDataContainer {
             sharing: SupabaseSharingRepository(store: store),
             feed: EmptyLiveFeedRepository(),
             alerts: SupabaseAlertRepository(store: store, currentUserID: currentUserID),
-            locationSession: resolvedSession
+            locationSession: resolvedSession,
+            presenceRealtimeBridge: presenceRealtimeBridge
         )
     }
 
@@ -241,7 +271,8 @@ final class AppDataContainer {
         sharing: SharingRepository,
         feed: FeedRepository,
         alerts: AlertRepository,
-        locationSession: LocationSessioning?
+        locationSession: LocationSessioning?,
+        presenceRealtimeBridge: PresenceRealtimeBridging?
     ) {
         self.database = nil
         self.currentUserID = currentUserID
@@ -251,5 +282,6 @@ final class AppDataContainer {
         self.profile = profile; self.sharing = sharing; self.feed = feed
         self.alerts = alerts
         self.locationSession = locationSession
+        self.presenceRealtimeBridge = presenceRealtimeBridge
     }
 }

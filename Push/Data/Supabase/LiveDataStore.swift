@@ -661,6 +661,85 @@ final class LiveDataStore {
         revisionSubject.value += 1
     }
 
+    // MARK: - Presence Realtime (Issue #84)
+    //
+    // Remote patches return a material-change flag; the bridge owns debounced
+    // revision publishing. Self write-through remains on the methods above.
+
+    /// Upsert a remote presence row when newer than the cached row.
+    /// - Returns: `true` when cache content should trigger a revision.
+    @discardableResult
+    func applyRemotePresenceRow(_ row: CurrentPresenceRow) -> Bool {
+        guard let rows = presenceRows else {
+            // Never warm: force listeners to reload so the next read refetches.
+            presenceTask = nil
+            return true
+        }
+        let remoteUpdated = PushDateFormatting.parse(row.updated_at)
+        if let index = rows.firstIndex(where: {
+            $0.user_id.caseInsensitiveCompare(row.user_id) == .orderedSame
+        }) {
+            let existing = rows[index]
+            if isRemotePresenceStale(remote: row, remoteUpdated: remoteUpdated, existing: existing) {
+                return false
+            }
+            if existing == row { return false }
+            var updated = rows
+            updated[index] = row
+            presenceRows = updated
+            presenceTask = nil
+            return true
+        }
+        var updated = rows
+        updated.append(row)
+        presenceRows = updated
+        presenceTask = nil
+        return true
+    }
+
+    /// Remove a remote user's presence row from the warm cache.
+    @discardableResult
+    func removeRemotePresence(userID: String) -> Bool {
+        guard var rows = presenceRows else { return false }
+        let before = rows.count
+        rows.removeAll {
+            $0.user_id.caseInsensitiveCompare(userID) == .orderedSame
+        }
+        guard rows.count != before else { return false }
+        presenceRows = rows
+        presenceTask = nil
+        return true
+    }
+
+    /// Canonical presence re-read. Replaces the warm snapshot.
+    /// - Returns: `true` when the snapshot differs from what was cached.
+    @discardableResult
+    func reconcilePresence() async throws -> Bool {
+        let previous = presenceRows
+        let rows = try await loader.loadPresence().uniqued(by: \.user_id)
+        presenceRows = rows
+        presenceTask = nil
+        guard let previous else { return true }
+        return previous != rows
+    }
+
+    /// Publish one store revision after a material remote presence batch.
+    func publishPresenceRevision() {
+        revisionSubject.value += 1
+    }
+
+    private func isRemotePresenceStale(
+        remote: CurrentPresenceRow,
+        remoteUpdated: Date?,
+        existing: CurrentPresenceRow
+    ) -> Bool {
+        guard let remoteUpdated else { return false }
+        guard let existingUpdated = PushDateFormatting.parse(existing.updated_at) else {
+            return false
+        }
+        return remoteUpdated < existingUpdated
+    }
+
     // MARK: - Friendships
     //
     // Session-cached like the rest of the social graph so Map/Friends/Plans can

@@ -50,6 +50,10 @@ of the files in order reproduces the schema.
   friend/co-member excluding blocked/unpublished/expired/legacy-ghost), RPCs
   `unpublish_current_presence()` and `set_availability_choice(text)`. No seed rows.
   Verify with `tests/0018_current_presence_verify.sql` after apply (privileged SQL).
+- `migrations/0020_current_presence_realtime.sql` — add `public.current_presence` to
+  publication `supabase_realtime` (idempotent) so authenticated clients can receive
+  `postgres_changes` for friend-visible presence (Issue #84). RLS still filters rows
+  per JWT; app bridge patches `LiveDataStore` and reconciles on gaps.
 - `seed.sql` — idempotent public-graph seed keyed off **real** auth IDs (resolved by email).
 
 ## Security model

@@ -1,14 +1,18 @@
-# Issue #63 — Push Design System
+# Issue #84 — Realtime Presence Synchronization
 
 ## Status
 
-- [x] Waves 0–9 complete — design system operational
-- [ ] Optional: open PR for Issue #63
+- [x] Design spec approved
+- [x] Implementation plan
+- [x] Migration `0020_current_presence_realtime` (file + remote apply)
+- [x] Applicator + LiveDataStore remote APIs
+- [x] PresenceRealtimeBridge + fake source + tests
+- [x] AppDataContainer start/stop wiring
+- [x] `PresenceRealtimeTests` (28) green
+- [ ] Optional: two-account manual dogfood
+- [ ] Open PR when ready
 
 ## Done
 
-Catalog (`docs/design-system.md`), `Push/DesignSystem/`, decision log, AGENTS links, waves 0–9.
-
-## Next
-
-Open PR when ready; re-audit with `scripts/test.sh full` before merge if desired.
+See `docs/superpowers/specs/2026-07-24-realtime-presence-sync-design.md` and
+`docs/superpowers/plans/2026-07-24-realtime-presence-sync.md`.
