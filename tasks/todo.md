@@ -1,21 +1,26 @@
-# Issue #83 — Audit and Standardize Confirmation Popups
+# Issue #84 — Realtime Presence Synchronization
 
 ## Status
 
-- [x] Audit system `confirmationDialog` / `.alert` inventory
-- [x] Design approved (centered cream card, destructive-only migration)
-- [x] Spec: `docs/superpowers/specs/2026-07-24-confirmation-dialogs-design.md`
-- [x] DS-090 decision + catalog updates
-- [x] `PushConfirmationDialog` + `.pushConfirmation` (+ window bridge)
-- [x] Migrate destructive call sites
-- [x] Register new files in Xcode project
-- [x] Build + `PushConfirmationTests` (4/4 passed)
-- [ ] Commit / open PR when ready
+- [x] Design spec approved
+- [x] Implementation plan
+- [x] Migration `0020_current_presence_realtime` (file + remote apply)
+- [x] Applicator + LiveDataStore remote APIs
+- [x] PresenceRealtimeBridge + fake source + tests
+- [x] AppDataContainer start/stop wiring
+- [x] `PresenceRealtimeTests` (28) green
+- [ ] Optional: two-account manual dogfood
+- [x] Open PR (merge with main)
 
-## Migrated
+## Done
 
-Profile sign out / delete account; ExpandablePersonRow remove/block; Blocked unblock; Group leave/delete/transfer; Group remove member / cancel invite; Start Push delete; Plans cancel push.
+See `docs/superpowers/specs/2026-07-24-realtime-presence-sync-design.md` and
+`docs/superpowers/plans/2026-07-24-realtime-presence-sync.md`.
 
-## Intentionally system
+---
 
-Photo choose/remove menus; photo/connector info alerts; Menu / contextMenu; PhotosPicker / OS permissions.
+# Issue #83 — Audit and Standardize Confirmation Popups (merged to main)
+
+## Status
+
+- [x] Complete — see design system decision DS-090 and `PushConfirmationTests`
