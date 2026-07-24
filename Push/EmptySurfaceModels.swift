@@ -10,7 +10,8 @@ enum SurfaceContentPhase: Equatable {
 
 enum EmptySurfaceCopy {
     static let mapEmptyTitle = "Friends will show up here"
-    static let mapEmptyMessage = "When they share status — add friends to get started."
+    /// Shown only when the viewer has zero friends (not when friends hide presence).
+    static let mapEmptyMessage = "Add friends to see who's around."
     static let addFriendsAction = "Add friends"
 
     static let friendsEmptyTitle = "No friends yet"

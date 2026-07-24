@@ -24,7 +24,10 @@ final class SupabaseFriendRepository: FriendRepository {
     /// friends. Outbound blocks are excluded so soft-hidden co-members never
     /// appear on Friends / Start Push / Add Group pickers.
     func friends() async throws -> [Person] {
-        let friendships = try await store.friendships()
+        async let friendshipsTask = store.friendships()
+        async let blockedTask = store.listBlockedUsers()
+        async let profilesTask = store.profiles()
+        let friendships = try await friendshipsTask
         let accepted = Set(
             friendships
                 .filter { $0.isAccepted && $0.involves(currentUserID) }
@@ -36,9 +39,9 @@ final class SupabaseFriendRepository: FriendRepository {
                 .compactMap { $0.otherUserID(relativeTo: currentUserID)?.lowercased() }
         )
         let blockedIDs = Set(
-            (try await store.listBlockedUsers()).map { $0.id.lowercased() }
+            (try await blockedTask).map { $0.id.lowercased() }
         )
-        return try await store.profiles()
+        return try await profilesTask
             .filter { $0.id.caseInsensitiveCompare(currentUserID) != .orderedSame }
             .filter { row in
                 let id = row.id.lowercased()

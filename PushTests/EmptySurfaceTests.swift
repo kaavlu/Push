@@ -23,10 +23,24 @@ final class EmptySurfaceTests: XCTestCase {
         let viewModel = MapViewModel(container: AppDataContainer(seed: .emptyGraph()))
         await viewModel.load()
         XCTAssertEqual(viewModel.surfacePhase, .empty)
+        XCTAssertEqual(viewModel.friendsCount, 0)
         XCTAssertFalse(viewModel.hasFriendMapContent)
     }
 
-    /// Self-only presence (exact place) is not friend map content — phase stays empty.
+    /// Friends without shared presence: no Add-friends empty CTA (content phase).
+    @MainActor
+    func testMapContentPhaseWhenFriendsExistButNoPresence() async throws {
+        let viewModel = MapViewModel(
+            container: AppDataContainer(seed: .friendsWithoutPresence())
+        )
+        await viewModel.load()
+        XCTAssertGreaterThan(viewModel.friendsCount, 0)
+        XCTAssertFalse(viewModel.hasFriendMapContent)
+        XCTAssertEqual(viewModel.surfacePhase, .content)
+    }
+
+    /// Self-only presence (exact place) is not friend map content — phase stays empty
+    /// because there are still zero friends.
     @MainActor
     func testMapEmptyPhaseWhenOnlySelfHasPresence() async throws {
         let now = Date()
@@ -77,6 +91,7 @@ final class EmptySurfaceTests: XCTestCase {
         )
         let viewModel = MapViewModel(container: AppDataContainer(seed: seed))
         await viewModel.load()
+        XCTAssertEqual(viewModel.friendsCount, 0)
         XCTAssertEqual(viewModel.surfacePhase, .empty)
         XCTAssertFalse(viewModel.hasFriendMapContent)
     }

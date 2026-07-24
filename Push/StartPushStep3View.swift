@@ -59,7 +59,11 @@ struct StartPushStep3View: View {
             }
             .padding(.horizontal, 14)
             .frame(height: StartPushLayout.searchBarHeight)
-            .pushGlassBackground(cornerRadius: StartPushLayout.searchBarHeight / 2)
+            // Form field sits on cream — drop the glass drop shadow so it reads flat.
+            .pushGlassBackground(
+                cornerRadius: StartPushLayout.searchBarHeight / 2,
+                showsShadow: false
+            )
         }
     }
 

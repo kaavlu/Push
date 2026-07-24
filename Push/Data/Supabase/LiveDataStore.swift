@@ -144,6 +144,8 @@ final class LiveDataStore {
     private var pushRows: [PushRow]?
     private var responseRows: [PushResponseRow]?
     private var presenceRows: [CurrentPresenceRow]?
+    private var friendshipRows: [FriendshipRow]?
+    private var blockedRows: [SearchProfileRow]?
     private var profilesTask: Task<[ProfileRow], Error>?
     private var groupsTask: Task<[GroupRow], Error>?
     private var membershipsTask: Task<[GroupMembershipRow], Error>?
@@ -151,6 +153,8 @@ final class LiveDataStore {
     private var pushesTask: Task<[PushRow], Error>?
     private var responsesTask: Task<[PushResponseRow], Error>?
     private var presenceTask: Task<[CurrentPresenceRow], Error>?
+    private var friendshipsTask: Task<[FriendshipRow], Error>?
+    private var blockedTask: Task<[SearchProfileRow], Error>?
     private let revisionSubject = CurrentValueSubject<Int, Never>(0)
     private var refreshTask: Task<Void, Error>?
     private var lastSuccessfulRefreshAt: Date?
@@ -171,7 +175,14 @@ final class LiveDataStore {
         async let pushes = pushes()
         async let responses = pushResponses()
         async let presence = currentPresence()
-        _ = try await (profiles, groups, memberships, policies, pushes, responses, presence)
+        // Friendships + blocks gate Friends/Map/Plans derivation; warm with the
+        // social graph so tab opens do not pay a network round-trip per load.
+        async let friendships = friendships()
+        async let blocked = blockedUserRows()
+        _ = try await (
+            profiles, groups, memberships, policies, pushes, responses, presence,
+            friendships, blocked
+        )
     }
 
     /// Clears session caches, re-warms, and publishes one revision on success.
@@ -206,7 +217,9 @@ final class LiveDataStore {
             policyRows: policyRows,
             pushRows: pushRows,
             responseRows: responseRows,
-            presenceRows: presenceRows
+            presenceRows: presenceRows,
+            friendshipRows: friendshipRows,
+            blockedRows: blockedRows
         )
         clearAllSessionCaches()
         do {
@@ -227,6 +240,8 @@ final class LiveDataStore {
         pushRows = nil
         responseRows = nil
         presenceRows = nil
+        friendshipRows = nil
+        blockedRows = nil
         profilesTask = nil
         groupsTask = nil
         membershipsTask = nil
@@ -234,6 +249,8 @@ final class LiveDataStore {
         pushesTask = nil
         responsesTask = nil
         presenceTask = nil
+        friendshipsTask = nil
+        blockedTask = nil
     }
 
     private func restoreSessionCaches(from snapshot: SessionCacheSnapshot) {
@@ -244,6 +261,8 @@ final class LiveDataStore {
         pushRows = snapshot.pushRows
         responseRows = snapshot.responseRows
         presenceRows = snapshot.presenceRows
+        friendshipRows = snapshot.friendshipRows
+        blockedRows = snapshot.blockedRows
     }
 
     private struct SessionCacheSnapshot {
@@ -254,6 +273,8 @@ final class LiveDataStore {
         let pushRows: [PushRow]?
         let responseRows: [PushResponseRow]?
         let presenceRows: [CurrentPresenceRow]?
+        let friendshipRows: [FriendshipRow]?
+        let blockedRows: [SearchProfileRow]?
     }
 
     func profiles() async throws -> [ProfileRow] {
@@ -635,12 +656,18 @@ final class LiveDataStore {
 
     // MARK: - Friendships
     //
-    // Like pushes: no long-lived friendship cache. Profile cache *is* session-
-    // scoped, so after accept we clear it so the new friend becomes visible via
-    // `profiles_select_friends` on the next read.
+    // Session-cached like the rest of the social graph so Map/Friends/Plans can
+    // paint from the bootstrap snapshot. Mutations invalidate friendships +
+    // blocks (and often profiles) via `notifyFriendshipsChanged()`.
 
     func friendships() async throws -> [FriendshipRow] {
-        try await loader.loadFriendships()
+        if let friendshipRows { return friendshipRows }
+        if let friendshipsTask { return try await friendshipsTask.value }
+        let task = Task { try await loader.loadFriendships().uniqued(by: \.id) }
+        friendshipsTask = task
+        return try await finish(
+            task, cache: { friendshipRows = $0 }, clear: { friendshipsTask = nil }
+        )
     }
 
     func searchProfiles(query: String, limit: Int = 20) async throws -> [SearchProfileRow] {
@@ -692,7 +719,7 @@ final class LiveDataStore {
     }
 
     func listBlockedUsers() async throws -> [BlockedPerson] {
-        try await loader.listBlockedUsers().map { row in
+        try await blockedUserRows().map { row in
             BlockedPerson(
                 id: row.id,
                 firstName: row.first_name,
@@ -700,6 +727,16 @@ final class LiveDataStore {
                 imageAssetPath: row.image_asset_path
             )
         }
+    }
+
+    private func blockedUserRows() async throws -> [SearchProfileRow] {
+        if let blockedRows { return blockedRows }
+        if let blockedTask { return try await blockedTask.value }
+        let task = Task { try await loader.listBlockedUsers().uniqued(by: \.id) }
+        blockedTask = task
+        return try await finish(
+            task, cache: { blockedRows = $0 }, clear: { blockedTask = nil }
+        )
     }
 
     /// Fetches a single profile when it may not yet be in the warm snapshot
@@ -711,7 +748,12 @@ final class LiveDataStore {
         return try await loader.loadProfile(id: userID)
     }
 
+    /// Drop friendship/block snapshots so the next read re-fetches, then bump.
     func notifyFriendshipsChanged() {
+        friendshipRows = nil
+        friendshipsTask = nil
+        blockedRows = nil
+        blockedTask = nil
         revisionSubject.value += 1
     }
 }

@@ -38,6 +38,8 @@ final class MapViewModel: ObservableObject {
 
     private var vagueRegionalSources: [RegionalPuckSource] = []
     private var currentUserGroupIDs: Set<String> = []
+    /// Direct friends after last successful load — empty-CTA uses this, not map pucks.
+    private var friendCount = 0
     private let friends: FriendRepository
     private let groups: GroupRepository
     private let sharing: SharingRepository
@@ -46,8 +48,17 @@ final class MapViewModel: ObservableObject {
     private var containerForRefresh: AppDataContainer? = nil
     // Holds the active store-change subscription; nil when initialised without a container.
     private var storeChangeSub: AnyCancellable?
+    private var locationFocusSub: AnyCancellable?
     // Tracks the last revision we loaded so the subscription skips redundant reloads.
     private var lastSeenRevision = 0
+    /// One-shot open: center on GPS (preferred) or self presence, then leave pan to the user.
+    private var initialUserFocusSource: InitialUserFocusSource = .none
+
+    private enum InitialUserFocusSource {
+        case none
+        case presence
+        case location
+    }
 
     init(
         friends: FriendRepository,
@@ -81,6 +92,53 @@ final class MapViewModel: ObservableObject {
             guard let self, revision != self.lastSeenRevision else { return }
             Task { await self.load() }
         }
+        wireLocationFocus(session: container.locationSession)
+    }
+
+    /// Prefer live GPS when available; fall back to self presence place after load.
+    private func wireLocationFocus(session: LocationSessioning?) {
+        guard let session else { return }
+        if let observation = session.state.lastObservation {
+            requestInitialUserFocus(
+                latitude: observation.latitude,
+                longitude: observation.longitude,
+                source: .location
+            )
+        }
+        locationFocusSub = session.statePublisher.sink { [weak self] state in
+            guard let observation = state.lastObservation else { return }
+            self?.requestInitialUserFocus(
+                latitude: observation.latitude,
+                longitude: observation.longitude,
+                source: .location
+            )
+        }
+    }
+
+    private func requestInitialUserFocus(
+        latitude: Double,
+        longitude: Double,
+        source: InitialUserFocusSource
+    ) {
+        switch (initialUserFocusSource, source) {
+        case (.none, _):
+            break
+        case (.presence, .location):
+            // Upgrade presence-based open to the real device fix once.
+            break
+        default:
+            return
+        }
+        initialUserFocusSource = source
+        mapFocusRequest = MapFocusRequest(
+            region: MKCoordinateRegion(
+                center: CLLocationCoordinate2D(latitude: latitude, longitude: longitude),
+                span: MKCoordinateSpan(
+                    latitudeDelta: MapUserFocusLayout.latitudeDelta,
+                    longitudeDelta: MapUserFocusLayout.longitudeDelta
+                )
+            )
+        )
     }
 
     var filteredPucks: [MapPuckData] {
@@ -131,6 +189,9 @@ final class MapViewModel: ObservableObject {
         return !pucks.isEmpty || hasFriendVague
     }
 
+    /// Direct friends after last successful load (not presence-filtered).
+    var friendsCount: Int { friendCount }
+
     var surfacePhase: SurfaceContentPhase {
         switch loadState {
         case .idle, .loading:
@@ -142,21 +203,31 @@ final class MapViewModel: ObservableObject {
         }
     }
 
+    /// Add-friends empty CTA only when there are no friends. Friends who exist but
+    /// aren't sharing leave the map blank without the onboarding prompt.
     private func phaseForLoadedContent() -> SurfaceContentPhase {
-        hasFriendMapContent ? .content : .empty
+        friendCount == 0 ? .empty : .content
     }
 
     func load() async {
         if loadState.value == nil { loadState = .loading }
         do {
             let now = Date()
-            let user = try await friends.currentUser()
-            let friendList = try await friends.friends()
-            let statuses = try await friends.presenceStatuses()
-            let groupList = try await groups.groups()
-            let memberships = try await groups.memberships()
-            let policies = try await sharing.allPolicies()
-            let places = try await pushes.allPlaces()
+            async let userTask = friends.currentUser()
+            async let friendListTask = friends.friends()
+            async let statusesTask = friends.presenceStatuses()
+            async let groupListTask = groups.groups()
+            async let membershipsTask = groups.memberships()
+            async let policiesTask = sharing.allPolicies()
+            async let placesTask = pushes.allPlaces()
+
+            let user = try await userTask
+            let friendList = try await friendListTask
+            let statuses = try await statusesTask
+            let groupList = try await groupListTask
+            let memberships = try await membershipsTask
+            let policies = try await policiesTask
+            let places = try await placesTask
 
             let placesByID = Dictionary(uniqueKeysWithValues: places.map { ($0.id, $0) })
             let peopleByID = Dictionary(
@@ -181,6 +252,7 @@ final class MapViewModel: ObservableObject {
                 )
             }
 
+            friendCount = friendList.count
             filters = [.allFriends] + groupList.map { GroupFilterItem(id: $0.id, title: $0.name) }
             selfPuck = Self.selfPuck(from: presences, currentUserID: user.id)
             currentUserGroupIDs = viewerGroups
@@ -195,10 +267,19 @@ final class MapViewModel: ObservableObject {
                     presences: presences, groups: groupList, memberships: memberships, now: now
                 )
             )
+            // Prefer GPS via location subscription; fall back to published self place.
+            if let selfPuck {
+                requestInitialUserFocus(
+                    latitude: selfPuck.coordinate.latitude,
+                    longitude: selfPuck.coordinate.longitude,
+                    source: .presence
+                )
+            }
             // Stamp the revision so the subscription guard can detect duplicates.
             lastSeenRevision = containerForRefresh?.storeRevision ?? lastSeenRevision
         } catch {
             selfPuck = nil
+            friendCount = 0
             currentUserGroupIDs = []
             vagueRegionalSources = []
             loadState = .failed(error)
@@ -230,4 +311,10 @@ final class MapViewModel: ObservableObject {
 private enum MapFocusLayout {
     static let regionalZoomLatitudeDelta = 0.06
     static let regionalZoomLongitudeDelta = 0.06
+}
+
+/// Default neighborhood span when opening the map on the current user.
+private enum MapUserFocusLayout {
+    static let latitudeDelta = 0.08
+    static let longitudeDelta = 0.08
 }

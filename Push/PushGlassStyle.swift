@@ -80,11 +80,11 @@ enum PushTypography {
 
 extension View {
     @ViewBuilder
-    func pushGlassBackground(cornerRadius: CGFloat) -> some View {
+    func pushGlassBackground(cornerRadius: CGFloat, showsShadow: Bool = true) -> some View {
         let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
         #if compiler(>=6.2)
         if #available(iOS 26.0, *) {
-            self
+            let base = self
                 .background(shape.fill(PushGlassStyle.warmTint.opacity(PushGlassStyle.tintOpacity)))
                 .glassEffect(.regular, in: shape)
                 .overlay {
@@ -93,44 +93,48 @@ extension View {
                         lineWidth: PushGlassStyle.strokeWidth
                     )
                 }
-                .shadow(
+            if showsShadow {
+                base.shadow(
                     color: PushGlassStyle.shadowColor.opacity(PushGlassStyle.shadowOpacity),
                     radius: PushGlassStyle.shadowRadius,
                     y: PushGlassStyle.shadowYOffset
                 )
+            } else {
+                base
+            }
         } else {
-            pushMaterialBackground(cornerRadius: cornerRadius)
+            pushMaterialBackground(cornerRadius: cornerRadius, showsShadow: showsShadow)
         }
         #else
-        pushMaterialBackground(cornerRadius: cornerRadius)
+        pushMaterialBackground(cornerRadius: cornerRadius, showsShadow: showsShadow)
         #endif
     }
 
-    func pushMaterialBackground(cornerRadius: CGFloat) -> some View {
-        background(
-            .ultraThinMaterial,
-            in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-        )
-        .background(
-            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                .fill(.regularMaterial.opacity(PushGlassStyle.materialPresenceOpacity))
-        )
-        .background(
-            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                .fill(PushGlassStyle.warmTint.opacity(PushGlassStyle.tintOpacity))
-        )
-        .overlay {
-            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                .stroke(
+    @ViewBuilder
+    func pushMaterialBackground(cornerRadius: CGFloat, showsShadow: Bool = true) -> some View {
+        let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+        let base = background(.ultraThinMaterial, in: shape)
+            .background(
+                shape.fill(.regularMaterial.opacity(PushGlassStyle.materialPresenceOpacity))
+            )
+            .background(
+                shape.fill(PushGlassStyle.warmTint.opacity(PushGlassStyle.tintOpacity))
+            )
+            .overlay {
+                shape.stroke(
                     .white.opacity(PushGlassStyle.strokeOpacity),
                     lineWidth: PushGlassStyle.strokeWidth
                 )
+            }
+        if showsShadow {
+            base.shadow(
+                color: PushGlassStyle.shadowColor.opacity(PushGlassStyle.shadowOpacity),
+                radius: PushGlassStyle.shadowRadius,
+                y: PushGlassStyle.shadowYOffset
+            )
+        } else {
+            base
         }
-        .shadow(
-            color: PushGlassStyle.shadowColor.opacity(PushGlassStyle.shadowOpacity),
-            radius: PushGlassStyle.shadowRadius,
-            y: PushGlassStyle.shadowYOffset
-        )
     }
 
     func pushOnboardingGlassBackground(cornerRadius: CGFloat) -> some View {

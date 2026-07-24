@@ -1,42 +1,29 @@
-# Issue #79 — Add Core Location Provider
+# Issue #81 — Live App Cleanup
 
-**Issue:** https://github.com/kaavlu/Push/issues/79  
-**Design:** `docs/superpowers/specs/2026-07-23-location-presence-architecture-design.md` §2.4, §2.5, §2.9, PR7  
-**Base:** main (includes #76 presence throttle/heartbeat/Ghost)  
-**PR:** against `main` when done
+**Issue:** https://github.com/kaavlu/Push/issues/81  
+**Base:** main (includes #79 Core Location)
 
 ## Status
 
-- [x] Plan from issue + design
-- [x] `CoreLocationMapping` (auth + CLLocation → LocationObservation)
-- [x] `CoreLocationLocationProvider` (manager seam, AsyncStream, start/stop)
-- [x] Factory: live → Core Location; mock → Null; `--sim-location` → Simulated
-- [x] Session: request when-in-use when not determined; safe auth revoke
-- [x] Minimal `NSLocationWhenInUseUsageDescription` (polished UX = next issue)
-- [x] Tests (provider + factory + session auth)
-- [x] Register files + run suites
-- [ ] Commits + PR
+- [x] Plan from issue
+- [x] Map empty CTA only when `friendsCount == 0` (not when friends hide presence)
+- [x] Open map on user GPS/self presence instead of SF default
+- [x] Session-cache friendships + blocked users; warm with social graph (lag fix)
+- [x] Remove shadow from Start Push location typing bar
+- [x] Tests (EmptySurfaceTests, LiveDataStoreTests, FriendRelationshipTests)
+- [ ] PR
+
+## Fixes
+
+| # | Bug | Fix |
+|---|---|---|
+| 1 | Add-friends map popup when friends exist but no presence | `MapViewModel.surfacePhase` uses friend count |
+| 2 | Map opens in SF | Initial focus from GPS (prefer) or self presence |
+| 3 | Visible lag on friends/pushes | Cache `friendships` + blocked in `LiveDataStore.warm` |
+| 4 | Location field shadow | `pushGlassBackground(showsShadow: false)` on Where field |
 
 ## Non-goals
 
-- Custom permission onboarding / denial recovery UI
-- Background / Always location, significant-change, visits, geofencing
-- Realtime, inference, places catalog, map redesign
-
-## Test evidence (local)
-
-| Suite | Result |
-|---|---|
-| CoreLocationProviderTests | 16 passed |
-| LocationSessionTests | 18 passed |
-| LocationSessionContainerTests | 10 passed |
-
-## Deliverables
-
-| Area | Change |
-|---|---|
-| `Push/Data/Location/` | Infra-only Core Location mapping + provider |
-| `LocationSessionFactory` | `usesCoreLocation` selection |
-| `LocationSession` | Auth request + revoke-only unpublish |
-| `Info.plist` | Minimal when-in-use usage string |
-| Tests | Fake manager seam; no real GPS |
+- Realtime subscriptions
+- Custom location permission onboarding UI
+- Feed backend

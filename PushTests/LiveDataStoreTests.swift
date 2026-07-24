@@ -4,7 +4,7 @@ import XCTest
 
 @MainActor
 final class LiveDataStoreTests: XCTestCase {
-    func testWarmLoadsSevenResourcesConcurrentlyAndOnlyOnce() async throws {
+    func testWarmLoadsNineResourcesConcurrentlyAndOnlyOnce() async throws {
         let loader = LiveDataLoaderSpy()
         let store = LiveDataStore(loader: loader)
 
@@ -12,9 +12,10 @@ final class LiveDataStoreTests: XCTestCase {
         async let second: Void = store.warm()
         _ = try await (first, second)
 
-        // profiles, groups, memberships, policies, pushes, responses, presence
-        XCTAssertEqual(loader.loadCounts, [1, 1, 1, 1, 1, 1, 1])
-        XCTAssertEqual(loader.maximumConcurrentLoads, 7)
+        // profiles, groups, memberships, policies, pushes, responses, presence,
+        // friendships, blocked
+        XCTAssertEqual(loader.loadCounts, [1, 1, 1, 1, 1, 1, 1, 1, 1])
+        XCTAssertEqual(loader.maximumConcurrentLoads, 9)
     }
 
     func testPreparedContainerRepositoriesShareSnapshotWithoutMoreReads() async throws {
@@ -25,6 +26,7 @@ final class LiveDataStoreTests: XCTestCase {
 
         let user = try await container.friends.currentUser()
         let friends = try await container.friends.friends()
+        let blocked = try await container.friends.blockedUsers()
         let profile = try await container.profile.userProfile()
         let groups = try await container.groups.groups()
         let memberships = try await container.groups.memberships()
@@ -33,14 +35,34 @@ final class LiveDataStoreTests: XCTestCase {
         let responses = try await container.pushes.responses()
         XCTAssertEqual(user.id, "self")
         XCTAssertEqual(friends.map(\.id), ["friend"])
+        XCTAssertTrue(blocked.isEmpty)
         XCTAssertEqual(profile.personID, "self")
         XCTAssertEqual(groups.count, 1)
         XCTAssertEqual(memberships.count, 1)
         XCTAssertEqual(policies.count, 1)
         XCTAssertEqual(plans.map(\.id), ["push-1"])
         XCTAssertEqual(responses.map(\.personID), ["self"])
-        // Warm already loaded all seven; tab/repo reads must not re-hit the network.
-        XCTAssertEqual(loader.loadCounts, [1, 1, 1, 1, 1, 1, 1])
+        // Warm already loaded all nine; tab/repo reads must not re-hit the network.
+        XCTAssertEqual(loader.loadCounts, [1, 1, 1, 1, 1, 1, 1, 1, 1])
+    }
+
+    func testNotifyFriendshipsChangedInvalidatesFriendshipAndBlockedCaches() async throws {
+        let loader = LiveDataLoaderSpy()
+        let store = LiveDataStore(loader: loader)
+        try await store.warm()
+        XCTAssertEqual(loader.loadCounts[LiveDataLoaderSpy.Index.friendships], 1)
+        XCTAssertEqual(loader.loadCounts[LiveDataLoaderSpy.Index.blocked], 1)
+
+        _ = try await store.friendships()
+        _ = try await store.listBlockedUsers()
+        XCTAssertEqual(loader.loadCounts[LiveDataLoaderSpy.Index.friendships], 1)
+        XCTAssertEqual(loader.loadCounts[LiveDataLoaderSpy.Index.blocked], 1)
+
+        store.notifyFriendshipsChanged()
+        _ = try await store.friendships()
+        _ = try await store.listBlockedUsers()
+        XCTAssertEqual(loader.loadCounts[LiveDataLoaderSpy.Index.friendships], 2)
+        XCTAssertEqual(loader.loadCounts[LiveDataLoaderSpy.Index.blocked], 2)
     }
 
     func testNotifyPushesChangedInvalidatesPushSnapshot() async throws {
@@ -138,7 +160,7 @@ final class LiveDataStoreTests: XCTestCase {
         loader.pushRows = [Self.samplePushRow(id: "push-1", creator: "self")]
         let store = LiveDataStore(loader: loader)
         try await store.warm()
-        XCTAssertEqual(loader.loadCounts, [1, 1, 1, 1, 1, 1, 1])
+        XCTAssertEqual(loader.loadCounts, [1, 1, 1, 1, 1, 1, 1, 1, 1])
 
         loader.pushRows = [
             Self.samplePushRow(id: "push-1", creator: "self"),
@@ -151,7 +173,7 @@ final class LiveDataStoreTests: XCTestCase {
 
         let pushes = try await store.pushes()
         XCTAssertEqual(pushes.map(\.id), ["push-1", "push-2"])
-        XCTAssertEqual(loader.loadCounts, [2, 2, 2, 2, 2, 2, 2])
+        XCTAssertEqual(loader.loadCounts, [2, 2, 2, 2, 2, 2, 2, 2, 2])
         XCTAssertEqual(revisions, [1])
         XCTAssertEqual(store.revision, 1)
         _ = sub
@@ -161,13 +183,13 @@ final class LiveDataStoreTests: XCTestCase {
         let loader = LiveDataLoaderSpy()
         let store = LiveDataStore(loader: loader)
         try await store.warm()
-        loader.loadCounts = [0, 0, 0, 0, 0, 0, 0]
+        loader.loadCounts = [0, 0, 0, 0, 0, 0, 0, 0, 0]
 
         async let a: Void = store.refresh()
         async let b: Void = store.refresh()
         _ = try await (a, b)
 
-        XCTAssertEqual(loader.loadCounts, [1, 1, 1, 1, 1, 1, 1])
+        XCTAssertEqual(loader.loadCounts, [1, 1, 1, 1, 1, 1, 1, 1, 1])
         XCTAssertEqual(store.revision, 1)
     }
 
@@ -195,9 +217,9 @@ final class LiveDataStoreTests: XCTestCase {
     func testRefreshSessionOnPreparedContainerRefetches() async throws {
         let loader = LiveDataLoaderSpy()
         let container = try await AppDataContainer.prepareLive(loader: loader, currentUserID: "self")
-        XCTAssertEqual(loader.loadCounts, [1, 1, 1, 1, 1, 1, 1])
+        XCTAssertEqual(loader.loadCounts, [1, 1, 1, 1, 1, 1, 1, 1, 1])
         try await container.refreshSession()
-        XCTAssertEqual(loader.loadCounts, [2, 2, 2, 2, 2, 2, 2])
+        XCTAssertEqual(loader.loadCounts, [2, 2, 2, 2, 2, 2, 2, 2, 2])
     }
 
     func testPresenceIncludedInWarmAndSurvivesFailedRefresh() async throws {
@@ -270,10 +292,13 @@ final class LiveDataLoaderSpy: LiveDataLoading {
         static let pushes = 4
         static let responses = 5
         static let presence = 6
-        static let count = 7
+        static let friendships = 7
+        static let blocked = 8
+        static let count = 9
     }
 
-    /// profiles, groups, memberships, policies, pushes, responses, presence
+    /// profiles, groups, memberships, policies, pushes, responses, presence,
+    /// friendships, blocked
     var loadCounts = Array(repeating: 0, count: Index.count)
     var maximumConcurrentLoads = 0
     var writeError: Error?
@@ -581,7 +606,10 @@ final class LiveDataLoaderSpy: LiveDataLoading {
     ]
     var searchRows: [SearchProfileRow] = []
 
-    func loadFriendships() async throws -> [FriendshipRow] { friendshipRows }
+    func loadFriendships() async throws -> [FriendshipRow] {
+        try await load(index: Index.friendships)
+        return friendshipRows
+    }
 
     func searchProfiles(query: String, limit: Int) async throws -> [SearchProfileRow] {
         let q = query.lowercased()
@@ -675,6 +703,7 @@ final class LiveDataLoaderSpy: LiveDataLoading {
 
     func listBlockedUsers() async throws -> [SearchProfileRow] {
         if let writeError { throw writeError }
+        try await load(index: Index.blocked)
         return blockedRows
     }
 

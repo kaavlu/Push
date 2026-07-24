@@ -23,6 +23,10 @@ struct PushApp: App {
                 RootView()
                 #endif
             }
+            // Design is light-only: brand hex colors don't adapt, but system
+            // materials / glass / chrome do — lock appearance so Dark Mode
+            // doesn't invert the cream/glass UI (also UIUserInterfaceStyle in Info.plist).
+            .preferredColorScheme(.light)
         }
     }
 
