@@ -14,6 +14,7 @@ protocol LiveDataLoading: AnyObject {
     func updateImagePath(userID: String, imageAssetPath: String?) async throws -> ProfileRow
     func loadPushes() async throws -> [PushRow]
     func loadResponses() async throws -> [PushResponseRow]
+    func loadPresence() async throws -> [CurrentPresenceRow]
     func insertPush(_ payload: PushInsertPayload) async throws -> PushRow
     func updatePush(id: String, payload: PushUpdatePayload) async throws -> PushRow
     func cancelPush(id: String, payload: PushCancelPayload) async throws -> PushRow
@@ -140,12 +141,14 @@ final class LiveDataStore {
     private var policyRows: [SharingPolicyRow]?
     private var pushRows: [PushRow]?
     private var responseRows: [PushResponseRow]?
+    private var presenceRows: [CurrentPresenceRow]?
     private var profilesTask: Task<[ProfileRow], Error>?
     private var groupsTask: Task<[GroupRow], Error>?
     private var membershipsTask: Task<[GroupMembershipRow], Error>?
     private var policiesTask: Task<[SharingPolicyRow], Error>?
     private var pushesTask: Task<[PushRow], Error>?
     private var responsesTask: Task<[PushResponseRow], Error>?
+    private var presenceTask: Task<[CurrentPresenceRow], Error>?
     private let revisionSubject = CurrentValueSubject<Int, Never>(0)
     private var refreshTask: Task<Void, Error>?
     private var lastSuccessfulRefreshAt: Date?
@@ -165,7 +168,8 @@ final class LiveDataStore {
         async let policies = policies()
         async let pushes = pushes()
         async let responses = pushResponses()
-        _ = try await (profiles, groups, memberships, policies, pushes, responses)
+        async let presence = currentPresence()
+        _ = try await (profiles, groups, memberships, policies, pushes, responses, presence)
     }
 
     /// Clears session caches, re-warms, and publishes one revision on success.
@@ -199,7 +203,8 @@ final class LiveDataStore {
             membershipRows: membershipRows,
             policyRows: policyRows,
             pushRows: pushRows,
-            responseRows: responseRows
+            responseRows: responseRows,
+            presenceRows: presenceRows
         )
         clearAllSessionCaches()
         do {
@@ -219,12 +224,14 @@ final class LiveDataStore {
         policyRows = nil
         pushRows = nil
         responseRows = nil
+        presenceRows = nil
         profilesTask = nil
         groupsTask = nil
         membershipsTask = nil
         policiesTask = nil
         pushesTask = nil
         responsesTask = nil
+        presenceTask = nil
     }
 
     private func restoreSessionCaches(from snapshot: SessionCacheSnapshot) {
@@ -234,6 +241,7 @@ final class LiveDataStore {
         policyRows = snapshot.policyRows
         pushRows = snapshot.pushRows
         responseRows = snapshot.responseRows
+        presenceRows = snapshot.presenceRows
     }
 
     private struct SessionCacheSnapshot {
@@ -243,6 +251,7 @@ final class LiveDataStore {
         let policyRows: [SharingPolicyRow]?
         let pushRows: [PushRow]?
         let responseRows: [PushResponseRow]?
+        let presenceRows: [CurrentPresenceRow]?
     }
 
     func profiles() async throws -> [ProfileRow] {
@@ -477,6 +486,32 @@ final class LiveDataStore {
         responseRows = nil
         pushesTask = nil
         responsesTask = nil
+        revisionSubject.value += 1
+    }
+
+    // MARK: - Presence
+    //
+    // Session-cached like the social graph / pushes. Phase 1a is read-only:
+    // warm + refresh load `current_presence`; writes/Realtime land later.
+    // `notifyPresenceChanged()` clears the cache and bumps one revision so
+    // Map/Friends reload through the existing onStoreChange path.
+
+    func currentPresence() async throws -> [CurrentPresenceRow] {
+        if let presenceRows { return presenceRows }
+        if let presenceTask { return try await presenceTask.value }
+        let task = Task {
+            try await loader.loadPresence().uniqued(by: \.user_id)
+        }
+        presenceTask = task
+        return try await finish(
+            task, cache: { presenceRows = $0 }, clear: { presenceTask = nil }
+        )
+    }
+
+    /// Drop the presence snapshot and publish one revision (Realtime / write path).
+    func notifyPresenceChanged() {
+        presenceRows = nil
+        presenceTask = nil
         revisionSubject.value += 1
     }
 

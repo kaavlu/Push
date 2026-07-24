@@ -51,9 +51,10 @@ final class SupabasePushRepository: PushRepository {
         await store.notifyPushesChanged()
     }
 
-    // History/calendar derive from completed pushes; places remain out of
-    // scope for live (no places table) — free-text location still surfaces
-    // via HistoryContentBuilder + location_text on the push row.
+    // History/calendar derive from completed pushes. Phase 1a has no places
+    // catalog — free-text location still surfaces via HistoryContentBuilder +
+    // location_text on the push row. `allPlaces()` returns synthetic places
+    // from the presence cache so MapViewModel keeps its existing load path.
     func pastHangouts(forMonthContaining date: Date) async throws -> [PastHangout] {
         let now = Date()
         let plans = try await store.pushes().map { $0.pushPlan() }
@@ -66,7 +67,12 @@ final class SupabasePushRepository: PushRepository {
         )
     }
 
-    func allPlaces() async throws -> [Place] { [] }
+    func allPlaces() async throws -> [Place] {
+        let rows = try await store.currentPresence()
+        return CurrentPresenceRow.syntheticPlaces(
+            from: rows, viewerID: currentUserID
+        )
+    }
 
     func createPush(_ draft: PushDraft) async throws -> PushPlan.ID {
         let parsed = PushRecipientResolver.parse(draft.recipientIDs)

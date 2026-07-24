@@ -4,7 +4,7 @@ import XCTest
 
 @MainActor
 final class LiveDataStoreTests: XCTestCase {
-    func testWarmLoadsSixResourcesConcurrentlyAndOnlyOnce() async throws {
+    func testWarmLoadsSevenResourcesConcurrentlyAndOnlyOnce() async throws {
         let loader = LiveDataLoaderSpy()
         let store = LiveDataStore(loader: loader)
 
@@ -12,8 +12,9 @@ final class LiveDataStoreTests: XCTestCase {
         async let second: Void = store.warm()
         _ = try await (first, second)
 
-        XCTAssertEqual(loader.loadCounts, [1, 1, 1, 1, 1, 1])
-        XCTAssertEqual(loader.maximumConcurrentLoads, 6)
+        // profiles, groups, memberships, policies, pushes, responses, presence
+        XCTAssertEqual(loader.loadCounts, [1, 1, 1, 1, 1, 1, 1])
+        XCTAssertEqual(loader.maximumConcurrentLoads, 7)
     }
 
     func testPreparedContainerRepositoriesShareSnapshotWithoutMoreReads() async throws {
@@ -38,8 +39,8 @@ final class LiveDataStoreTests: XCTestCase {
         XCTAssertEqual(policies.count, 1)
         XCTAssertEqual(plans.map(\.id), ["push-1"])
         XCTAssertEqual(responses.map(\.personID), ["self"])
-        // Warm already loaded all six; tab/repo reads must not re-hit the network.
-        XCTAssertEqual(loader.loadCounts, [1, 1, 1, 1, 1, 1])
+        // Warm already loaded all seven; tab/repo reads must not re-hit the network.
+        XCTAssertEqual(loader.loadCounts, [1, 1, 1, 1, 1, 1, 1])
     }
 
     func testNotifyPushesChangedInvalidatesPushSnapshot() async throws {
@@ -47,10 +48,13 @@ final class LiveDataStoreTests: XCTestCase {
         loader.pushRows = [Self.samplePushRow(id: "push-1", creator: "self")]
         let store = LiveDataStore(loader: loader)
         try await store.warm()
-        XCTAssertEqual(loader.loadCounts[4], 1)
+        XCTAssertEqual(loader.loadCounts[LiveDataLoaderSpy.Index.pushes], 1)
 
         _ = try await store.pushes()
-        XCTAssertEqual(loader.loadCounts[4], 1, "cached push read should not re-fetch")
+        XCTAssertEqual(
+            loader.loadCounts[LiveDataLoaderSpy.Index.pushes], 1,
+            "cached push read should not re-fetch"
+        )
 
         store.notifyPushesChanged()
         loader.pushRows = [
@@ -59,7 +63,7 @@ final class LiveDataStoreTests: XCTestCase {
         ]
         let refreshed = try await store.pushes()
         XCTAssertEqual(refreshed.map(\.id), ["push-1", "push-2"])
-        XCTAssertEqual(loader.loadCounts[4], 2)
+        XCTAssertEqual(loader.loadCounts[LiveDataLoaderSpy.Index.pushes], 2)
     }
 
     func testCurrentUserAndProfileUseAuthenticatedIDNotRowOrder() async throws {
@@ -134,7 +138,7 @@ final class LiveDataStoreTests: XCTestCase {
         loader.pushRows = [Self.samplePushRow(id: "push-1", creator: "self")]
         let store = LiveDataStore(loader: loader)
         try await store.warm()
-        XCTAssertEqual(loader.loadCounts, [1, 1, 1, 1, 1, 1])
+        XCTAssertEqual(loader.loadCounts, [1, 1, 1, 1, 1, 1, 1])
 
         loader.pushRows = [
             Self.samplePushRow(id: "push-1", creator: "self"),
@@ -147,7 +151,7 @@ final class LiveDataStoreTests: XCTestCase {
 
         let pushes = try await store.pushes()
         XCTAssertEqual(pushes.map(\.id), ["push-1", "push-2"])
-        XCTAssertEqual(loader.loadCounts, [2, 2, 2, 2, 2, 2])
+        XCTAssertEqual(loader.loadCounts, [2, 2, 2, 2, 2, 2, 2])
         XCTAssertEqual(revisions, [1])
         XCTAssertEqual(store.revision, 1)
         _ = sub
@@ -157,13 +161,13 @@ final class LiveDataStoreTests: XCTestCase {
         let loader = LiveDataLoaderSpy()
         let store = LiveDataStore(loader: loader)
         try await store.warm()
-        loader.loadCounts = [0, 0, 0, 0, 0, 0]
+        loader.loadCounts = [0, 0, 0, 0, 0, 0, 0]
 
         async let a: Void = store.refresh()
         async let b: Void = store.refresh()
         _ = try await (a, b)
 
-        XCTAssertEqual(loader.loadCounts, [1, 1, 1, 1, 1, 1])
+        XCTAssertEqual(loader.loadCounts, [1, 1, 1, 1, 1, 1, 1])
         XCTAssertEqual(store.revision, 1)
     }
 
@@ -191,9 +195,59 @@ final class LiveDataStoreTests: XCTestCase {
     func testRefreshSessionOnPreparedContainerRefetches() async throws {
         let loader = LiveDataLoaderSpy()
         let container = try await AppDataContainer.prepareLive(loader: loader, currentUserID: "self")
-        XCTAssertEqual(loader.loadCounts, [1, 1, 1, 1, 1, 1])
+        XCTAssertEqual(loader.loadCounts, [1, 1, 1, 1, 1, 1, 1])
         try await container.refreshSession()
-        XCTAssertEqual(loader.loadCounts, [2, 2, 2, 2, 2, 2])
+        XCTAssertEqual(loader.loadCounts, [2, 2, 2, 2, 2, 2, 2])
+    }
+
+    func testPresenceIncludedInWarmAndSurvivesFailedRefresh() async throws {
+        let loader = LiveDataLoaderSpy()
+        loader.presenceRows = [
+            .fixture(userID: "friend", lat: 37.77, lng: -122.42)
+        ]
+        let store = LiveDataStore(loader: loader)
+        try await store.warm()
+
+        let presence = try await store.currentPresence()
+        XCTAssertEqual(presence.map(\.user_id), ["friend"])
+        XCTAssertEqual(loader.loadCounts[LiveDataLoaderSpy.Index.presence], 1)
+
+        loader.shouldFailLoads = true
+        do {
+            try await store.refresh()
+            XCTFail("expected throw")
+        } catch {}
+
+        loader.shouldFailLoads = false
+        let restored = try await store.currentPresence()
+        XCTAssertEqual(restored.map(\.user_id), ["friend"])
+        XCTAssertEqual(
+            loader.loadCounts[LiveDataLoaderSpy.Index.presence], 1,
+            "failed refresh must restore cache without re-fetch"
+        )
+    }
+
+    func testNotifyPresenceChangedInvalidatesAndBumpsOneRevision() async throws {
+        let loader = LiveDataLoaderSpy()
+        loader.presenceRows = [
+            .fixture(userID: "friend", lat: 37.77, lng: -122.42)
+        ]
+        let store = LiveDataStore(loader: loader)
+        try await store.warm()
+        var revisions: [Int] = []
+        let sub = store.onChange { revisions.append($0) }
+
+        store.notifyPresenceChanged()
+        loader.presenceRows = [
+            .fixture(userID: "friend", lat: 37.78, lng: -122.41),
+            .fixture(userID: "self", lat: 37.76, lng: -122.43)
+        ]
+        let refreshed = try await store.currentPresence()
+        XCTAssertEqual(Set(refreshed.map(\.user_id)), Set(["friend", "self"]))
+        XCTAssertEqual(loader.loadCounts[LiveDataLoaderSpy.Index.presence], 2)
+        XCTAssertEqual(revisions, [1])
+        XCTAssertEqual(store.revision, 1)
+        _ = sub
     }
 
     func testRefreshSessionOnMockIsNoOp() async throws {
@@ -208,14 +262,26 @@ final class LiveDataStoreTests: XCTestCase {
 // create/update/cancel/respond behavior.
 @MainActor
 final class LiveDataLoaderSpy: LiveDataLoading {
-    /// profiles, groups, memberships, policies, pushes, responses
-    var loadCounts = [0, 0, 0, 0, 0, 0]
+    enum Index {
+        static let profiles = 0
+        static let groups = 1
+        static let memberships = 2
+        static let policies = 3
+        static let pushes = 4
+        static let responses = 5
+        static let presence = 6
+        static let count = 7
+    }
+
+    /// profiles, groups, memberships, policies, pushes, responses, presence
+    var loadCounts = Array(repeating: 0, count: Index.count)
     var maximumConcurrentLoads = 0
     var writeError: Error?
     var shouldFailLoads = false
     var duplicateProfiles = false
     var pushRows: [PushRow] = []
     var responseRows: [PushResponseRow] = []
+    var presenceRows: [CurrentPresenceRow] = []
     /// Overridable so push-invitee tests can supply their own group rosters;
     /// defaults to the fixture the pre-existing store tests expect.
     var membershipRows = [GroupMembershipRow(
@@ -225,24 +291,24 @@ final class LiveDataLoaderSpy: LiveDataLoading {
     private var activeLoads = 0
 
     func loadProfiles() async throws -> [ProfileRow] {
-        try await load(index: 0)
+        try await load(index: Index.profiles)
         var rows: [ProfileRow] = [.fixture(id: "friend", name: "Friend"), .fixture(id: "self", name: "Self")]
         if duplicateProfiles { rows.append(.fixture(id: "friend", name: "Duplicate")) }
         return rows
     }
 
     func loadGroups() async throws -> [GroupRow] {
-        try await load(index: 1)
+        try await load(index: Index.groups)
         return [GroupRow(id: "group", name: "Crew", image_asset_path: nil)]
     }
 
     func loadMemberships() async throws -> [GroupMembershipRow] {
-        try await load(index: 2)
+        try await load(index: Index.memberships)
         return membershipRows
     }
 
     func loadPolicies() async throws -> [SharingPolicyRow] {
-        try await load(index: 3)
+        try await load(index: Index.policies)
         return [SharingPolicyRow(
             id: "policy", owner_person_id: "self", audience_type: "global_default",
             audience_id: nil, location_visibility: "full", activity_visibility: "full",
@@ -283,13 +349,18 @@ final class LiveDataLoaderSpy: LiveDataLoading {
     // be exercised end-to-end via `SupabasePushRepository` in other tests).
 
     func loadPushes() async throws -> [PushRow] {
-        try await load(index: 4)
+        try await load(index: Index.pushes)
         return pushRows
     }
 
     func loadResponses() async throws -> [PushResponseRow] {
-        try await load(index: 5)
+        try await load(index: Index.responses)
         return responseRows
+    }
+
+    func loadPresence() async throws -> [CurrentPresenceRow] {
+        try await load(index: Index.presence)
+        return presenceRows
     }
 
     func insertPush(_ payload: PushInsertPayload) async throws -> PushRow {
@@ -609,6 +680,46 @@ private extension ProfileRow {
             availability_choice: availability, visibility_note: "Visible",
             settings_activity_visibility: nil, settings_map_preferences: nil,
             settings_close_friends: nil
+        )
+    }
+}
+
+extension CurrentPresenceRow {
+    /// Test fixture for live presence reads (Issue #73).
+    static func fixture(
+        userID: String,
+        availability: String = "free_now",
+        isPublished: Bool = true,
+        activityName: String = "",
+        activitySymbol: String = "",
+        statusNote: String? = nil,
+        lat: Double? = 37.7749,
+        lng: Double? = -122.4194,
+        vagueLat: Double? = nil,
+        vagueLng: Double? = nil,
+        confidence: String = "medium",
+        observedAt: String = "2030-01-01T12:00:00Z",
+        updatedAt: String = "2030-01-01T12:00:00Z",
+        expiresAt: String? = "2030-01-01T13:00:00Z",
+        source: String = "location"
+    ) -> CurrentPresenceRow {
+        CurrentPresenceRow(
+            user_id: userID,
+            availability: availability,
+            is_published: isPublished,
+            activity_name: activityName,
+            activity_symbol: activitySymbol,
+            place_id: nil,
+            status_note: statusNote,
+            latitude: lat,
+            longitude: lng,
+            vague_latitude: vagueLat,
+            vague_longitude: vagueLng,
+            confidence: confidence,
+            observed_at: observedAt,
+            updated_at: updatedAt,
+            expires_at: expiresAt,
+            source: source
         )
     }
 }

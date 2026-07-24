@@ -4,25 +4,35 @@ import Combine
 
 @MainActor
 final class LiveContainerIsolationTests: XCTestCase {
-    func testLiveContainerExposesNoMockPresenceOrFeed() async throws {
+    func testPreparedLiveWithEmptyPresenceDoesNotLeakMockSeed() async throws {
+        let loader = LiveDataLoaderSpy()
+        loader.presenceRows = []
+        let container = try await AppDataContainer.prepareLive(
+            loader: loader, currentUserID: "self"
+        )
+        // Empty live presence + empty feed — never mock seed pucks / hangouts.
+        let presence = try await container.friends.presenceStatuses()
+        let places = try await container.pushes.allPlaces()
+        let events = try await container.feed.events()
+        XCTAssertTrue(presence.isEmpty)
+        XCTAssertTrue(places.isEmpty)
+        XCTAssertTrue(events.isEmpty)
+        XCTAssertEqual(container.currentUserID, "self")
+    }
+
+    func testLiveContainerWiresRealFriendAndPushRepositories() {
         let container = AppDataContainer.live(
             client: SupabaseClientProvider.shared.client,
             currentUserID: "11111111-1111-1111-1111-111111111111"
         )
-        // No network is exercised here: these live repos return empty synchronously.
-        let presence = try await container.friends.presenceStatuses()
-        let events = try await container.feed.events()
-        XCTAssertTrue(presence.isEmpty)
-        XCTAssertTrue(events.isEmpty)
-        XCTAssertEqual(container.currentUserID, "11111111-1111-1111-1111-111111111111")
+        XCTAssertTrue(container.friends is SupabaseFriendRepository)
+        XCTAssertTrue(container.pushes is SupabasePushRepository)
     }
 
-    // Pushes and friend requests are live-persisted (unlike presence/feed, which
-    // stay mock-empty Day-1), so "no mock leak" is verified structurally — the
-    // live container must be wired to the real Supabase-backed repository, not
-    // the mock — rather than by an unauthenticated network call, which real
-    // usage never makes (`RootView` only installs a live container after
-    // sign-in). Behavioral coverage lives in repository unit tests with spies.
+    // Pushes and friend requests are live-persisted. "No mock leak" for presence
+    // is covered by empty-cache prepared live above and LivePresenceReadTests.
+    // Unauthenticated network is never exercised here — RootView only installs
+    // a live container after sign-in.
     func testLiveContainerWiresRealPushRepositoryNotMock() {
         let container = AppDataContainer.live(
             client: SupabaseClientProvider.shared.client,
