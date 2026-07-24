@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		395157BC677C7B7727651F37 /* PushPersonAvatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76CAF04D38F43AFCB0CC16D3 /* PushPersonAvatar.swift */; };
+		03BCF3862D68A15B2F276AC6 /* PushBrandSunbeamPill.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EDC803E651129A5D6768CEA /* PushBrandSunbeamPill.swift */; };
+		E2F1B8A583A72D13C8142BA5 /* PushAvailabilityChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F254EF9BF3AF2BF21DBEB05 /* PushAvailabilityChip.swift */; };
+		AEFB876C3386AA0658B771E2 /* PushAvailabilityTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = B89791E1057B7DFE69BF6301 /* PushAvailabilityTokens.swift */; };
 		F515ED6A11B8DE42C99D85FE /* PushModalSurface.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2634232E38BB3E06DAC2DD5 /* PushModalSurface.swift */; };
 		D6629FCC09A96BE8D2576A8D /* PushCardGlass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AA6ED638E44BC85BC0350EB /* PushCardGlass.swift */; };
 		3F47C695F9FD965CF4813C82 /* PushPuckGlass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FEBC7152C686B51F0314080 /* PushPuckGlass.swift */; };
@@ -304,6 +308,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		76CAF04D38F43AFCB0CC16D3 /* PushPersonAvatar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushPersonAvatar.swift"; path = "DesignSystem/Components/Avatars/PushPersonAvatar.swift"; sourceTree = "<group>"; };
+		7EDC803E651129A5D6768CEA /* PushBrandSunbeamPill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushBrandSunbeamPill.swift"; path = "DesignSystem/Components/Chips/PushBrandSunbeamPill.swift"; sourceTree = "<group>"; };
+		5F254EF9BF3AF2BF21DBEB05 /* PushAvailabilityChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushAvailabilityChip.swift"; path = "DesignSystem/Components/Chips/PushAvailabilityChip.swift"; sourceTree = "<group>"; };
+		B89791E1057B7DFE69BF6301 /* PushAvailabilityTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushAvailabilityTokens.swift"; path = "DesignSystem/Tokens/PushAvailabilityTokens.swift"; sourceTree = "<group>"; };
 		A2634232E38BB3E06DAC2DD5 /* PushModalSurface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushModalSurface.swift"; path = "DesignSystem/Surfaces/PushModalSurface.swift"; sourceTree = "<group>"; };
 		0AA6ED638E44BC85BC0350EB /* PushCardGlass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushCardGlass.swift"; path = "DesignSystem/Surfaces/PushCardGlass.swift"; sourceTree = "<group>"; };
 		2FEBC7152C686B51F0314080 /* PushPuckGlass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushPuckGlass.swift"; path = "DesignSystem/Surfaces/PushPuckGlass.swift"; sourceTree = "<group>"; };
@@ -638,6 +646,10 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				76CAF04D38F43AFCB0CC16D3 /* PushPersonAvatar.swift */,
+				7EDC803E651129A5D6768CEA /* PushBrandSunbeamPill.swift */,
+				5F254EF9BF3AF2BF21DBEB05 /* PushAvailabilityChip.swift */,
+				B89791E1057B7DFE69BF6301 /* PushAvailabilityTokens.swift */,
 				A2634232E38BB3E06DAC2DD5 /* PushModalSurface.swift */,
 				0AA6ED638E44BC85BC0350EB /* PushCardGlass.swift */,
 				2FEBC7152C686B51F0314080 /* PushPuckGlass.swift */,
@@ -1077,6 +1089,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				395157BC677C7B7727651F37 /* PushPersonAvatar.swift in Sources */,
+				03BCF3862D68A15B2F276AC6 /* PushBrandSunbeamPill.swift in Sources */,
+				E2F1B8A583A72D13C8142BA5 /* PushAvailabilityChip.swift in Sources */,
+				AEFB876C3386AA0658B771E2 /* PushAvailabilityTokens.swift in Sources */,
 				F515ED6A11B8DE42C99D85FE /* PushModalSurface.swift in Sources */,
 				D6629FCC09A96BE8D2576A8D /* PushCardGlass.swift in Sources */,
 				3F47C695F9FD965CF4813C82 /* PushPuckGlass.swift in Sources */,

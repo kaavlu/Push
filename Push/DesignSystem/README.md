@@ -42,7 +42,8 @@ DesignSystem/
 | 2 | Cream lists & person system | Done |
 | 3 | Empty / loading / error | Done |
 | 4 | Named surfaces + cream tokens | Done |
-| 5–9 | See spec §8.3 | Not started |
+| 5 | Availability, chips, avatars, pucks | Done |
+| 6–9 | See spec §8.3 | Not started |
 
 ## Migrated components
 
@@ -86,5 +87,15 @@ Error routing: hard load → full-page/map failed; mutations → `ActionErrorBan
 | `pushPlansCardGlass` / `pushReviewDeckGlass` | `Surfaces/PushCardGlass.swift` | `plansGlassCard` / `reviewGlassCard` |
 | `PushModalBackground` | `Surfaces/PushModalSurface.swift` | — |
 | Cream tokens | `PushCreamTokens` + `PushGlassCreamTokens` | `PlansColor` cream aliases |
+
+### Wave 5 — Availability, chips, avatars
+
+| Type | File | Notes |
+|---|---|---|
+| `PushAvailabilityTokens` | `Tokens/PushAvailabilityTokens.swift` | `PuckColorTokens` typealias |
+| `PushAvailabilityChip` | `Components/Chips/PushAvailabilityChip.swift` | compact + sheet density |
+| `PushBrandSunbeamPill` | `Components/Chips/PushBrandSunbeamPill.swift` | profile / plan time / group status |
+| `PushPersonAvatar` | `Components/Avatars/PushPersonAvatar.swift` | dark + sunbeam fallbacks |
+| Map pucks | existing `FriendPuck*` / `SelfPuckView` / `RegionalActivityPuck` | catalog only — no DIY |
 
 Temporary typealiases keep call sites compiling during renames.

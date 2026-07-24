@@ -10,25 +10,7 @@
 import SwiftUI
 
 // Ivory page + solid cream card live in DesignSystem (PushCreamSurfaces).
-// FriendsBackground / friendsCard remain as migration shims.
-
-struct FriendsAvailabilityChip: View {
-    let availability: FriendAvailabilityState
-
-    var body: some View {
-        Text(availability.title)
-            .font(.caption2.weight(.bold))
-            .foregroundStyle(availability.chipTextColor)
-            .lineLimit(1)
-            .minimumScaleFactor(FriendsLayout.minimumTextScale)
-            .padding(.horizontal, FriendsLayout.chipHorizontalPadding)
-            .padding(.vertical, FriendsLayout.chipVerticalPadding)
-            .background(availability.chipFillColor, in: Capsule())
-            .overlay(
-                Capsule().stroke(.white.opacity(FriendsColor.chipStrokeOpacity), lineWidth: 0.5)
-            )
-    }
-}
+// FriendsAvailabilityChip → PushAvailabilityChip (DesignSystem).
 
 // MARK: - Filter Chips
 

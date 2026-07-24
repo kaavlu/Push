@@ -135,37 +135,7 @@ struct StartPushHeader: View {
     }
 }
 
-struct RecipientAvatarView: View {
-    let imageAssetName: String?
-    let initials: String
-    let size: CGFloat
-    @State private var remoteImage: UIImage?
-
-    var body: some View {
-        avatarContent
-            .frame(width: size, height: size)
-            .clipShape(Circle())
-            .task(id: imageAssetName) {
-                remoteImage = nil
-                remoteImage = await AvatarImageLoader.image(for: imageAssetName)
-            }
-    }
-
-    @ViewBuilder
-    private var avatarContent: some View {
-        if let image = remoteImage ?? AvatarImageLoader.localImage(for: imageAssetName) {
-            Image(uiImage: image)
-                .resizable()
-                .scaledToFill()
-        } else {
-            Text(initials)
-                .font(.system(size: size * 0.32, weight: .bold, design: .rounded))
-                .foregroundStyle(PushControlColors.activeForeground)
-                .frame(width: size, height: size)
-                .background(Circle().fill(PushControlColors.activeFill))
-        }
-    }
-}
+// RecipientAvatarView → PushPersonAvatar sunbeam fallback (DesignSystem).
 
 struct StartPushSearchBar: View {
     @Binding var text: String

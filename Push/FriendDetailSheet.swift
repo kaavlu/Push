@@ -189,13 +189,7 @@ private struct FriendDetailHeader: View {
             Spacer(minLength: 0)
 
             VStack(alignment: .center, spacing: 6) {
-                Text(friend.availability.title)
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(friend.availability.chipTextColor)
-                    .padding(.horizontal, FriendDetailSheetLayout.headerChipHorizontalPadding)
-                    .padding(.vertical, FriendDetailSheetLayout.headerChipVerticalPadding)
-                    .background(friend.availability.chipFillColor, in: Capsule())
-                    .overlay(Capsule().stroke(Color.white.opacity(0.30), lineWidth: 0.5))
+                PushAvailabilityChip(availability: friend.availability, density: .sheet)
 
                 HStack(spacing: 4) {
                     Circle()
@@ -336,13 +330,7 @@ private struct HangoutMomentHeader: View {
             Spacer(minLength: 0)
 
             VStack(alignment: .center, spacing: 6) {
-                Text(puck.availability.title)
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(puck.availability.chipTextColor)
-                    .padding(.horizontal, FriendDetailSheetLayout.headerChipHorizontalPadding)
-                    .padding(.vertical, FriendDetailSheetLayout.headerChipVerticalPadding)
-                    .background(puck.availability.chipFillColor, in: Capsule())
-                    .overlay(Capsule().stroke(Color.white.opacity(0.30), lineWidth: 0.5))
+                PushAvailabilityChip(availability: puck.availability, density: .sheet)
 
                 HStack(spacing: 4) {
                     Circle()
@@ -525,13 +513,7 @@ private struct FriendGroupHeader: View {
             Spacer(minLength: 0)
 
             VStack(alignment: .center, spacing: 6) {
-                Text(puck.availability.title)
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(puck.availability.chipTextColor)
-                    .padding(.horizontal, FriendDetailSheetLayout.headerChipHorizontalPadding)
-                    .padding(.vertical, FriendDetailSheetLayout.headerChipVerticalPadding)
-                    .background(puck.availability.chipFillColor, in: Capsule())
-                    .overlay(Capsule().stroke(Color.white.opacity(0.30), lineWidth: 0.5))
+                PushAvailabilityChip(availability: puck.availability, density: .sheet)
 
                 HStack(spacing: 4) {
                     Circle()

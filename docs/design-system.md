@@ -1,6 +1,6 @@
 # Push Design System — Agent Catalog
 
-**Status:** Waves 0–4 complete (through named surfaces).  
+**Status:** Waves 0–5 complete (through availability, chips, avatars).  
 **Decisions:** `tasks/design-system-decision-log.md` (DS-001–DS-089) — product law.  
 **Spec:** `docs/superpowers/specs/2026-07-21-push-design-system-specification.md`.  
 **Code home:** `Push/DesignSystem/` (+ temporary typealiases at legacy call sites).  
@@ -130,15 +130,19 @@ Map profile control, bottom-nav raised +, product circles with intentionally dif
 
 **Do not** use full-screen failed as the only channel for mutation errors.
 
-### Avatars, chips, pucks (Wave 5)
+### Availability, chips, avatars, pucks (Wave 5)
 
-| Pattern | DS |
-|---|---|
-| Availability tokens + compact chip | DS-043–044 |
-| Brand sunbeam pill | DS-045 |
-| Person avatar + rings | DS-050–051 |
-| Map puck family | DS-052 — do not DIY |
-| Avatar stack / strip | DS-053 |
+| Pattern | Named API | When to use |
+|---|---|---|
+| Availability colors (DS-043) | `PushAvailabilityTokens` + `FriendAvailabilityState.accentColor` / `chipFillColor` / `chipTextColor` | All rings, chips, badges, live dots |
+| Availability chip (DS-044) | `PushAvailabilityChip` (`.compact` / `.sheet`) | Cream lists + friend-detail headers |
+| Map activity badge (DS-044) | `ActivityBadge` | Map pucks only — not list trailing chips |
+| Brand sunbeam pill (DS-045) | `PushBrandSunbeamPill` / `StatusPill` / `YourPushTimeChip` / `PushGroupStatusPill` | Non-availability labels |
+| Plan status pill (DS-046) | `PlanStatusPill` | Plan/RSVP state on plan cards only |
+| Live dot + time (DS-047) | Person-row trailing accessory | Uses availability accent |
+| Person avatar (DS-050) | `PushPersonAvatar` (fallback `.dark` / `.sunbeam`) | All person faces; shims: `ProfilePhotoAvatar`, `RecipientAvatarView` |
+| Map puck family (DS-052) | `FriendPuck`, `FriendClusterPuck` / group pucks, `RegionalActivityPuck`, `SelfPuckView` | **No DIY map pucks** |
+| Avatar stack / strip (DS-053) | `AvatarStack` / plan-card strips / `PushHistoryAvatarStack` | Offset stack vs linear strip |
 
 ### Navigation & sheets (Wave 6)
 
@@ -196,7 +200,7 @@ Until token modules land, use existing shared sources:
 | 2 | Cream lists & person system | Done |
 | 3 | Empty / loading / error | Done |
 | 4 | Named surfaces + cream tokens | Done |
-| 5 | Availability, chips, avatars, pucks | Pending |
+| 5 | Availability, chips, avatars, pucks | Done |
 | 6 | Selectors, headers, sheets | Pending |
 | 7 | Plan cards & subcomponents | Pending |
 | 8 | Tokens & motion | Pending |

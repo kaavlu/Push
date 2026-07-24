@@ -7,21 +7,21 @@
 - [x] Wave 2 — Cream lists & person system
 - [x] Wave 3 — Empty / loading / error
 - [x] Wave 4 — Named surfaces + cream tokens
-- [ ] Wave 5 — Availability, chips, avatars, pucks
-- [ ] Waves 6–9
+- [x] Wave 5 — Availability, chips, avatars, pucks
+- [ ] Wave 6 — Selectors, headers, sheets
+- [ ] Waves 7–9
 - [ ] Commit / PR
 
-## Wave 4 deliverables
+## Wave 5 deliverables
 
-| Named API | Role |
+| API | Role |
 |---|---|
-| `pushControlGlass` | Generic floating chrome |
-| `pushMapControlGlass` / `MapPopupSheetBackground` | Map chrome + sheets |
-| `pushPuckGlass` | Map annotations only |
-| `pushPlansCardGlass` / `pushReviewDeckGlass` | Card glass families |
-| `PushModalBackground` | Modal gradient |
-| `PushCreamTokens` / `PushGlassCreamTokens` | Cream roles without flattening Plans glass |
+| `PushAvailabilityTokens` | Single availability color path |
+| `PushAvailabilityChip` | List + sheet densities |
+| `PushBrandSunbeamPill` | Profile / plan time / group status |
+| `PushPersonAvatar` | Dark + sunbeam fallbacks |
+| Map puck family | Cataloged — no DIY |
 
 ## Next
 
-Wave 5 — availability tokens, chips, person avatar API, puck catalog.
+Wave 6 — ivory segmented switch, filter chips, map dropdown row, cream headers, modal chrome.

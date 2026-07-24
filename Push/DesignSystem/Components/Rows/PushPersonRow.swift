@@ -157,7 +157,7 @@ struct PushPersonRow: View {
                 customTrailing
             } else {
                 VStack(alignment: .trailing, spacing: FriendsLayout.rowTrailingSpacing) {
-                    FriendsAvailabilityChip(availability: friend.availability)
+                    PushAvailabilityChip(availability: friend.availability)
 
                     if !friend.lastUpdated.isEmpty {
                         HStack(spacing: FriendsLayout.liveTimestampSpacing) {

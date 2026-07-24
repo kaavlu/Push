@@ -83,28 +83,7 @@ struct YourPushCard: View {
     }
 }
 
-struct YourPushTimeChip: View {
-    let timeSignal: String
-
-    var body: some View {
-        Text(timeSignal)
-            .font(.caption.weight(.semibold))
-            .foregroundStyle(PushControlColors.textEspresso)
-            .padding(.horizontal, YourPushCardLayout.timeChipHorizontalPadding)
-            .padding(.vertical, YourPushCardLayout.timeChipVerticalPadding)
-            .background {
-                Capsule()
-                    .fill(PushColorPalette.Accent.sunbeam)
-            }
-            .overlay {
-                Capsule()
-                    .stroke(
-                        PlansColor.creamBase.opacity(YourPushCardLayout.timeChipStrokeOpacity),
-                        lineWidth: YourPushCardLayout.timeChipStrokeWidth
-                    )
-            }
-    }
-}
+// YourPushTimeChip → PushBrandSunbeamPill plan-time style (DesignSystem).
 
 struct YourPushAvatarRow: View {
     let participants: [HangoutPerson]
