@@ -123,40 +123,21 @@ struct GroupDetailView: View {
             guard let item else { return }
             Task { await processPickedPhoto(item) }
         }
-        .confirmationDialog(
-            memberPendingRemove.map { "Remove \($0.name)?" } ?? "Remove member?",
-            isPresented: Binding(
-                get: { memberPendingRemove != nil },
-                set: { if !$0 { memberPendingRemove = nil } }
-            ),
-            titleVisibility: .visible
-        ) {
-            Button("Remove", role: .destructive) {
-                if let member = memberPendingRemove { onRemoveMember(member.id) }
-                memberPendingRemove = nil
-            }
-            Button("Cancel", role: .cancel) { memberPendingRemove = nil }
-        } message: {
-            Text(GroupDetailCopy.removeMemberMessage)
-        }
-        .confirmationDialog(
-            memberPendingCancel.map { "Cancel invite for \($0.name)?" } ?? "Cancel invite?",
-            isPresented: Binding(
-                get: { memberPendingCancel != nil },
-                set: { if !$0 { memberPendingCancel = nil } }
-            ),
-            titleVisibility: .visible
-        ) {
-            Button("Cancel invite", role: .destructive) {
-                if let member = memberPendingCancel {
-                    onCancelInvite(member.membershipID)
-                }
-                memberPendingCancel = nil
-            }
-            Button("Keep invite", role: .cancel) { memberPendingCancel = nil }
-        } message: {
-            Text(GroupDetailCopy.cancelInviteMessage)
-        }
+        .pushConfirmation(
+            item: $memberPendingRemove,
+            title: { member in "Remove \(member.name)?" },
+            message: { _ in GroupDetailCopy.removeMemberMessage },
+            confirmTitle: "Remove",
+            onConfirm: { member in onRemoveMember(member.id) }
+        )
+        .pushConfirmation(
+            item: $memberPendingCancel,
+            title: { member in "Cancel invite for \(member.name)?" },
+            message: { _ in GroupDetailCopy.cancelInviteMessage },
+            confirmTitle: "Cancel invite",
+            cancelTitle: "Keep invite",
+            onConfirm: { member in onCancelInvite(member.membershipID) }
+        )
     }
 
     private var header: some View {

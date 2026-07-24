@@ -132,12 +132,13 @@ _Interview complete (Categories 1–12). Decisions DS-001–DS-089. Specificatio
 ### DS-009 — Destructive confirmations (B10)
 
 - **Existing UI:** System `confirmationDialog` / destructive roles for delete, remove, block, cancel push, etc.
-- **My decision:** Keep **native** system destructive confirmation flows for this design-system pass. Do **not** build a custom branded destructive-alert system now.
-- **Must remain consistent:** Use system confirmation dialogs and destructive roles for irreversible actions.
+- **My decision (historical, Issue #63):** Keep **native** system destructive confirmation flows for the design-system extraction pass. Do **not** build a custom branded destructive-alert system in Waves 0–9.
+- **Superseded by:** **DS-090** (Issue #83) for destructive confirmation presentation. System dialogs remain for multi-action photo menus only.
+- **Must remain consistent:** Explicit confirmation before irreversible actions (now via DS-090 chrome).
 - **May vary:** Copy and action titles per flow.
-- **Reuse required for future features:** **Yes** — prefer system destructive patterns; no custom alert kit unless later decided.
-- **Existing screens need migration:** **No**.
-- **Recommended mechanism:** Keep one-off / platform-native (documented convention).
+- **Reuse required for future features:** **Yes** — use DS-090 `.pushConfirmation` for destructive confirms.
+- **Existing screens need migration:** **Yes** under DS-090.
+- **Recommended mechanism:** Shared Push confirmation dialog family (DS-090).
 
 ---
 
@@ -150,7 +151,7 @@ _Interview complete (Categories 1–12). Decisions DS-001–DS-089. Specificatio
 5. **Onboarding/auth CTAs** → DS-006 domain family only; future alignment planned.
 6. **Create-menu icon circles** → DS-007 menu-scoped style.
 7. **Expandable row actions** → DS-008 reusable rail pattern.
-8. **Destructive confirms** → DS-009 system dialogs.
+8. **Destructive confirms** → DS-090 `.pushConfirmation` (DS-009 superseded for destructive).
 
 ---
 
@@ -895,16 +896,17 @@ _Interview complete (Categories 1–12). Decisions DS-001–DS-089. Specificatio
 ### DS-066 — System menus and confirmations (H4, H5, H6, H9)
 
 - **Existing UI:** Row `Menu` overflow; plan `contextMenu`; `confirmationDialog` for remove/block/cancel/photo/etc. (DS-009).
-- **My decision:** Approved non-sheet action surfaces for this pass:
+- **My decision:** Approved non-sheet action surfaces:
   - System **`Menu`** for row overflow
   - System **`contextMenu`** for secondary card actions
-  - System **`confirmationDialog`** for confirms and photo choose/remove (DS-009)
-- No custom popover/action-panel chrome without an explicit design-system decision. Destructive flows still use system destructive roles + confirmation.
-- **Must remain consistent:** Platform menu/dialog patterns.
+  - System **`confirmationDialog`** for multi-action menus (photo choose/remove)
+  - **DS-090** `.pushConfirmation` for destructive confirmation (Issue #83; supersedes DS-009 for confirms)
+- No freeform custom popover/action-panel chrome outside DS-090.
+- **Must remain consistent:** Menu/contextMenu platform patterns; destructive confirms use DS-090.
 - **May vary:** Menu item lists and copy.
 - **Reuse required for future features:** **Yes**.
-- **Existing screens need migration:** **No** (enforce convention).
-- **Recommended mechanism:** Platform APIs + documented convention.
+- **Existing screens need migration:** Destructive confirms → DS-090; photo menus stay system.
+- **Recommended mechanism:** Platform menus + DS-090 confirmation family.
 
 ### DS-067 — Bottom sheet vs fullScreenCover (H7)
 
@@ -1194,6 +1196,17 @@ _Interview complete (Categories 1–12). Decisions DS-001–DS-089. Specificatio
 - **Existing screens need migration:** **Yes** per priority waves.
 - **Recommended mechanism:** Phased migration plan in design-system spec.
 
+### DS-090 — Branded destructive confirmation dialogs (Issue #83)
+
+- **Existing UI:** System `confirmationDialog` for sign out, delete account, remove/block friend, unblock, leave/delete/transfer group, remove member, cancel invite, cancel/delete push (DS-009 / DS-066).
+- **My decision:** Ship a shared **centered cream confirmation card** on a dim scrim (`PushConfirmationDialog` + `.pushConfirmation`). Destructive confirms use filled `PushControlColors.destructive` capsule (danger role — **not** a third primary CTA). Cancel is secondary text. Local `isPresented` / pending-item state (no global presenter). Window-level presentation so list nesting works. Supersedes DS-009 for **destructive confirmation** only.
+- **Must remain consistent:** Cream card + dialog scrim; confirm above cancel; scrim tap cancels; explicit confirm required before mutation; existing action copy; loading/disabled hooks when needed.
+- **May vary:** Title/message/confirm/cancel labels per flow.
+- **Out of scope this decision:** Multi-action menus (photo choose/remove) stay system `confirmationDialog`; info `.alert`s stay system; `Menu` / `contextMenu` stay system (DS-066 narrowed).
+- **Reuse required for future features:** **Yes** — use `.pushConfirmation` for destructive confirms; do not one-off popup chrome.
+- **Existing screens need migration:** **Yes** — inventory in `docs/superpowers/specs/2026-07-24-confirmation-dialogs-design.md`.
+- **Recommended mechanism:** Shared DesignSystem dialogs family + view modifiers.
+
 ---
 
 ## Category 12 — Agent rules (summary for future implementation)
@@ -1207,11 +1220,15 @@ _Interview complete (Categories 1–12). Decisions DS-001–DS-089. Specificatio
 
 ---
 
+## Post-interview extensions
+
+- **DS-090** (Issue #83): branded destructive confirmation dialogs. Spec: `docs/superpowers/specs/2026-07-24-confirmation-dialogs-design.md`.
+
 ## Interview complete
 
-All categories 1–12 confirmed (DS-001–DS-089).  
-**Spec (approved):** `docs/superpowers/specs/2026-07-21-push-design-system-specification.md`  
-**Handoff (start implementation here):** `tasks/design-system-handoff.md`  
-**Status bookmark:** `tasks/design-system-status.md`  
-Implementation not started — deferred until a dedicated session.
+All categories 1–12 confirmed (DS-001–DS-089); DS-090 added for confirmation dialogs.  
+**Spec (design system):** `docs/superpowers/specs/2026-07-21-push-design-system-specification.md`  
+**Spec (confirmations):** `docs/superpowers/specs/2026-07-24-confirmation-dialogs-design.md`  
+**Handoff (history):** `tasks/design-system-handoff.md`  
+**Catalog:** `docs/design-system.md`
 

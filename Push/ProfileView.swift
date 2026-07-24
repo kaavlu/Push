@@ -94,24 +94,19 @@ struct ProfileView: View {
                 dismissButton: .default(Text("Got it"))
             )
         }
-        .confirmationDialog(
-            "Sign out?",
+        .pushConfirmation(
             isPresented: $isSignOutConfirmationPresented,
-            titleVisibility: .visible
-        ) {
-            Button("Sign Out", role: .destructive) { performSignOut() }
-            Button("Cancel", role: .cancel) { }
-        }
-        .confirmationDialog(
-            "Delete Account?",
+            title: "Sign out?",
+            confirmTitle: "Sign Out",
+            onConfirm: { performSignOut() }
+        )
+        .pushConfirmation(
             isPresented: $isDeleteAccountConfirmationPresented,
-            titleVisibility: .visible
-        ) {
-            Button("Delete Account", role: .destructive) { performDeleteAccount() }
-            Button("Cancel", role: .cancel) { }
-        } message: {
-            Text(ProfileCopy.deleteAccountConfirmationMessage)
-        }
+            title: "Delete Account?",
+            message: ProfileCopy.deleteAccountConfirmationMessage,
+            confirmTitle: "Delete Account",
+            onConfirm: { performDeleteAccount() }
+        )
         // Cream Blocked list uses its own chrome; path-based Profile destinations
         // would leave the modal close bar up, so present as a cover instead.
         .fullScreenCover(isPresented: $isBlockedListPresented) {

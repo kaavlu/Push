@@ -111,6 +111,7 @@ struct PushExpandableRailOverflowChrome<Content: View>: View {
             if isBusy {
                 ProgressView()
                     .controlSize(.small)
+                    .tint(PushControlColors.textSecondary)
             } else {
                 content()
             }
@@ -119,7 +120,57 @@ struct PushExpandableRailOverflowChrome<Content: View>: View {
             width: PushExpandableActionRailMetrics.overflowWidth,
             height: PushExpandableActionRailMetrics.railHeight
         )
+        .contentShape(RoundedRectangle(
+            cornerRadius: PushExpandableActionRailMetrics.railCornerRadius,
+            style: .continuous
+        ))
         .pushExpandableRailSurface()
+    }
+}
+
+/// Ellipsis glyph used inside overflow chrome — same weight/color as rail actions.
+struct PushExpandableRailOverflowGlyph: View {
+    var body: some View {
+        Image(systemName: "ellipsis")
+            .font(.system(
+                size: PushExpandableActionRailMetrics.overflowIconSize,
+                weight: .semibold
+            ))
+            .foregroundStyle(PushControlColors.textSecondary)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .accessibilityHidden(true)
+    }
+}
+
+/// Overflow ellipsis button — opens a Push action menu (not system `Menu`).
+struct PushExpandableRailOverflowButton: View {
+    var isBusy: Bool = false
+    let accessibilityLabel: String
+    var accessibilityHint: String? = nil
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            PushExpandableRailOverflowChrome(isBusy: isBusy) {
+                PushExpandableRailOverflowGlyph()
+            }
+        }
+        .buttonStyle(.plain)
+        .disabled(isBusy)
+        .accessibilityLabel(accessibilityLabel)
+        .modifier(OptionalAccessibilityHint(hint: accessibilityHint))
+    }
+}
+
+private struct OptionalAccessibilityHint: ViewModifier {
+    let hint: String?
+
+    func body(content: Content) -> some View {
+        if let hint, !hint.isEmpty {
+            content.accessibilityHint(hint)
+        } else {
+            content
+        }
     }
 }
 
@@ -160,14 +211,11 @@ struct PushExpandableActionRail_Previews: PreviewProvider {
                     )
                 ]
             ) {
-                PushExpandableRailOverflowChrome {
-                    Image(systemName: "ellipsis")
-                        .font(.system(
-                            size: PushExpandableActionRailMetrics.overflowIconSize,
-                            weight: .semibold
-                        ))
-                        .foregroundStyle(PushControlColors.textSecondary)
-                }
+                PushExpandableRailOverflowButton(
+                    accessibilityLabel: "More actions",
+                    accessibilityHint: "Remove friend or block",
+                    action: {}
+                )
             }
             .padding()
             .pushSolidCreamCard(cornerRadius: 20)

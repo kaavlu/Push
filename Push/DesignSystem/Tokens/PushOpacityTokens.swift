@@ -22,6 +22,9 @@ enum PushOpacityTokens {
     /// Full-screen dim behind menus (create menu, etc.).
     static let scrim = 0.12
 
+    /// Stronger dim behind centered confirmation dialogs (DS-090).
+    static let dialogScrim = 0.36
+
     /// Dense truncating labels (chips, group rows, pills).
     static let minimumTextScale: CGFloat = 0.82
 }

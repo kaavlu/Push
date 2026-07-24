@@ -42,14 +42,13 @@ struct PushPlansPlanCard: View {
         .padding(PlansLayout.cardPadding(layout))
         .pushPlansCardGlass(cornerRadius: PlansLayout.cardCornerRadius(layout))
         .contextMenu { cancelMenu }
-        .confirmationDialog(
-            "Cancel this push?",
+        .pushConfirmation(
             isPresented: $isCancelConfirmationPresented,
-            titleVisibility: .visible
-        ) {
-            Button("Cancel push", role: .destructive) { onCancel?() }
-            Button("Keep push", role: .cancel) {}
-        }
+            title: "Cancel this push?",
+            confirmTitle: "Cancel push",
+            cancelTitle: "Keep push",
+            onConfirm: { onCancel?() }
+        )
     }
 
     private var headerRow: some View {
