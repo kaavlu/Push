@@ -93,19 +93,9 @@ extension View {
         modifier(PulsingAvailabilityGlow(ringColor: ringColor, pulseColor: pulseColor, lineWidth: lineWidth))
     }
 
+    /// Prefer `pushPuckGlass` (DS-012).
     func puckGlassBackground(cornerRadius: CGFloat) -> some View {
-        background(
-            .ultraThinMaterial,
-            in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-        )
-        .background {
-            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                .fill(.white.opacity(FriendPuckLayout.glassTintOpacity))
-        }
-        .overlay {
-            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                .stroke(.white.opacity(FriendPuckLayout.glassStrokeOpacity), lineWidth: FriendPuckLayout.glassStrokeWidth)
-        }
+        pushPuckGlass(cornerRadius: cornerRadius)
     }
 }
 
@@ -190,7 +180,8 @@ enum FriendPuckLayout {
     static let countStrokeWidth: CGFloat = 1.4
     static let clusterBadgeInset: CGFloat = 36
     static let clusterBadgeOffset: CGFloat = 10
-    static let glassTintOpacity = 0.16
-    static let glassStrokeOpacity = 0.64
-    static let glassStrokeWidth: CGFloat = 0.9
+    /// Prefer `PushPuckGlassTokens`.
+    static let glassTintOpacity = PushPuckGlassTokens.tintOpacity
+    static let glassStrokeOpacity = PushPuckGlassTokens.strokeOpacity
+    static let glassStrokeWidth = PushPuckGlassTokens.strokeWidth
 }

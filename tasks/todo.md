@@ -6,19 +6,22 @@
 - [x] Wave 1 — Buttons & primary CTAs
 - [x] Wave 2 — Cream lists & person system
 - [x] Wave 3 — Empty / loading / error
-- [ ] Wave 4 — Named surfaces + cream tokens
-- [ ] Waves 5–9
+- [x] Wave 4 — Named surfaces + cream tokens
+- [ ] Wave 5 — Availability, chips, avatars, pucks
+- [ ] Waves 6–9
 - [ ] Commit / PR
 
-## Wave 3 deliverables
+## Wave 4 deliverables
 
-| Item | Notes |
+| Named API | Role |
 |---|---|
-| EmptySurface family in DesignSystem | models + view + FriendsEmptyState |
-| MapEmptyOverlay | DesignSystem EmptyStates; branded CTAs |
-| Migrated forks | Blocked, Alerts, Add Friends |
-| Error routing | Documented in `docs/design-system.md` |
+| `pushControlGlass` | Generic floating chrome |
+| `pushMapControlGlass` / `MapPopupSheetBackground` | Map chrome + sheets |
+| `pushPuckGlass` | Map annotations only |
+| `pushPlansCardGlass` / `pushReviewDeckGlass` | Card glass families |
+| `PushModalBackground` | Modal gradient |
+| `PushCreamTokens` / `PushGlassCreamTokens` | Cream roles without flattening Plans glass |
 
 ## Next
 
-Wave 4 — promote named glass surfaces (control/map/puck/plans/review/modal).
+Wave 5 — availability tokens, chips, person avatar API, puck catalog.

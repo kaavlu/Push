@@ -62,20 +62,7 @@ enum ProfileColor {
     static let iconFillOpacity = 0.38
 }
 
-struct PushModalBackground: View {
-    var body: some View {
-        LinearGradient(
-            colors: [
-                PushColorPalette.Accent.sunbeam.opacity(ProfileColor.sunbeamTopOpacity),
-                .white,
-                PushColorPalette.Accent.walnut.opacity(ProfileColor.walnutBottomOpacity)
-            ],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-        .ignoresSafeArea()
-    }
-}
+// PushModalBackground lives in DesignSystem/Surfaces/PushModalSurface.swift (DS-015).
 
 struct PushModalCloseButtonBar: View {
     @Environment(\.pushLayout) private var layout

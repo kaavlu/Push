@@ -7,8 +7,8 @@
 
 import SwiftUI
 
-/// Semantic cream roles for ivory-page destinations. Plans card glass keeps its
-/// own fill literals until Wave 4/7 so approved glass appearance is preserved.
+/// Semantic cream roles for ivory-page destinations (DS-014).
+/// Glass-card cream roles live in `PushGlassCreamTokens` (preserve Plans glass look).
 enum PushCreamTokens {
     static let pageIvory = Color(red: 0.988, green: 0.964, blue: 0.902)
     static let solidCard = Color(red: 1.0, green: 0.992, blue: 0.955)
@@ -17,6 +17,11 @@ enum PushCreamTokens {
     static let solidCardStrokeWidth: CGFloat = 0.8
     static let ringOpacity = 0.9
     static let neutralRingOpacity = 0.28
+
+    /// Metadata browns shared by Plans chrome (not solid-card fill).
+    static let metadata = Color(red: 0.43, green: 0.29, blue: 0.17)
+    static let metadataSecondary = Color(red: 0.55, green: 0.43, blue: 0.31)
+    static let metadataTertiary = Color(red: 0.68, green: 0.58, blue: 0.47)
 }
 
 /// Flat ivory page for persistent cream destinations (Friends, Plans, Alerts, …).

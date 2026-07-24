@@ -225,66 +225,14 @@ enum FriendDetailBottomSheetLayout {
     static let sunbeamGlowRadius: CGFloat = 120
 }
 
-/// Cream + sunbeam tokens mirrored from the map top-control surface treatment.
+/// Prefer `PushMapGlassTokens` for map sheet surface chrome (DS-011).
 enum FriendDetailBottomSheetColor {
-    static let creamFill = PushGlassStyle.warmTint.opacity(0.38)
-    static let creamGlowOpacity = 0.28
-    static let sunbeamGlowOpacity = 0.18
-    static let stroke = Color.white.opacity(PushGlassStyle.strokeOpacity)
-    static let highlightTopOpacity = 0.72
-    static let highlightSideOpacity = 0.14
+    static let creamFill = PushMapGlassTokens.sheetCreamFill
+    static let creamGlowOpacity = PushMapGlassTokens.sheetCreamGlowOpacity
+    static let sunbeamGlowOpacity = PushMapGlassTokens.sheetSunbeamGlowOpacity
+    static let stroke = PushMapGlassTokens.sheetStroke
+    static let highlightTopOpacity = PushMapGlassTokens.sheetHighlightTopOpacity
+    static let highlightSideOpacity = PushMapGlassTokens.sheetHighlightSideOpacity
 }
 
-/// Shared cream-glass surface used by the map friend popup and calendar day sheet.
-struct MapPopupSheetBackground<S: Shape>: View {
-    let shape: S
-
-    var body: some View {
-        ZStack {
-            shape.fill(.ultraThinMaterial)
-            shape.fill(FriendDetailBottomSheetColor.creamFill)
-            shape.fill(sunbeamAccent)
-            shape.stroke(
-                FriendDetailBottomSheetColor.stroke,
-                lineWidth: FriendDetailBottomSheetLayout.strokeWidth
-            )
-            shape
-                .stroke(
-                    reflectiveHighlight,
-                    lineWidth: FriendDetailBottomSheetLayout.highlightWidth
-                )
-                .padding(FriendDetailBottomSheetLayout.highlightInset)
-        }
-    }
-
-    private var sunbeamAccent: RadialGradient {
-        RadialGradient(
-            colors: [
-                PushGlassStyle.warmTint.opacity(FriendDetailBottomSheetColor.creamGlowOpacity),
-                PushControlColors.activeFill.opacity(FriendDetailBottomSheetColor.sunbeamGlowOpacity),
-                .clear
-            ],
-            center: .bottom,
-            startRadius: 0,
-            endRadius: FriendDetailBottomSheetLayout.sunbeamGlowRadius
-        )
-    }
-
-    private var reflectiveHighlight: LinearGradient {
-        LinearGradient(
-            colors: [
-                Color.white.opacity(FriendDetailBottomSheetColor.highlightTopOpacity),
-                Color.white.opacity(FriendDetailBottomSheetColor.highlightSideOpacity),
-                .clear
-            ],
-            startPoint: .top,
-            endPoint: .bottom
-        )
-    }
-}
-
-extension MapPopupSheetBackground where S == Rectangle {
-    init() {
-        self.init(shape: Rectangle())
-    }
-}
+// MapPopupSheetBackground lives in DesignSystem/Surfaces/PushMapGlass.swift.

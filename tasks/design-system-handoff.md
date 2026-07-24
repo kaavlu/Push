@@ -1,6 +1,6 @@
 # Push Design System — Implementation Handoff
 
-**Status:** Spec approved · **Wave 0–3 implemented** · continue from Wave 4  
+**Status:** Spec approved · **Wave 0–4 implemented** · continue from Wave 5  
 **Started:** Issue #63 implementation session
 
 ---
@@ -41,7 +41,7 @@
 | Confirmed decisions DS-001–DS-089 | `tasks/design-system-decision-log.md` |
 | Approved specification + migration plan | `docs/superpowers/specs/2026-07-21-push-design-system-specification.md` |
 | Module path choice | `Push/DesignSystem/` |
-| Implementation | **Wave 0–3 done** — through empty/loading/error family |
+| Implementation | **Wave 0–4 done** — through named surfaces |
 
 ---
 
@@ -95,7 +95,7 @@ named surfaces only; update docs/design-system.md and AGENTS.md as specified.
 - [x] Wave 1 — Buttons & primary CTAs  
 - [x] Wave 2 — Cream lists & person system  
 - [x] Wave 3 — Empty / loading / error  
-- [ ] Wave 4 — Named surfaces + cream tokens  
+- [x] Wave 4 — Named surfaces + cream tokens  
 - [ ] Wave 5 — Availability, chips, avatars, pucks  
 - [ ] Wave 6 — Selectors, headers, sheets  
 - [ ] Wave 7 — Plan cards & subcomponents  

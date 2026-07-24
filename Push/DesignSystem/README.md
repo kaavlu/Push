@@ -41,7 +41,8 @@ DesignSystem/
 | 1 | Buttons & primary CTAs | Done |
 | 2 | Cream lists & person system | Done |
 | 3 | Empty / loading / error | Done |
-| 4–9 | See spec §8.3 | Not started |
+| 4 | Named surfaces + cream tokens | Done |
+| 5–9 | See spec §8.3 | Not started |
 
 ## Migrated components
 
@@ -74,5 +75,16 @@ DesignSystem/
 | `MapEmptyOverlay` | `Components/EmptyStates/PushMapEmptyOverlay.swift` | Map empty chrome (branded CTAs) |
 
 Error routing: hard load → full-page/map failed; mutations → `ActionErrorBanner`; soft reload keeps content. See `docs/design-system.md`.
+
+### Wave 4 — Named surfaces
+
+| Type | File | Legacy shim |
+|---|---|---|
+| `pushControlGlass` | `Surfaces/PushControlGlass.swift` | `pushGlassBackground` |
+| `pushMapControlGlass` / `MapPopupSheetBackground` | `Surfaces/PushMapGlass.swift` | ContentView `topControlBackground` |
+| `pushPuckGlass` | `Surfaces/PushPuckGlass.swift` | `puckGlassBackground` |
+| `pushPlansCardGlass` / `pushReviewDeckGlass` | `Surfaces/PushCardGlass.swift` | `plansGlassCard` / `reviewGlassCard` |
+| `PushModalBackground` | `Surfaces/PushModalSurface.swift` | — |
+| Cream tokens | `PushCreamTokens` + `PushGlassCreamTokens` | `PlansColor` cream aliases |
 
 Temporary typealiases keep call sites compiling during renames.

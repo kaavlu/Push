@@ -1,6 +1,6 @@
 # Push Design System — Agent Catalog
 
-**Status:** Waves 0–3 complete (scaffold, buttons, cream lists, empty/loading/error).  
+**Status:** Waves 0–4 complete (through named surfaces).  
 **Decisions:** `tasks/design-system-decision-log.md` (DS-001–DS-089) — product law.  
 **Spec:** `docs/superpowers/specs/2026-07-21-push-design-system-specification.md`.  
 **Code home:** `Push/DesignSystem/` (+ temporary typealiases at legacy call sites).  
@@ -34,17 +34,22 @@ Open this file **before** creating UI chrome. Discover → reuse → extend → 
 
 ## Named surfaces (select first)
 
-| Surface | Use when | Status |
+Feature code **must** pick a named API — no local glass/cream/gradient recipes (DS-016).
+
+| Surface | Named API | Use when |
 |---|---|---|
-| Generic control glass | Circular buttons, bottom nav, create menu, toasts, map empty overlay, lightweight floating chrome | API still `pushGlassBackground` (Wave 4 rename) |
-| Map glass family | Map top controls, filter pills, profile control, map popup sheets | Feature-local today (Wave 4) |
-| Puck glass | Map annotations only | Feature-local (Wave 4) |
-| Plans card glass | Push cards & calendar shell on cream pages | `plansGlassCard` (Wave 4/7) |
-| Review deck glass | Review swipe deck over gradient | `reviewGlassCard` (Wave 4/7) |
-| Ivory page | Persistent destinations (Friends, Plans, Alerts, …) | `PushIvoryPageBackground` (`FriendsBackground` shim) |
-| Solid cream card | Dense list cards on ivory | `pushSolidCreamCard` (`friendsCard` shim) |
-| Modal gradient | Focused full-screen flows (Start Push, Profile, Review, …) | `PushModalBackground` |
-| Onboarding/auth | Auth domain only | `OnboardingLab*` / auth components |
+| Generic control glass | `pushControlGlass` (`pushGlassBackground` shim) | Circular buttons, bottom nav, create menu, toasts, map empty overlay |
+| Map control glass | `pushMapControlGlass(treatment:)` | Map top profile / filter pill / dropdown panel |
+| Map sheet glass | `MapPopupSheetBackground` | Friend detail / day-detail map popups |
+| Puck glass | `pushPuckGlass` (`puckGlassBackground` shim) | Map annotations only |
+| Plans card glass | `pushPlansCardGlass` (`plansGlassCard` shim) | Push cards & calendar on cream pages |
+| Review deck glass | `pushReviewDeckGlass` (`reviewGlassCard` shim) | Review swipe deck over gradient only |
+| Ivory page | `PushIvoryPageBackground` | Persistent destinations |
+| Solid cream card | `pushSolidCreamCard` | Dense list rows/banners on ivory |
+| Modal gradient | `PushModalBackground` | Focused full-screen flows |
+| Onboarding/auth | domain glass only | Auth domain (temporary — DS-016) |
+
+**Tokens:** solid cream → `PushCreamTokens`; Plans/Review glass cream → `PushGlassCreamTokens` (do not flatten Plans glass into solid cream).
 
 **Background rule (DS-015):** Ivory = browse/persist; modal gradient = enter → complete → exit.
 
@@ -190,7 +195,7 @@ Until token modules land, use existing shared sources:
 | 1 | Buttons & primary CTAs | Done |
 | 2 | Cream lists & person system | Done |
 | 3 | Empty / loading / error | Done |
-| 4 | Named surfaces + cream tokens | Pending |
+| 4 | Named surfaces + cream tokens | Done |
 | 5 | Availability, chips, avatars, pucks | Pending |
 | 6 | Selectors, headers, sheets | Pending |
 | 7 | Plan cards & subcomponents | Pending |
