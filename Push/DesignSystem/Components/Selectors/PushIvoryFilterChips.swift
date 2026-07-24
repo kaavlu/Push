@@ -21,8 +21,6 @@ enum PushIvoryFilterChipMetrics {
     static let countHorizontalPadding: CGFloat = 6
     static let countVerticalPadding: CGFloat = 1
     static let strokeWidth: CGFloat = 0.9
-    static let animationResponse = 0.28
-    static let animationDamping = 0.86
 }
 
 /// Horizontal filter chip row — walnut selected, cream unselected.
@@ -43,12 +41,7 @@ struct PushIvoryFilterChipRow: View {
     private func chip(_ item: PushIvoryFilterItem) -> some View {
         let isSelected = selectedID == item.id
         return Button {
-            withAnimation(
-                .spring(
-                    response: PushIvoryFilterChipMetrics.animationResponse,
-                    dampingFraction: PushIvoryFilterChipMetrics.animationDamping
-                )
-            ) {
+            withAnimation(PushMotion.selection) {
                 selectedID = item.id
             }
         } label: {

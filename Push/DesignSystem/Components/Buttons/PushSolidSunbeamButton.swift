@@ -44,28 +44,17 @@ struct PushSolidSunbeamButton: View {
                     showsAsEnabled
                         ? PushControlColors.activeFill
                         : PushControlColors.activeFill.opacity(
-                            PushSolidSunbeamButtonMetrics.disabledFillOpacity
+                            PushOpacityTokens.disabledControlFill
                         )
                 )
             )
         }
         .buttonStyle(.plain)
         .disabled(!isEnabled || isLoading)
-        .animation(
-            .easeInOut(duration: PushSolidSunbeamButtonMetrics.stateAnimationDuration),
-            value: showsAsEnabled
-        )
-        .animation(
-            .easeInOut(duration: PushSolidSunbeamButtonMetrics.stateAnimationDuration),
-            value: isLoading
-        )
+        .animation(PushMotion.press, value: showsAsEnabled)
+        .animation(PushMotion.press, value: isLoading)
         .accessibilityLabel(title)
     }
-}
-
-private enum PushSolidSunbeamButtonMetrics {
-    static let disabledFillOpacity = 0.45
-    static let stateAnimationDuration = 0.18
 }
 
 /// Migration shim — prefer `PushSolidSunbeamButton`.

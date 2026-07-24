@@ -73,7 +73,7 @@ struct ReviewPushesView: View {
                         }
                 )
                 .animation(
-                    .spring(response: 0.3, dampingFraction: 0.8),
+                    PushMotion.selection,
                     value: dragOffset
                 )
         } else {

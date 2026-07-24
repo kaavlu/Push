@@ -46,7 +46,7 @@ struct PushGroupRow: View {
                 .font(.headline.weight(.semibold))
                 .foregroundStyle(PushControlColors.textEspresso)
                 .lineLimit(1)
-                .minimumScaleFactor(FriendsLayout.minimumTextScale)
+                .minimumScaleFactor(PushOpacityTokens.minimumTextScale)
 
             Text(memberCountText)
                 .font(.subheadline)
@@ -60,7 +60,7 @@ struct PushGroupRow: View {
                         : PushControlColors.textPrimary
                 )
                 .lineLimit(1)
-                .minimumScaleFactor(FriendsLayout.minimumTextScale)
+                .minimumScaleFactor(PushOpacityTokens.minimumTextScale)
         }
     }
 

@@ -45,7 +45,8 @@ DesignSystem/
 | 5 | Availability, chips, avatars, pucks | Done |
 | 6 | Selectors, headers, sheets | Done |
 | 7 | Plan cards & subcomponents | Done |
-| 8–9 | See spec §8.3 | Not started |
+| 8 | Tokens & motion | Done |
+| 9 | Docs polish | Not started |
 
 ## Migrated components
 
@@ -122,5 +123,14 @@ Error routing: hard load → full-page/map failed; mutations → `ActionErrorBan
 | `PushPlanStatusPill` / `PushPlanAvatarStrip` | `Components/Cards/PushPlanCardSubcomponents.swift` |
 
 Calendar module remains feature-local (`PlansCalendarView`) — do not restyle into plan cards.
+
+### Wave 8 — Tokens
+
+| Module | Role |
+|---|---|
+| `Tokens/PushMotion.swift` | selection / expand / sheet / press / mapPulse |
+| `Tokens/PushOpacityTokens.swift` | disabled, inactive, scrim, min text scale |
+| `Tokens/PushRadiusTokens.swift` | card / control / segmented / review |
+| `Tokens/PushTypographyTokens.swift` | section label + rounded initials helper |
 
 Temporary typealiases keep call sites compiling during renames.

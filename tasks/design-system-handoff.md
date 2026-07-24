@@ -1,6 +1,6 @@
 # Push Design System — Implementation Handoff
 
-**Status:** Spec approved · **Wave 0–7 implemented** · continue from Wave 8  
+**Status:** Spec approved · **Wave 0–8 implemented** · finish with Wave 9 docs polish  
 **Started:** Issue #63 implementation session
 
 ---
@@ -41,7 +41,7 @@
 | Confirmed decisions DS-001–DS-089 | `tasks/design-system-decision-log.md` |
 | Approved specification + migration plan | `docs/superpowers/specs/2026-07-21-push-design-system-specification.md` |
 | Module path choice | `Push/DesignSystem/` |
-| Implementation | **Wave 0–7 done** — through plan cards |
+| Implementation | **Wave 0–8 done** — through tokens & motion |
 
 ---
 
@@ -99,7 +99,7 @@ named surfaces only; update docs/design-system.md and AGENTS.md as specified.
 - [x] Wave 5 — Availability, chips, avatars, pucks  
 - [x] Wave 6 — Selectors, headers, sheets  
 - [x] Wave 7 — Plan cards & subcomponents  
-- [ ] Wave 8 — Tokens & motion cleanup  
+- [x] Wave 8 — Tokens & motion cleanup  
 - [ ] Wave 9 — Docs polish  
 
 When a wave completes, check it off here and note any intentional decision-log updates.

@@ -30,7 +30,6 @@ enum PushBrandSunbeamPillMetrics {
     static let groupHorizontalPadding: CGFloat = 10
     static let groupVerticalPadding: CGFloat = 5
     static let groupFillOpacity = 0.92
-    static let groupMinimumTextScale = 0.82
 }
 
 /// Shared sunbeam-fill capsule chrome (not multi-color availability, not plan RSVP).
@@ -67,7 +66,7 @@ struct PushBrandSunbeamPill: View {
             Text(title)
                 .font(.caption.weight(.bold))
                 .lineLimit(1)
-                .minimumScaleFactor(PushBrandSunbeamPillMetrics.groupMinimumTextScale)
+                .minimumScaleFactor(PushOpacityTokens.minimumTextScale)
         }
     }
 

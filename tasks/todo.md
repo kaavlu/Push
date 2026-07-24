@@ -2,20 +2,19 @@
 
 ## Status
 
-- [x] Waves 0–7 complete
-- [ ] Wave 8 — Tokens & motion cleanup
+- [x] Waves 0–8 complete
 - [ ] Wave 9 — Docs polish
 - [ ] Commit / PR
 
-## Wave 7
+## Wave 8
 
-| API | Role |
+| Module | Role |
 |---|---|
-| `PushPlansPlanCard` | Owner/invited Plans-glass family |
-| `PushReviewPlanCard` | Separate review deck card |
-| `PushPlanStatusPill` | Shared RSVP/status pill |
-| `PushPlanAvatarStrip` | Horizontal participant faces |
+| `PushMotion` | Named selection/expand/sheet/press/mapPulse |
+| `PushOpacityTokens` | Disabled / inactive / scrim / min scale |
+| `PushRadiusTokens` | Role radii |
+| `PushTypographyTokens` | Section label helper |
 
 ## Next
 
-Wave 8 — motion/opacity tokens + remaining magic-number sweep.
+Wave 9 — complete catalog do-not-recreate list and handoff polish.

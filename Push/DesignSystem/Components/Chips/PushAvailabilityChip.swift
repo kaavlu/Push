@@ -21,7 +21,6 @@ enum PushAvailabilityChipMetrics {
     static let sheetVerticalPadding: CGFloat = 3
     static let strokeOpacity = 0.30
     static let strokeWidth: CGFloat = 0.5
-    static let minimumTextScale = 0.82
 }
 
 /// Canonical multi-color availability capsule. Map annotations use `ActivityBadge`.
@@ -34,7 +33,7 @@ struct PushAvailabilityChip: View {
             .font(titleFont)
             .foregroundStyle(availability.chipTextColor)
             .lineLimit(1)
-            .minimumScaleFactor(PushAvailabilityChipMetrics.minimumTextScale)
+            .minimumScaleFactor(PushOpacityTokens.minimumTextScale)
             .padding(.horizontal, horizontalPadding)
             .padding(.vertical, verticalPadding)
             .background(availability.chipFillColor, in: Capsule())

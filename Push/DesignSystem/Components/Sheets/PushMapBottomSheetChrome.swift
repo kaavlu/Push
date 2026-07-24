@@ -17,12 +17,12 @@ enum PushMapBottomSheetChrome {
     static let dragMinimumDistance: CGFloat = 12
     static let dismissTranslation: CGFloat = 44
     static let dismissPredictedTranslation: CGFloat = 120
-    static let animationResponse = 0.42
-    static let animationDamping = 0.86
-    static let animationBlendDuration = 0.12
-    static let dismissAnimationDuration = 0.40
+    static let animationResponse = PushMotion.Sheet.response
+    static let animationDamping = PushMotion.Sheet.damping
+    static let animationBlendDuration = PushMotion.Sheet.blendDuration
+    static let dismissAnimationDuration = PushMotion.Sheet.dismissAnimationDuration
     static let presentationOvershoot: CGFloat = 12
-    static let closedScale: CGFloat = 0.96
+    static let closedScale = PushMotion.Sheet.closedScale
     static let zIndex: Double = 30
 }
 

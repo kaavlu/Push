@@ -65,13 +65,7 @@ struct PushExpandablePersonRow: View {
         }
         .pushSolidCreamCard(cornerRadius: FriendsLayout.cardCornerRadius)
         .clipShape(RoundedRectangle(cornerRadius: FriendsLayout.cardCornerRadius, style: .continuous))
-        .animation(
-            .spring(
-                response: PushExpandableActionRailMetrics.animationResponse,
-                dampingFraction: PushExpandableActionRailMetrics.animationDamping
-            ),
-            value: isExpanded
-        )
+        .animation(PushMotion.expand, value: isExpanded)
         .confirmationDialog(
             "Remove \(row.friend.name)?",
             isPresented: $isConfirmingRemove,

@@ -114,7 +114,7 @@ enum FriendsLayout {
     static let emptyStateIconSize: CGFloat = 30
     static let emptyStateTopPadding: CGFloat = 60
 
-    static let minimumTextScale = 0.82
+    static let minimumTextScale = PushOpacityTokens.minimumTextScale
 }
 
 enum FriendsColor {

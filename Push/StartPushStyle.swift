@@ -170,10 +170,7 @@ struct StartPushSectionLabel: View {
 
     var body: some View {
         Text(title)
-            .font(.footnote.weight(.bold))
-            .foregroundStyle(PushControlColors.textTertiary)
-            .textCase(.uppercase)
-            .kerning(0.5)
+            .pushSectionLabelStyle()
             .frame(maxWidth: .infinity, alignment: .leading)
     }
 }

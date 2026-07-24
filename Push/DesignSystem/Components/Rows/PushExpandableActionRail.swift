@@ -39,8 +39,6 @@ enum PushExpandableActionRailMetrics {
     static let overflowIconSize: CGFloat = 15
     static let railBorderWidth: CGFloat = 1.5
     static let railBorderOpacity = 0.40
-    static let animationResponse = 0.40
-    static let animationDamping = 0.86
 }
 
 /// Horizontal action rail under an expanded person row. Primary actions share
@@ -90,7 +88,7 @@ struct PushExpandableRailActionButton: View {
                 Text(label)
                     .font(.caption.weight(.semibold))
                     .lineLimit(1)
-                    .minimumScaleFactor(FriendsLayout.minimumTextScale)
+                    .minimumScaleFactor(PushOpacityTokens.minimumTextScale)
             }
             .foregroundStyle(PushControlColors.textSecondary)
             .frame(maxWidth: .infinity)

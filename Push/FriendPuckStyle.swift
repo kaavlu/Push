@@ -32,10 +32,7 @@ private struct PulsingAvailabilityGlow: ViewModifier {
                 y: FriendPuckLayout.statusGlowYOffset
             )
             .onAppear {
-                withAnimation(
-                    .easeInOut(duration: FriendPuckLayout.pulseDuration)
-                    .repeatForever(autoreverses: true)
-                ) {
+                withAnimation(PushMotion.mapPulse) {
                     isPulsing = true
                 }
             }

@@ -209,7 +209,7 @@ struct ReviewMaybeRow: View {
 }
 
 enum ReviewPushCardLayout {
-    static let cardCornerRadius: CGFloat = 30
+    static let cardCornerRadius = PushRadiusTokens.reviewCard
     static let cardPadding: CGFloat = 20
     static let sectionSpacing: CGFloat = 16
     static let headerSpacing: CGFloat = 7

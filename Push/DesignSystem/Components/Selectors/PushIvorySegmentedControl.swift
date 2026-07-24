@@ -16,8 +16,8 @@ struct PushIvorySegmentedItem: Identifiable, Equatable {
 enum PushIvorySegmentedMetrics {
     static let itemSpacing: CGFloat = 4
     static let padding: CGFloat = 4
-    static let cornerRadius: CGFloat = 22
-    static let itemCornerRadius: CGFloat = 18
+    static let cornerRadius = PushRadiusTokens.segmentedTrack
+    static let itemCornerRadius = PushRadiusTokens.segmentedItem
     static let itemVerticalPadding: CGFloat = 9
     static let countSpacing: CGFloat = 6
     static let countHorizontalPadding: CGFloat = 7
@@ -26,8 +26,6 @@ enum PushIvorySegmentedMetrics {
     static let containerShadowYOffset: CGFloat = 3
     static let selectedShadowRadius: CGFloat = 8
     static let selectedShadowYOffset: CGFloat = 3
-    static let animationResponse = 0.28
-    static let animationDamping = 0.86
     static let selectionNamespaceID = "pushIvorySegmentSelection"
 }
 
@@ -72,12 +70,7 @@ struct PushIvorySegmentedControl: View {
     private func segment(_ item: PushIvorySegmentedItem) -> some View {
         let isSelected = selectedID == item.id
         return Button {
-            withAnimation(
-                .spring(
-                    response: PushIvorySegmentedMetrics.animationResponse,
-                    dampingFraction: PushIvorySegmentedMetrics.animationDamping
-                )
-            ) {
+            withAnimation(PushMotion.selection) {
                 selectedID = item.id
             }
         } label: {

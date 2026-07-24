@@ -63,7 +63,7 @@ struct AddGroupFlowView: View {
                     removal: .move(edge: movingForward ? .leading : .trailing).combined(with: .opacity)
                 ))
             }
-            .animation(.spring(response: 0.30, dampingFraction: 0.84), value: viewModel.step)
+            .animation(PushMotion.selection, value: viewModel.step)
         }
     }
 

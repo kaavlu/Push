@@ -272,11 +272,11 @@ struct FriendsView: View {
     }
 
     private func triggerToast(_ message: String) {
-        withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
+        withAnimation(PushMotion.hangoutReveal) {
             toastMessage = message
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-            withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
+            withAnimation(PushMotion.hangoutReveal) {
                 toastMessage = nil
             }
         }
@@ -297,7 +297,7 @@ private struct FriendsHeader: View {
                 action: onClose
             )
         }
-        .animation(.easeInOut(duration: 0.2), value: mode)
+        .animation(PushMotion.contentCrossfade, value: mode)
     }
 }
 

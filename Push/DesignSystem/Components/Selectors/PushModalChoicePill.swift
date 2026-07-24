@@ -12,8 +12,6 @@ enum PushModalChoicePillMetrics {
     static let selectedStrokeOpacity = 0.28
     static let strokeWidth: CGFloat = 1.5
     static let unselectedFillOpacity = 0.55
-    static let animationResponse = 0.22
-    static let animationDamping = 0.82
 }
 
 /// Compact choice pill for modal multi-step flows (AM/PM, similar option pills).
@@ -54,13 +52,7 @@ struct PushModalChoicePill: View {
                 )
         }
         .buttonStyle(.plain)
-        .animation(
-            .spring(
-                response: PushModalChoicePillMetrics.animationResponse,
-                dampingFraction: PushModalChoicePillMetrics.animationDamping
-            ),
-            value: isSelected
-        )
+        .animation(PushMotion.selectionSnappy, value: isSelected)
         .accessibilityLabel(title)
         .accessibilityValue(isSelected ? "Selected" : "Not selected")
     }

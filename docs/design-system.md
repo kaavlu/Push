@@ -1,6 +1,6 @@
 # Push Design System — Agent Catalog
 
-**Status:** Waves 0–7 complete (through plan cards).  
+**Status:** Waves 0–8 complete (through tokens & motion).  
 **Decisions:** `tasks/design-system-decision-log.md` (DS-001–DS-089) — product law.  
 **Spec:** `docs/superpowers/specs/2026-07-21-push-design-system-specification.md`.  
 **Code home:** `Push/DesignSystem/` (+ temporary typealiases at legacy call sites).  
@@ -173,19 +173,21 @@ Map profile control, bottom-nav raised +, product circles with intentionally dif
 
 ---
 
-## Tokens (Wave 8 target)
+## Tokens (Wave 8)
 
-Until token modules land, use existing shared sources:
-
-| Domain | Today | Target |
+| Domain | Module / API | Rules |
 |---|---|---|
-| Brand accents | `PushColorPalette` | `PushColorTokens` |
-| Text hierarchy | `PushControlColors` | same roles |
-| Availability | `PuckColorTokens` / state extensions | `PushAvailabilityTokens` |
-| Layout metrics | `PushAdaptiveLayout` | keep + spacing tokens |
-| Glass chrome | `PushGlassStyle` / `pushGlassBackground` | named surfaces |
+| Brand accents | `PushColorPalette` | Semantic only in features |
+| Text hierarchy | `PushControlColors` | No black text |
+| Availability | `PushAvailabilityTokens` | Single color path |
+| Cream | `PushCreamTokens` / `PushGlassCreamTokens` | Don't flatten glass into solid cream |
+| Motion | **`PushMotion`** | selection, expand, sheet, press, mapPulse — no new spring literals |
+| Opacity / min scale | **`PushOpacityTokens`** | disabled, inactive, scrim, minimumTextScale |
+| Radii | **`PushRadiusTokens`** + `layout.cardCornerRadius` | Continuous corners; role-based |
+| Typography helpers | **`PushTypographyTokens`** / `pushSectionLabelStyle()` | SF semantic first; rounded for initials only |
+| Spacing | `PushAdaptiveLayout` | Cross-screen padding/spacing |
 
-**Never black text or black shadows.** Walnut/espresso hierarchy only.
+**Never black text or black shadows.** New shared values → token or DS decision (DS-083).
 
 ---
 
@@ -211,7 +213,7 @@ Until token modules land, use existing shared sources:
 | 5 | Availability, chips, avatars, pucks | Done |
 | 6 | Selectors, headers, sheets | Done |
 | 7 | Plan cards & subcomponents | Done |
-| 8 | Tokens & motion | Pending |
+| 8 | Tokens & motion | Done |
 | 9 | Docs polish | Pending |
 
 Update `tasks/design-system-handoff.md` when a wave finishes.

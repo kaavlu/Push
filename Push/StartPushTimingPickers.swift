@@ -171,7 +171,7 @@ private struct CalendarDayCell: View {
         }
         .buttonStyle(.plain)
         .disabled(isPast)
-        .animation(.spring(response: 0.22, dampingFraction: 0.82), value: isSelected)
+        .animation(PushMotion.selectionSnappy, value: isSelected)
         .accessibilityLabel("Day \(day)")
         .accessibilityValue(isSelected ? "Selected" : "")
     }

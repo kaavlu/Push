@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D1CC800A8E472611E25B082E /* PushTypographyTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 778C15F07F8469E15E655D2C /* PushTypographyTokens.swift */; };
+		A8927B79F5DCA0EA4AEDBF01 /* PushRadiusTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11AB53CC3528BDC1AD1F168 /* PushRadiusTokens.swift */; };
+		292E9CCCE4971654E86CE78A /* PushOpacityTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BC7FBF4D2390A57588E84D5 /* PushOpacityTokens.swift */; };
+		7EE2BE140875E55DB0ED50DF /* PushMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = D696988CEE87875D32A230B8 /* PushMotion.swift */; };
 		F2692B836B7A92DD305D6C80 /* PushReviewPlanCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2704E7A6833673F3654BE2FE /* PushReviewPlanCard.swift */; };
 		B6F5A69CCD7AE7A51C23D20E /* PushPlansPlanCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29B0B5968884262B91A101C3 /* PushPlansPlanCard.swift */; };
 		16BC46452B4CDC1D2C1696A2 /* PushPlanCardSubcomponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21C6194268529CC06E389596 /* PushPlanCardSubcomponents.swift */; };
@@ -319,6 +323,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		778C15F07F8469E15E655D2C /* PushTypographyTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushTypographyTokens.swift"; path = "DesignSystem/Tokens/PushTypographyTokens.swift"; sourceTree = "<group>"; };
+		F11AB53CC3528BDC1AD1F168 /* PushRadiusTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushRadiusTokens.swift"; path = "DesignSystem/Tokens/PushRadiusTokens.swift"; sourceTree = "<group>"; };
+		6BC7FBF4D2390A57588E84D5 /* PushOpacityTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushOpacityTokens.swift"; path = "DesignSystem/Tokens/PushOpacityTokens.swift"; sourceTree = "<group>"; };
+		D696988CEE87875D32A230B8 /* PushMotion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushMotion.swift"; path = "DesignSystem/Tokens/PushMotion.swift"; sourceTree = "<group>"; };
 		2704E7A6833673F3654BE2FE /* PushReviewPlanCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushReviewPlanCard.swift"; path = "DesignSystem/Components/Cards/PushReviewPlanCard.swift"; sourceTree = "<group>"; };
 		29B0B5968884262B91A101C3 /* PushPlansPlanCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushPlansPlanCard.swift"; path = "DesignSystem/Components/Cards/PushPlansPlanCard.swift"; sourceTree = "<group>"; };
 		21C6194268529CC06E389596 /* PushPlanCardSubcomponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushPlanCardSubcomponents.swift"; path = "DesignSystem/Components/Cards/PushPlanCardSubcomponents.swift"; sourceTree = "<group>"; };
@@ -668,6 +676,10 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				778C15F07F8469E15E655D2C /* PushTypographyTokens.swift */,
+				F11AB53CC3528BDC1AD1F168 /* PushRadiusTokens.swift */,
+				6BC7FBF4D2390A57588E84D5 /* PushOpacityTokens.swift */,
+				D696988CEE87875D32A230B8 /* PushMotion.swift */,
 				2704E7A6833673F3654BE2FE /* PushReviewPlanCard.swift */,
 				29B0B5968884262B91A101C3 /* PushPlansPlanCard.swift */,
 				21C6194268529CC06E389596 /* PushPlanCardSubcomponents.swift */,
@@ -1122,6 +1134,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				D1CC800A8E472611E25B082E /* PushTypographyTokens.swift in Sources */,
+				A8927B79F5DCA0EA4AEDBF01 /* PushRadiusTokens.swift in Sources */,
+				292E9CCCE4971654E86CE78A /* PushOpacityTokens.swift in Sources */,
+				7EE2BE140875E55DB0ED50DF /* PushMotion.swift in Sources */,
 				F2692B836B7A92DD305D6C80 /* PushReviewPlanCard.swift in Sources */,
 				B6F5A69CCD7AE7A51C23D20E /* PushPlansPlanCard.swift in Sources */,
 				16BC46452B4CDC1D2C1696A2 /* PushPlanCardSubcomponents.swift in Sources */,

@@ -24,7 +24,7 @@ enum PushGlassStyle {
 
 enum PushControlStyle {
     static let activeFillOpacity = 1.0
-    static let inactiveForegroundOpacity = 0.7
+    static let inactiveForegroundOpacity = PushOpacityTokens.inactiveLabel
     static let primaryStrokeOpacity = 0.72
     static let primaryGlowOpacity = 0.34
 }
@@ -43,8 +43,8 @@ enum PushOnboardingControlStyle {
         startPoint: .top,
         endPoint: .bottom
     )
-    static let pressScale = 0.97
-    static let pressAnimation = Animation.easeInOut(duration: 0.18)
+    static let pressScale = PushMotion.pressScale
+    static let pressAnimation = PushMotion.press
     static let primaryShadowOpacity = 0.32
     static let primaryShadowRadius: CGFloat = 12
     static let primaryShadowYOffset: CGFloat = 12
