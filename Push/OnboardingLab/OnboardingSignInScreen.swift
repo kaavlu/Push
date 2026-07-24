@@ -2,7 +2,7 @@
 //  OnboardingSignInScreen.swift
 //  Push
 //
-//  Returning-user entry point: email/password plus Apple + Google.
+//  Returning-user entry point: email/password plus Google.
 //  Peer to the sign-up (welcome) screen; the two cross-link via
 //  OnboardingAuthSwitchLink. Reuses the shared onboarding components,
 //  colors, and typography so it reads as the same system.
@@ -89,10 +89,7 @@ struct OnboardingSignInScreen: View {
     // MARK: Social sign-in
 
     private var socialButtons: some View {
-        VStack(spacing: 12) {
-            OnboardingAuthButton(kind: .apple) { model.completeSignIn() }
-            OnboardingAuthButton(kind: .google) { model.completeSignIn() }
-        }
+        OnboardingAuthButton(kind: .google) { model.completeSignIn() }
     }
 }
 

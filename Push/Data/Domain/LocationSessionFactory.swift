@@ -3,29 +3,35 @@
 //  Push
 //
 //  Builds app-lifetime LocationSession instances for mock / DEBUG sim / live.
-//  Core Location provider selection is intentionally out of scope (later PR).
+//  Provider selection: sim flag → Simulated; live → Core Location; mock → Null.
 //
 
 import Foundation
 
 enum LocationSessionLaunchArgument {
-    /// DEBUG dogfood: scripted `SimulatedLocationProvider` instead of null.
+    /// DEBUG dogfood: scripted `SimulatedLocationProvider` instead of Core Location / null.
     static let simLocation = "--sim-location"
     /// DEBUG dogfood: 20s stationary heartbeat instead of 15m (Issue #76).
     static let fastPresenceHeartbeat = "--fast-presence-heartbeat"
 }
 
 enum LocationSessionFactory {
-    /// Default session for a container: null provider, or simulated when
-    /// `--sim-location` is present (DEBUG process arguments).
+    /// Default session for a container.
+    /// - Mock: Null (or Simulated with `--sim-location`).
+    /// - Live: Core Location (or Simulated with `--sim-location`).
     @MainActor
     static func makeDefault(
         personID: Person.ID,
         arguments: [String] = ProcessInfo.processInfo.arguments,
+        usesCoreLocation: Bool = false,
         availabilityProvider: @escaping @MainActor () -> FriendAvailabilityState? = { nil },
         sync: PresenceSyncing = NoOpPresenceSync()
     ) -> LocationSession {
-        let provider = makeProvider(personID: personID, arguments: arguments)
+        let provider = makeProvider(
+            personID: personID,
+            arguments: arguments,
+            usesCoreLocation: usesCoreLocation
+        )
         return LocationSession(
             provider: provider,
             validator: LocationObservationValidator(),
@@ -41,7 +47,8 @@ enum LocationSessionFactory {
     @MainActor
     static func makeProvider(
         personID: Person.ID,
-        arguments: [String] = ProcessInfo.processInfo.arguments
+        arguments: [String] = ProcessInfo.processInfo.arguments,
+        usesCoreLocation: Bool = false
     ) -> LocationProviding {
         if usesSimulatedProvider(arguments: arguments) {
             // Timed + wall-clock base so `--live --sim-location` dogfood emits
@@ -56,6 +63,10 @@ enum LocationSessionFactory {
                 mode: .timed
             )
         }
+        if usesCoreLocation {
+            return CoreLocationLocationProvider(personID: personID)
+        }
+        // Mock default: never start production GPS.
         return NullLocationProvider(authorizationState: .notDetermined)
     }
 

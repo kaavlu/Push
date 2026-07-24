@@ -74,11 +74,11 @@ sessions, or ON for a confirmation email — the iOS client handles both via `Si
 - The shared `SupabaseClient` default `redirectToURL` is the recovery URL; Google
   OAuth passes `pushapp://auth/callback` per call.
 
-### Apple + Google providers (Issue #61)
-- **Apple (native):** Enable Sign in with Apple on App ID `com.manav.Push`. In
-  Supabase Auth → Providers → Apple, add `com.manav.Push` under Client IDs.
-  The app entitlements file includes Sign in with Apple. No Services ID secret is
-  required for native-only sign-in.
+### Google provider (Issue #61; Apple currently disabled)
+- **Apple (native):** Temporarily removed from the app target so Personal Team
+  provisioning works (no `com.apple.developer.applesignin` entitlement). Re-enable
+  Sign in with Apple on App ID `com.manav.Push` and list the bundle ID under
+  Supabase Auth → Providers → Apple → Client IDs when restoring the flow.
 - **Google (OAuth web session):** Create a Google Cloud OAuth **Web** client ID +
   secret; authorize redirect
   `https://tzzvwjhvjduyqywlszqc.supabase.co/auth/v1/callback`. Paste client ID and

@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D74ABA9AC7A765028035F776 /* CoreLocationProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A6B9A9B7679969653EAD8CA /* CoreLocationProviderTests.swift */; };
+		58D92613BDD184CCDE44B88A /* CoreLocationLocationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10FD91F9CF0773D314241FE /* CoreLocationLocationProvider.swift */; };
+		BF8D2A6AA0BF59C6496AB341 /* CoreLocationMapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A2BE65D4665ADCED775D8D2 /* CoreLocationMapping.swift */; };
 		844B8119CC75C70F595E9D1A /* LocationPresenceThrottleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7200BFE2778A623FC14579E /* LocationPresenceThrottleTests.swift */; };
 		5B39C41A8D8AF6FF50B9D614 /* PresencePublishPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6986EEED12A68F773E3F1B9 /* PresencePublishPolicyTests.swift */; };
 		F753CECC7AC5FB43A7BB938E /* LocalPresenceSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = C14FFC01FBEB4C9F17E2FD22 /* LocalPresenceSync.swift */; };
@@ -277,6 +280,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0A6B9A9B7679969653EAD8CA /* CoreLocationProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CoreLocationProviderTests.swift"; sourceTree = "<group>"; };
+		A10FD91F9CF0773D314241FE /* CoreLocationLocationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "CoreLocationLocationProvider.swift"; path = "Data/Location/CoreLocationLocationProvider.swift"; sourceTree = "<group>"; };
+		6A2BE65D4665ADCED775D8D2 /* CoreLocationMapping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "CoreLocationMapping.swift"; path = "Data/Location/CoreLocationMapping.swift"; sourceTree = "<group>"; };
 		D7200BFE2778A623FC14579E /* LocationPresenceThrottleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LocationPresenceThrottleTests.swift"; sourceTree = "<group>"; };
 		F6986EEED12A68F773E3F1B9 /* PresencePublishPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PresencePublishPolicyTests.swift"; sourceTree = "<group>"; };
 		C14FFC01FBEB4C9F17E2FD22 /* LocalPresenceSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "LocalPresenceSync.swift"; path = "Data/Domain/LocalPresenceSync.swift"; sourceTree = "<group>"; };
@@ -584,6 +590,8 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				A10FD91F9CF0773D314241FE /* CoreLocationLocationProvider.swift */,
+				6A2BE65D4665ADCED775D8D2 /* CoreLocationMapping.swift */,
 				C14FFC01FBEB4C9F17E2FD22 /* LocalPresenceSync.swift */,
 				A7959C539446233AD9A0B962 /* PresencePublishPolicy.swift */,
 				200468BA1F72474FF611C572 /* SupabasePresenceSync.swift */,
@@ -804,6 +812,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				0A6B9A9B7679969653EAD8CA /* CoreLocationProviderTests.swift */,
 				D7200BFE2778A623FC14579E /* LocationPresenceThrottleTests.swift */,
 				F6986EEED12A68F773E3F1B9 /* PresencePublishPolicyTests.swift */,
 				23F1F328B36F7BA02E33311D /* LivePresenceWriteTests.swift */,
@@ -996,6 +1005,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				58D92613BDD184CCDE44B88A /* CoreLocationLocationProvider.swift in Sources */,
+				BF8D2A6AA0BF59C6496AB341 /* CoreLocationMapping.swift in Sources */,
 				F753CECC7AC5FB43A7BB938E /* LocalPresenceSync.swift in Sources */,
 				352AC1BE0B3A67930D5C5617 /* PresencePublishPolicy.swift in Sources */,
 				A3468EB5EC4656FF0F81B495 /* SupabasePresenceSync.swift in Sources */,
@@ -1207,6 +1218,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				D74ABA9AC7A765028035F776 /* CoreLocationProviderTests.swift in Sources */,
 				844B8119CC75C70F595E9D1A /* LocationPresenceThrottleTests.swift in Sources */,
 				5B39C41A8D8AF6FF50B9D614 /* PresencePublishPolicyTests.swift in Sources */,
 				48C4DC9C2752004AF85ACAD1 /* LivePresenceWriteTests.swift in Sources */,

@@ -116,12 +116,6 @@ final class AuthViewModel: ObservableObject {
         }
     }
 
-    func signInWithApple() async {
-        await runSocial {
-            self.authedUser = try await self.auth.signInWithApple()
-        }
-    }
-
     func signInWithGoogle() async {
         await runSocial {
             self.authedUser = try await self.auth.signInWithGoogle()

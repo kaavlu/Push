@@ -220,13 +220,6 @@ final class AuthViewModelTests: XCTestCase {
 
     // MARK: Social providers
 
-    func testSignInWithApplePublishesUser() async {
-        let vm = AuthViewModel(auth: FakeAuthService())
-        await vm.signInWithApple()
-        XCTAssertEqual(vm.authedUser?.id, "apple-user")
-        XCTAssertNil(vm.errorMessage)
-    }
-
     func testSignInWithGooglePublishesUser() async {
         let vm = AuthViewModel(auth: FakeAuthService())
         await vm.signInWithGoogle()
@@ -236,9 +229,9 @@ final class AuthViewModelTests: XCTestCase {
 
     func testSocialSignInCancellationLeavesNoError() async {
         let fake = FakeAuthService()
-        fake.signInWithAppleResult = .failure(SocialAuthError.cancelled)
+        fake.signInWithGoogleResult = .failure(SocialAuthError.cancelled)
         let vm = AuthViewModel(auth: fake)
-        await vm.signInWithApple()
+        await vm.signInWithGoogle()
         XCTAssertNil(vm.authedUser)
         XCTAssertNil(vm.errorMessage)
     }

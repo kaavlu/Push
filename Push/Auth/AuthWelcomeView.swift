@@ -1,7 +1,7 @@
 // Push/Auth/AuthWelcomeView.swift
 import SwiftUI
 
-/// Production front door: hero + wordmark + Apple / Google / email continue.
+/// Production front door: hero + wordmark + Google / email continue.
 struct AuthWelcomeView: View {
     @ObservedObject var model: AuthViewModel
 
@@ -54,7 +54,6 @@ struct AuthWelcomeView: View {
             }
             AuthSocialButtons(
                 isBusy: model.isBusy,
-                onApple: { Task { await model.signInWithApple() } },
                 onGoogle: { Task { await model.signInWithGoogle() } }
             )
             OnboardingCTAButton(title: "Continue with email") {

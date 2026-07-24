@@ -37,6 +37,46 @@ final class LocationSessionTests: XCTestCase {
 
         XCTAssertFalse(session.state.isTrackingEnabled)
         XCTAssertEqual(provider.startCount, 0)
+        XCTAssertEqual(provider.requestAuthorizationCount, 0)
+    }
+
+    func testRequestsAuthorizationWhenNotDeterminedThenStarts() async {
+        let provider = FakeLocationProvider(authorizationState: .notDetermined)
+        let session = makeSession(provider: provider)
+
+        await session.startIfEligible()
+
+        XCTAssertEqual(provider.requestAuthorizationCount, 1)
+        XCTAssertEqual(provider.authorizationState, .whenInUse)
+        XCTAssertEqual(provider.startCount, 1)
+        XCTAssertTrue(session.state.isTrackingEnabled)
+    }
+
+    func testAuthorizationRevokeUnpublishesOnlyAfterPreviouslyGranted() async {
+        let provider = FakeLocationProvider(authorizationState: .whenInUse)
+        let sync = FakePresenceSync()
+        let session = makeSession(provider: provider, sync: sync)
+
+        await session.startIfEligible()
+        XCTAssertEqual(provider.startCount, 1)
+
+        provider.setAuthorization(.denied)
+        await session.handleAuthorizationStateChanged()
+
+        XCTAssertEqual(sync.unpublishCount, 1)
+        XCTAssertEqual(provider.stopCount, 1)
+        XCTAssertFalse(session.state.isTrackingEnabled)
+    }
+
+    func testInitialNotDeterminedAuthChangeDoesNotUnpublish() async {
+        let provider = FakeLocationProvider(authorizationState: .notDetermined)
+        let sync = FakePresenceSync()
+        let session = makeSession(provider: provider, sync: sync)
+
+        await session.handleAuthorizationStateChanged()
+
+        XCTAssertEqual(sync.unpublishCount, 0)
+        XCTAssertEqual(provider.startCount, 0)
     }
 
     func testDoesNotStartWhenPublishingDisabled() async {

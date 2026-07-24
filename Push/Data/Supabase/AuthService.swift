@@ -118,8 +118,6 @@ protocol AuthService {
         displayName: String,
         handle: String
     ) async throws -> SignUpResult
-    /// Native Sign in with Apple → Supabase id-token exchange.
-    func signInWithApple() async throws -> AuthedUser
     /// Google via Supabase OAuth + system web authentication session.
     func signInWithGoogle() async throws -> AuthedUser
     func resetPasswordRequest(email: String) async throws
@@ -177,22 +175,6 @@ final class SupabaseAuthService: AuthService {
         // User row created; email confirmation still required before a session exists.
         currentUser = nil
         return .confirmationRequired(email: email)
-    }
-
-    @MainActor
-    func signInWithApple() async throws -> AuthedUser {
-        let apple = try await AppleIDTokenRequester.request()
-        let session = try await client.auth.signInWithIdToken(
-            credentials: OpenIDConnectCredentials(
-                provider: .apple,
-                idToken: apple.idToken,
-                nonce: apple.rawNonce
-            )
-        )
-        let user = Self.map(session.user)
-        currentUser = user
-        await applyAppleFullNameIfNeeded(apple.fullName, userID: user.id)
-        return user
     }
 
     @MainActor
@@ -288,34 +270,5 @@ final class SupabaseAuthService: AuthService {
         AuthedUser(id: user.id.uuidString.lowercased(), email: user.email)
     }
 
-    /// Apple only supplies the full name on first authorize; persist when present.
-    private func applyAppleFullNameIfNeeded(
-        _ fullName: PersonNameComponents?,
-        userID: String
-    ) async {
-        guard let fullName else { return }
-        let parts = [fullName.givenName, fullName.middleName, fullName.familyName]
-            .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
-        guard !parts.isEmpty else { return }
-        let displayName = parts.joined(separator: " ")
-        _ = try? await client.auth.update(
-            user: UserAttributes(
-                data: [
-                    "first_name": .string(displayName),
-                    "full_name": .string(displayName),
-                    "given_name": .string(fullName.givenName ?? ""),
-                    "family_name": .string(fullName.familyName ?? ""),
-                ]
-            )
-        )
-        // Best-effort profile fill when the trigger ran before name was available.
-        struct FirstNamePatch: Encodable { let first_name: String }
-        _ = try? await client.from("profiles")
-            .update(FirstNamePatch(first_name: displayName))
-            .eq("id", value: userID)
-            .eq("first_name", value: "")
-            .execute()
-    }
 }
 

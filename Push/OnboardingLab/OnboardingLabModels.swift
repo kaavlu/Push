@@ -39,7 +39,7 @@ enum OnboardingScreen: String, CaseIterable, Identifiable {
 /// Sign-in method chosen on the welcome screen. Mobile routes through
 /// phone + verify before the value preview.
 enum OnboardingAuthMethod {
-    case apple, google, mobile
+    case google, mobile
 }
 
 /// Location-sharing choice on the privacy screen.
