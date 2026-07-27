@@ -27,7 +27,7 @@
 **Interfaces:**
 - Produces: `StartPushColor.selectedTintOpacity: Double`, `StartPushColor.selectedStrokeWidth: CGFloat`. `StartPushColor.selectedStrokeOpacity` value changes from `0.3` to `0.5` (same name/type, existing consumer in Task 2 is being rewritten in this same plan).
 
-- [ ] **Step 1: Edit the `StartPushColor` enum**
+- [x] **Step 1: Edit the `StartPushColor` enum**
 
 Current code at `Push/StartPushStyle.swift:83-90`:
 
@@ -57,12 +57,12 @@ enum StartPushColor {
 }
 ```
 
-- [ ] **Step 2: Verify the project builds**
+- [x] **Step 2: Verify the project builds**
 
 Run: `scripts/test.sh build`
 Expected: `** BUILD SUCCEEDED **`. (`selectedStrokeOpacity`'s only consumer, `GroupSelectCard`, still compiles unchanged until Task 2 — this step just confirms the token edit alone doesn't break anything.)
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add Push/StartPushStyle.swift
@@ -84,7 +84,7 @@ EOF
 - Consumes: `StartPushColor.selectedTintOpacity`, `StartPushColor.selectedStrokeOpacity`, `StartPushColor.selectedStrokeWidth`, `StartPushColor.avatarOverlayStroke` (Task 1). `PushCreamTokens.solidCard`, `PushCreamTokens.solidCardStrokeOpacity`, `PushCreamTokens.solidCardStrokeWidth` (existing, `Push/DesignSystem/Surfaces/PushCreamSurfaces.swift`). `PushControlColors.activeFill`, `PushControlColors.activeForeground`, `PushControlColors.textEspresso`, `PushControlColors.textTertiary` (existing, `Push/PushGlassStyle.swift`).
 - Produces: `private struct SelectableCardSurface: View` with `init(cornerRadius: CGFloat, isSelected: Bool)` — consumed by Task 3 as well.
 
-- [ ] **Step 1: Replace the `GroupSelectCard` struct and add `SelectableCardSurface` above it**
+- [x] **Step 1: Replace the `GroupSelectCard` struct and add `SelectableCardSurface` above it**
 
 Current code at `Push/StartPushStep1View.swift:158-216`:
 
@@ -242,12 +242,12 @@ private struct GroupSelectCard: View {
 }
 ```
 
-- [ ] **Step 2: Verify the project builds**
+- [x] **Step 2: Verify the project builds**
 
 Run: `scripts/test.sh build`
 Expected: `** BUILD SUCCEEDED **`
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add Push/StartPushStep1View.swift
@@ -268,7 +268,7 @@ EOF
 **Interfaces:**
 - Consumes: `SelectableCardSurface(cornerRadius:isSelected:)` (Task 2).
 
-- [ ] **Step 1: Replace `FriendSelectRow`'s background**
+- [x] **Step 1: Replace `FriendSelectRow`'s background**
 
 Current code (the `FriendSelectRow` struct, unchanged by Task 2):
 
@@ -333,12 +333,12 @@ Replace only the `.background(...)` block inside `body` with:
 
 (Everything else in `FriendSelectRow` — including `selectionIndicator` — stays exactly as-is.)
 
-- [ ] **Step 2: Verify the project builds**
+- [x] **Step 2: Verify the project builds**
 
 Run: `scripts/test.sh build`
 Expected: `** BUILD SUCCEEDED **`
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add Push/StartPushStep1View.swift
@@ -357,7 +357,7 @@ EOF
 
 **Interfaces:** None.
 
-- [ ] **Step 1: Launch the app on the worktree simulator**
+- [x] **Step 1: Launch the app on the worktree simulator**
 
 Run: `scripts/run-ios-sim.sh run`
 Expected: Build succeeds, app installs and launches on the worktree-labeled simulator (e.g. `Push - <worktree> - iPhone 17`).
@@ -378,6 +378,6 @@ Tap a group tile and a friend row. Confirm both show: the cream base still visib
 
 Toggle the simulator between light and dark appearance (Settings app or `xcrun simctl ui <udid> appearance dark|light`) and re-check steps 3–4 still read clearly in both.
 
-- [ ] **Step 6: Report result**
+- [x] **Step 6: Report result**
 
 No commit for this task (verification only). If any visual issue is found, fix it in the relevant file from Task 2/3 and re-run this task's steps before proceeding.

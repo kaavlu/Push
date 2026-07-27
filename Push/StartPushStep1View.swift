@@ -163,8 +163,8 @@ private struct SelectableCardSurface: View {
     let isSelected: Bool
 
     var body: some View {
-        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-            .fill(PushCreamTokens.solidCard)
+        Color.clear
+            .pushSolidCreamCard(cornerRadius: cornerRadius)
             .overlay {
                 if isSelected {
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
@@ -172,15 +172,13 @@ private struct SelectableCardSurface: View {
                 }
             }
             .overlay {
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .stroke(
-                        isSelected
-                            ? PushControlColors.activeFill.opacity(StartPushColor.selectedStrokeOpacity)
-                            : PushColorPalette.Accent.walnut.opacity(PushCreamTokens.solidCardStrokeOpacity),
-                        lineWidth: isSelected
-                            ? StartPushColor.selectedStrokeWidth
-                            : PushCreamTokens.solidCardStrokeWidth
-                    )
+                if isSelected {
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .stroke(
+                            PushControlColors.activeFill.opacity(StartPushColor.selectedStrokeOpacity),
+                            lineWidth: StartPushColor.selectedStrokeWidth
+                        )
+                }
             }
     }
 }
