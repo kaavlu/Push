@@ -347,6 +347,7 @@ private struct FriendGroupDropdownButton: View {
         .contentShape(Capsule())
         .accessibilityLabel("Friend group")
         .accessibilityValue(selectedTitle)
+        .accessibilityHint(isExpanded ? "Double tap to collapse" : "Double tap to expand")
     }
 }
 
