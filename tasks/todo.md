@@ -1,44 +1,36 @@
-# Issue #91 — Polish the Friend-Group Filter Dropdown
+# Issue #94 — Integrate Activity Inference into Presence (I3)
 
 ## Status
 
-- [x] Design spec approved
-- [x] Implementation plan
-- [x] Outside-tap-to-dismiss backdrop
-- [x] Dead layout constants removed
-- [x] Scroll-safe panel (~5 rows, then scrolls)
-- [x] Accessibility traits (row selection, pill expand/collapse hint)
+- [x] Map inferred kinds → `PresenceActivity` / draft fields (existing activity_name/symbol)
+- [x] `LocationSessionActivityState` observation window + last-valid hold
+- [x] `LocationSession` orchestration (engine → draft → sync)
+- [x] Factory wires `DeterministicActivityInferenceEngine`
+- [x] Heartbeats preserve latest valid activity
+- [x] Ghost / availability unchanged; unknown still publishes
+- [x] Remote activity patches via existing LiveDataStore path
+- [x] `ActivityInferenceIntegrationTests` — 9 green
+- [x] Regression `LocationSessionTests` — 18 green
+- [x] Commit
 
-## Done
+## Flow
 
-See `docs/superpowers/specs/2026-07-24-friend-group-dropdown-polish-design.md`
-and `docs/superpowers/plans/2026-07-24-friend-group-dropdown-polish.md`.
+```
+validated observation
+→ activity engine
+→ latest inferred activity
+→ presence draft (activity_name/symbol)
+→ existing Supabase write path
+→ existing Realtime path
+```
 
----
+## Out of scope
 
-# Issue #84 — Realtime Presence Synchronization
+- Arrived / left
+- Friend-facing UI
+- New DB columns (reuse activity_name / activity_symbol)
 
-## Status
+## Prior
 
-- [x] Design spec approved
-- [x] Implementation plan
-- [x] Migration `0020_current_presence_realtime` (file + remote apply)
-- [x] Applicator + LiveDataStore remote APIs
-- [x] PresenceRealtimeBridge + fake source + tests
-- [x] AppDataContainer start/stop wiring
-- [x] `PresenceRealtimeTests` (28) green
-- [ ] Optional: two-account manual dogfood
-- [x] Open PR (merge with main)
-
-## Done
-
-See `docs/superpowers/specs/2026-07-24-realtime-presence-sync-design.md` and
-`docs/superpowers/plans/2026-07-24-realtime-presence-sync.md`.
-
----
-
-# Issue #83 — Audit and Standardize Confirmation Popups (merged to main)
-
-## Status
-
-- [x] Complete — see design system decision DS-090 and `PushConfirmationTests`
+- #92 I1 domain — done
+- #93 I2 deterministic rules — done

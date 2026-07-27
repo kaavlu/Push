@@ -190,7 +190,25 @@ struct RejectAllLocationValidator: LocationObservationValidating {
     }
 }
 
-/// Builds a minimal draft from the latest history entry — Phase 1 shape, no ML.
+/// Test double — always returns a fixed inference result (I3 session tests).
+struct FixedActivityInferenceEngine: ActivityInferenceEngine {
+    var result: InferredActivityResult
+
+    func infer(
+        from observations: [LocationObservation],
+        previous: InferredActivityResult?,
+        at evaluationTime: Date
+    ) -> InferredActivityResult {
+        _ = observations
+        _ = previous
+        _ = evaluationTime
+        return result
+    }
+}
+
+/// Builds a minimal draft from the latest history entry — coords + mirrored
+/// availability. Activity is filled by `LocationSession` via activity inference
+/// (Issue #94); this inferrer only supplies a Nearby default.
 struct PassthroughPresenceInferrer: PresenceInferring {
     func infer(
         from history: [ValidatedObservation],
@@ -210,8 +228,7 @@ struct PassthroughPresenceInferrer: PresenceInferring {
         return PresenceStatusDraft(
             availability: availability,
             isPublished: isPublished,
-            activity: previous?.activity
-                ?? PresenceActivity(name: "Nearby", symbolName: "location.fill"),
+            activity: previous?.activity ?? .nearby,
             placeID: previous?.placeID,
             statusNote: previous?.statusNote,
             latitude: observation?.latitude,
