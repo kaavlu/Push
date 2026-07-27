@@ -82,7 +82,9 @@ enum StartPushLayout {
 
 enum StartPushColor {
     static let rowFillOpacity = 0.28
-    static let selectedStrokeOpacity = 0.3
+    static let selectedTintOpacity = 0.14
+    static let selectedStrokeOpacity = 0.5
+    static let selectedStrokeWidth: CGFloat = 1.5
     static let textEditorFill = 0.24
     static let textEditorStrokeOpacity = 0.18
     static let pillSelectedStrokeOpacity = 0.3
