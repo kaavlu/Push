@@ -357,21 +357,25 @@ private struct FriendGroupDropdownPanel: View {
     let select: (GroupFilterItem) -> Void
 
     var body: some View {
-        VStack(spacing: TopDropdownLayout.rowSpacing) {
-            ForEach(items) { item in
-                Button {
-                    select(item)
-                } label: {
-                    FriendGroupDropdownRow(
-                        item: item,
-                        isSelected: selectedID == item.id
-                    )
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: TopDropdownLayout.rowSpacing) {
+                ForEach(items) { item in
+                    Button {
+                        select(item)
+                    } label: {
+                        FriendGroupDropdownRow(
+                            item: item,
+                            isSelected: selectedID == item.id
+                        )
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
+            .padding(TopDropdownLayout.panelPadding)
         }
-        .padding(TopDropdownLayout.panelPadding)
         .frame(width: TopDropdownLayout.panelWidth(layout))
+        .frame(maxHeight: TopDropdownLayout.panelMaxHeight)
+        .fixedSize(horizontal: false, vertical: true)
         .topControlBackground(cornerRadius: TopDropdownLayout.panelCornerRadius)
     }
 }
@@ -455,6 +459,9 @@ private enum TopDropdownLayout {
     static let panelSpacing: CGFloat = 8
     static let panelPadding: CGFloat = 6
     static func panelWidth(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 196, standard: 208, large: 218) }
+    /// Caps the panel at ~5 visible rows before it scrolls; eyeballed against
+    /// current row metrics, same convention as `overlayHeight`/`dropdownHeight`.
+    static let panelMaxHeight: CGFloat = 240
     static let panelCornerRadius: CGFloat = 24
     static let rowSpacing: CGFloat = 2
     static let chevronSize: CGFloat = 11
