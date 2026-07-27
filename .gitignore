@@ -17,7 +17,27 @@ build/
 *.xcresult
 *.moved-aside
 *.xcuserstate
+**/xcuserdata/
 xcuserdata/
+
+# Local scratch / build logs (never commit)
+build_output.txt
+scratchpad_udid.txt
+*.log
+
+# Secrets and local credentials (never commit)
+.env
+.env.*
+!.env.example
+secrets/
+credentials.json
+**/GoogleService-Info.plist
+*.pem
+*.p8
+*.p12
+*.mobileprovision
+AuthKey_*.p8
+.supabase/
 
 # macOS
 .DS_Store

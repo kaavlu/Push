@@ -96,7 +96,7 @@ final class DataLayerTests: XCTestCase {
     func testRepositoriesServeSeededData() async throws {
         let container = AppDataContainer(seed: .standard())
         let friends = try await container.friends.friends()
-        XCTAssertEqual(friends.count, 10)
+        XCTAssertEqual(friends.count, 37)
         XCTAssertFalse(friends.contains { $0.id == "manav" })
         let user = try await container.friends.currentUser()
         XCTAssertEqual(user.id, "manav")
@@ -121,9 +121,9 @@ final class DataLayerTests: XCTestCase {
     func testMapViewModelLoadsPucksAndFilters() async throws {
         let viewModel = MapViewModel(container: AppDataContainer(seed: .standard()))
         await viewModel.load()
-        XCTAssertEqual(viewModel.loadState.value?.count, 5)
+        XCTAssertEqual(viewModel.loadState.value?.count, 8)
         XCTAssertEqual(viewModel.filters.map(\.title), ["All Friends", "India", "Exec", "Michigan"])
-        XCTAssertEqual(viewModel.filteredPucks.count, 5)
+        XCTAssertEqual(viewModel.filteredPucks.count, 8)
 
         viewModel.selectedFilterID = "india"
         XCTAssertEqual(viewModel.filteredPucks.count, 3)
@@ -159,7 +159,7 @@ extension DataLayerTests {
 
         XCTAssertEqual(viewModel.groups.map(\.id), ["group_india", "group_exec", "group_michigan"])
         XCTAssertEqual(viewModel.groups.map(\.memberCount), [5, 2, 5])
-        XCTAssertEqual(viewModel.friends.count, 10)
+        XCTAssertEqual(viewModel.friends.count, 37)
 
         XCTAssertEqual(viewModel.likelyFreeNow.map(\.id), [
             "friend_chitty", "friend_ishan", "friend_rohan", "friend_viplove"

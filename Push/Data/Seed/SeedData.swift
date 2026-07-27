@@ -117,7 +117,7 @@ struct SeedData {
             friend("chitty"), friend("ishan"), friend("nitin"), friend("ohm"),
             friend("pranay"), friend("ram"), friend("roh"), friend("rohan"),
             friend("ryan"), friend("viplove")
-        ]
+        ] + RegionalClusterSeed.cohorts.flatMap(\.people)
     }
 
     /// Not yet friends — searchable for Add Friends (and austin seeds an incoming request).
@@ -253,10 +253,81 @@ struct SeedData {
                 address: "Ram's place", vagueLabel: "Nob Hill",
                 latitude: 37.7920, longitude: -122.4150,
                 vagueLatitude: 37.7930, vagueLongitude: -122.4161
-            )
-        ]
+            ),
+        ] + RegionalClusterSeed.cohorts.map(\.place)
     }
 
+    // MARK: - Regional cluster visual fixtures
+
+    /// DEBUG mock cohorts positioned far enough apart to remain independent
+    /// within the map's 100-mile regional clustering radius.
+    ///
+    /// Counts intentionally exercise every `RegionalActivityPuck` size tier:
+    /// New York = small (5), Chicago = medium (6), Seattle = large (16).
+    /// Existing SF people and coordinates above remain unchanged.
+    static var regionalClusterCohorts: [RegionalClusterSeed.Cohort] {
+        RegionalClusterSeed.cohorts
+    }
+}
+
+enum RegionalClusterSeed {
+    struct Cohort {
+        let id: String
+        let city: String
+        let count: Int
+        let latitude: Double
+        let longitude: Double
+
+        var people: [Person] {
+            (1...count).map { index in
+                Person(
+                    id: "regional-\(id)-\(index)",
+                    firstName: "\(city) \(index)",
+                    imageAssetPath: nil
+                )
+            }
+        }
+
+        var place: Place {
+            Place(
+                id: placeID,
+                name: "\(city) cluster",
+                shortName: city,
+                address: city,
+                vagueLabel: city,
+                latitude: latitude,
+                longitude: longitude,
+                vagueLatitude: latitude,
+                vagueLongitude: longitude
+            )
+        }
+
+        var placeID: String {
+            "regional-\(id)"
+        }
+
+        var personIDs: [Person.ID] {
+            people.map(\.id)
+        }
+    }
+
+    static let cohorts: [Cohort] = [
+        Cohort(
+            id: "new-york", city: "New York", count: 5,
+            latitude: 40.7128, longitude: -74.0060
+        ),
+        Cohort(
+            id: "chicago", city: "Chicago", count: 6,
+            latitude: 41.8781, longitude: -87.6298
+        ),
+        Cohort(
+            id: "seattle", city: "Seattle", count: 16,
+            latitude: 47.6062, longitude: -122.3321
+        ),
+    ]
+}
+
+extension SeedData {
     // MARK: - Policies
 
     /// Full-visibility global defaults so today's screens render unchanged.

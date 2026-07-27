@@ -19,6 +19,7 @@ struct ContentView: View {
     @State private var isCreateMenuPresented = false
     @State private var isFilterDropdownExpanded = false
     @State private var selectedPuck: MapPuckData?
+    @State private var selectedRegionalPuck: RegionalPuckModel?
     @State private var startPushContext: StartPushLaunchContext?
     @State private var mapSpan = MapDefaults.region.span
     @State private var forcedRenderSpan: MKCoordinateSpan?
@@ -31,12 +32,19 @@ struct ContentView: View {
                 region: MapDefaults.region,
                 pucks: viewModel.renderPucks(for: forcedRenderSpan ?? mapSpan),
                 focusRequest: viewModel.mapFocusRequest,
+                selectedRegionalPuckID: selectedRegionalPuck?.id,
                 onPuckSelected: selectMapPuck,
+                onMapTapped: dismissMapSelection,
                 onRegionChanged: handleRegionChanged,
                 layout: layout,
                 mapLayoutMargins: MapAttributionLayout.edgeInsets(layout)
             )
             .ignoresSafeArea()
+
+            if isFilterDropdownExpanded {
+                filterDropdownBackdrop
+                    .transition(.opacity)
+            }
 
             if viewModel.surfacePhase == .empty || viewModel.surfacePhase == .failed {
                 mapSurfaceOverlay
@@ -76,12 +84,28 @@ struct ContentView: View {
                     onStartPush: launchStartPush
                 )
             }
+
+            if let selectedRegionalPuck {
+                RegionalPuckDetailCard(
+                    model: selectedRegionalPuck,
+                    onZoomIn: { zoomIntoRegionalPuck(selectedRegionalPuck) }
+                )
+                .padding(.horizontal, RegionalPuckDetailLayout.horizontalPadding(layout))
+                .padding(.bottom, RegionalPuckDetailLayout.bottomClearance(layout))
+                .transition(
+                    .move(edge: .bottom)
+                        .combined(with: .opacity)
+                        .combined(with: .scale(scale: RegionalPuckDetailLayout.closedScale))
+                )
+                .zIndex(RegionalPuckDetailLayout.zIndex)
+            }
         }
         .animation(
             .spring(response: CreateActionMenuLayout.animationResponse, dampingFraction: CreateActionMenuLayout.animationDamping),
             value: isCreateMenuPresented
         )
         .animation(.spring(response: TopDropdownLayout.animationResponse, dampingFraction: TopDropdownLayout.animationDamping), value: isFilterDropdownExpanded)
+        .animation(PushMotion.sheet, value: selectedRegionalPuck?.id)
         .fullScreenCover(item: $presentedRoute) { route in
             destination(for: route)
         }
@@ -222,7 +246,7 @@ struct ContentView: View {
     private func destination(for route: MainMapRoute) -> some View {
         switch route {
         case .groups:
-            FriendsView()
+            FriendsView(onLocateFriend: locateFriendOnMap)
         case .profile:
             ProfileView {
                 presentedRoute = nil
@@ -252,6 +276,18 @@ struct ContentView: View {
             }
     }
 
+    /// Invisible tap-catcher over the map so tapping outside the panel closes
+    /// it — mirrors `createMenuBackdrop`'s interception technique, but stays
+    /// transparent since this control doesn't need to dim the map.
+    private var filterDropdownBackdrop: some View {
+        Color.clear
+            .contentShape(Rectangle())
+            .ignoresSafeArea()
+            .onTapGesture {
+                isFilterDropdownExpanded = false
+            }
+    }
+
     private func selectCreateAction(_ item: CreateActionMenuItem) {
         isCreateMenuPresented = false
         isFilterDropdownExpanded = false
@@ -261,12 +297,39 @@ struct ContentView: View {
 
     private func selectMapPuck(_ puck: MapPuckRenderModel) {
         isFilterDropdownExpanded = false
+        if case .regionalCluster(let regional) = puck {
+            selectedPuck = nil
+            selectedRegionalPuck = regional
+            return
+        }
+        selectedRegionalPuck = nil
         if let selected = viewModel.select(puck) {
             presentSelectedPuck(selected)
-        } else if let focusRequest = viewModel.mapFocusRequest {
-            forcedRenderSpan = focusRequest.region.span
-            mapSpan = focusRequest.region.span
         }
+    }
+
+    private func zoomIntoRegionalPuck(_ puck: RegionalPuckModel) {
+        selectedRegionalPuck = nil
+        viewModel.focus(on: puck)
+        guard let focusRequest = viewModel.mapFocusRequest else { return }
+        forcedRenderSpan = focusRequest.region.span
+        mapSpan = focusRequest.region.span
+    }
+
+    private func dismissMapSelection() {
+        selectedRegionalPuck = nil
+    }
+
+    private func locateFriendOnMap(_ personID: Person.ID) -> Bool {
+        guard let puck = viewModel.select(personID: personID) else { return false }
+        isFilterDropdownExpanded = false
+        forcedRenderSpan = viewModel.mapFocusRequest?.region.span
+        if let span = forcedRenderSpan {
+            mapSpan = span
+        }
+        presentSelectedPuck(puck)
+        presentedRoute = nil
+        return true
     }
 
     private func presentSelectedPuck(_ puck: MapPuckData) {
@@ -302,6 +365,19 @@ struct ContentView: View {
     }
 }
 
+private enum RegionalPuckDetailLayout {
+    static func horizontalPadding(_ layout: PushAdaptiveLayout) -> CGFloat {
+        layout.pageHorizontalPadding
+    }
+
+    static func bottomClearance(_ layout: PushAdaptiveLayout) -> CGFloat {
+        layout.value(compact: 96, standard: 104, large: 112)
+    }
+
+    static let closedScale = PushMotion.Sheet.closedScale
+    static let zIndex: Double = 28
+}
+
 private struct FriendGroupDropdownButton: View {
     let selectedTitle: String
     let isExpanded: Bool
@@ -330,6 +406,7 @@ private struct FriendGroupDropdownButton: View {
         .contentShape(Capsule())
         .accessibilityLabel("Friend group")
         .accessibilityValue(selectedTitle)
+        .accessibilityHint(isExpanded ? "Double tap to collapse" : "Double tap to expand")
     }
 }
 
@@ -340,21 +417,26 @@ private struct FriendGroupDropdownPanel: View {
     let select: (GroupFilterItem) -> Void
 
     var body: some View {
-        VStack(spacing: TopDropdownLayout.rowSpacing) {
-            ForEach(items) { item in
-                Button {
-                    select(item)
-                } label: {
-                    FriendGroupDropdownRow(
-                        item: item,
-                        isSelected: selectedID == item.id
-                    )
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: TopDropdownLayout.rowSpacing) {
+                ForEach(items) { item in
+                    Button {
+                        select(item)
+                    } label: {
+                        FriendGroupDropdownRow(
+                            item: item,
+                            isSelected: selectedID == item.id
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityAddTraits(selectedID == item.id ? .isSelected : [])
                 }
-                .buttonStyle(.plain)
             }
+            .padding(TopDropdownLayout.panelPadding)
         }
-        .padding(TopDropdownLayout.panelPadding)
         .frame(width: TopDropdownLayout.panelWidth(layout))
+        .frame(maxHeight: TopDropdownLayout.panelMaxHeight)
+        .fixedSize(horizontal: false, vertical: true)
         .topControlBackground(cornerRadius: TopDropdownLayout.panelCornerRadius)
     }
 }
@@ -438,13 +520,12 @@ private enum TopDropdownLayout {
     static let panelSpacing: CGFloat = 8
     static let panelPadding: CGFloat = 6
     static func panelWidth(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 196, standard: 208, large: 218) }
+    /// Caps the panel at ~5 visible rows before it scrolls; eyeballed against
+    /// current row metrics, same convention as `overlayHeight`/`dropdownHeight`.
+    static let panelMaxHeight: CGFloat = 240
     static let panelCornerRadius: CGFloat = 24
     static let rowSpacing: CGFloat = 2
-    static let rowHorizontalPadding: CGFloat = 12
-    static let rowVerticalPadding: CGFloat = 10
-    static let rowIconSpacing: CGFloat = 8
     static let chevronSize: CGFloat = 11
-    static let checkmarkSize: CGFloat = 12
     static let expandedChevronRotation = 180.0
     static let panelTransitionScale = 0.96
     static let animationResponse = 0.28
@@ -465,14 +546,6 @@ private enum TopControlLayout {
     /// Insets the unread badge from the control edge so it sits on the icon, not outside the button.
     static let indicatorInset: CGFloat = 9
     static let minimumTextScale = 0.78
-    static let strokeWidth: CGFloat = 1
-    static let profileRingWidth: CGFloat = 1.15
-    static let highlightWidth: CGFloat = 0.8
-    static let highlightInset: CGFloat = 1.2
-    static let pillGlowRadius: CGFloat = 58
-    static let profileGlowRadius: CGFloat = 24
-    static let shadowRadius: CGFloat = 22
-    static let shadowYOffset: CGFloat = 10
 }
 
 private enum MapAttributionLayout {

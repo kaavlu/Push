@@ -19,7 +19,7 @@ extension SeedData {
         let gym = PresenceActivity(name: "Gym", symbolName: "dumbbell.fill")
         let off = PresenceActivity(name: "Off", symbolName: "moon.zzz.fill")
 
-        return [
+        let sfStatuses = [
             status("chitty", .freeNow, coffee, place: "blue-bottle", note: nil, minutesAgo: 3, now: now),
             status("nitin", .maybeDown, park, place: "dolores-park", note: "Near Dolores", minutesAgo: 8, now: now),
             status("ishan", .freeNow, lunch, place: "souvla", note: nil, minutesAgo: 0, now: now),
@@ -32,6 +32,20 @@ extension SeedData {
             status(SeedIDs.currentUser, .maybeDown, park, place: "north-park", note: "Near North Park", minutesAgo: 0, now: now),
             status("roh", .unavailable, off, place: nil, note: nil, minutesAgo: 60, now: now)
         ]
+        let regionalStatuses = regionalClusterCohorts.flatMap { cohort in
+            cohort.personIDs.map { personID in
+                status(
+                    personID,
+                    .busy,
+                    PresenceActivity(name: "Around town", symbolName: "building.2.fill"),
+                    place: cohort.placeID,
+                    note: nil,
+                    minutesAgo: 0,
+                    now: now
+                )
+            }
+        }
+        return sfStatuses + regionalStatuses
     }
 
     private static func status(

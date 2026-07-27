@@ -7,182 +7,307 @@ import SwiftUI
 
 struct RegionalActivityPuck: View {
     let model: RegionalPuckModel
-    @State private var isPulsing = false
+    var isSelected = false
 
-    private var size: CGFloat {
-        switch model.memberCount {
-        case 2...5: return RegionalActivityPuckLayout.sizeSmall
-        case 6...15: return RegionalActivityPuckLayout.sizeMedium
-        case 16...35: return RegionalActivityPuckLayout.sizeLarge
-        case 36...75: return RegionalActivityPuckLayout.sizeXLarge
-        default: return RegionalActivityPuckLayout.sizeXXLarge
-        }
+    @Environment(\.pushLayout) private var layout
+    @State private var isHaloExpanded = false
+
+    private var metrics: RegionalActivityPuckMetrics {
+        RegionalActivityPuckMetrics(memberCount: model.memberCount, scale: layout.puckScale)
     }
 
-    private var pulseColor: Color {
-        model.containsCurrentUser || model.containsJoinedGroup
-            ? RegionalActivityPuckColor.joinedPulse
-            : PushColorPalette.Accent.sunbeam
+    private var stateColor: Color {
+        if model.containsCurrentUser {
+            return PushAvailabilityTokens.freeNow
+        }
+        return PushGlassCreamTokens.creamBase
     }
 
     var body: some View {
         ZStack {
-            pulseRing
-            activityCore
-            VStack(spacing: RegionalActivityPuckLayout.contentSpacing) {
-                locationInitialsLabel
-                countLabel
-            }
+            currentUserHalo
+            core
+            clusterChip(model.regionAbbreviation)
+                .offset(y: PushRegionalPuckTokens.chipVerticalOffset)
         }
-        .frame(
-            width: size * RegionalActivityPuckLayout.frameScale,
-            height: size * RegionalActivityPuckLayout.frameScale
-        )
+        .scaleEffect(metrics.uniformScale)
+        .frame(width: metrics.frameWidth, height: metrics.frameHeight)
+        .scaleEffect(isSelected ? PushRegionalPuckTokens.selectedScale : 1)
+        .animation(PushMotion.selection, value: isSelected)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(model.memberCount) friends active near \(model.regionName)")
+        .accessibilityLabel(accessibilityLabel)
+        .accessibilityValue(isSelected ? "Selected" : "")
         .onAppear {
-            withAnimation(
-                .easeInOut(duration: RegionalActivityPuckLayout.pulseDuration)
-                .repeatForever(autoreverses: true)
-            ) {
-                isPulsing = true
+            guard model.containsCurrentUser else { return }
+            withAnimation(PushMotion.mapPulse) {
+                isHaloExpanded = true
             }
         }
     }
 
-    private var pulseRing: some View {
-        Circle()
-            .stroke(
-                pulseColor.opacity(RegionalActivityPuckLayout.pulseOpacity),
-                lineWidth: model.containsCurrentUser
-                    ? RegionalActivityPuckLayout.selfPulseLineWidth
-                    : RegionalActivityPuckLayout.pulseLineWidth
-            )
-            .frame(width: size, height: size)
-            .scaleEffect(isPulsing ? RegionalActivityPuckLayout.pulseMaxScale : RegionalActivityPuckLayout.pulseMinScale)
-            .opacity(isPulsing ? RegionalActivityPuckLayout.pulseLowOpacity : RegionalActivityPuckLayout.pulseHighOpacity)
+    @ViewBuilder
+    private var currentUserHalo: some View {
+        if model.containsCurrentUser {
+            Capsule()
+                .stroke(
+                    PushAvailabilityTokens.freeNow.opacity(PushRegionalPuckTokens.haloOpacity),
+                    lineWidth: PushRegionalPuckTokens.haloLineWidth
+                )
+                .frame(
+                    width: PushRegionalPuckTokens.baseWidth,
+                    height: PushRegionalPuckTokens.coreHeight
+                )
+                .scaleEffect(
+                    isHaloExpanded
+                        ? PushRegionalPuckTokens.haloMaxScale
+                        : PushRegionalPuckTokens.haloMinScale
+                )
+                .opacity(isHaloExpanded ? PushRegionalPuckTokens.haloLowOpacity : 1)
+        }
     }
 
-    private var activityCore: some View {
-        Circle()
-            .fill(.ultraThinMaterial)
-            .overlay {
-                Circle()
-                    .fill(PushColorPalette.Accent.sunbeam.opacity(coreTintOpacity))
-            }
-            .overlay {
-                Circle()
-                    .stroke(PushColorPalette.Accent.walnut, lineWidth: RegionalActivityPuckLayout.coreStrokeWidth)
-            }
-            .shadow(
-                color: PushColorPalette.Accent.walnut.opacity(RegionalActivityPuckLayout.shadowOpacity),
-                radius: RegionalActivityPuckLayout.shadowRadius,
-                y: RegionalActivityPuckLayout.shadowYOffset
-            )
-            .frame(width: size, height: size)
+    private var core: some View {
+        RegionalPuckAvatarStack(
+            friends: model.representativeAvatars,
+            avatarSize: PushRegionalPuckTokens.avatarSize
+        )
+        .frame(
+            width: PushRegionalPuckTokens.baseWidth,
+            height: PushRegionalPuckTokens.coreHeight
+        )
+        .pushPuckGlass(cornerRadius: PushRegionalPuckTokens.coreHeight / 2)
+        .overlay {
+            Capsule()
+                .stroke(
+                    Color.white.opacity(PushRegionalPuckTokens.avatarStrokeOpacity),
+                    lineWidth: PushRegionalPuckTokens.contrastRingWidth
+                )
+        }
+        .overlay {
+            Capsule()
+                .stroke(
+                    stateColor.opacity(stateRingOpacity),
+                    lineWidth: isSelected
+                        ? PushRegionalPuckTokens.selectedRingWidth
+                        : PushRegionalPuckTokens.stateRingWidth
+                )
+        }
     }
 
-    private var coreTintOpacity: Double {
-        RegionalActivityPuckLayout.coreTintBaseOpacity
-            + model.activityScore * RegionalActivityPuckLayout.coreTintScoreMultiplier
-    }
-
-    private var countLabel: some View {
-        Text("\(model.memberCount)")
-            .font(.system(size: countFontSize, weight: .heavy, design: .rounded))
-            .foregroundStyle(PushColorPalette.Accent.walnut)
+    private func clusterChip(_ text: String) -> some View {
+        Text(text)
+            .font(.caption2.weight(.black))
+            .kerning(PushRegionalPuckTokens.chipKerning)
+            .foregroundStyle(PushControlColors.textEspresso)
             .lineLimit(1)
-            .minimumScaleFactor(RegionalActivityPuckLayout.minimumTextScale)
-    }
-
-    private var locationInitialsLabel: some View {
-        Text(locationInitials)
-            .font(.system(size: initialsFontSize, weight: .black, design: .rounded))
-            .foregroundStyle(PushColorPalette.Accent.walnut)
-            .lineLimit(1)
-            .minimumScaleFactor(RegionalActivityPuckLayout.minimumTextScale)
-            .padding(.horizontal, RegionalActivityPuckLayout.initialsHorizontalPadding)
-            .padding(.vertical, RegionalActivityPuckLayout.initialsVerticalPadding)
+            .minimumScaleFactor(PushRegionalPuckTokens.minimumTextScale)
+            .frame(
+                width: PushRegionalPuckTokens.chipWidth,
+                height: PushRegionalPuckTokens.chipHeight
+            )
             .background {
                 Capsule()
-                    .fill(.white.opacity(RegionalActivityPuckLayout.initialsPlateOpacity))
+                    .fill(
+                        PushGlassCreamTokens.creamBase.opacity(
+                            PushRegionalPuckTokens.chipFillOpacity
+                        )
+                    )
             }
+            .overlay {
+                Capsule()
+                    .stroke(
+                        Color.white.opacity(PushRegionalPuckTokens.chipStrokeOpacity),
+                        lineWidth: PushRegionalPuckTokens.chipStrokeWidth
+                    )
+            }
+            .shadow(
+                color: PushColorPalette.Accent.walnut.opacity(
+                    PushRegionalPuckTokens.badgeShadowOpacity
+                ),
+                radius: PushRegionalPuckTokens.badgeShadowRadius,
+                y: PushRegionalPuckTokens.badgeShadowYOffset
+            )
     }
 
-    private var locationInitials: String {
-        if isSanFranciscoCoordinate {
-            return "SF"
+    private var stateRingOpacity: Double {
+        if model.containsCurrentUser { return PushRegionalPuckTokens.currentUserRingOpacity }
+        return PushRegionalPuckTokens.creamRingOpacity
+    }
+
+    private var accessibilityLabel: String {
+        let inclusion = model.containsCurrentUser ? ", including you" : ""
+        return "\(model.regionName), \(model.memberCount) people\(inclusion), \(model.availabilitySummary)"
+    }
+}
+
+private struct RegionalPuckAvatarStack: View {
+    let friends: [FriendPuckData]
+    let avatarSize: CGFloat
+
+    private var displayedFriends: [FriendPuckData] {
+        Array(friends.prefix(3))
+    }
+
+    var body: some View {
+        HStack(spacing: -PushRegionalPuckTokens.avatarOverlap) {
+            ForEach(Array(displayedFriends.enumerated()), id: \.element.id) { index, friend in
+                PushPersonAvatar(
+                    imageAssetName: friend.profileImageAssetName,
+                    fallbackInitials: friend.avatarPlaceholder,
+                    fallbackStyle: .dark,
+                    size: avatarSize
+                )
+                .overlay {
+                    Circle()
+                        .stroke(
+                            Color.white.opacity(PushRegionalPuckTokens.avatarStrokeOpacity),
+                            lineWidth: PushRegionalPuckTokens.avatarStrokeWidth
+                        )
+                }
+                .zIndex(Double(displayedFriends.count - index))
+            }
+
+            if displayedFriends.isEmpty {
+                PushPersonAvatar(
+                    imageAssetName: nil,
+                    fallbackInitials: "P",
+                    fallbackStyle: .dark,
+                    size: avatarSize
+                )
+                .overlay {
+                    Circle()
+                        .stroke(
+                            Color.white.opacity(PushRegionalPuckTokens.avatarStrokeOpacity),
+                            lineWidth: PushRegionalPuckTokens.avatarStrokeWidth
+                        )
+                }
+            }
         }
-        let words = model.regionName
-            .split(separator: " ")
-            .prefix(RegionalActivityPuckLayout.initialsLimit)
-        let initials = words.compactMap(\.first).map(String.init).joined()
-        return initials.isEmpty ? "NE" : initials.uppercased()
-    }
-
-    private var isSanFranciscoCoordinate: Bool {
-        model.coordinate.latitude >= RegionalActivityPuckLayout.sfMinLatitude
-            && model.coordinate.latitude <= RegionalActivityPuckLayout.sfMaxLatitude
-            && model.coordinate.longitude >= RegionalActivityPuckLayout.sfMinLongitude
-            && model.coordinate.longitude <= RegionalActivityPuckLayout.sfMaxLongitude
-    }
-
-    private var countFontSize: CGFloat {
-        min(
-            RegionalActivityPuckLayout.maxCountFontSize,
-            size * RegionalActivityPuckLayout.countFontSizeRatio
-        )
-    }
-
-    private var initialsFontSize: CGFloat {
-        min(
-            RegionalActivityPuckLayout.maxInitialsFontSize,
-            size * RegionalActivityPuckLayout.initialsFontSizeRatio
-        )
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
-private enum RegionalActivityPuckColor {
-    static let joinedPulse = Color(red: 0.94, green: 0.79, blue: 0.48)
+struct RegionalActivityPuckMetrics: Equatable {
+    let uniformScale: CGFloat
+    let width: CGFloat
+    let height: CGFloat
+    let avatarSize: CGFloat
+    let frameWidth: CGFloat
+    let frameHeight: CGFloat
+    let regionVerticalOffset: CGFloat
+    let countFontSize: CGFloat
+
+    init(memberCount: Int, scale: CGFloat = 1) {
+        let populationScale: CGFloat
+        switch memberCount {
+        case ...5:
+            populationScale = PushRegionalPuckTokens.populationScaleSmall
+        case 6...15:
+            populationScale = PushRegionalPuckTokens.populationScaleMedium
+        default:
+            populationScale = PushRegionalPuckTokens.populationScaleLarge
+        }
+
+        uniformScale = PushRegionalPuckTokens.overallScale * populationScale * scale
+        width = PushRegionalPuckTokens.baseWidth * uniformScale
+        height = PushRegionalPuckTokens.coreHeight * uniformScale
+        avatarSize = PushRegionalPuckTokens.avatarSize * uniformScale
+        frameWidth = (
+            PushRegionalPuckTokens.baseWidth + PushRegionalPuckTokens.frameWidthPadding
+        ) * uniformScale
+        frameHeight = PushRegionalPuckTokens.frameHeight * uniformScale
+        regionVerticalOffset = PushRegionalPuckTokens.chipVerticalOffset * uniformScale
+        countFontSize = UIFont.preferredFont(forTextStyle: .caption2).pointSize * uniformScale
+    }
 }
 
-private enum RegionalActivityPuckLayout {
-    static let sizeSmall: CGFloat = 48
-    static let sizeMedium: CGFloat = 60
-    static let sizeLarge: CGFloat = 74
-    static let sizeXLarge: CGFloat = 88
-    static let sizeXXLarge: CGFloat = 96
-    static let frameScale: CGFloat = 1.55
-    static let contentSpacing: CGFloat = 2
+/// Compatibility shim for existing hit-testing/tests while the regional
+/// metrics now live on the DS variant above.
+enum RegionalActivityPuckLayout {
+    static let sizeSmall = PushRegionalPuckTokens.baseWidth
+        * PushRegionalPuckTokens.overallScale
+        * PushRegionalPuckTokens.populationScaleSmall
+    static let sizeMedium = PushRegionalPuckTokens.baseWidth
+        * PushRegionalPuckTokens.overallScale
+        * PushRegionalPuckTokens.populationScaleMedium
+    static let sizeLarge = PushRegionalPuckTokens.baseWidth
+        * PushRegionalPuckTokens.overallScale
+        * PushRegionalPuckTokens.populationScaleLarge
 
-    static let pulseOpacity = 0.68
-    static let pulseLineWidth: CGFloat = 2.3
-    static let selfPulseLineWidth: CGFloat = 3
-    static let pulseDuration = 2.2
-    static let pulseMinScale: CGFloat = 0.96
-    static let pulseMaxScale: CGFloat = 1.16
-    static let pulseHighOpacity = 0.56
-    static let pulseLowOpacity = 0.14
-
-    static let coreTintBaseOpacity = 0.28
-    static let coreTintScoreMultiplier = 0.3
-    static let coreStrokeWidth: CGFloat = 2.2
-    static let shadowOpacity = 0.22
-    static let shadowRadius: CGFloat = 18
-    static let shadowYOffset: CGFloat = 8
-
-    static let countFontSizeRatio: CGFloat = 0.32
-    static let maxCountFontSize: CGFloat = 30
-    static let initialsFontSizeRatio: CGFloat = 0.28
-    static let maxInitialsFontSize: CGFloat = 24
-    static let minimumTextScale = 0.72
-
-    static let initialsLimit = 2
-    static let initialsHorizontalPadding: CGFloat = 6
-    static let initialsVerticalPadding: CGFloat = 2
-    static let initialsPlateOpacity = 0.52
-    static let sfMinLatitude = 37.60
-    static let sfMaxLatitude = 37.86
-    static let sfMinLongitude = -122.56
-    static let sfMaxLongitude = -122.30
+    static func coreSize(memberCount: Int, scale: CGFloat = 1) -> CGFloat {
+        RegionalActivityPuckMetrics(memberCount: memberCount, scale: scale).width
+    }
 }
+
+struct RegionalPuckDetailCard: View {
+    let model: RegionalPuckModel
+    let onZoomIn: () -> Void
+
+    var body: some View {
+        HStack(spacing: PushRegionalPuckTokens.detailContentSpacing) {
+            RegionalPuckAvatarStack(
+                friends: model.representativeAvatars,
+                avatarSize: PushRegionalPuckTokens.detailAvatarSize
+            )
+            .frame(
+                width: PushRegionalPuckTokens.detailAvatarStackSize,
+                height: PushRegionalPuckTokens.detailAvatarStackSize
+            )
+
+            VStack(alignment: .leading, spacing: PushRegionalPuckTokens.detailTextSpacing) {
+                Text(model.regionName)
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(PushControlColors.textEspresso)
+                    .lineLimit(1)
+
+                Text(peopleSummary)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(PushControlColors.textPrimary)
+                    .lineLimit(1)
+
+                Text(model.availabilitySummary)
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(PushControlColors.textSecondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(PushRegionalPuckTokens.minimumTextScale)
+            }
+
+            Spacer(minLength: 0)
+
+            PushCircleIconButton(
+                systemImageName: "plus.magnifyingglass",
+                accessibilityLabel: "Zoom into \(model.regionName)",
+                action: onZoomIn
+            )
+        }
+        .padding(.horizontal, PushRegionalPuckTokens.detailHorizontalPadding)
+        .padding(.vertical, PushRegionalPuckTokens.detailVerticalPadding)
+        .pushMapControlGlass(cornerRadius: PushRegionalPuckTokens.detailCornerRadius)
+        .accessibilityElement(children: .contain)
+    }
+
+    private var peopleSummary: String {
+        let count = "\(model.memberCount) \(model.memberCount == 1 ? "person" : "people")"
+        let inclusion = model.containsCurrentUser ? "You’re here" : "You’re not here"
+        return "\(count) · \(inclusion)"
+    }
+}
+
+#if DEBUG
+struct RegionalActivityPuck_Previews: PreviewProvider {
+    static var previews: some View {
+        PushPreviewMatrix {
+            HStack(spacing: 20) {
+                ForEach(PuckLabFixtures.regionalScenarios) { scenario in
+                    RegionalActivityPuck(
+                        model: scenario.model,
+                        isSelected: scenario.model.regionName == "Chicago"
+                    )
+                }
+            }
+            .padding()
+            .background(PushIvoryPageBackground())
+        }
+    }
+}
+#endif

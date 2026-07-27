@@ -13,6 +13,7 @@ import SwiftUI
 struct FriendsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.pushLayout) private var layout
+    private let onLocateFriend: (Person.ID) -> Bool
     @StateObject private var viewModel: FriendsViewModel
     @StateObject private var groupsViewModel: GroupsViewModel
     @State private var mode: FriendsMode = .friends
@@ -23,12 +24,18 @@ struct FriendsView: View {
     @State private var toastMessage: String?
 
     @MainActor
-    init() {
+    init(onLocateFriend: @escaping (Person.ID) -> Bool = { _ in false }) {
+        self.onLocateFriend = onLocateFriend
         _viewModel = StateObject(wrappedValue: FriendsViewModel())
         _groupsViewModel = StateObject(wrappedValue: GroupsViewModel())
     }
 
-    init(viewModel: FriendsViewModel, groupsViewModel: GroupsViewModel) {
+    init(
+        viewModel: FriendsViewModel,
+        groupsViewModel: GroupsViewModel,
+        onLocateFriend: @escaping (Person.ID) -> Bool = { _ in false }
+    ) {
+        self.onLocateFriend = onLocateFriend
         _viewModel = StateObject(wrappedValue: viewModel)
         _groupsViewModel = StateObject(wrappedValue: groupsViewModel)
     }
@@ -205,6 +212,7 @@ struct FriendsView: View {
                     isRemoving: viewModel.removingFriendIDs.contains(row.id),
                     isBlocking: viewModel.blockingFriendIDs.contains(row.id),
                     onToggle: { selectFriend(row) },
+                    onAvatarTap: { locateOnMap(row) },
                     onDirections: { triggerToast("Opening in Maps…") },
                     onStartPush: { startPush(for: row) },
                     onRemove: { Task { await viewModel.removeFriend(row) } },
@@ -269,6 +277,12 @@ struct FriendsView: View {
     private func startPush(for row: FriendRowModel) {
         viewModel.collapse()
         launchStartPush(.friends([row.friend.id], locationHint: row.friend.placeName))
+    }
+
+    private func locateOnMap(_ row: FriendRowModel) {
+        if onLocateFriend(row.friend.id) {
+            dismiss()
+        }
     }
 
     private func triggerToast(_ message: String) {

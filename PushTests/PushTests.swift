@@ -98,6 +98,21 @@ final class PushTests: XCTestCase {
         XCTAssertFalse(scenarios.contains { $0.title == "Different states" })
     }
 
+    func testPuckLabCoversRegionalVisualStates() throws {
+        let regional = PuckLabFixtures.regionalScenarios
+
+        XCTAssertEqual(regional.map(\.model.memberCount), [10, 5, 6, 16])
+        XCTAssertTrue(regional.contains { $0.model.containsCurrentUser })
+        XCTAssertTrue(regional.contains { $0.model.isSociallyActive && !$0.model.containsCurrentUser })
+        XCTAssertTrue(regional.contains(where: \.isSelected))
+        XCTAssertTrue(
+            regional.allSatisfy {
+                !$0.model.representativeAvatars.isEmpty
+                    && $0.model.representativeAvatars.count <= 3
+            }
+        )
+    }
+
     func testClusterLayoutKindSeparatesPairsFromGroups() throws {
         XCTAssertEqual(FriendClusterLayoutKind(friendsCount: 2), .pair)
         XCTAssertEqual(FriendClusterLayoutKind(friendsCount: 3), .smallGroup)

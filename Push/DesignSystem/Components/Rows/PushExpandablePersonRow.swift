@@ -15,6 +15,7 @@ struct PushExpandablePersonRow: View {
     let isExpanded: Bool
     let isBusy: Bool
     let onToggle: () -> Void
+    let onAvatarTap: () -> Void
     let railActions: [PushExpandableRailAction]
     var removeTitle: String = "Remove Friend"
     var removeMessage: String = "They won't see your status anymore, and you won't see theirs."
@@ -55,7 +56,13 @@ struct PushExpandablePersonRow: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            PushPersonRow(row: row, showsCardBackground: false, action: onToggle)
+            PushPersonRow(
+                row: row,
+                showsCardBackground: false,
+                action: onToggle,
+                avatarAction: onAvatarTap,
+                onLongPress: presentOverflowMenu
+            )
 
             if isExpanded {
                 PushExpandableActionRail(actions: railActions, isBusy: isBusy) {
@@ -124,6 +131,11 @@ struct PushExpandablePersonRow: View {
             break
         }
     }
+
+    private func presentOverflowMenu() {
+        guard !isBusy else { return }
+        isOverflowMenuPresented = true
+    }
 }
 
 /// Friends-list convenience wrapping directions + start-push rail actions.
@@ -133,6 +145,7 @@ struct ExpandableFriendRow: View {
     let isRemoving: Bool
     let isBlocking: Bool
     let onToggle: () -> Void
+    let onAvatarTap: () -> Void
     let onDirections: () -> Void
     let onStartPush: () -> Void
     let onRemove: () -> Void
@@ -170,6 +183,7 @@ struct ExpandableFriendRow: View {
             isExpanded: isExpanded,
             isBusy: isRemoving || isBlocking,
             onToggle: onToggle,
+            onAvatarTap: onAvatarTap,
             railActions: railActions,
             onRemove: onRemove,
             onBlock: onBlock
@@ -200,6 +214,7 @@ struct PushExpandablePersonRow_Previews: PreviewProvider {
                 isRemoving: false,
                 isBlocking: false,
                 onToggle: {},
+                onAvatarTap: {},
                 onDirections: {},
                 onStartPush: {},
                 onRemove: {},

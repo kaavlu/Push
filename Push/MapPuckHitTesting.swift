@@ -96,34 +96,13 @@ enum MapPuckHitTesting {
         }
     }
 
-    /// Core regional size buckets mirror `RegionalActivityPuck`.
     private static func regionalVisualDiameter(
         memberCount: Int,
         layout: PushAdaptiveLayout
     ) -> CGFloat {
-        let core: CGFloat
-        switch memberCount {
-        case 2...5:
-            core = RegionalHitLayout.sizeSmall
-        case 6...15:
-            core = RegionalHitLayout.sizeMedium
-        case 16...35:
-            core = RegionalHitLayout.sizeLarge
-        case 36...75:
-            core = RegionalHitLayout.sizeXLarge
-        default:
-            core = RegionalHitLayout.sizeXXLarge
-        }
-        return core * layout.puckScale
+        RegionalActivityPuckLayout.coreSize(
+            memberCount: memberCount,
+            scale: layout.puckScale
+        )
     }
-}
-
-/// Size constants aligned with `RegionalActivityPuckLayout` (kept local so that
-/// private view layout enums stay view-scoped).
-private enum RegionalHitLayout {
-    static let sizeSmall: CGFloat = 48
-    static let sizeMedium: CGFloat = 60
-    static let sizeLarge: CGFloat = 74
-    static let sizeXLarge: CGFloat = 88
-    static let sizeXXLarge: CGFloat = 96
 }

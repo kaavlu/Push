@@ -79,6 +79,16 @@ struct SelfPuckData: Equatable {
 }
 
 struct RegionalPuckModel: Identifiable, Equatable {
+    private static let knownRegionAbbreviations = [
+        "san francisco": "SF",
+        "new york": "NYC",
+        "new york city": "NYC",
+        "san diego": "SD",
+        "los angeles": "LA",
+        "chicago": "CHI",
+        "seattle": "SEA",
+    ]
+
     let id: String
     let coordinate: CLLocationCoordinate2D
     let memberCount: Int
@@ -92,6 +102,40 @@ struct RegionalPuckModel: Identifiable, Equatable {
     let regionName: String
     let activityScore: Double
     let groupIDs: [String]
+
+    var regionAbbreviation: String {
+        let normalized = regionName
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+        if let known = Self.knownRegionAbbreviations[normalized] {
+            return known
+        }
+
+        let words = regionName.split(whereSeparator: \.isWhitespace)
+        if words.count > 1 {
+            let initials = words.prefix(3).compactMap(\.first).map(String.init).joined()
+            return initials.isEmpty ? "NEAR" : initials.uppercased()
+        }
+        let compact = regionName.filter(\.isLetter)
+        return compact.isEmpty ? "NEAR" : String(compact.prefix(3)).uppercased()
+    }
+
+    var isSociallyActive: Bool {
+        activeCount > 0 || joinableCount > 0
+    }
+
+    var availabilitySummary: String {
+        if joinableCount > 0 {
+            return "\(activeCount) active · \(joinableCount) joinable"
+        }
+        if activeCount > 0 {
+            return "\(activeCount) active now"
+        }
+        if busyCount > 0 {
+            return busyCount == memberCount ? "Everyone is busy right now" : "\(busyCount) busy right now"
+        }
+        return "Availability not shared"
+    }
 
     static func == (lhs: RegionalPuckModel, rhs: RegionalPuckModel) -> Bool {
         lhs.id == rhs.id
