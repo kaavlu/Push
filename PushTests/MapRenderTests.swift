@@ -176,6 +176,34 @@ final class MapRenderTests: XCTestCase {
         XCTAssertEqual(focus.region.span.latitudeDelta, 0.06, accuracy: 0.0001)
     }
 
+    @MainActor
+    func testSelectingPersonFocusesTheirPuckAndClearsGroupFilter() async throws {
+        let viewModel = MapViewModel(container: AppDataContainer(seed: .standard()))
+        await viewModel.load()
+        let target = try XCTUnwrap(viewModel.filteredPucks.first)
+        let personID = try XCTUnwrap(target.people.first?.id)
+        viewModel.selectedFilterID = "michigan"
+
+        let selected = try XCTUnwrap(viewModel.select(personID: personID))
+
+        XCTAssertEqual(selected, target)
+        XCTAssertEqual(viewModel.selectedFilterID, GroupFilterItem.allFriendsID)
+        let focus = try XCTUnwrap(viewModel.mapFocusRequest)
+        XCTAssertEqual(focus.region.center.latitude, target.coordinate.latitude, accuracy: 0.0001)
+        XCTAssertEqual(focus.region.center.longitude, target.coordinate.longitude, accuracy: 0.0001)
+        XCTAssertEqual(focus.region.span.latitudeDelta, 0.06, accuracy: 0.0001)
+    }
+
+    @MainActor
+    func testSelectingPersonWithoutExactPuckDoesNothing() async {
+        let viewModel = MapViewModel(container: AppDataContainer(seed: .standard()))
+        await viewModel.load()
+        let priorFocus = viewModel.mapFocusRequest
+
+        XCTAssertNil(viewModel.select(personID: "friend-without-visible-presence"))
+        XCTAssertEqual(viewModel.mapFocusRequest, priorFocus)
+    }
+
     private func puck(
         id: String,
         personID: String,

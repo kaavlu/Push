@@ -21,6 +21,8 @@ struct PushPersonRow: View {
     /// Off when an outer container (e.g. expandable row) draws its own card surface.
     let showsCardBackground: Bool
     let action: (() -> Void)?
+    let avatarAction: (() -> Void)?
+    let onLongPress: (() -> Void)?
 
     init(
         row: FriendRowModel,
@@ -30,7 +32,9 @@ struct PushPersonRow: View {
         usesAvailabilityAppearance: Bool = true,
         customTrailing: AnyView? = nil,
         showsCardBackground: Bool = true,
-        action: (() -> Void)? = nil
+        action: (() -> Void)? = nil,
+        avatarAction: (() -> Void)? = nil,
+        onLongPress: (() -> Void)? = nil
     ) {
         self.row = row
         self.showsGroupLabel = showsGroupLabel
@@ -40,6 +44,8 @@ struct PushPersonRow: View {
         self.customTrailing = customTrailing
         self.showsCardBackground = showsCardBackground
         self.action = action
+        self.avatarAction = avatarAction
+        self.onLongPress = onLongPress
     }
 
     private var friend: FriendPuckData { row.friend }
@@ -47,12 +53,15 @@ struct PushPersonRow: View {
 
     var body: some View {
         if let action {
-            Button(action: action) {
-                rowContent
-            }
-            .buttonStyle(.plain)
+            rowContent
+            .onTapGesture(perform: action)
+            .simultaneousGesture(
+                LongPressGesture().onEnded { _ in onLongPress?() }
+            )
+            .accessibilityElement(children: avatarAction == nil ? .combine : .contain)
             .accessibilityLabel(friend.name)
             .accessibilityValue(showsStatusDetail ? friend.venueStatusText : "")
+            .accessibilityAddTraits(.isButton)
         } else if customTrailing != nil {
             // Keep interactive trailing controls (e.g. Accept/Deny) as separate elements.
             rowContent
@@ -94,6 +103,20 @@ struct PushPersonRow: View {
     }
 
     private var avatar: some View {
+        Group {
+            if let avatarAction {
+                Button(action: avatarAction) {
+                    avatarContent
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Locate \(friend.name) on map")
+            } else {
+                avatarContent
+            }
+        }
+    }
+
+    private var avatarContent: some View {
         ProfilePhotoAvatar(
             imageAssetName: friend.profileImageAssetName,
             fallbackInitials: friend.avatarPlaceholder

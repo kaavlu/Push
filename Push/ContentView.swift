@@ -222,7 +222,7 @@ struct ContentView: View {
     private func destination(for route: MainMapRoute) -> some View {
         switch route {
         case .groups:
-            FriendsView()
+            FriendsView(onLocateFriend: locateFriendOnMap)
         case .profile:
             ProfileView {
                 presentedRoute = nil
@@ -267,6 +267,18 @@ struct ContentView: View {
             forcedRenderSpan = focusRequest.region.span
             mapSpan = focusRequest.region.span
         }
+    }
+
+    private func locateFriendOnMap(_ personID: Person.ID) -> Bool {
+        guard let puck = viewModel.select(personID: personID) else { return false }
+        isFilterDropdownExpanded = false
+        forcedRenderSpan = viewModel.mapFocusRequest?.region.span
+        if let span = forcedRenderSpan {
+            mapSpan = span
+        }
+        presentSelectedPuck(puck)
+        presentedRoute = nil
+        return true
     }
 
     private func presentSelectedPuck(_ puck: MapPuckData) {
