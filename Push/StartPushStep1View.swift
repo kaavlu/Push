@@ -155,6 +155,36 @@ struct StartPushStep1View: View {
     }
 }
 
+/// Shared cream card fill/tint/stroke for step 1's group and friend
+/// selection cells. File-scoped — not a cross-file DS component (see
+/// docs/superpowers/specs/2026-07-24-issue-89-restyle-group-selection-design.md).
+private struct SelectableCardSurface: View {
+    let cornerRadius: CGFloat
+    let isSelected: Bool
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+            .fill(PushCreamTokens.solidCard)
+            .overlay {
+                if isSelected {
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .fill(PushControlColors.activeFill.opacity(StartPushColor.selectedTintOpacity))
+                }
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .stroke(
+                        isSelected
+                            ? PushControlColors.activeFill.opacity(StartPushColor.selectedStrokeOpacity)
+                            : PushColorPalette.Accent.walnut.opacity(PushCreamTokens.solidCardStrokeOpacity),
+                        lineWidth: isSelected
+                            ? StartPushColor.selectedStrokeWidth
+                            : PushCreamTokens.solidCardStrokeWidth
+                    )
+            }
+    }
+}
+
 private struct GroupSelectCard: View {
     @Environment(\.pushLayout) private var layout
     let item: PushRecipientItem
@@ -174,7 +204,7 @@ private struct GroupSelectCard: View {
                 }
                 Text(item.name)
                     .font(.caption.weight(.bold))
-                    .foregroundStyle(isSelected ? PushControlColors.activeForeground : PushControlColors.textEspresso)
+                    .foregroundStyle(PushControlColors.textEspresso)
                     .lineLimit(1)
                 if let count = item.memberCount {
                     HStack(spacing: 3) {
@@ -189,15 +219,10 @@ private struct GroupSelectCard: View {
             .frame(maxWidth: .infinity)
             .frame(height: StartPushLayout.groupCardHeight(layout))
             .background(
-                RoundedRectangle(cornerRadius: StartPushLayout.cardCornerRadius(layout), style: .continuous)
-                    .fill(isSelected ? PushControlColors.activeFill : .white.opacity(StartPushColor.rowFillOpacity))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: StartPushLayout.cardCornerRadius(layout), style: .continuous)
-                    .stroke(
-                        isSelected ? PushColorPalette.Accent.walnut.opacity(StartPushColor.selectedStrokeOpacity) : .clear,
-                        lineWidth: 1.5
-                    )
+                SelectableCardSurface(
+                    cornerRadius: StartPushLayout.cardCornerRadius(layout),
+                    isSelected: isSelected
+                )
             )
         }
         .buttonStyle(.plain)
@@ -211,6 +236,9 @@ private struct GroupSelectCard: View {
             .font(.system(size: StartPushLayout.groupCheckmarkSize, weight: .bold))
             .foregroundStyle(PushControlColors.activeForeground)
             .background(Circle().fill(.white))
+            .overlay(
+                Circle().stroke(PushControlColors.activeFill, lineWidth: StartPushColor.avatarOverlayStroke)
+            )
             .offset(x: StartPushLayout.groupCardCheckOffset, y: StartPushLayout.groupCardCheckOffset)
     }
 }
