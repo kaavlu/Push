@@ -265,8 +265,10 @@ private struct FriendSelectRow: View {
             .padding(.horizontal, StartPushLayout.rowHorizontalPadding)
             .padding(.vertical, StartPushLayout.rowVerticalPadding)
             .background(
-                RoundedRectangle(cornerRadius: StartPushLayout.rowCornerRadius, style: .continuous)
-                    .fill(isSelected ? PushControlColors.activeFill : .white.opacity(StartPushColor.rowFillOpacity))
+                SelectableCardSurface(
+                    cornerRadius: StartPushLayout.rowCornerRadius,
+                    isSelected: isSelected
+                )
             )
         }
         .buttonStyle(.plain)
