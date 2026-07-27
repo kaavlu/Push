@@ -24,9 +24,6 @@ enum StartPushLayout {
     static let pillCornerRadius: CGFloat = 22
     static let pillHorizontalPadding: CGFloat = 16
     static let pillVerticalPadding: CGFloat = 10
-    static func groupCardMinWidth(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 92, standard: 100, large: 108) }
-    static func groupCardHeight(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 88, standard: 91, large: 94) }
-    static func groupAvatarSize(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 40, standard: 43, large: 46) }
     static let searchBarHeight: CGFloat = 44
     static let searchIconSize: CGFloat = 14
     static func primaryButtonHeight(_ layout: PushAdaptiveLayout) -> CGFloat { layout.primaryButtonHeight }
@@ -49,14 +46,12 @@ enum StartPushLayout {
     static let navBottomPadding: CGFloat = 10
     static let stepIndicatorBottomPadding: CGFloat = 14
     static let friendRowAvatarSize: CGFloat = 40
-    static let memberCountIconSize: CGFloat = 10
     static let sectionLabelSpacing: CGFloat = 12
-    static func groupCardSpacing(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 6, standard: 7, large: 7) }
-    static let groupCheckmarkSize: CGFloat = 16
-    static let groupCardCheckOffset: CGFloat = 3
+    static let recipientSectionSpacing: CGFloat = 10
     static let rowHorizontalPadding: CGFloat = 14
     static let rowVerticalPadding: CGFloat = 10
     static let rowCornerRadius: CGFloat = 18
+    static let rowMetadataSpacing: CGFloat = 2
     static let selectionCircleSize: CGFloat = 20
     static let chipAvatarSize: CGFloat = 22
     static let chipIconSize: CGFloat = 9
@@ -82,7 +77,9 @@ enum StartPushLayout {
 
 enum StartPushColor {
     static let rowFillOpacity = 0.28
-    static let selectedStrokeOpacity = 0.3
+    static let selectedTintOpacity = 0.14
+    static let selectedStrokeOpacity = 0.5
+    static let selectedStrokeWidth: CGFloat = 1.5
     static let textEditorFill = 0.24
     static let textEditorStrokeOpacity = 0.18
     static let pillSelectedStrokeOpacity = 0.3

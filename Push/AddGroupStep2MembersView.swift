@@ -3,7 +3,7 @@
 //  Push
 //
 //  Step 2 of Add Group: pick invitees. Reuses FriendRowCard with a circular
-//  selection control (mirroring StartPushStep1View's FriendSelectRow idiom)
+//  selection control (mirroring StartPushStep1View's RecipientSelectRow idiom)
 //  instead of the default availability trailing.
 //
 
