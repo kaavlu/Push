@@ -55,6 +55,11 @@ struct ContentView: View {
                     )
             }
 
+            if isFilterDropdownExpanded {
+                filterDropdownBackdrop
+                    .transition(.opacity)
+            }
+
             VStack(spacing: 0) {
                 topControlsLayer
                 Spacer(minLength: 0)
@@ -249,6 +254,18 @@ struct ContentView: View {
             .contentShape(Rectangle())
             .onTapGesture {
                 isCreateMenuPresented = false
+            }
+    }
+
+    /// Invisible tap-catcher over the map so tapping outside the panel closes
+    /// it — mirrors `createMenuBackdrop`'s interception technique, but stays
+    /// transparent since this control doesn't need to dim the map.
+    private var filterDropdownBackdrop: some View {
+        Color.clear
+            .contentShape(Rectangle())
+            .ignoresSafeArea()
+            .onTapGesture {
+                isFilterDropdownExpanded = false
             }
     }
 
