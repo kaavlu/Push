@@ -36,7 +36,7 @@ struct PuckLabView: View {
                 .foregroundStyle(PuckLabColors.primaryText)
                 .shadow(color: PuckLabColors.headerShadow, radius: PuckLabLayout.headerShadowRadius, y: PuckLabLayout.headerShadowYOffset)
 
-            Text("Single-friend puck states first, with clusters still available for comparison.")
+            Text("Regional cluster tiers, current-user treatment, and close-range pucks.")
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(PuckLabColors.secondaryText)
                 .shadow(color: PuckLabColors.headerShadow, radius: PuckLabLayout.headerShadowRadius, y: PuckLabLayout.headerShadowYOffset)
@@ -51,6 +51,15 @@ struct PuckLabView: View {
                 isSelected: selectedItemID == PuckLabItem.selfPuck.id,
                 onTap: { toggleSelection(PuckLabItem.selfPuck.id) }
             )
+
+            ForEach(PuckLabFixtures.regionalScenarios) { scenario in
+                let item = PuckLabItem.regional(scenario)
+                PuckLabPuckRow(
+                    item: item,
+                    isSelected: selectedItemID == item.id,
+                    onTap: { toggleSelection(item.id) }
+                )
+            }
 
             ForEach(PuckLabFixtures.scenarios) { scenario in
                 let item = PuckLabItem.scenario(scenario)
@@ -99,6 +108,15 @@ private struct PuckLabPuckRow: View {
         case .selfPuck:
             SelfPuckView(data: PuckLabSelfPuck.fixture)
                 .frame(width: PuckLabMapSizing.selfFrameSize.width, height: PuckLabMapSizing.selfFrameSize.height)
+        case .regional(let scenario):
+            RegionalActivityPuck(
+                model: scenario.model,
+                isSelected: scenario.isSelected
+            )
+                .frame(
+                    width: PuckLabMapSizing.regionalFrameSize.width,
+                    height: PuckLabMapSizing.regionalFrameSize.height
+                )
         case .scenario(let scenario):
             if scenario.puckStyle == .friendGroup {
                 FriendGroupPuck(friends: scenario.friends, size: PuckLabMapSizing.friendGroupPuckSize)
@@ -155,12 +173,15 @@ private struct PuckLabDescriptionPopup: View {
 
 private enum PuckLabItem: Identifiable {
     case selfPuck
+    case regional(PuckLabRegionalScenario)
     case scenario(PuckLabScenario)
 
     var id: String {
         switch self {
         case .selfPuck:
             return "self-puck"
+        case .regional(let scenario):
+            return scenario.id
         case .scenario(let scenario):
             return scenario.id
         }
@@ -170,6 +191,8 @@ private enum PuckLabItem: Identifiable {
         switch self {
         case .selfPuck:
             return "Self Puck"
+        case .regional(let scenario):
+            return scenario.title
         case .scenario(let scenario):
             return scenario.title
         }
@@ -179,6 +202,8 @@ private enum PuckLabItem: Identifiable {
         switch self {
         case .selfPuck:
             return "Current-user location anchor"
+        case .regional(let scenario):
+            return scenario.subtitle
         case .scenario(let scenario):
             return scenario.subtitle
         }
@@ -188,6 +213,9 @@ private enum PuckLabItem: Identifiable {
         switch self {
         case .selfPuck:
             return "You"
+        case .regional(let scenario):
+            let inclusion = scenario.model.containsCurrentUser ? " · includes you" : ""
+            return "\(scenario.model.memberCount) people\(inclusion)"
         case .scenario(let scenario):
             return scenario.friends.map(\.availability.title).joined(separator: " - ")
         }
@@ -197,6 +225,8 @@ private enum PuckLabItem: Identifiable {
         switch self {
         case .selfPuck:
             return PuckLabMapSizing.selfFrameSize.height
+        case .regional:
+            return PuckLabMapSizing.regionalFrameSize.height
         case .scenario(let scenario):
             return scenario.friends.count == PuckLabLayout.singleFriendCount
                 ? PuckLabMapSizing.individualFrameSize.height
@@ -253,6 +283,7 @@ private enum PuckLabMapSizing {
     static let individualFrameSize = CGSize(width: 126, height: 126)
     static let groupFrameSize = CGSize(width: 164, height: 154)
     static let selfFrameSize = CGSize(width: 132, height: 124)
+    static let regionalFrameSize = CGSize(width: 132, height: 124)
 }
 
 private struct PuckLabCardScrim: ViewModifier {

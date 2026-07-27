@@ -29,6 +29,58 @@ final class MapPuckHitTestingTests: XCTestCase {
         )
     }
 
+    func testRegionalPuckUsesRestrainedUniformPopulationScaling() {
+        let small = MapPuckRenderModel.regionalCluster(sampleRegional(id: "s", members: 5))
+        let medium = MapPuckRenderModel.regionalCluster(sampleRegional(id: "m", members: 6))
+        let mediumUpper = MapPuckRenderModel.regionalCluster(sampleRegional(id: "mu", members: 15))
+        let large = MapPuckRenderModel.regionalCluster(sampleRegional(id: "l", members: 16))
+
+        XCTAssertEqual(
+            MapPuckHitTesting.visualDiameter(for: small, layout: layout),
+            RegionalActivityPuckLayout.sizeSmall * layout.puckScale,
+            accuracy: 0.001
+        )
+        XCTAssertEqual(
+            MapPuckHitTesting.visualDiameter(for: medium, layout: layout),
+            RegionalActivityPuckLayout.sizeMedium * layout.puckScale,
+            accuracy: 0.001
+        )
+        XCTAssertEqual(
+            MapPuckHitTesting.visualDiameter(for: mediumUpper, layout: layout),
+            RegionalActivityPuckLayout.sizeMedium * layout.puckScale,
+            accuracy: 0.001
+        )
+        XCTAssertEqual(
+            MapPuckHitTesting.visualDiameter(for: large, layout: layout),
+            RegionalActivityPuckLayout.sizeLarge * layout.puckScale,
+            accuracy: 0.001
+        )
+        XCTAssertLessThan(
+            RegionalActivityPuckLayout.sizeLarge - RegionalActivityPuckLayout.sizeSmall,
+            12
+        )
+
+        let smallMetrics = RegionalActivityPuckMetrics(memberCount: 5)
+        let mediumMetrics = RegionalActivityPuckMetrics(memberCount: 6)
+        let largeMetrics = RegionalActivityPuckMetrics(memberCount: 16)
+
+        XCTAssertEqual(
+            smallMetrics.width / mediumMetrics.width,
+            smallMetrics.height / mediumMetrics.height,
+            accuracy: 0.001
+        )
+        XCTAssertEqual(
+            largeMetrics.width / mediumMetrics.width,
+            largeMetrics.avatarSize / mediumMetrics.avatarSize,
+            accuracy: 0.001
+        )
+        XCTAssertEqual(
+            largeMetrics.frameHeight / mediumMetrics.frameHeight,
+            largeMetrics.uniformScale / mediumMetrics.uniformScale,
+            accuracy: 0.001
+        )
+    }
+
     func testZPriorityOrdersLargerGroupsAboveFriends() {
         let regional = MapPuckRenderModel.regionalCluster(sampleRegional(id: "r", members: 8))
         let hangout = MapPuckRenderModel.smallGroup(samplePuck(id: "h", kind: .hangout))

@@ -163,18 +163,21 @@ final class MapViewModel: ObservableObject {
             return puck
         case .selfPuck:
             return nil
-        case .regionalCluster(let puck):
-            mapFocusRequest = MapFocusRequest(
-                region: MKCoordinateRegion(
-                    center: puck.coordinate,
-                    span: MKCoordinateSpan(
-                        latitudeDelta: MapFocusLayout.regionalZoomLatitudeDelta,
-                        longitudeDelta: MapFocusLayout.regionalZoomLongitudeDelta
-                    )
-                )
-            )
+        case .regionalCluster:
             return nil
         }
+    }
+
+    func focus(on puck: RegionalPuckModel) {
+        mapFocusRequest = MapFocusRequest(
+            region: MKCoordinateRegion(
+                center: puck.coordinate,
+                span: MKCoordinateSpan(
+                    latitudeDelta: MapFocusLayout.regionalZoomLatitudeDelta,
+                    longitudeDelta: MapFocusLayout.regionalZoomLongitudeDelta
+                )
+            )
+        )
     }
 
     /// Resolves a friend back to their exact-place puck, makes it visible under

@@ -12,13 +12,19 @@ struct StyledMapView: UIViewRepresentable {
     let region: MKCoordinateRegion
     let pucks: [MapPuckRenderModel]
     let focusRequest: MapFocusRequest?
+    let selectedRegionalPuckID: String?
     let onPuckSelected: (MapPuckRenderModel) -> Void
+    let onMapTapped: () -> Void
     let onRegionChanged: (MKCoordinateSpan) -> Void
     var layout: PushAdaptiveLayout = .reference
     var mapLayoutMargins: UIEdgeInsets = .zero
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(onPuckSelected: onPuckSelected, onRegionChanged: onRegionChanged)
+        Coordinator(
+            onPuckSelected: onPuckSelected,
+            onMapTapped: onMapTapped,
+            onRegionChanged: onRegionChanged
+        )
     }
 
     func makeUIView(context: Context) -> MKMapView {
@@ -34,6 +40,7 @@ struct StyledMapView: UIViewRepresentable {
 
     func updateUIView(_ mapView: MKMapView, context: Context) {
         context.coordinator.onPuckSelected = onPuckSelected
+        context.coordinator.onMapTapped = onMapTapped
         context.coordinator.onRegionChanged = onRegionChanged
         mapView.layoutMargins = mapLayoutMargins
         applyStyle(to: mapView)
@@ -58,7 +65,9 @@ struct StyledMapView: UIViewRepresentable {
         let incomingByID = Dictionary(uniqueKeysWithValues: pucks.map { ($0.id, $0) })
         let staleAnnotations = existingPuckAnnotations.filter { annotation in
             guard let incoming = incomingByID[annotation.id] else { return true }
-            return annotation.puck != incoming || annotation.layout != layout
+            return annotation.puck != incoming
+                || annotation.layout != layout
+                || annotation.isSelected != isSelected(incoming)
         }
         let staleIDs = Set(staleAnnotations.map(\.id))
         let newAnnotations = pucks.filter { puck in
@@ -69,8 +78,21 @@ struct StyledMapView: UIViewRepresentable {
             mapView.removeAnnotations(staleAnnotations)
         }
         if !newAnnotations.isEmpty {
-            mapView.addAnnotations(newAnnotations.map { MapPuckAnnotation(puck: $0, layout: layout) })
+            mapView.addAnnotations(
+                newAnnotations.map {
+                    MapPuckAnnotation(
+                        puck: $0,
+                        layout: layout,
+                        isSelected: isSelected($0)
+                    )
+                }
+            )
         }
+    }
+
+    private func isSelected(_ puck: MapPuckRenderModel) -> Bool {
+        guard case .regionalCluster = puck else { return false }
+        return puck.id == selectedRegionalPuckID
     }
 
     private func applyFocusRequest(on mapView: MKMapView, coordinator: Coordinator) {
@@ -85,6 +107,7 @@ struct StyledMapView: UIViewRepresentable {
 
 final class Coordinator: NSObject, MKMapViewDelegate, UIGestureRecognizerDelegate {
     var onPuckSelected: (MapPuckRenderModel) -> Void
+    var onMapTapped: () -> Void
     var onRegionChanged: (MKCoordinateSpan) -> Void
     var lastFocusRequestID: UUID?
     private weak var mapView: MKMapView?
@@ -92,9 +115,11 @@ final class Coordinator: NSObject, MKMapViewDelegate, UIGestureRecognizerDelegat
 
     init(
         onPuckSelected: @escaping (MapPuckRenderModel) -> Void,
+        onMapTapped: @escaping () -> Void,
         onRegionChanged: @escaping (MKCoordinateSpan) -> Void
     ) {
         self.onPuckSelected = onPuckSelected
+        self.onMapTapped = onMapTapped
         self.onRegionChanged = onRegionChanged
     }
 
@@ -103,7 +128,7 @@ final class Coordinator: NSObject, MKMapViewDelegate, UIGestureRecognizerDelegat
         guard tapGesture == nil else { return }
         let gesture = UITapGestureRecognizer(target: self, action: #selector(handleMapTap(_:)))
         gesture.delegate = self
-        gesture.cancelsTouchesInView = true
+        gesture.cancelsTouchesInView = false
         mapView.addGestureRecognizer(gesture)
         tapGesture = gesture
     }
@@ -119,7 +144,11 @@ final class Coordinator: NSObject, MKMapViewDelegate, UIGestureRecognizerDelegat
             annotation: annotation,
             reuseIdentifier: MapPuckAnnotationHostingView.reuseIdentifier
         )
-        annotationView.configure(with: puckAnnotation.puck, layout: puckAnnotation.layout)
+        annotationView.configure(
+            with: puckAnnotation.puck,
+            layout: puckAnnotation.layout,
+            isSelected: puckAnnotation.isSelected
+        )
         annotationView.alpha = 0
         annotationView.transform = CGAffineTransform(scaleX: 0.86, y: 0.86)
         UIView.animate(
@@ -149,25 +178,27 @@ final class Coordinator: NSObject, MKMapViewDelegate, UIGestureRecognizerDelegat
             let mapView
         else { return }
         let point = gesture.location(in: mapView)
-        guard let puck = resolvePuck(at: point, in: mapView) else { return }
-        onPuckSelected(puck)
+        if let puck = resolvePuck(at: point, in: mapView) {
+            onPuckSelected(puck)
+        } else {
+            onMapTapped()
+        }
     }
 
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-        guard
-            gestureRecognizer === tapGesture,
-            let mapView
-        else { return true }
-        let point = gestureRecognizer.location(in: mapView)
-        return resolvePuck(at: point, in: mapView) != nil
+        true
     }
 
     func gestureRecognizer(
         _ gestureRecognizer: UIGestureRecognizer,
         shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer
     ) -> Bool {
-        // Claim puck taps exclusively so pan/zoom don't compete on hit targets.
-        false
+        guard
+            gestureRecognizer === tapGesture,
+            let mapView
+        else { return false }
+        let point = gestureRecognizer.location(in: mapView)
+        return resolvePuck(at: point, in: mapView) == nil
     }
 
     private func resolvePuck(at point: CGPoint, in mapView: MKMapView) -> MapPuckRenderModel? {
@@ -203,15 +234,17 @@ private final class MapPuckAnnotation: NSObject, MKAnnotation {
     let id: String
     let puck: MapPuckRenderModel
     let layout: PushAdaptiveLayout
+    let isSelected: Bool
 
     var coordinate: CLLocationCoordinate2D {
         puck.coordinate
     }
 
-    init(puck: MapPuckRenderModel, layout: PushAdaptiveLayout) {
+    init(puck: MapPuckRenderModel, layout: PushAdaptiveLayout, isSelected: Bool) {
         self.id = puck.id
         self.puck = puck
         self.layout = layout
+        self.isSelected = isSelected
     }
 }
 
@@ -221,8 +254,16 @@ private final class MapPuckAnnotationHostingView: MKAnnotationView {
     private var hostingController: UIHostingController<MapPuckAnnotationView>?
     private var hitRadius: CGFloat = 0
 
-    func configure(with puck: MapPuckRenderModel, layout: PushAdaptiveLayout) {
-        let rootView = MapPuckAnnotationView(puck: puck, layout: layout)
+    func configure(
+        with puck: MapPuckRenderModel,
+        layout: PushAdaptiveLayout,
+        isSelected: Bool
+    ) {
+        let rootView = MapPuckAnnotationView(
+            puck: puck,
+            layout: layout,
+            isSelected: isSelected
+        )
         let size = MapPuckAnnotationView.size(for: puck, layout: layout)
         bounds = CGRect(origin: .zero, size: size)
         centerOffset = .zero
@@ -262,6 +303,7 @@ private final class MapPuckAnnotationHostingView: MKAnnotationView {
 private struct MapPuckAnnotationView: View {
     let puck: MapPuckRenderModel
     let layout: PushAdaptiveLayout
+    let isSelected: Bool
 
     var body: some View {
         puckView
@@ -305,7 +347,7 @@ private struct MapPuckAnnotationView: View {
                 FriendClusterPuck(friends: puck.people, size: MapPuckAnnotationLayout.clusterPuckSize(layout))
             }
         case .regionalCluster(let puck):
-            RegionalActivityPuck(model: puck)
+            RegionalActivityPuck(model: puck, isSelected: isSelected)
         }
     }
 }
@@ -322,7 +364,8 @@ enum MapPuckAnnotationLayout {
         CGSize(width: 164 * layout.puckScale, height: 154 * layout.puckScale)
     }
     static func regionalFrameSize(_ layout: PushAdaptiveLayout) -> CGSize {
-        CGSize(width: 154 * layout.puckScale, height: 154 * layout.puckScale)
+        let metrics = RegionalActivityPuckMetrics(memberCount: 16, scale: layout.puckScale)
+        return CGSize(width: metrics.frameWidth, height: metrics.frameHeight)
     }
     static let shadowOpacity = 0.28
     static let shadowRadius: CGFloat = 16
