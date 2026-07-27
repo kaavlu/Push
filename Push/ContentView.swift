@@ -38,6 +38,11 @@ struct ContentView: View {
             )
             .ignoresSafeArea()
 
+            if isFilterDropdownExpanded {
+                filterDropdownBackdrop
+                    .transition(.opacity)
+            }
+
             if viewModel.surfacePhase == .empty || viewModel.surfacePhase == .failed {
                 mapSurfaceOverlay
             }
@@ -53,11 +58,6 @@ struct ContentView: View {
                             .combined(with: .opacity)
                             .combined(with: .scale(scale: CreateActionMenuLayout.transitionScale, anchor: .bottom))
                     )
-            }
-
-            if isFilterDropdownExpanded {
-                filterDropdownBackdrop
-                    .transition(.opacity)
             }
 
             VStack(spacing: 0) {
@@ -370,6 +370,7 @@ private struct FriendGroupDropdownPanel: View {
                         )
                     }
                     .buttonStyle(.plain)
+                    .accessibilityAddTraits(selectedID == item.id ? .isSelected : [])
                 }
             }
             .padding(TopDropdownLayout.panelPadding)
