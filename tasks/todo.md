@@ -1,32 +1,36 @@
-# Issue #93 — Deterministic Movement and Chilling Inference (I2)
+# Issue #94 — Integrate Activity Inference into Presence (I3)
 
 ## Status
 
-- [x] Window helpers: path length, accuracy filter
-- [x] Protocol `previous` + hysteresis seam
-- [x] `DeterministicActivityInferenceEngine` rules
-- [x] Unit tests (`DeterministicActivityInferenceTests`) — 17 green
-- [x] Verify suite green (I1 suite also green)
+- [x] Map inferred kinds → `PresenceActivity` / draft fields (existing activity_name/symbol)
+- [x] `LocationSessionActivityState` observation window + last-valid hold
+- [x] `LocationSession` orchestration (engine → draft → sync)
+- [x] Factory wires `DeterministicActivityInferenceEngine`
+- [x] Heartbeats preserve latest valid activity
+- [x] Ghost / availability unchanged; unknown still publishes
+- [x] Remote activity patches via existing LiveDataStore path
+- [x] `ActivityInferenceIntegrationTests` — 9 green
+- [x] Regression `LocationSessionTests` — 18 green
 - [x] Commit
 
-## Rules (input → output)
+## Flow
 
-Recent `LocationObservation` → unknown | stationary | moving | walking | driving | chilling
-
-Uses: elapsed time, displacement, path length, speed, accuracy, min duration, hysteresis.
+```
+validated observation
+→ activity engine
+→ latest inferred activity
+→ presence draft (activity_name/symbol)
+→ existing Supabase write path
+→ existing Realtime path
+```
 
 ## Out of scope
 
 - Arrived / left
-- `LocationSession` integration
-- Supabase / Realtime / UI / Venues / Core Motion
+- Friend-facing UI
+- New DB columns (reuse activity_name / activity_symbol)
 
-## Follow-ups
+## Prior
 
-- Issue #94 — Integrate into presence pipeline (I3)
-
----
-
-# Issue #92 — Activity Inference Domain (I1) — done
-
-See commit history. Domain types, config, fixtures, unknown engine.
+- #92 I1 domain — done
+- #93 I2 deterministic rules — done

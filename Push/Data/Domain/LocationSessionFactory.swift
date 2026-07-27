@@ -36,6 +36,7 @@ enum LocationSessionFactory {
             provider: provider,
             validator: LocationObservationValidator(),
             inferrer: PassthroughPresenceInferrer(),
+            activityEngine: DeterministicActivityInferenceEngine(),
             sync: sync,
             availabilityProvider: availabilityProvider,
             isPresencePublishingEnabled: true,

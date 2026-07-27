@@ -2,7 +2,7 @@
 //  LocationSession.swift
 //  Push
 //
-//  App-lifetime: provider → validator → inferrer → throttle → sync.
+//  App-lifetime: provider → validator → activity inference → draft → throttle → sync.
 //  Owned by AppDataContainer — never MapViewModel. No Core Location types.
 //
 
@@ -12,30 +12,34 @@ import Foundation
 /// Concrete `LocationSessioning` for mock, simulated, and live providers.
 @MainActor
 final class LocationSession: LocationSessioning {
-    @Published private(set) var state: LocationTrackingState
+    /// Session-owned tracking state. Setter is internal so the pipeline
+    /// extension (separate file) can update fields; Views only read.
+    @Published internal(set) var state: LocationTrackingState
 
     var statePublisher: AnyPublisher<LocationTrackingState, Never> {
         $state.eraseToAnyPublisher()
     }
 
-    private let provider: LocationProviding
-    private let validator: LocationObservationValidating
-    private let inferrer: PresenceInferring
-    private let sync: PresenceSyncing
-    private let availabilityProvider: @MainActor () -> FriendAvailabilityState?
-    private let now: @MainActor () -> Date
-    private let unpublishTimeout: TimeInterval
-    private let sleep: @MainActor (TimeInterval) async -> Void
+    let provider: LocationProviding
+    let validator: LocationObservationValidating
+    let inferrer: PresenceInferring
+    let activityEngine: ActivityInferenceEngine
+    let sync: PresenceSyncing
+    let availabilityProvider: @MainActor () -> FriendAvailabilityState?
+    let now: @MainActor () -> Date
+    let unpublishTimeout: TimeInterval
+    let sleep: @MainActor (TimeInterval) async -> Void
 
-    private var observationTask: Task<Void, Never>?
-    private var syncTask: Task<Void, Never>?
-    private var heartbeatTask: Task<Void, Never>?
-    private var isConsuming = false
-    private var isShutDown = false
-    private var previousAccepted: LocationObservation?
-    private var lastAcceptedValidated: ValidatedObservation?
-    private var publishSnapshot = PresencePublishSnapshot()
-    private var pendingTrigger: PresenceSyncTrigger?
+    var observationTask: Task<Void, Never>?
+    var syncTask: Task<Void, Never>?
+    var heartbeatTask: Task<Void, Never>?
+    var isConsuming = false
+    var isShutDown = false
+    var previousAccepted: LocationObservation?
+    var lastAcceptedValidated: ValidatedObservation?
+    var publishSnapshot = PresencePublishSnapshot()
+    var pendingTrigger: PresenceSyncTrigger?
+    var activityState = LocationSessionActivityState()
 
     /// Exposed for tests that need the same sync instance assertions.
     let presenceSync: PresenceSyncing
@@ -44,6 +48,7 @@ final class LocationSession: LocationSessioning {
         provider: LocationProviding,
         validator: LocationObservationValidating = LocationObservationValidator(),
         inferrer: PresenceInferring = PassthroughPresenceInferrer(),
+        activityEngine: ActivityInferenceEngine = DeterministicActivityInferenceEngine(),
         sync: PresenceSyncing = NoOpPresenceSync(),
         availabilityProvider: @escaping @MainActor () -> FriendAvailabilityState? = { nil },
         isPresencePublishingEnabled: Bool = true,
@@ -55,6 +60,7 @@ final class LocationSession: LocationSessioning {
         self.provider = provider
         self.validator = validator
         self.inferrer = inferrer
+        self.activityEngine = activityEngine
         self.sync = sync
         self.presenceSync = sync
         self.availabilityProvider = availabilityProvider
@@ -135,6 +141,7 @@ final class LocationSession: LocationSessioning {
         lastAcceptedValidated = nil
         publishSnapshot = PresencePublishSnapshot()
         pendingTrigger = nil
+        activityState.reset()
         provider.setAuthorizationChangeHandler(nil)
         provider.stopUpdating()
         provider.prepareForShutdown()
@@ -200,15 +207,25 @@ final class LocationSession: LocationSessioning {
 
     var publishSnapshotForTesting: PresencePublishSnapshot { publishSnapshot }
 
+    /// Test hook — last non-unknown inferred activity held for heartbeats.
+    var lastValidInferredActivityForTesting: InferredActivityResult? {
+        activityState.lastValid
+    }
+
+    /// Test hook — retained observation window for inference.
+    var recentActivityObservationsForTesting: [LocationObservation] {
+        activityState.recentObservations
+    }
+
     // MARK: - Private
 
-    private var canRunPipeline: Bool {
+    var canRunPipeline: Bool {
         !isShutDown
             && state.isPresencePublishingEnabled
             && state.authorization.allowsWhenInUseUpdates
     }
 
-    private func pauseConsumption(clearTrackingEnabled: Bool) {
+    func pauseConsumption(clearTrackingEnabled: Bool) {
         isConsuming = false
         provider.stopUpdating()
         if clearTrackingEnabled {
@@ -216,14 +233,14 @@ final class LocationSession: LocationSessioning {
         }
     }
 
-    private func ensureObservationTask() {
+    func ensureObservationTask() {
         if observationTask != nil { return }
         observationTask = Task { [weak self] in
             await self?.consumeObservations()
         }
     }
 
-    private func ensureHeartbeatLoop() {
+    func ensureHeartbeatLoop() {
         guard canRunPipeline, isConsuming else { return }
         if heartbeatTask != nil { return }
         heartbeatTask = Task { [weak self] in
@@ -231,159 +248,17 @@ final class LocationSession: LocationSessioning {
         }
     }
 
-    private func stopHeartbeatLoop() {
+    func stopHeartbeatLoop() {
         heartbeatTask?.cancel()
         heartbeatTask = nil
     }
 
-    private func runHeartbeatLoop() async {
+    func runHeartbeatLoop() async {
         while !Task.isCancelled, !isShutDown {
             await sleep(LocationPipelineConstants.presenceHeartbeatInterval)
             guard !Task.isCancelled, !isShutDown else { break }
             processHeartbeatIfDue()
         }
     }
-
-    private func consumeObservations() async {
-        for await observation in provider.observations {
-            guard !Task.isCancelled, !isShutDown else { break }
-            guard isConsuming else { continue }
-            process(observation)
-        }
-        if !isShutDown {
-            observationTask = nil
-        }
-    }
-
-    private func process(_ observation: LocationObservation) {
-        guard !isShutDown, isConsuming else { return }
-        guard state.isPresencePublishingEnabled else { return }
-
-        guard let validated = validator.accept(observation, previous: previousAccepted) else {
-            return
-        }
-
-        previousAccepted = validated.observation
-        lastAcceptedValidated = validated
-        state.lastObservation = validated.observation
-        state.lastAcceptedAt = now()
-        state.authorization = provider.authorizationState
-
-        if case .publish = PresencePublishPolicy.decisionForHeartbeat(
-            now: now(), snapshot: publishSnapshot
-        ) {
-            enqueueDraft(from: validated, trigger: .heartbeat)
-            return
-        }
-
-        let movement = PresencePublishPolicy.decisionForMovement(
-            observation: validated.observation,
-            now: now(),
-            snapshot: publishSnapshot
-        )
-        guard case .publish(let trigger) = movement else { return }
-        enqueueDraft(from: validated, trigger: trigger)
-    }
-
-    private func processHeartbeatIfDue() {
-        guard !isShutDown else { return }
-        guard state.isPresencePublishingEnabled, isConsuming else { return }
-        guard case .publish = PresencePublishPolicy.decisionForHeartbeat(
-            now: now(), snapshot: publishSnapshot
-        ) else { return }
-        guard let validated = lastAcceptedValidated else { return }
-        enqueueDraft(from: validated, trigger: .heartbeat)
-    }
-
-    private func republishLastAcceptedIfPossible() {
-        guard !isShutDown, state.isPresencePublishingEnabled else { return }
-        guard canRunPipeline else { return }
-        guard let validated = lastAcceptedValidated else { return }
-        enqueueDraft(from: validated, trigger: .republish)
-    }
-
-    private func enqueueDraft(
-        from validated: ValidatedObservation,
-        trigger: PresenceSyncTrigger
-    ) {
-        let draft = inferrer.infer(
-            from: [validated],
-            manualAvailability: mirroredAvailability(),
-            isPublished: state.isPresencePublishingEnabled,
-            previous: nil
-        )
-        enqueueSync(draft, trigger: trigger)
-    }
-
-    private func mirroredAvailability() -> FriendAvailabilityState? {
-        let value = availabilityProvider()
-        if value == .ghost { return .maybeDown }
-        return value
-    }
-
-    private func enqueueSync(_ draft: PresenceStatusDraft, trigger: PresenceSyncTrigger) {
-        guard !isShutDown else { return }
-        guard draft.isPublished else { return }
-
-        pendingTrigger = trigger
-        syncTask?.cancel()
-        let sync = self.sync
-        syncTask = Task { [weak self] in
-            do {
-                try await sync.upsertCurrentPresence(draft)
-                await self?.recordSyncSuccess(draft: draft)
-            } catch is CancellationError {
-                return
-            } catch {
-                await self?.recordSyncFailure()
-            }
-        }
-    }
-
-    private func recordSyncSuccess(draft: PresenceStatusDraft) {
-        guard !isShutDown else { return }
-        let at = now()
-        state.lastUploadAt = at
-        state.lastErrorCode = nil
-        publishSnapshot = PresencePublishPolicy.recordingSuccessfulWrite(
-            on: publishSnapshot,
-            at: at,
-            latitude: draft.latitude,
-            longitude: draft.longitude
-        )
-        pendingTrigger = nil
-    }
-
-    private func recordSyncFailure() {
-        guard !isShutDown else { return }
-        state.lastErrorCode = LocationSessionErrorCode.upsertFailed
-        pendingTrigger = nil
-    }
-
-    private func performUnpublish(timeout: TimeInterval, recordError: Bool) async {
-        syncTask?.cancel()
-        syncTask = nil
-        pendingTrigger = nil
-        publishSnapshot = PresencePublishPolicy.recordingUnpublish(on: publishSnapshot)
-
-        let sync = self.sync
-        let work = Task { try await sync.unpublishCurrentPresence() }
-        let timeoutTask = Task {
-            let nanoseconds = UInt64(max(0, timeout) * 1_000_000_000)
-            try? await Task.sleep(nanoseconds: nanoseconds)
-            work.cancel()
-        }
-        defer { timeoutTask.cancel() }
-
-        do {
-            try await work.value
-            if !isShutDown { state.lastErrorCode = nil }
-        } catch {
-            if recordError, !isShutDown {
-                state.lastErrorCode = LocationSessionErrorCode.unpublishFailed
-            }
-        }
-    }
 }
-
 

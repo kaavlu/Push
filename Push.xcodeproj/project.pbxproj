@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DC1DBF618C46AC1D30D43E9A /* ActivityInferenceIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7B835A88FC797A9326142C8 /* ActivityInferenceIntegrationTests.swift */; };
+		7343A8F1430553EA9830B820 /* LocationSession+Pipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 294C5A010F9E0CC12DEE4E22 /* LocationSession+Pipeline.swift */; };
+		12A455BFBB157624250B9D47 /* LocationSessionActivityState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8241202A73D239B2C760204 /* LocationSessionActivityState.swift */; };
+		BF05027BCBBD92D18A9EC6C0 /* ActivityInferencePresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20B863B432CA5928375D5F37 /* ActivityInferencePresentation.swift */; };
 		2C7535D963BC599C82325F8B /* DeterministicActivityInferenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A7B28E1203ADFDFDE1421F4 /* DeterministicActivityInferenceTests.swift */; };
 		5A15FEBC4B102B4F0FA1ED9C /* DeterministicActivityInferenceEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 001BFF532763940BDC94D59B /* DeterministicActivityInferenceEngine.swift */; };
 		DE33E834EBA1BCFF81585C9B /* ActivityInferenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94B8B006DD18988DFC953F6A /* ActivityInferenceTests.swift */; };
@@ -338,6 +342,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C7B835A88FC797A9326142C8 /* ActivityInferenceIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ActivityInferenceIntegrationTests.swift"; sourceTree = "<group>"; };
+		294C5A010F9E0CC12DEE4E22 /* LocationSession+Pipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "LocationSession+Pipeline.swift"; path = "Data/Domain/LocationSession+Pipeline.swift"; sourceTree = "<group>"; };
+		B8241202A73D239B2C760204 /* LocationSessionActivityState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "LocationSessionActivityState.swift"; path = "Data/Domain/LocationSessionActivityState.swift"; sourceTree = "<group>"; };
+		20B863B432CA5928375D5F37 /* ActivityInferencePresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "ActivityInferencePresentation.swift"; path = "Data/Domain/ActivityInferencePresentation.swift"; sourceTree = "<group>"; };
 		1A7B28E1203ADFDFDE1421F4 /* DeterministicActivityInferenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeterministicActivityInferenceTests.swift"; sourceTree = "<group>"; };
 		001BFF532763940BDC94D59B /* DeterministicActivityInferenceEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "DeterministicActivityInferenceEngine.swift"; path = "Data/Domain/DeterministicActivityInferenceEngine.swift"; sourceTree = "<group>"; };
 		94B8B006DD18988DFC953F6A /* ActivityInferenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ActivityInferenceTests.swift"; sourceTree = "<group>"; };
@@ -706,6 +714,9 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				294C5A010F9E0CC12DEE4E22 /* LocationSession+Pipeline.swift */,
+				B8241202A73D239B2C760204 /* LocationSessionActivityState.swift */,
+				20B863B432CA5928375D5F37 /* ActivityInferencePresentation.swift */,
 				001BFF532763940BDC94D59B /* DeterministicActivityInferenceEngine.swift */,
 				F6CDFD25CEBDBD11145BBA09 /* ActivityInferenceFixtures.swift */,
 				E2689BB78F1046C84A99CF9E /* ActivityInferenceConfiguration.swift */,
@@ -980,6 +991,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				C7B835A88FC797A9326142C8 /* ActivityInferenceIntegrationTests.swift */,
 				1A7B28E1203ADFDFDE1421F4 /* DeterministicActivityInferenceTests.swift */,
 				94B8B006DD18988DFC953F6A /* ActivityInferenceTests.swift */,
 				A8AE6FD36BFBD47659EA5830 /* PushConfirmationTests.swift */,
@@ -1179,6 +1191,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				7343A8F1430553EA9830B820 /* LocationSession+Pipeline.swift in Sources */,
+				12A455BFBB157624250B9D47 /* LocationSessionActivityState.swift in Sources */,
+				BF05027BCBBD92D18A9EC6C0 /* ActivityInferencePresentation.swift in Sources */,
 				5A15FEBC4B102B4F0FA1ED9C /* DeterministicActivityInferenceEngine.swift in Sources */,
 				7F79B26A7B831F0A9A9BE5BB /* ActivityInferenceFixtures.swift in Sources */,
 				E52A9F596C5DFECC26C42A0D /* ActivityInferenceConfiguration.swift in Sources */,
@@ -1444,6 +1459,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				DC1DBF618C46AC1D30D43E9A /* ActivityInferenceIntegrationTests.swift in Sources */,
 				2C7535D963BC599C82325F8B /* DeterministicActivityInferenceTests.swift in Sources */,
 				DE33E834EBA1BCFF81585C9B /* ActivityInferenceTests.swift in Sources */,
 				050AA118783FBFB63F5297CD /* PushConfirmationTests.swift in Sources */,
