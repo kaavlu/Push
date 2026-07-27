@@ -180,6 +180,29 @@ final class MapViewModel: ObservableObject {
         )
     }
 
+    /// Resolves a friend back to their exact-place puck, makes it visible under
+    /// the map filter, and requests the same close focus used for regional drill-in.
+    /// Friends without an exact published place intentionally have no selectable puck.
+    func select(personID: Person.ID) -> MapPuckData? {
+        guard let puck = (loadState.value ?? []).first(where: {
+            $0.people.contains { $0.id == personID }
+        }) else {
+            return nil
+        }
+
+        selectedFilterID = GroupFilterItem.allFriendsID
+        mapFocusRequest = MapFocusRequest(
+            region: MKCoordinateRegion(
+                center: puck.coordinate,
+                span: MKCoordinateSpan(
+                    latitudeDelta: MapFocusLayout.regionalZoomLatitudeDelta,
+                    longitudeDelta: MapFocusLayout.regionalZoomLongitudeDelta
+                )
+            )
+        )
+        return puck
+    }
+
     var selectedFilterTitle: String {
         filters.first { $0.id == selectedFilterID }?.title ?? GroupFilterItem.allFriends.title
     }

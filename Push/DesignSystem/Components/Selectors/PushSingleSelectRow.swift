@@ -36,6 +36,7 @@ struct PushSingleSelectRow: View {
                 Image(systemName: "checkmark")
                     .font(.system(size: PushSingleSelectRowMetrics.checkmarkSize, weight: .bold))
                     .foregroundStyle(PushControlColors.activeForeground)
+                    .accessibilityHidden(true)
             }
         }
         .padding(.horizontal, PushSingleSelectRowMetrics.horizontalPadding)
@@ -45,5 +46,7 @@ struct PushSingleSelectRow: View {
                 Capsule().fill(PushControlColors.activeFill)
             }
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }

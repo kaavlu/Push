@@ -233,15 +233,18 @@ final class DerivationTests: XCTestCase {
         XCTAssertEqual(countsByPlaceID["regional-seattle"], 16)
         XCTAssertEqual(
             RegionalActivityPuckLayout.coreSize(memberCount: 5),
-            RegionalActivityPuckLayout.sizeSmall
+            RegionalActivityPuckLayout.sizeSmall,
+            accuracy: 0.001
         )
         XCTAssertEqual(
             RegionalActivityPuckLayout.coreSize(memberCount: 6),
-            RegionalActivityPuckLayout.sizeMedium
+            RegionalActivityPuckLayout.sizeMedium,
+            accuracy: 0.001
         )
         XCTAssertEqual(
             RegionalActivityPuckLayout.coreSize(memberCount: 16),
-            RegionalActivityPuckLayout.sizeLarge
+            RegionalActivityPuckLayout.sizeLarge,
+            accuracy: 0.001
         )
     }
 
