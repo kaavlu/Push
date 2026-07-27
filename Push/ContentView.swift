@@ -440,11 +440,7 @@ private enum TopDropdownLayout {
     static func panelWidth(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 196, standard: 208, large: 218) }
     static let panelCornerRadius: CGFloat = 24
     static let rowSpacing: CGFloat = 2
-    static let rowHorizontalPadding: CGFloat = 12
-    static let rowVerticalPadding: CGFloat = 10
-    static let rowIconSpacing: CGFloat = 8
     static let chevronSize: CGFloat = 11
-    static let checkmarkSize: CGFloat = 12
     static let expandedChevronRotation = 180.0
     static let panelTransitionScale = 0.96
     static let animationResponse = 0.28
@@ -465,14 +461,6 @@ private enum TopControlLayout {
     /// Insets the unread badge from the control edge so it sits on the icon, not outside the button.
     static let indicatorInset: CGFloat = 9
     static let minimumTextScale = 0.78
-    static let strokeWidth: CGFloat = 1
-    static let profileRingWidth: CGFloat = 1.15
-    static let highlightWidth: CGFloat = 0.8
-    static let highlightInset: CGFloat = 1.2
-    static let pillGlowRadius: CGFloat = 58
-    static let profileGlowRadius: CGFloat = 24
-    static let shadowRadius: CGFloat = 22
-    static let shadowYOffset: CGFloat = 10
 }
 
 private enum MapAttributionLayout {
