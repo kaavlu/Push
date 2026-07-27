@@ -5,6 +5,7 @@
 //  Created by Manav Khanvilkar on 6/28/26.
 //
 
+import CoreLocation
 import Foundation
 
 enum FriendAvailabilityState: String, Codable, CaseIterable, Equatable {
@@ -173,6 +174,27 @@ enum PuckLabPuckStyle: Equatable {
     case friendGroup
 }
 
+struct PuckLabRegionalScenario: Identifiable, Equatable {
+    let id: String
+    let title: String
+    let subtitle: String
+    let model: RegionalPuckModel
+    let isSelected: Bool
+
+    init(
+        title: String,
+        subtitle: String,
+        model: RegionalPuckModel,
+        isSelected: Bool = false
+    ) {
+        self.id = "regional-\(model.id)"
+        self.title = title
+        self.subtitle = subtitle
+        self.model = model
+        self.isSelected = isSelected
+    }
+}
+
 enum FriendClusterLayoutKind: Equatable {
     case pair
     case smallGroup
@@ -187,6 +209,124 @@ enum FriendClusterLayoutKind: Equatable {
 /// every availability state) that the real seed data doesn't contain.
 enum PuckLabFixtures {
     static let scenarios: [PuckLabScenario] = singleFriendScenarios + clusterScenarios + friendGroupScenarios
+    static let regionalScenarios: [PuckLabRegionalScenario] = [
+        regionalScenario(
+            id: "sf-current-user",
+            title: "SF · Current user",
+            subtitle: "Medium tier · availability ring · sunbeam pulse",
+            regionName: "San Francisco",
+            memberCount: 10,
+            availability: .maybeDown,
+            containsCurrentUser: true,
+            latitude: 37.7749,
+            longitude: -122.4194
+        ),
+        regionalScenario(
+            id: "new-york-small",
+            title: "New York · Small",
+            subtitle: "Small tier · ordinary walnut ring",
+            regionName: "New York",
+            memberCount: 5,
+            availability: .freeNow,
+            containsCurrentUser: false,
+            latitude: 40.7128,
+            longitude: -74.0060
+        ),
+        regionalScenario(
+            id: "chicago-medium",
+            title: "Chicago · Medium",
+            subtitle: "Medium tier · ordinary walnut ring",
+            regionName: "Chicago",
+            memberCount: 6,
+            availability: .busy,
+            containsCurrentUser: false,
+            latitude: 41.8781,
+            longitude: -87.6298,
+            isSelected: true
+        ),
+        regionalScenario(
+            id: "seattle-large",
+            title: "Seattle · Large",
+            subtitle: "Large tier · ordinary walnut ring",
+            regionName: "Seattle",
+            memberCount: 16,
+            availability: .busy,
+            containsCurrentUser: false,
+            latitude: 47.6062,
+            longitude: -122.3321
+        ),
+    ]
+
+    private static func regionalScenario(
+        id: String,
+        title: String,
+        subtitle: String,
+        regionName: String,
+        memberCount: Int,
+        availability: FriendAvailabilityState,
+        containsCurrentUser: Bool,
+        latitude: Double,
+        longitude: Double,
+        isSelected: Bool = false
+    ) -> PuckLabRegionalScenario {
+        PuckLabRegionalScenario(
+            title: title,
+            subtitle: subtitle,
+            model: RegionalPuckModel(
+                id: id,
+                coordinate: CLLocationCoordinate2D(latitude: latitude, longitude: longitude),
+                memberCount: memberCount,
+                containsCurrentUser: containsCurrentUser,
+                containsJoinedGroup: false,
+                activeCount: availability == .busy ? 0 : memberCount,
+                joinableCount: availability == .joinable ? memberCount : 0,
+                busyCount: availability == .busy ? memberCount : 0,
+                dominantAvailability: availability,
+                representativeAvatars: regionalFriends(
+                    id: id,
+                    availability: availability,
+                    containsCurrentUser: containsCurrentUser
+                ),
+                regionName: regionName,
+                activityScore: 0,
+                groupIDs: []
+            ),
+            isSelected: isSelected
+        )
+    }
+
+    private static func regionalFriends(
+        id: String,
+        availability: FriendAvailabilityState,
+        containsCurrentUser: Bool
+    ) -> [FriendPuckData] {
+        let fallbackNames = ["Maya Chen", "Theo Brooks", "Nina Patel"]
+
+        return (0..<3).map { index in
+            let isCurrentUser = containsCurrentUser && index == 0
+            return FriendPuckData(
+                id: "\(id)-friend-\(index)",
+                name: isCurrentUser ? "You" : fallbackNames[index],
+                avatarPlaceholder: isCurrentUser
+                    ? "MK"
+                    : fallbackNames[index]
+                        .split(separator: " ")
+                        .compactMap(\.first)
+                        .map(String.init)
+                        .joined(),
+                profileImageAssetName: isCurrentUser
+                    ? "assets/profile/manav.jpeg"
+                    : (index == 1 ? "assets/friends/chitty.png" : nil),
+                activity: "Around town",
+                activitySymbolName: "person.2.fill",
+                activityDisplayText: "Nearby",
+                availability: availability,
+                venueStatusText: "In the region",
+                placeName: nil,
+                isCurrentUser: isCurrentUser
+            )
+        }
+    }
 
     private static func labFriend(
         _ firstName: String,

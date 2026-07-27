@@ -151,7 +151,7 @@ final class MapRenderTests: XCTestCase {
     }
 
     @MainActor
-    func testRegionalTapRequestsMapFocusAndDoesNotSelectSheetPuck() async throws {
+    func testRegionalSelectionAndZoomAreSeparateInteractions() async throws {
         let viewModel = MapViewModel(container: AppDataContainer(seed: .standard()))
         await viewModel.load()
         let regional = RegionalPuckModel(
@@ -170,10 +170,54 @@ final class MapRenderTests: XCTestCase {
             groupIDs: []
         )
 
+        let priorFocus = viewModel.mapFocusRequest
         XCTAssertNil(viewModel.select(.regionalCluster(regional)))
+        XCTAssertEqual(viewModel.mapFocusRequest, priorFocus)
+
+        viewModel.focus(on: regional)
         let focus = try XCTUnwrap(viewModel.mapFocusRequest)
         XCTAssertEqual(focus.region.center.latitude, 37.77, accuracy: 0.0001)
         XCTAssertEqual(focus.region.span.latitudeDelta, 0.06, accuracy: 0.0001)
+    }
+
+    func testRegionalPresentationDerivesAbbreviationAndAvailabilitySummary() {
+        let newYork = RegionalPuckModel(
+            id: "nyc",
+            coordinate: CLLocationCoordinate2D(latitude: 40.71, longitude: -74.00),
+            memberCount: 12,
+            containsCurrentUser: false,
+            containsJoinedGroup: false,
+            activeCount: 7,
+            joinableCount: 2,
+            busyCount: 5,
+            dominantAvailability: .freeNow,
+            representativeAvatars: [],
+            regionName: "New York",
+            activityScore: 0.5,
+            groupIDs: []
+        )
+        let sanDiego = RegionalPuckModel(
+            id: "sd",
+            coordinate: CLLocationCoordinate2D(latitude: 32.71, longitude: -117.16),
+            memberCount: 3,
+            containsCurrentUser: false,
+            containsJoinedGroup: false,
+            activeCount: 0,
+            joinableCount: 0,
+            busyCount: 3,
+            dominantAvailability: .busy,
+            representativeAvatars: [],
+            regionName: "San Diego",
+            activityScore: 0,
+            groupIDs: []
+        )
+
+        XCTAssertEqual(newYork.regionAbbreviation, "NYC")
+        XCTAssertEqual(newYork.availabilitySummary, "7 active · 2 joinable")
+        XCTAssertTrue(newYork.isSociallyActive)
+        XCTAssertEqual(sanDiego.regionAbbreviation, "SD")
+        XCTAssertEqual(sanDiego.availabilitySummary, "Everyone is busy right now")
+        XCTAssertFalse(sanDiego.isSociallyActive)
     }
 
     private func puck(

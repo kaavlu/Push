@@ -180,10 +180,10 @@ final class DerivationTests: XCTestCase {
 
     func testMapBuilderReproducesCurrentPuckMix() {
         let pucks = seedPucks()
-        XCTAssertEqual(pucks.count, 5)
+        XCTAssertEqual(pucks.count, 8)
         XCTAssertEqual(pucks.filter { $0.kind == .individual }.count, 2)
         XCTAssertEqual(pucks.filter { $0.kind == .hangout }.count, 2)
-        XCTAssertEqual(pucks.filter { $0.kind == .cluster }.count, 1)
+        XCTAssertEqual(pucks.filter { $0.kind == .cluster }.count, 4)
         XCTAssertEqual(pucks.filter { $0.kind == .friendGroup }.count, 0)
     }
 
@@ -212,8 +212,37 @@ final class DerivationTests: XCTestCase {
             "Near Dolores",
             "At Souvla",
             "Group forming near Dolores",
-            "At Crunch"
+            "At Crunch",
+            "Group forming near New York",
+            "Group forming near Chicago",
+            "Group forming near Seattle"
         ])
+    }
+
+    func testRegionalDemoCohortsExerciseEveryClusterSizeTier() {
+        let countsByPlaceID = Dictionary(
+            uniqueKeysWithValues: seedPucks()
+                .filter { $0.id.hasPrefix("puck-regional-") }
+                .map { puck in
+                    (String(puck.id.dropFirst("puck-".count)), puck.people.count)
+                }
+        )
+
+        XCTAssertEqual(countsByPlaceID["regional-new-york"], 5)
+        XCTAssertEqual(countsByPlaceID["regional-chicago"], 6)
+        XCTAssertEqual(countsByPlaceID["regional-seattle"], 16)
+        XCTAssertEqual(
+            RegionalActivityPuckLayout.coreSize(memberCount: 5),
+            RegionalActivityPuckLayout.sizeSmall
+        )
+        XCTAssertEqual(
+            RegionalActivityPuckLayout.coreSize(memberCount: 6),
+            RegionalActivityPuckLayout.sizeMedium
+        )
+        XCTAssertEqual(
+            RegionalActivityPuckLayout.coreSize(memberCount: 16),
+            RegionalActivityPuckLayout.sizeLarge
+        )
     }
 
     func testMultiPersonPucksDeriveJoinable() {

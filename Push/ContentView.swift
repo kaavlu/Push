@@ -19,6 +19,7 @@ struct ContentView: View {
     @State private var isCreateMenuPresented = false
     @State private var isFilterDropdownExpanded = false
     @State private var selectedPuck: MapPuckData?
+    @State private var selectedRegionalPuck: RegionalPuckModel?
     @State private var startPushContext: StartPushLaunchContext?
     @State private var mapSpan = MapDefaults.region.span
     @State private var forcedRenderSpan: MKCoordinateSpan?
@@ -31,7 +32,9 @@ struct ContentView: View {
                 region: MapDefaults.region,
                 pucks: viewModel.renderPucks(for: forcedRenderSpan ?? mapSpan),
                 focusRequest: viewModel.mapFocusRequest,
+                selectedRegionalPuckID: selectedRegionalPuck?.id,
                 onPuckSelected: selectMapPuck,
+                onMapTapped: dismissMapSelection,
                 onRegionChanged: handleRegionChanged,
                 layout: layout,
                 mapLayoutMargins: MapAttributionLayout.edgeInsets(layout)
@@ -76,12 +79,28 @@ struct ContentView: View {
                     onStartPush: launchStartPush
                 )
             }
+
+            if let selectedRegionalPuck {
+                RegionalPuckDetailCard(
+                    model: selectedRegionalPuck,
+                    onZoomIn: { zoomIntoRegionalPuck(selectedRegionalPuck) }
+                )
+                .padding(.horizontal, RegionalPuckDetailLayout.horizontalPadding(layout))
+                .padding(.bottom, RegionalPuckDetailLayout.bottomClearance(layout))
+                .transition(
+                    .move(edge: .bottom)
+                        .combined(with: .opacity)
+                        .combined(with: .scale(scale: RegionalPuckDetailLayout.closedScale))
+                )
+                .zIndex(RegionalPuckDetailLayout.zIndex)
+            }
         }
         .animation(
             .spring(response: CreateActionMenuLayout.animationResponse, dampingFraction: CreateActionMenuLayout.animationDamping),
             value: isCreateMenuPresented
         )
         .animation(.spring(response: TopDropdownLayout.animationResponse, dampingFraction: TopDropdownLayout.animationDamping), value: isFilterDropdownExpanded)
+        .animation(PushMotion.sheet, value: selectedRegionalPuck?.id)
         .fullScreenCover(item: $presentedRoute) { route in
             destination(for: route)
         }
@@ -261,12 +280,27 @@ struct ContentView: View {
 
     private func selectMapPuck(_ puck: MapPuckRenderModel) {
         isFilterDropdownExpanded = false
+        if case .regionalCluster(let regional) = puck {
+            selectedPuck = nil
+            selectedRegionalPuck = regional
+            return
+        }
+        selectedRegionalPuck = nil
         if let selected = viewModel.select(puck) {
             presentSelectedPuck(selected)
-        } else if let focusRequest = viewModel.mapFocusRequest {
-            forcedRenderSpan = focusRequest.region.span
-            mapSpan = focusRequest.region.span
         }
+    }
+
+    private func zoomIntoRegionalPuck(_ puck: RegionalPuckModel) {
+        selectedRegionalPuck = nil
+        viewModel.focus(on: puck)
+        guard let focusRequest = viewModel.mapFocusRequest else { return }
+        forcedRenderSpan = focusRequest.region.span
+        mapSpan = focusRequest.region.span
+    }
+
+    private func dismissMapSelection() {
+        selectedRegionalPuck = nil
     }
 
     private func presentSelectedPuck(_ puck: MapPuckData) {
@@ -300,6 +334,19 @@ struct ContentView: View {
         viewModel.selectedFilterID = item.id
         isFilterDropdownExpanded = false
     }
+}
+
+private enum RegionalPuckDetailLayout {
+    static func horizontalPadding(_ layout: PushAdaptiveLayout) -> CGFloat {
+        layout.pageHorizontalPadding
+    }
+
+    static func bottomClearance(_ layout: PushAdaptiveLayout) -> CGFloat {
+        layout.value(compact: 96, standard: 104, large: 112)
+    }
+
+    static let closedScale = PushMotion.Sheet.closedScale
+    static let zIndex: Double = 28
 }
 
 private struct FriendGroupDropdownButton: View {
