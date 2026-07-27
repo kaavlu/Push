@@ -60,8 +60,10 @@ struct StartPushStep1View: View {
                     subtitle: "Choose groups or friends to send this push to."
                 )
                 StartPushSearchBar(text: $viewModel.searchText, placeholder: "Search people or groups")
-                groupSection
-                friendSection
+                VStack(alignment: .leading, spacing: StartPushLayout.recipientSectionSpacing) {
+                    groupSection
+                    friendSection
+                }
             }
             .padding(.horizontal, StartPushLayout.horizontalPadding(layout))
             .padding(.bottom, StartPushLayout.contentTopSpacing)
@@ -84,39 +86,22 @@ struct StartPushStep1View: View {
     }
 
     private var groupSection: some View {
-        VStack(alignment: .leading, spacing: StartPushLayout.sectionLabelSpacing) {
-            StartPushSectionLabel(title: "Groups")
-            LazyVGrid(columns: groupColumns, spacing: StartPushLayout.groupCardSpacing(layout)) {
-                ForEach(viewModel.filteredGroups) { group in
-                    GroupSelectCard(
-                        item: group,
-                        isSelected: viewModel.isSelected(group.id),
-                        action: { viewModel.toggleRecipient(group.id) }
-                    )
-                }
-            }
-            .frame(maxWidth: .infinity)
-        }
-    }
-
-    private var groupColumns: [GridItem] {
-        [
-            GridItem(
-                .adaptive(minimum: StartPushLayout.groupCardMinWidth(layout)),
-                spacing: StartPushLayout.groupCardSpacing(layout)
-            )
-        ]
+        recipientSection(title: "Groups", items: viewModel.filteredGroups)
     }
 
     private var friendSection: some View {
+        recipientSection(title: "Friends", items: viewModel.filteredFriends)
+    }
+
+    private func recipientSection(title: String, items: [PushRecipientItem]) -> some View {
         VStack(alignment: .leading, spacing: StartPushLayout.sectionLabelSpacing) {
-            StartPushSectionLabel(title: "Friends")
+            StartPushSectionLabel(title: title)
             VStack(spacing: StartPushLayout.rowSpacing) {
-                ForEach(viewModel.filteredFriends) { friend in
-                    FriendSelectRow(
-                        item: friend,
-                        isSelected: viewModel.isSelected(friend.id),
-                        action: { viewModel.toggleRecipient(friend.id) }
+                ForEach(items) { item in
+                    RecipientSelectRow(
+                        item: item,
+                        isSelected: viewModel.isSelected(item.id),
+                        action: { viewModel.toggleRecipient(item.id) }
                     )
                 }
             }
@@ -183,65 +168,11 @@ private struct SelectableCardSurface: View {
     }
 }
 
-private struct GroupSelectCard: View {
-    @Environment(\.pushLayout) private var layout
-    let item: PushRecipientItem
-    let isSelected: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: 8) {
-                ZStack(alignment: .bottomTrailing) {
-                    RecipientAvatarView(
-                        imageAssetName: item.imageAssetName,
-                        initials: item.initials,
-                        size: StartPushLayout.groupAvatarSize(layout)
-                    )
-                    if isSelected { checkmark }
-                }
-                Text(item.name)
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(PushControlColors.textEspresso)
-                    .lineLimit(1)
-                if let count = item.memberCount {
-                    HStack(spacing: 3) {
-                        Image(systemName: "person.fill")
-                            .font(.system(size: StartPushLayout.memberCountIconSize))
-                        Text("\(count)")
-                            .font(.caption2.weight(.medium))
-                    }
-                    .foregroundStyle(PushControlColors.textTertiary)
-                }
-            }
-            .frame(maxWidth: .infinity)
-            .frame(height: StartPushLayout.groupCardHeight(layout))
-            .background(
-                SelectableCardSurface(
-                    cornerRadius: StartPushLayout.cardCornerRadius(layout),
-                    isSelected: isSelected
-                )
-            )
-        }
-        .buttonStyle(.plain)
-        .animation(.spring(response: 0.22, dampingFraction: 0.82), value: isSelected)
-        .accessibilityLabel(item.name)
-        .accessibilityValue(isSelected ? "Selected" : "Not selected")
-    }
-
-    private var checkmark: some View {
-        Image(systemName: "checkmark.circle.fill")
-            .font(.system(size: StartPushLayout.groupCheckmarkSize, weight: .bold))
-            .foregroundStyle(PushControlColors.activeForeground)
-            .background(Circle().fill(.white))
-            .overlay(
-                Circle().stroke(PushControlColors.activeFill, lineWidth: StartPushColor.avatarOverlayStroke)
-            )
-            .offset(x: StartPushLayout.groupCardCheckOffset, y: StartPushLayout.groupCardCheckOffset)
-    }
-}
-
-private struct FriendSelectRow: View {
+/// Shared full-width row for both groups and friends on step 1, so the two
+/// sections read as one consistent multi-select list. Selection state only
+/// changes fill/stroke/indicator glyph — never the row's layout — so nothing
+/// shifts when a row is tapped.
+private struct RecipientSelectRow: View {
     let item: PushRecipientItem
     let isSelected: Bool
     let action: () -> Void
@@ -254,9 +185,17 @@ private struct FriendSelectRow: View {
                     initials: item.initials,
                     size: StartPushLayout.friendRowAvatarSize
                 )
-                Text(item.name)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(PushControlColors.textEspresso)
+                VStack(alignment: .leading, spacing: StartPushLayout.rowMetadataSpacing) {
+                    Text(item.name)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(PushControlColors.textEspresso)
+                        .lineLimit(1)
+                    if let count = item.memberCount {
+                        Text("\(count) member\(count == 1 ? "" : "s")")
+                            .font(.caption)
+                            .foregroundStyle(PushControlColors.textTertiary)
+                    }
+                }
                 Spacer(minLength: 0)
                 selectionIndicator
             }
