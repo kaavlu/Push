@@ -1,3 +1,21 @@
+# Issue #91 — Polish the Friend-Group Filter Dropdown
+
+## Status
+
+- [x] Design spec approved
+- [x] Implementation plan
+- [x] Outside-tap-to-dismiss backdrop
+- [x] Dead layout constants removed
+- [x] Scroll-safe panel (~5 rows, then scrolls)
+- [x] Accessibility traits (row selection, pill expand/collapse hint)
+
+## Done
+
+See `docs/superpowers/specs/2026-07-24-friend-group-dropdown-polish-design.md`
+and `docs/superpowers/plans/2026-07-24-friend-group-dropdown-polish.md`.
+
+---
+
 # Issue #84 — Realtime Presence Synchronization
 
 ## Status
