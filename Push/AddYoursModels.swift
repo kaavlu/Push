@@ -32,19 +32,19 @@ struct AddYoursContext: Identifiable, Equatable {
         self.dateTimeLabel = carousel.dateTimeLabel
     }
 
+    /// Instructional subtitle in Start Push voice, with place context when known.
     var subtitle: String {
         let location = locationTitle.trimmingCharacters(in: .whitespacesAndNewlines)
-        let when = dateTimeLabel.trimmingCharacters(in: .whitespacesAndNewlines)
-        switch (location.isEmpty, when.isEmpty) {
-        case (false, false):
-            return "\(location) · \(when)"
-        case (false, true):
-            return location
-        case (true, false):
-            return when
-        case (true, true):
+        if location.isEmpty {
             return AddYoursCopy.fallbackSubtitle
         }
+        return "Share photos or videos from \(location)."
+    }
+
+    /// Optional metadata line (time) shown under the header when available.
+    var contextDetail: String? {
+        let when = dateTimeLabel.trimmingCharacters(in: .whitespacesAndNewlines)
+        return when.isEmpty ? nil : when
     }
 }
 
@@ -92,16 +92,21 @@ struct AddYoursTiming {
 
 enum AddYoursCopy {
     static let title = "Add yours"
-    static let fallbackSubtitle = "Share a moment from this push"
-    static let emptyPrompt = "Photos or videos"
-    static let emptyHint = "Tap to choose from your library"
+    static let fallbackSubtitle = "Share photos or videos with this push."
+    static let emptyPrompt = "Choose from library"
+    static let emptyHint = "Photos and videos · up to \(AddYoursLayout.maxSelectionCount)"
+    static let selectedSection = "Selected"
     static let addMoreAccessibility = "Add more media"
     static let removeAccessibility = "Remove media"
     static let primaryAction = "Add to push"
     static let submittingAction = "Adding…"
     static let successTitle = "Added to push"
-    static let successMessage = "Your media is ready to share with the group"
+    static let successMessage = "Your media is ready to share with the group."
     static let videoBadgeAccessibility = "Video"
+
+    static func selectedCountLabel(count: Int, max: Int) -> String {
+        "\(count) of \(max)"
+    }
 }
 
 // MARK: - ViewModel

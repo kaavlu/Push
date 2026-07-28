@@ -4,18 +4,28 @@ import XCTest
 
 @MainActor
 final class AddYoursViewModelTests: XCTestCase {
-    func testContextSubtitleCombinesLocationAndTime() {
+    func testContextSubtitleUsesStartPushVoiceWithLocation() {
         let context = AddYoursContext(
             id: "p1",
             locationTitle: "Dolores Park",
             dateTimeLabel: "Sat · 4:30 PM"
         )
-        XCTAssertEqual(context.subtitle, "Dolores Park · Sat · 4:30 PM")
+        XCTAssertEqual(context.subtitle, "Share photos or videos from Dolores Park.")
+        XCTAssertEqual(context.contextDetail, "Sat · 4:30 PM")
     }
 
     func testContextSubtitleFallsBackWhenEmpty() {
         let context = AddYoursContext(id: "p1", locationTitle: "  ", dateTimeLabel: "")
         XCTAssertEqual(context.subtitle, AddYoursCopy.fallbackSubtitle)
+        XCTAssertNil(context.contextDetail)
+    }
+
+    func testFittedHeroShrinksToAvailableHeight() {
+        let wide = CGSize(width: 360, height: 200)
+        let fitted = AddYoursLayout.fittedHeroSize(in: wide)
+        XCTAssertLessThanOrEqual(fitted.height, wide.height + 0.5)
+        XCTAssertLessThanOrEqual(fitted.width, wide.width + 0.5)
+        XCTAssertGreaterThan(fitted.width, 0)
     }
 
     func testContextFromCarouselMapsFields() {

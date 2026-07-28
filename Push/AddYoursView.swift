@@ -2,8 +2,9 @@
 //  AddYoursView.swift
 //  Push
 //
-//  Single-screen Add Yours contribution flow — modal gradient, hero preview,
-//  thumb strip, multi PhotosPicker. Local state only (no uploads).
+//  Single-screen Add Yours contribution flow. Layout mirrors Start Push:
+//  modal gradient, StartPushHeader, form-card media stage, fixed primary CTA.
+//  Thumb strip stays pinned above the button — no scroll to manage selection.
 //
 
 import PhotosUI
@@ -59,22 +60,38 @@ struct AddYoursView: View {
         }
     }
 
-    // MARK: - Composing
+    // MARK: - Composing (fixed layout — no page scroll)
 
     private var composingContent: some View {
         VStack(spacing: 0) {
-            ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: AddYoursLayout.sectionSpacing(layout)) {
-                    header
-                    heroSection
-                    if !viewModel.items.isEmpty {
-                        thumbStrip
-                    }
+            VStack(alignment: .leading, spacing: AddYoursLayout.headerToStageSpacing) {
+                header
+
+                AddYoursMediaStage(
+                    item: viewModel.focusedItem,
+                    isLoading: viewModel.isLoadingPicker,
+                    showsRemove: viewModel.phase == .composing && viewModel.focusedItem != nil,
+                    pickerSelection: $viewModel.pickerItems,
+                    maxSelection: max(viewModel.remainingSlots, 1),
+                    onRemove: { viewModel.removeFocusedItem() }
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+                if !viewModel.items.isEmpty {
+                    AddYoursThumbStrip(
+                        items: viewModel.items,
+                        focusedIndex: viewModel.focusedIndex,
+                        canAddMore: viewModel.canAddMore,
+                        remainingSlots: viewModel.remainingSlots,
+                        pickerSelection: $viewModel.pickerItems,
+                        onSelect: { viewModel.selectItem(at: $0) }
+                    )
                 }
-                .padding(.horizontal, AddYoursLayout.horizontalPadding(layout))
-                .padding(.top, AddYoursLayout.contentTopSpacing)
-                .padding(.bottom, AddYoursLayout.contentTopSpacing)
             }
+            .padding(.horizontal, AddYoursLayout.horizontalPadding(layout))
+            .padding(.top, AddYoursLayout.contentTopSpacing)
+            .padding(.bottom, AddYoursLayout.stripToButtonSpacing)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
 
             PushSolidSunbeamButton(
                 title: viewModel.primaryButtonTitle,
@@ -95,57 +112,19 @@ struct AddYoursView: View {
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: AddYoursLayout.headerSpacing) {
-            Text(AddYoursCopy.title)
-                .font(.title2.weight(.bold))
-                .foregroundStyle(PushControlColors.textEspresso)
-            Text(viewModel.context.subtitle)
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(PushControlColors.textSecondary)
+        VStack(alignment: .leading, spacing: StartPushLayout.headerSpacing) {
+            StartPushHeader(
+                title: AddYoursCopy.title,
+                subtitle: viewModel.context.subtitle
+            )
+            if let detail = viewModel.context.contextDetail {
+                Text(detail)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(PushControlColors.textTertiary)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
-    }
-
-    @ViewBuilder
-    private var heroSection: some View {
-        if let item = viewModel.focusedItem {
-            AddYoursHeroPreview(
-                item: item,
-                showsRemove: viewModel.phase == .composing,
-                onRemove: { viewModel.removeFocusedItem() }
-            )
-        } else {
-            AddYoursEmptyPicker(
-                isLoading: viewModel.isLoadingPicker,
-                selection: $viewModel.pickerItems,
-                maxSelection: viewModel.remainingSlots
-            )
-        }
-    }
-
-    private var thumbStrip: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: AddYoursLayout.thumbSpacing) {
-                ForEach(Array(viewModel.items.enumerated()), id: \.element.id) { index, item in
-                    AddYoursThumbCell(
-                        item: item,
-                        isSelected: index == viewModel.focusedIndex
-                    ) {
-                        viewModel.selectItem(at: index)
-                    }
-                }
-
-                if viewModel.canAddMore {
-                    AddYoursAddThumbPicker(
-                        selection: $viewModel.pickerItems,
-                        maxSelection: viewModel.remainingSlots
-                    )
-                }
-            }
-            .padding(.vertical, AddYoursLayout.thumbStripVerticalPadding)
-        }
-        .padding(.top, AddYoursLayout.thumbStripTopPadding)
     }
 
     // MARK: - Success
