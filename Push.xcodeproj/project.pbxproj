@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6F67B70359D27E3951173399 /* PushMediaCarouselBottom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9027F53DCDEB095DE6C8BD3E /* PushMediaCarouselBottom.swift */; };
 		5EDE64F4F8165D337821E53E /* FeedMediaCarouselTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32760387A7644CD1B64D2561 /* FeedMediaCarouselTests.swift */; };
 		EA94B79795D377A2CE1EDAD8 /* PushMediaCarousel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA14E3379E68254EA5747DC8 /* PushMediaCarousel.swift */; };
 		E2A9E2FC8AE5B86D76DC0DA6 /* FeedMediaModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F98454685A06121BC32049A /* FeedMediaModels.swift */; };
@@ -363,6 +364,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		9027F53DCDEB095DE6C8BD3E /* PushMediaCarouselBottom.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PushMediaCarouselBottom.swift"; sourceTree = "<group>"; };
 		32760387A7644CD1B64D2561 /* FeedMediaCarouselTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedMediaCarouselTests.swift"; sourceTree = "<group>"; };
 		EA14E3379E68254EA5747DC8 /* PushMediaCarousel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PushMediaCarousel.swift"; sourceTree = "<group>"; };
 		0F98454685A06121BC32049A /* FeedMediaModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedMediaModels.swift"; sourceTree = "<group>"; };
@@ -756,6 +758,7 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				9027F53DCDEB095DE6C8BD3E /* PushMediaCarouselBottom.swift */,
 				EA14E3379E68254EA5747DC8 /* PushMediaCarousel.swift */,
 				0F98454685A06121BC32049A /* FeedMediaModels.swift */,
 				E50500865C9684FC45D1A25F /* FeedView.swift */,
@@ -1254,6 +1257,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				6F67B70359D27E3951173399 /* PushMediaCarouselBottom.swift in Sources */,
 				EA94B79795D377A2CE1EDAD8 /* PushMediaCarousel.swift in Sources */,
 				E2A9E2FC8AE5B86D76DC0DA6 /* FeedMediaModels.swift in Sources */,
 				FE789DDB196D66C764240D1C /* FeedView.swift in Sources */,

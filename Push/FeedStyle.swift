@@ -77,6 +77,46 @@ enum FeedMediaLayout {
     static let metadataTextStackSpacing: CGFloat = 3
     /// Soft top scrim height so white type stays legible on light or dark media.
     static let metadataScrimHeight: CGFloat = 118
+
+    /// Bottom interaction inset from media edges (matches top chrome side inset).
+    static let bottomHorizontalInset: CGFloat = progressHorizontalInset
+    static let bottomEdgeInset: CGFloat = 16
+    /// Gap between participant row and Add yours.
+    static let bottomRowToCTASpacing: CGFloat = 12
+    /// Soft bottom scrim height behind the interaction section.
+    static let bottomScrimHeight: CGFloat = 168
+}
+
+/// Bottom media interaction chrome (avatars, names, play, Add yours).
+enum FeedMediaBottomStyle {
+    static let avatarSize: CGFloat = 34
+    static let avatarOverlap: CGFloat = -11
+    static let avatarStrokeWidth: CGFloat = 1.5
+    static let avatarStrokeOpacity = 0.92
+    static let avatarToTextSpacing: CGFloat = 10
+    static let textStackSpacing: CGFloat = 2
+    static let rowToPlaySpacing: CGFloat = 10
+
+    static let namesFont = Font.subheadline.weight(.semibold)
+    static let contributorFont = Font.caption.weight(.medium)
+    static let textColor = Color.white
+    static let contributorOpacity = 0.88
+    static let textShadowRadius: CGFloat = 2
+    static let textShadowY: CGFloat = 1
+
+    static let overflowFontSize: CGFloat = 12
+    static let playButtonSize: CGFloat = 44
+    static let playIconSize: CGFloat = 16
+    static var playCornerRadius: CGFloat { playButtonSize / 2 }
+
+    static let addYoursHeight: CGFloat = 52
+    static let addYoursIconSize: CGFloat = 15
+    static let addYoursLabelSpacing: CGFloat = 8
+    static let addYoursFont = Font.headline.weight(.bold)
+
+    static let scrimBottomOpacity = 0.58
+    static let scrimMidOpacity = 0.28
+    static let scrimMidStop = 0.45
 }
 
 enum FeedMediaProgressStyle {

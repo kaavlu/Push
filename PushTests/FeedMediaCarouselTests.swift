@@ -101,6 +101,25 @@ final class FeedMediaCarouselTests: XCTestCase {
         XCTAssertEqual(FeedMediaCarouselFixtures.threeBundlePhotos.dateTimeLabel, "Fri · 9:15 PM")
     }
 
+    func testParticipantNamesLineIncludesRemainingSuffix() {
+        let names = FeedMediaParticipantCopy.namesLine(
+            from: FeedMediaCarouselFixtures.threeBundlePhotos.participants
+        )
+        // Five participants → first two named + remaining count
+        XCTAssertEqual(names, "Ohm, Viplove +3")
+        XCTAssertEqual(
+            FeedMediaParticipantCopy.avatarOverflowCount(participantCount: 5),
+            2
+        )
+    }
+
+    func testAddYoursHiddenForNonParticipants() {
+        XCTAssertFalse(FeedMediaCarouselFixtures.mixedPortraitLandscapeSquare.canAddYours)
+        XCTAssertTrue(FeedMediaCarouselFixtures.threeBundlePhotos.canAddYours)
+        XCTAssertFalse(FeedMediaCarouselFixtures.threeBundlePhotos.participants.isEmpty)
+        XCTAssertFalse(FeedMediaCarouselFixtures.threeBundlePhotos.contributorName.isEmpty)
+    }
+
     func testSolidImageFactoryProducesRequestedSize() {
         let swatch = FeedSolidMediaSwatch(
             red: 0.5, green: 0.4, blue: 0.3,

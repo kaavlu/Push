@@ -14,7 +14,11 @@ struct PushMediaCarousel: View {
     let data: FeedMediaCarouselData
     /// Overflow menu action — no-op until card chrome menus ship.
     var onOverflowMenu: () -> Void = {}
+    /// Add yours action — no-op until contribution upload ships.
+    var onAddYours: () -> Void = {}
     @State private var selectedIndex: Int = 0
+    /// Drives auto-advance and the bottom play/pause control.
+    @State private var isAutoPlaying: Bool = true
 
     private var items: [FeedMediaItem] { data.items }
     private var cornerRadius: CGFloat { FeedMediaLayout.cornerRadius }
@@ -24,6 +28,16 @@ struct PushMediaCarousel: View {
         ZStack {
             mediaPages
             topChrome
+            FeedMediaBottomInteraction(
+                participants: data.participants,
+                contributorName: data.contributorName,
+                canAddYours: data.canAddYours,
+                isPlaying: isAutoPlaying,
+                onTogglePlayback: {
+                    isAutoPlaying.toggle()
+                },
+                onAddYours: onAddYours
+            )
         }
         .aspectRatio(FeedMediaLayout.aspectRatio, contentMode: .fit)
         .frame(maxWidth: .infinity)
@@ -60,21 +74,21 @@ struct PushMediaCarousel: View {
         }
     }
 
-    /// Bumps when the carousel identity or page count changes so autoplay resets cleanly.
+    /// Bumps when identity, page, or play state changes so autoplay restarts cleanly.
     private var autoAdvanceTaskID: String {
-        "\(data.id)-\(items.count)-\(selectedIndex)"
+        "\(data.id)-\(items.count)-\(selectedIndex)-\(isAutoPlaying)"
     }
 
     @MainActor
     private func runAutoAdvanceLoop() async {
-        guard items.count > 1 else { return }
+        guard items.count > 1, isAutoPlaying else { return }
         let nanos = UInt64(FeedMediaLayout.autoAdvanceDuration * 1_000_000_000)
         do {
             try await Task.sleep(nanoseconds: nanos)
         } catch {
             return
         }
-        guard !Task.isCancelled, items.count > 1 else { return }
+        guard !Task.isCancelled, items.count > 1, isAutoPlaying else { return }
         let next = (selectedIndex + 1) % items.count
         withAnimation(.easeInOut(duration: FeedMediaLayout.autoAdvanceAnimationDuration)) {
             selectedIndex = next

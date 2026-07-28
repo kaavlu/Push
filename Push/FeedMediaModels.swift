@@ -49,6 +49,20 @@ struct FeedMediaItem: Identifiable, Equatable {
     let source: FeedMediaSource
 }
 
+/// Participant face + name for the bottom media interaction row.
+struct FeedMediaParticipant: Identifiable, Equatable {
+    let id: String
+    let displayName: String
+    let imageAssetPath: String?
+
+    var initials: String {
+        let parts = displayName.split(separator: " ").map(String.init)
+        let letters = parts.prefix(2).compactMap(\.first).map(String.init)
+        let joined = letters.joined().uppercased()
+        return joined.isEmpty ? "?" : joined
+    }
+}
+
 /// One immersive media stack that will later sit under full Push-card chrome.
 struct FeedMediaCarouselData: Identifiable, Equatable {
     let id: String
@@ -57,8 +71,37 @@ struct FeedMediaCarouselData: Identifiable, Equatable {
     let locationTitle: String
     /// Date + time under location (presentation-ready).
     let dateTimeLabel: String
+    /// People in the Push (avatar stack + names).
+    let participants: [FeedMediaParticipant]
+    /// Current media contributor attribution (secondary line).
+    let contributorName: String
+    /// When false, hides the Add yours CTA (viewer was not a participant).
+    let canAddYours: Bool
 
     var isEmpty: Bool { items.isEmpty }
+}
+
+// MARK: - Participant copy helpers
+
+enum FeedMediaParticipantCopy {
+    static let maxVisibleAvatars = 3
+    static let maxNamedInPrimaryLine = 2
+
+    /// Primary names line with a remaining-count suffix when needed.
+    static func namesLine(from participants: [FeedMediaParticipant]) -> String {
+        let names = participants.map(\.displayName)
+        guard !names.isEmpty else { return "" }
+        if names.count <= maxNamedInPrimaryLine {
+            return names.joined(separator: ", ")
+        }
+        let head = names.prefix(maxNamedInPrimaryLine).joined(separator: ", ")
+        let remaining = names.count - maxNamedInPrimaryLine
+        return "\(head) +\(remaining)"
+    }
+
+    static func avatarOverflowCount(participantCount: Int) -> Int {
+        max(0, participantCount - maxVisibleAvatars)
+    }
 }
 
 // MARK: - Selection helper
@@ -92,6 +135,31 @@ enum FeedMediaCarouselFixtures {
         width: 800, height: 1600
     )
 
+    private static let ohm = FeedMediaParticipant(
+        id: "p-ohm", displayName: "Ohm", imageAssetPath: "assets/friends/ohm.png"
+    )
+    private static let viplove = FeedMediaParticipant(
+        id: "p-viplove", displayName: "Viplove", imageAssetPath: "assets/friends/viplove.png"
+    )
+    private static let ram = FeedMediaParticipant(
+        id: "p-ram", displayName: "Ram", imageAssetPath: "assets/friends/ram.png"
+    )
+    private static let pranay = FeedMediaParticipant(
+        id: "p-pranay", displayName: "Pranay", imageAssetPath: "assets/friends/pranay.png"
+    )
+    private static let ishan = FeedMediaParticipant(
+        id: "p-ishan", displayName: "Ishan", imageAssetPath: "assets/friends/ishan.png"
+    )
+    private static let nitin = FeedMediaParticipant(
+        id: "p-nitin", displayName: "Nitin", imageAssetPath: "assets/friends/nitin.png"
+    )
+    private static let roh = FeedMediaParticipant(
+        id: "p-roh", displayName: "Roh", imageAssetPath: "assets/friends/roh.png"
+    )
+    private static let ryan = FeedMediaParticipant(
+        id: "p-ryan", displayName: "Ryan", imageAssetPath: "assets/friends/ryan.png"
+    )
+
     /// Three photos with different source aspect ratios (portrait / landscape / square).
     static let threeMixedAspectPhotos = FeedMediaCarouselData(
         id: "fixture-three-mixed",
@@ -101,7 +169,10 @@ enum FeedMediaCarouselFixtures {
             FeedMediaItem(id: "mixed-2", kind: .photo, source: .solidColor(squareSwatch)),
         ],
         locationTitle: "Dolores Park",
-        dateTimeLabel: "Sat · 4:30 PM"
+        dateTimeLabel: "Sat · 4:30 PM",
+        participants: [ohm, viplove, ram, pranay],
+        contributorName: "Ohm",
+        canAddYours: true
     )
 
     /// Single photo carousel.
@@ -115,10 +186,14 @@ enum FeedMediaCarouselFixtures {
             ),
         ],
         locationTitle: "Home",
-        dateTimeLabel: "Tonight · 8:00 PM"
+        dateTimeLabel: "Tonight · 8:00 PM",
+        participants: [pranay],
+        contributorName: "Pranay",
+        canAddYours: true
     )
 
     /// Mixed portrait, landscape, square solids plus a real portrait asset.
+    /// Viewer is not a participant — Add yours hidden.
     static let mixedPortraitLandscapeSquare = FeedMediaCarouselData(
         id: "fixture-mixed-shapes",
         items: [
@@ -132,7 +207,10 @@ enum FeedMediaCarouselFixtures {
             ),
         ],
         locationTitle: "Ocean Beach",
-        dateTimeLabel: "Sun · 11:00 AM"
+        dateTimeLabel: "Sun · 11:00 AM",
+        participants: [roh, ryan, ishan],
+        contributorName: "Roh",
+        canAddYours: false
     )
 
     /// Empty / unavailable media — polished placeholder.
@@ -142,7 +220,10 @@ enum FeedMediaCarouselFixtures {
             FeedMediaItem(id: "missing-0", kind: .photo, source: .missing),
         ],
         locationTitle: "TBD",
-        dateTimeLabel: "Date · Time"
+        dateTimeLabel: "Date · Time",
+        participants: [ohm, viplove],
+        contributorName: "Ohm",
+        canAddYours: false
     )
 
     /// Loading media state.
@@ -153,7 +234,10 @@ enum FeedMediaCarouselFixtures {
             FeedMediaItem(id: "loading-1", kind: .photo, source: .loading),
         ],
         locationTitle: "Loading…",
-        dateTimeLabel: "—"
+        dateTimeLabel: "—",
+        participants: [ram],
+        contributorName: "Ram",
+        canAddYours: true
     )
 
     /// Multi-photo stack using bundled friend images (realistic crop demo).
@@ -165,7 +249,10 @@ enum FeedMediaCarouselFixtures {
             FeedMediaItem(id: "bundle-2", kind: .photo, source: .assetPath("assets/friends/ram.png")),
         ],
         locationTitle: "The Beehive",
-        dateTimeLabel: "Fri · 9:15 PM"
+        dateTimeLabel: "Fri · 9:15 PM",
+        participants: [ohm, viplove, ram, pranay, ryan],
+        contributorName: "Viplove",
+        canAddYours: true
     )
 
     /// Mixed photo + video poster (video is still frame only — no playback).
@@ -184,7 +271,10 @@ enum FeedMediaCarouselFixtures {
             ),
         ],
         locationTitle: "Mission Cliffs",
-        dateTimeLabel: "Thu · 7:00 PM"
+        dateTimeLabel: "Thu · 7:00 PM",
+        participants: [ishan, nitin, ohm],
+        contributorName: "Ishan",
+        canAddYours: true
     )
 
     /// Default vertical stack shown on the Pushes tab for this foundation step.
