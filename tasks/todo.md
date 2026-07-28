@@ -1,36 +1,30 @@
-# Issue #94 — Integrate Activity Inference into Presence (I3)
+# Issue #99 — Deterministic Dwell Detection (I1)
 
 ## Status
 
-- [x] Map inferred kinds → `PresenceActivity` / draft fields (existing activity_name/symbol)
-- [x] `LocationSessionActivityState` observation window + last-valid hold
-- [x] `LocationSession` orchestration (engine → draft → sync)
-- [x] Factory wires `DeterministicActivityInferenceEngine`
-- [x] Heartbeats preserve latest valid activity
-- [x] Ghost / availability unchanged; unknown still publishes
-- [x] Remote activity patches via existing LiveDataStore path
-- [x] `ActivityInferenceIntegrationTests` — 9 green
-- [x] Regression `LocationSessionTests` — 18 green
-- [x] Commit
+- [x] Spec (`tasks/spec.md`)
+- [x] Domain types + configuration + fixtures
+- [x] `DeterministicDwellDetector` state machine
+- [x] Silent `LocationSession` wiring (no label / publish changes)
+- [x] `DwellDetectionTests` — 15 green
+- [x] Regression `LocationSessionTests` / activity suites green
+- [x] Register pbxproj + commit
 
-## Flow
+## Acceptance
 
-```
-validated observation
-→ activity engine
-→ latest inferred activity
-→ presence draft (activity_name/symbol)
-→ existing Supabase write path
-→ existing Realtime path
-```
+- Sustained stationary → one stable dwell (centroid, start, duration, samples)
+- Single fix / walk-by / traffic-light stop → no false dwell
+- GPS drift does not reset start or wander locked centroid
+- Activity inference + presence publishing unchanged
 
 ## Out of scope
 
-- Arrived / left
-- Friend-facing UI
-- New DB columns (reuse activity_name / activity_symbol)
+- Venue lookup
+- Arrived / left events
+- Activity label changes (`.chilling` stays window-based only)
+- DB / UI
 
-## Prior
+## Related
 
-- #92 I1 domain — done
-- #93 I2 deterministic rules — done
+- #92–#94 activity inference (parallel; not replaced)
+- Location presence architecture Phase 2+ venue path

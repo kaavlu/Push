@@ -32,6 +32,8 @@ extension LocationSession {
         lastAcceptedValidated = validated
         let evaluationTime = now()
         activityState.recordAccepted(validated.observation, now: evaluationTime)
+        // Dwell runs in parallel — never blocks publish and does not mutate drafts.
+        dwellState = dwellDetector.process(validated.observation, at: evaluationTime)
         state.lastObservation = validated.observation
         state.lastAcceptedAt = evaluationTime
         state.authorization = provider.authorizationState
