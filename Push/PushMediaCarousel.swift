@@ -124,11 +124,24 @@ struct PushMediaCarousel: View {
         // Never zero progress while this index is still selected — that flashes empty.
         segmentProgress = 1
         let next = (selectedIndex + 1) % items.count
-        var handoff = Transaction()
-        handoff.disablesAnimations = true
-        withTransaction(handoff) {
-            selectedIndex = next
-            // New active segment starts empty; prior indices render as completed.
+        // Slide to the next page (FeedMediaPageStrip animates offset). When wrapping
+        // last → first, skip the reverse scrub through intermediate pages.
+        if next > selectedIndex {
+            withAnimation(
+                .easeInOut(duration: FeedMediaLayout.autoAdvanceAnimationDuration)
+            ) {
+                selectedIndex = next
+            }
+        } else {
+            var wrap = Transaction()
+            wrap.disablesAnimations = true
+            withTransaction(wrap) {
+                selectedIndex = next
+            }
+        }
+        var progressHandoff = Transaction()
+        progressHandoff.disablesAnimations = true
+        withTransaction(progressHandoff) {
             segmentProgress = 0
         }
     }
@@ -174,14 +187,11 @@ struct PushMediaCarousel: View {
                 } else if items.count == 1, let only = items.first {
                     FeedMediaPageView(item: only, size: size)
                 } else {
-                    TabView(selection: $selectedIndex) {
-                        ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
-                            FeedMediaPageView(item: item, size: size)
-                                .frame(width: size.width, height: size.height)
-                                .tag(index)
-                        }
-                    }
-                    .tabViewStyle(.page(indexDisplayMode: .never))
+                    FeedMediaPageStrip(
+                        items: items,
+                        selectedIndex: $selectedIndex,
+                        size: size
+                    )
                     .frame(width: size.width, height: size.height)
                 }
             }
@@ -403,7 +413,7 @@ private struct FeedMediaProgressSegment: View {
 
 // MARK: - Page
 
-private struct FeedMediaPageView: View {
+struct FeedMediaPageView: View {
     let item: FeedMediaItem
     let size: CGSize
 

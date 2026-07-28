@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		385379EF6517781AD4B024F1 /* FeedMediaPageStrip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39C2E7E18FF87ACE50F8A408 /* FeedMediaPageStrip.swift */; };
 		87C6B88906AC60E18F430E19 /* AddYoursViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A841F5F06CE2431AF9CB786F /* AddYoursViewModelTests.swift */; };
 		BDDBB548A8F404C4F5ECA572 /* AddYoursComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9512DE5E85357F7FF9C4F35 /* AddYoursComponents.swift */; };
 		F69848421FAF4D642B4672FF /* AddYoursView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A13200EA46508BB2A0AE05C6 /* AddYoursView.swift */; };
@@ -369,6 +370,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		39C2E7E18FF87ACE50F8A408 /* FeedMediaPageStrip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedMediaPageStrip.swift"; sourceTree = "<group>"; };
 		A841F5F06CE2431AF9CB786F /* AddYoursViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddYoursViewModelTests.swift"; sourceTree = "<group>"; };
 		C9512DE5E85357F7FF9C4F35 /* AddYoursComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddYoursComponents.swift"; sourceTree = "<group>"; };
 		A13200EA46508BB2A0AE05C6 /* AddYoursView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddYoursView.swift"; sourceTree = "<group>"; };
@@ -768,6 +770,7 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				39C2E7E18FF87ACE50F8A408 /* FeedMediaPageStrip.swift */,
 				C9512DE5E85357F7FF9C4F35 /* AddYoursComponents.swift */,
 				A13200EA46508BB2A0AE05C6 /* AddYoursView.swift */,
 				A80EED4F5D4707F56C38779F /* AddYoursStyle.swift */,
@@ -1272,6 +1275,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				385379EF6517781AD4B024F1 /* FeedMediaPageStrip.swift in Sources */,
 				BDDBB548A8F404C4F5ECA572 /* AddYoursComponents.swift in Sources */,
 				F69848421FAF4D642B4672FF /* AddYoursView.swift in Sources */,
 				EDBDB542118E6D97058B0240 /* AddYoursStyle.swift in Sources */,
