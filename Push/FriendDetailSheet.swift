@@ -17,25 +17,15 @@ struct FriendDetailViewData {
                 return String(friend.venueStatusText.dropFirst(prefix.count))
             }
         }
-        return friend.venueStatusText
+        return friend.placeName ?? friend.venueStatusText
     }
 
-    var activityPrefix: String {
-        switch friend.activity.lowercased() {
-        case "coffee":          return "Working at"
-        case "park":            return "Chilling at"
-        case "gym":             return "Working out at"
-        case "lunch", "food":   return "Eating at"
-        case "dinner":          return "Dinner at"
-        case "work":            return "Working at"
-        case "driving":         return "Driving to"
-        default:                return "At"
-        }
-    }
-
+    /// Canonical presence activity — no View-local coffee/park/gym inventing.
     var statusLine: String {
-        let place = friend.placeName ?? displayLocation
-        return "\(activityPrefix) \(place)"
+        PresenceActivityPresentation.detailStatusLine(
+            activityName: friend.activity,
+            venueStatusText: friend.venueStatusText
+        )
     }
 }
 

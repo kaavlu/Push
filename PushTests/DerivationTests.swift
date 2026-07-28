@@ -207,8 +207,9 @@ final class DerivationTests: XCTestCase {
 
     func testPuckVenueTextsMatchToday() {
         let texts = Set(seedPucks().map(\.venueStatusText))
+        // Individual pucks surface note/activity; multi-person pucks keep place wording.
         XCTAssertEqual(texts, [
-            "At Blue Bottle",
+            "Coffee",
             "Near Dolores",
             "At Souvla",
             "Group forming near Dolores",
@@ -324,8 +325,9 @@ final class DerivationTests: XCTestCase {
         let bluBottle = try XCTUnwrap(seedPucks().first { $0.id == "puck-blue-bottle" })
         let chitty = try XCTUnwrap(bluBottle.people.first)
         XCTAssertEqual(chitty.id, "chitty")
-        XCTAssertEqual(chitty.activityDisplayText, "Blue Bottle")
-        XCTAssertEqual(chitty.venueStatusText, "At Blue Bottle")
+        XCTAssertEqual(chitty.activityDisplayText, "Coffee")
+        XCTAssertEqual(chitty.venueStatusText, "Coffee")
+        XCTAssertEqual(chitty.activitySymbolName, "cup.and.saucer.fill")
         XCTAssertEqual(chitty.lastUpdated, "3 min ago")
         XCTAssertEqual(chitty.locationLabel, "315 Linden St")
         XCTAssertEqual(chitty.placeName, "Blue Bottle")
