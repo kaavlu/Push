@@ -1,77 +1,81 @@
-# Issue #105 — Attach Resolved Place Context to Presence Activity
+# Issue #109 — Surface Inferred Activity Across Push
 
 ## Goal
 
-Connect place resolution + activity inference into one canonical friend-visible presence activity so friends can receive labels such as:
+Display the canonical presence activity (`activity_name` / `activity_symbol`) consistently across live friend surfaces, without re-deriving activity composition in Views or ViewModels.
 
-- At Crunch Fitness
-- At Starbucks
-- Chilling
-- Walking
-- Driving
-- Moving
-- Nearby
+## Source of truth
 
-Builds on #99–#101 (dwell / lifecycle / place resolution), #94 (activity presentation), and live presence reads/writes/Realtime (`current_presence`).
+| Field | Role |
+|---|---|
+| `PresenceStatus.activity` / `VisiblePresence.activity` | Friend-visible activity label + SF symbol |
+| `statusNote` | Optional curated / place note (set equal to `At {place}` by #105 composition) |
+| `availability` | Independent free/busy chip — never conflated with activity |
 
-## Fallback order (canonical)
+Supported labels from the presence pipeline:
 
-```
-confident resolved place → At {place}
-confirmed dwell without a reliable place → Chilling
-walking → Walking
-driving → Driving
-generic movement → Moving
-otherwise → Nearby
-```
-
-Place context must not stick after departure, Ghost (friend-visible unpublish), hard expiry, or invalid/non-confident resolution.
+- `At {place}`
+- `Chilling`
+- `Walking`
+- `Driving`
+- `Moving`
+- `Nearby`
 
 ## Design
 
-### Composition (pure)
+### Shared presentation (pure)
 
-`ActivityInferencePresentation.compose` (or apply) merges:
+`PresenceActivityPresentation` in `Push/Data/Derived/` maps presence fields → surface fields:
 
-| Input | Role |
+| Output | Use |
 |---|---|
-| `InferredActivityResult` + heartbeat hold | Motion class |
-| `activePlaceResolution` | Confident POI only (`.resolved` + selected name) |
-| Confirmed dwell (`phase == .dwelling` + active session) | Enables Chilling when place is weak |
+| `activityName` | Raw activity string for models / search |
+| `activitySymbolName` | SF symbol for list rows, pucks, detail cards |
+| `activityDisplayText` | Compact map badge (strip leading `At ` when present) |
+| `venueStatusText` | List / detail status line |
 
-Outputs onto `PresenceStatusDraft`:
+**Status line priority**
 
-- `activity` (`activity_name` / `activity_symbol`)
-- `statusNote` — set to `At {place}` when place is attached (so existing “At \(place)” UI paths do not double-prefix)
-- `placeID` — resolved candidate id when attached; `nil` otherwise (no places catalog required; friend map place remains synthetic from coords)
-- `confidence` / `source` — inference when classified/place; location for unknown Nearby
+1. Non-empty `statusNote` (preserves curated seed notes + `At {place}` notes)
+2. Non-empty `activity.name` (Walking / Chilling / … when note is empty)
+3. Place: `At {displayName}` or `Near {displayName}` when vague
+4. Availability title, else `"Around"`
 
-No schema migration — reuse `current_presence.activity_name`, `activity_symbol`, `place_id`, `status_note`.
+Never prefix `"At "` onto an activity name (avoids live `"At Walking"` when synthetic place name mirrors activity).
 
-### Session wiring
+**Missing activity:** empty name + default symbol `mappin`; fall through status priority above.
 
-- `LocationSession.enqueueDraft` always runs composition (never blocks on resolver).
-- On place-resolution **apply** (async success): if publishing, `republishLastAcceptedIfPossible()` so friends get `At {place}` without waiting for movement/heartbeat.
-- On **departure**: clear place context, then republish when publishing so stale place/Chilling leave friend view promptly.
-- Ghost / unpublish: existing unpublish path removes friend-visible presence; local place context may remain for re-dwell/republish after Ghost off.
-- Resolver failure / ambiguous / empty: no confident place; dwell → Chilling; publish path unchanged.
+**Hidden / unpublished:** builders keep existing hidden rows (`"Hidden right now"`, moon symbol). Group member rows treat `!isEffectivelyPublished` as hidden. No stale activity for Ghosted, unpublished, or filtered-expired presence (repo + `VisiblePresenceBuilder` already drop those for friend surfaces).
+
+### Surfaces
+
+| Surface | Change |
+|---|---|
+| Map exact pucks (`MapContentBuilder`) | Badge + person fields via presentation helper |
+| Regional vague sources (`MapDisplayPuckBuilder`) | Same |
+| Friends list (`FriendsContentBuilder`) | Same |
+| Group members (`GroupContentBuilder`) | Same; respect publish flag |
+| Friend detail sheet | Status line = `venueStatusText` / activity — drop coffee/park/gym invent prefixes |
+| Hangout activity line | Prefer `venueStatusText` / activity directly |
+| Profile (`ProfileContentBuilder`) | `activityTitle` from presence activity (not availability); `placeTitle` remains vague neighborhood |
+
+### Realtime
+
+No new subscription. Map/Friends already reload on `AppDataContainer.onStoreChange` (Realtime → `LiveDataStore` revision). Correct field mapping is enough for activity updates to appear without pull-to-refresh.
 
 ### Non-goals
 
-UI redesign, place correction UI, co-presence, background location, ETA, feed, new inference rules, places catalog.
+- New inference rules / place resolution
+- Schema migrations
+- Place-correction UI / background location
+- Major UI redesign or design-system chrome changes
+- Seed content rewrite (optional later)
 
 ## Acceptance
 
-- [x] Confident place publishes as `At {place}`
-- [x] Ambiguous / failed / empty resolution falls back safely
-- [x] Friends receive activity via existing writes + Realtime/`LiveDataStore` patches
-- [x] Departure clears friend-visible place activity on next draft
-- [x] Manual availability remains independent
-- [x] Ghost / heartbeat / throttle / teardown behavior preserved
-- [x] Tests: compose, place, fallback, clear, write mapping, remote read
-
-## Tests
-
-- Pure composition unit tests
-- Session: resolve → `At …` draft; empty dwell → Chilling; departure clears
-- Existing `ActivityInferenceIntegrationTests` / presence suites still green (`Moving` label)
+- [x] All listed surfaces use the same presentation helper for activity fields
+- [x] Place and movement activities render correct symbol + label
+- [x] No `"At Walking"` / double-prefix from synthetic place names
+- [x] Availability remains independent of activity
+- [x] Hidden / unpublished / missing activity use safe fallbacks
+- [x] Focused presentation tests green; existing derivation suites updated only where expectations change

@@ -15,13 +15,15 @@ enum ProfileContentBuilder {
         person: Person,
         presence: VisiblePresence?
     ) -> ProfileData {
-        ProfileData(
+        let activity = presence.map { PresenceActivityPresentation.fields(from: $0) }
+        return ProfileData(
             name: person.displayName,
             initials: person.initials,
             handle: profile.handle,
             imageAssetName: person.imageAssetPath,
             availability: profile.chosenAvailability,
-            activityTitle: profile.chosenAvailability.title,
+            // Presence activity stays independent of the availability chip.
+            activityTitle: activity?.activityName ?? "",
             placeTitle: placeTitle(from: presence),
             visibilityNote: profile.visibilityNote,
             availabilityOptions: profile.availabilityOptions

@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F55A2607CE742BCA6AA51DF3 /* PresenceActivityPresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB1CFB9E61C38DFF795EF15 /* PresenceActivityPresentationTests.swift */; };
+		A076C5B27EFF6B240FD2C788 /* PresenceActivityPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6A92BA94A1CD6F021ABF663 /* PresenceActivityPresentation.swift */; };
 		B02A9B91E9E61B201D7DC219 /* PresenceActivityCompositionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C029D24C9C19F1A0E5038CC /* PresenceActivityCompositionTests.swift */; };
 		9C1D39122A8F059A477741F4 /* PlaceResolutionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5CE35E0C7E375B1DEB6E1BD /* PlaceResolutionTests.swift */; };
 		A04A9F1C134D339AD3AFEFDE /* MapKitPlaceResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE90F1F4343AB792A09619E9 /* MapKitPlaceResolver.swift */; };
@@ -357,6 +359,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		BBB1CFB9E61C38DFF795EF15 /* PresenceActivityPresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PresenceActivityPresentationTests.swift"; sourceTree = "<group>"; };
+		D6A92BA94A1CD6F021ABF663 /* PresenceActivityPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PresenceActivityPresentation.swift"; path = "Data/Derived/PresenceActivityPresentation.swift"; sourceTree = "<group>"; };
 		5C029D24C9C19F1A0E5038CC /* PresenceActivityCompositionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PresenceActivityCompositionTests.swift"; sourceTree = "<group>"; };
 		C5CE35E0C7E375B1DEB6E1BD /* PlaceResolutionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PlaceResolutionTests.swift"; sourceTree = "<group>"; };
 		AE90F1F4343AB792A09619E9 /* MapKitPlaceResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "MapKitPlaceResolver.swift"; path = "Data/Location/MapKitPlaceResolver.swift"; sourceTree = "<group>"; };
@@ -744,6 +748,7 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				D6A92BA94A1CD6F021ABF663 /* PresenceActivityPresentation.swift */,
 				AE90F1F4343AB792A09619E9 /* MapKitPlaceResolver.swift */,
 				795FBF52B55FA09A19F3497B /* LocationSession+PlaceResolution.swift */,
 				74B8E7C90BAAF4072EE94F27 /* PlaceCandidateRanker.swift */,
@@ -1032,6 +1037,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				BBB1CFB9E61C38DFF795EF15 /* PresenceActivityPresentationTests.swift */,
 				5C029D24C9C19F1A0E5038CC /* PresenceActivityCompositionTests.swift */,
 				C5CE35E0C7E375B1DEB6E1BD /* PlaceResolutionTests.swift */,
 				59BFB84DFE4794603A8F9B7A /* DwellLifecycleTests.swift */,
@@ -1236,6 +1242,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				A076C5B27EFF6B240FD2C788 /* PresenceActivityPresentation.swift in Sources */,
 				A04A9F1C134D339AD3AFEFDE /* MapKitPlaceResolver.swift in Sources */,
 				556CB72D6E09ABC1E391FE15 /* LocationSession+PlaceResolution.swift in Sources */,
 				B034EB2688AF18264842FD29 /* PlaceCandidateRanker.swift in Sources */,
@@ -1515,6 +1522,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				F55A2607CE742BCA6AA51DF3 /* PresenceActivityPresentationTests.swift in Sources */,
 				B02A9B91E9E61B201D7DC219 /* PresenceActivityCompositionTests.swift in Sources */,
 				9C1D39122A8F059A477741F4 /* PlaceResolutionTests.swift in Sources */,
 				D7DE91453AE63066B14960A0 /* DwellLifecycleTests.swift in Sources */,

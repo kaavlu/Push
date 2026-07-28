@@ -48,16 +48,17 @@ enum FriendsContentBuilder {
             return hiddenFriendPuck(for: person)
         }
         let placeInfo = presence.placeInfo
+        let activity = PresenceActivityPresentation.fields(from: presence)
         return FriendPuckData(
             id: person.id,
             name: person.displayName,
             avatarPlaceholder: person.initials,
             profileImageAssetName: person.imageAssetPath,
-            activity: presence.activity?.name ?? "",
-            activitySymbolName: presence.activity?.symbolName ?? "mappin",
-            activityDisplayText: placeInfo?.displayName ?? "",
+            activity: activity.activityName,
+            activitySymbolName: activity.activitySymbolName,
+            activityDisplayText: activity.activityDisplayText,
             availability: availability,
-            venueStatusText: statusText(presence: presence, placeInfo: placeInfo),
+            venueStatusText: activity.venueStatusText,
             lastUpdated: RelativeTimeFormatter.label(
                 for: presence.updatedAt, now: now, isCurrentUser: presence.isCurrentUser
             ),
@@ -68,28 +69,20 @@ enum FriendsContentBuilder {
         )
     }
 
-    private static func statusText(
-        presence: VisiblePresence,
-        placeInfo: VisiblePresence.VisiblePlaceInfo?
-    ) -> String {
-        if let note = presence.statusNote, !note.isEmpty { return note }
-        if let placeInfo { return "At \(placeInfo.displayName)" }
-        return presence.availability?.title ?? "Around"
-    }
-
     /// A friend the viewer can't see right now still belongs on the list, shown
     /// calmly as hidden rather than fabricating a location.
     private static func hiddenFriendPuck(for person: Person) -> FriendPuckData {
-        FriendPuckData(
+        let activity = PresenceActivityPresentation.hiddenFields()
+        return FriendPuckData(
             id: person.id,
             name: person.displayName,
             avatarPlaceholder: person.initials,
             profileImageAssetName: person.imageAssetPath,
-            activity: "",
-            activitySymbolName: "moon.zzz.fill",
-            activityDisplayText: "",
+            activity: activity.activityName,
+            activitySymbolName: activity.activitySymbolName,
+            activityDisplayText: activity.activityDisplayText,
             availability: .unavailable,
-            venueStatusText: "Hidden right now",
+            venueStatusText: activity.venueStatusText,
             lastUpdated: "",
             isCurrentUser: false
         )

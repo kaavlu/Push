@@ -1,16 +1,18 @@
-# Issue #105 — Attach Resolved Place Context to Presence Activity
+# Issue #109 — Surface Inferred Activity Across Push
 
 ## Status
 
-- [x] Spec
-- [x] Pure composition (place + dwell + inference)
-- [x] LocationSession draft wiring + place-resolution republish
-- [x] Tests — PresenceActivityCompositionTests + PlaceResolution #105 cases
-- [x] Regression: ActivityInferenceIntegration, LocationSession, LivePresenceWrite, Dwell*, PlaceResolution green
-- [x] Commit
+- [x] Spec (`tasks/spec.md`)
+- [x] `PresenceActivityPresentation` pure helper
+- [x] Wire Friends / Map / Regional / Group / Profile builders
+- [x] Friend detail + hangout status lines use canonical activity (no invent prefixes)
+- [x] Tests — `PresenceActivityPresentationTests` + Derivation/MapRender/EmptySurface/PushTests
+- [x] Commit (`ca8a795`)
 
 ## Out of scope
 
-- UI redesign / place picker
-- Places catalog
-- Co-presence, feed, ETA, background location
+- New inference / place resolution
+- Schema migrations
+- Place-correction UI / background location
+- Seed rewrite to only canonical labels
+- Major redesign

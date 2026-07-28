@@ -214,7 +214,8 @@ final class PushTests: XCTestCase {
         XCTAssertEqual(profile.handle, "@manav")
         XCTAssertEqual(profile.imageAssetName, "assets/profile/manav.jpeg")
         XCTAssertEqual(profile.availability, .maybeDown)
-        XCTAssertEqual(profile.activityTitle, "Maybe down")
+        // Presence activity is independent of the availability chip.
+        XCTAssertEqual(profile.activityTitle, "Park")
         XCTAssertEqual(profile.placeTitle, "Near North Park")
         XCTAssertEqual(profile.visibilityNote, "Visible to close friends for the next few hours.")
     }

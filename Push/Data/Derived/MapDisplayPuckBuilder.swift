@@ -167,14 +167,17 @@ enum MapDisplayPuckBuilder {
         placeInfo: VisiblePresence.VisiblePlaceInfo,
         now: Date
     ) -> FriendPuckData {
-        FriendPuckData(
+        // Regional sources keep vague place wording for the status line even when
+        // activity is present — activity still drives badge name + symbol.
+        let activity = PresenceActivityPresentation.fields(from: presence)
+        return FriendPuckData(
             id: presence.person.id,
             name: presence.person.displayName,
             avatarPlaceholder: presence.person.initials,
             profileImageAssetName: presence.person.imageAssetPath,
-            activity: presence.activity?.name ?? "",
-            activitySymbolName: presence.activity?.symbolName ?? "mappin",
-            activityDisplayText: placeInfo.displayName,
+            activity: activity.activityName,
+            activitySymbolName: activity.activitySymbolName,
+            activityDisplayText: activity.activityDisplayText,
             availability: presence.availability ?? .unavailable,
             venueStatusText: "Near \(placeInfo.place.vagueLabel)",
             lastUpdated: RelativeTimeFormatter.label(

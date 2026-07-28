@@ -63,14 +63,15 @@ enum GroupContentBuilder {
                 guard let person = people[membership.personID] else { return nil }
                 let isPending = membership.membershipStatus == .invited
                 let status = isPending ? nil : statuses[person.id]
+                let activity = memberActivityFields(status: status, places: places)
                 return PushGroupMemberData(
                     id: person.id,
                     name: person.displayName,
                     avatarPlaceholder: person.initials,
                     profileImageAssetName: person.imageAssetPath,
                     availability: status?.availability,
-                    activitySymbolName: status?.activity.symbolName ?? "moon.zzz.fill",
-                    venueStatusText: isPending ? "Invite pending" : memberStatusText(status: status, places: places),
+                    activitySymbolName: activity.activitySymbolName,
+                    venueStatusText: isPending ? "Invite pending" : activity.venueStatusText,
                     lastUpdated: memberLastUpdated(status: status, now: now),
                     membershipID: membership.id,
                     isOwner: membership.role == .owner,
@@ -79,16 +80,21 @@ enum GroupContentBuilder {
             }
     }
 
-    private static func memberStatusText(
+    private static func memberActivityFields(
         status: PresenceStatus?,
         places: [Place.ID: Place]
-    ) -> String {
-        guard let status else { return "Hidden right now" }
-        if let note = status.statusNote, !note.isEmpty { return note }
-        if let placeID = status.placeID, let place = places[placeID] {
-            return "At \(place.shortName)"
+    ) -> PresenceActivityPresentation.SurfaceFields {
+        guard let status, status.isEffectivelyPublished else {
+            return PresenceActivityPresentation.hiddenFields()
         }
-        return status.availability.title
+        let place = status.placeID.flatMap { places[$0] }
+        return PresenceActivityPresentation.fields(
+            activity: status.activity,
+            statusNote: status.statusNote,
+            placeDisplayName: place?.shortName,
+            isVaguePlace: false,
+            availabilityTitle: status.availability.title
+        )
     }
 
     private static func memberLastUpdated(status: PresenceStatus?, now: Date) -> String {
