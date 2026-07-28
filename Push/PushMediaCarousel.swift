@@ -159,7 +159,7 @@ struct PushMediaCarousel: View {
         }
     }
 
-    // MARK: - Top chrome (scrim + progress + metadata / ellipsis-only)
+    // MARK: - Top chrome (progress always; full metadata only on slide 1)
 
     private var topChrome: some View {
         ZStack(alignment: .top) {
@@ -169,41 +169,44 @@ struct PushMediaCarousel: View {
             }
 
             VStack(spacing: 0) {
-                if showsFullChrome {
-                    if showsProgressBar {
-                        FeedMediaProgressBar(
-                            count: items.count,
-                            selectedIndex: FeedMediaCarouselSelection.clampedIndex(
-                                selectedIndex,
-                                itemCount: items.count
-                            )
+                if showsProgressBar {
+                    FeedMediaProgressBar(
+                        count: items.count,
+                        selectedIndex: FeedMediaCarouselSelection.clampedIndex(
+                            selectedIndex,
+                            itemCount: items.count
                         )
-                        .padding(.horizontal, FeedMediaLayout.progressHorizontalInset)
-                        .padding(.top, FeedMediaLayout.progressTopInset)
-                        .allowsHitTesting(false)
+                    )
+                    .padding(.horizontal, FeedMediaLayout.progressHorizontalInset)
+                    .padding(.top, FeedMediaLayout.progressTopInset)
+                    .allowsHitTesting(false)
+                }
 
-                        FeedMediaMetadataOverlay(
-                            locationTitle: data.locationTitle,
-                            onOverflowMenu: onOverflowMenu
-                        )
-                        .padding(.horizontal, FeedMediaLayout.metadataHorizontalInset)
-                        .padding(.top, FeedMediaLayout.progressToMetadataSpacing)
-                    } else {
-                        FeedMediaMetadataOverlay(
-                            locationTitle: data.locationTitle,
-                            onOverflowMenu: onOverflowMenu
-                        )
-                        .padding(.horizontal, FeedMediaLayout.metadataHorizontalInset)
-                        .padding(.top, FeedMediaLayout.metadataTopInsetWithoutProgress)
-                    }
+                if showsFullChrome {
+                    FeedMediaMetadataOverlay(
+                        locationTitle: data.locationTitle,
+                        onOverflowMenu: onOverflowMenu
+                    )
+                    .padding(.horizontal, FeedMediaLayout.metadataHorizontalInset)
+                    .padding(
+                        .top,
+                        showsProgressBar
+                            ? FeedMediaLayout.progressToMetadataSpacing
+                            : FeedMediaLayout.metadataTopInsetWithoutProgress
+                    )
                 } else {
-                    // Non-first slides: only the overflow control stays on media.
+                    // Later slides: progress stays; only overflow chrome under it.
                     HStack {
                         Spacer(minLength: 0)
                         FeedMediaOverflowButton(action: onOverflowMenu)
                     }
                     .padding(.horizontal, FeedMediaLayout.metadataHorizontalInset)
-                    .padding(.top, FeedMediaLayout.metadataTopInsetWithoutProgress)
+                    .padding(
+                        .top,
+                        showsProgressBar
+                            ? FeedMediaLayout.progressToMetadataSpacing
+                            : FeedMediaLayout.metadataTopInsetWithoutProgress
+                    )
                 }
 
                 Spacer(minLength: 0)
