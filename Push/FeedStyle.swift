@@ -32,7 +32,7 @@ enum FeedLayout {
     static let placeholderCardSpacing: CGFloat = 8
 
     /// Consistent vertical gap between media cards (next card peeks slightly).
-    static let mediaStackSpacing: CGFloat = 14
+    static let mediaStackSpacing: CGFloat = 24
 
     /// Unread-dot metrics — match map top-control indicator scale.
     static let alertIndicatorSize: CGFloat = 9
