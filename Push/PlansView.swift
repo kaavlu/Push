@@ -2,7 +2,6 @@
 import SwiftUI
 
 struct PlansView: View {
-    @Environment(\.dismiss) private var dismiss
     @Environment(\.pushLayout) private var layout
     @StateObject private var viewModel: PlansViewModel
 
@@ -35,7 +34,7 @@ struct PlansView: View {
             }
         }
         .safeAreaInset(edge: .top, spacing: 0) {
-            PlansPageHeader(dismissAction: { dismiss() })
+            PlansPageHeader()
                 .padding(.horizontal, PlansLayout.horizontalPadding(layout))
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
@@ -46,14 +45,11 @@ struct PlansView: View {
                     onDismiss: { viewModel.dismissActionError() }
                 )
                 .padding(.horizontal, PlansLayout.horizontalPadding(layout))
-                .padding(.bottom, PlansLayout.startPlanButtonBottomPadding(layout))
+                .padding(.bottom, PlansLayout.contentBottomClearance(layout))
             }
         }
         .fullScreenCover(isPresented: $viewModel.isReviewDeckPresented) {
             ReviewPushesView(viewModel: viewModel)
-        }
-        .fullScreenCover(isPresented: $viewModel.isStartPushPresented) {
-            StartPushFlowView()
         }
         .fullScreenCover(isPresented: $viewModel.isYourPushesPresented) {
             YourPushesListView(viewModel: viewModel)
@@ -76,36 +72,19 @@ struct PlansView: View {
             YourPushesModule(viewModel: viewModel)
             Spacer(minLength: PlansLayout.pushesModuleSpacing(layout))
             ActivePushesModule(viewModel: viewModel)
-            Spacer(minLength: 0)
-            PushGlassRimButton(
-                title: "Start Push",
-                systemImageName: "plus.circle.fill",
-                accessibilityLabel: "Start a new push"
-            ) {
-                viewModel.isStartPushPresented = true
-            }
-                .frame(maxWidth: .infinity)
-                .padding(.top, PlansLayout.startButtonTopSpacing)
         }
         .padding(.horizontal, PlansLayout.horizontalPadding(layout))
         .padding(.top, PlansLayout.headerToCalendarSpacing(layout))
-        .padding(.bottom, PlansLayout.startPlanButtonBottomPadding(layout))
+        // Clear the floating bottom nav that stays on this page.
+        .padding(.bottom, PlansLayout.contentBottomClearance(layout))
     }
 }
 
 private struct PlansPageHeader: View {
-    let dismissAction: () -> Void
-
     var body: some View {
-        PushCreamPageHeader(title: "Pushes", subtitle: "Plan your next move") {
-            PushCircleIconButton(
-                systemImageName: "xmark",
-                accessibilityLabel: "Close pushes",
-                action: dismissAction
-            )
-        }
-        // Match the Friends screen's header-to-top spacing exactly.
-        .padding(.top, FriendsLayout.topPadding)
+        // Title only — leave via the shared bottom nav (no close control).
+        PushCreamPageHeader(title: "Pushes", subtitle: "Plan your next move")
+            .padding(.top, FriendsLayout.topPadding)
     }
 }
 
@@ -194,18 +173,18 @@ private struct PlansEmptyCard: View {
     let messageColor: Color
 
     var body: some View {
-        VStack(alignment: .leading, spacing: PlansLayout.cardRowSpacing(layout)) {
+        VStack(alignment: .leading, spacing: PlansLayout.emptyPushCardRowSpacing(layout)) {
             Text(title)
-                .font(.headline.weight(.semibold))
+                .font(.subheadline.weight(.semibold))
                 .foregroundStyle(PushControlColors.textEspresso)
             Text(message)
-                .font(.subheadline.weight(.medium))
+                .font(.caption.weight(.medium))
                 .foregroundStyle(messageColor)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(PlansLayout.cardPadding(layout))
-        .frame(minHeight: PlansLayout.pushCardMinHeight(layout), alignment: .leading)
+        .padding(PlansLayout.emptyPushCardPadding(layout))
+        .frame(minHeight: PlansLayout.emptyPushCardMinHeight(layout), alignment: .leading)
         .plansGlassCard(cornerRadius: PlansLayout.cardCornerRadius(layout))
         .accessibilityElement(children: .combine)
     }

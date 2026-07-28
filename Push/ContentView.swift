@@ -26,6 +26,23 @@ struct ContentView: View {
     /// Skip the first `.active` after launch — bootstrap already warms the live store.
     @State private var hasEnteredBackground = false
 
+    private var isPlansPresented: Bool {
+        selectedNavigationItem == .plans
+    }
+
+    private var isFriendsPresented: Bool {
+        selectedNavigationItem == .group
+    }
+
+    private var isFeedPresented: Bool {
+        selectedNavigationItem == .feed
+    }
+
+    /// Friends/Feed/Pushes overlays hide map chrome and keep the shared bottom nav.
+    private var isTabOverlayPresented: Bool {
+        isPlansPresented || isFriendsPresented || isFeedPresented
+    }
+
     var body: some View {
         ZStack(alignment: .bottom) {
             StyledMapView(
@@ -41,13 +58,37 @@ struct ContentView: View {
             )
             .ignoresSafeArea()
 
-            if isFilterDropdownExpanded {
+            if isFilterDropdownExpanded && !isTabOverlayPresented {
                 filterDropdownBackdrop
                     .transition(.opacity)
             }
 
-            if viewModel.surfacePhase == .empty || viewModel.surfacePhase == .failed {
+            if !isTabOverlayPresented,
+               viewModel.surfacePhase == .empty || viewModel.surfacePhase == .failed {
                 mapSurfaceOverlay
+            }
+
+            // Friends/Feed/Pushes stay under the map bottom nav (not fullScreenCovers)
+            // so the floating bar keeps its position; + is contextual per tab.
+            if isFriendsPresented {
+                FriendsView(onLocateFriend: locateFriendOnMap)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .transition(.opacity)
+                    .zIndex(TabOverlayLayout.zIndex)
+            }
+
+            if isFeedPresented {
+                FeedDeferredView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .transition(.opacity)
+                    .zIndex(TabOverlayLayout.zIndex)
+            }
+
+            if isPlansPresented {
+                PlansView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .transition(.opacity)
+                    .zIndex(TabOverlayLayout.zIndex)
             }
 
             if isCreateMenuPresented {
@@ -61,14 +102,17 @@ struct ContentView: View {
                             .combined(with: .opacity)
                             .combined(with: .scale(scale: CreateActionMenuLayout.transitionScale, anchor: .bottom))
                     )
+                    .zIndex(TabOverlayLayout.createMenuZIndex)
             }
 
-            VStack(spacing: 0) {
-                topControlsLayer
-                Spacer(minLength: 0)
+            if !isTabOverlayPresented {
+                VStack(spacing: 0) {
+                    topControlsLayer
+                    Spacer(minLength: 0)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .zIndex(TopDropdownLayout.expandedZIndex)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            .zIndex(TopDropdownLayout.expandedZIndex)
 
             BottomNavigationBar(
                 selectedItem: $selectedNavigationItem,
@@ -76,8 +120,9 @@ struct ContentView: View {
             )
                 .padding(.horizontal, BottomNavigationLayout.horizontalMargin(layout))
                 .padding(.bottom, BottomNavigationLayout.bottomMargin(layout))
+                .zIndex(TabOverlayLayout.bottomNavZIndex)
 
-            if let selectedPuck {
+            if !isTabOverlayPresented, let selectedPuck {
                 FriendDetailBottomSheet(
                     puck: selectedPuck,
                     onDismiss: dismissSelectedPuck,
@@ -85,7 +130,7 @@ struct ContentView: View {
                 )
             }
 
-            if let selectedRegionalPuck {
+            if !isTabOverlayPresented, let selectedRegionalPuck {
                 RegionalPuckDetailCard(
                     model: selectedRegionalPuck,
                     onZoomIn: { zoomIntoRegionalPuck(selectedRegionalPuck) }
@@ -106,6 +151,7 @@ struct ContentView: View {
         )
         .animation(.spring(response: TopDropdownLayout.animationResponse, dampingFraction: TopDropdownLayout.animationDamping), value: isFilterDropdownExpanded)
         .animation(PushMotion.sheet, value: selectedRegionalPuck?.id)
+        .animation(.easeInOut(duration: TabOverlayLayout.transitionDuration), value: isTabOverlayPresented)
         .fullScreenCover(item: $presentedRoute) { route in
             destination(for: route)
         }
@@ -215,6 +261,17 @@ struct ContentView: View {
         isFilterDropdownExpanded = false
 
         if item == .create {
+            // Contextual +: skip the create menu on tab overlays.
+            if selectedNavigationItem == .plans {
+                isCreateMenuPresented = false
+                startPushContext = .blank
+                return
+            }
+            if selectedNavigationItem == .group {
+                isCreateMenuPresented = false
+                presentedRoute = .addFriend
+                return
+            }
             isCreateMenuPresented.toggle()
             return
         }
@@ -222,20 +279,23 @@ struct ContentView: View {
         isCreateMenuPresented = false
 
         if item == .group {
-            selectedNavigationItem = .map
-            presentedRoute = .groups
+            selectedPuck = nil
+            selectedRegionalPuck = nil
+            selectedNavigationItem = .group
             return
         }
 
         if item == .feed {
-            selectedNavigationItem = .map
-            presentedRoute = .feed
+            selectedPuck = nil
+            selectedRegionalPuck = nil
+            selectedNavigationItem = .feed
             return
         }
 
         if item == .plans {
-            selectedNavigationItem = .map
-            presentedRoute = .plans
+            selectedPuck = nil
+            selectedRegionalPuck = nil
+            selectedNavigationItem = .plans
             return
         }
 
@@ -246,6 +306,8 @@ struct ContentView: View {
     private func destination(for route: MainMapRoute) -> some View {
         switch route {
         case .groups:
+            // Friends is embedded under the bottom nav; keep a destination for
+            // any residual MainMapRoute.groups presentation.
             FriendsView(onLocateFriend: locateFriendOnMap)
         case .profile:
             ProfileView {
@@ -258,8 +320,12 @@ struct ContentView: View {
         case .addFriend:
             AddFriendsView()
         case .feed:
+            // Feed is embedded under the bottom nav; keep a destination for
+            // any residual MainMapRoute.feed presentation.
             FeedDeferredView()
         case .plans:
+            // Pushes is embedded under the bottom nav; keep a destination for
+            // any residual MainMapRoute.plans presentation.
             PlansView()
         case .startPush:
             StartPushFlowView()
@@ -329,6 +395,8 @@ struct ContentView: View {
         }
         presentSelectedPuck(puck)
         presentedRoute = nil
+        // Avatar-locate leaves the Friends tab overlay for the map.
+        selectedNavigationItem = .map
         return true
     }
 
@@ -376,6 +444,14 @@ private enum RegionalPuckDetailLayout {
 
     static let closedScale = PushMotion.Sheet.closedScale
     static let zIndex: Double = 28
+}
+
+private enum TabOverlayLayout {
+    /// Above map chrome; below create menu and bottom nav.
+    static let zIndex: Double = 5
+    static let createMenuZIndex: Double = 15
+    static let bottomNavZIndex: Double = 20
+    static let transitionDuration: Double = 0.2
 }
 
 private struct FriendGroupDropdownButton: View {

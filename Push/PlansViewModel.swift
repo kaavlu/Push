@@ -15,7 +15,6 @@ final class PlansViewModel: ObservableObject {
     @Published private(set) var loadState: LoadState<[PlanData]> = .idle
     @Published var selectedDay: CalendarDayData?
     @Published var isReviewDeckPresented: Bool = false
-    @Published var isStartPushPresented: Bool = false
     @Published var isYourPushesPresented: Bool = false
     @Published var isHistoryPresented: Bool = false
     @Published var managedPlan: PlanData? = nil

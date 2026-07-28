@@ -34,6 +34,10 @@ enum FriendsLayout {
     static func horizontalPadding(_ layout: PushAdaptiveLayout) -> CGFloat { layout.pageHorizontalPadding }
     static let topPadding: CGFloat = 14
     static func bottomPadding(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 82, standard: 90, large: 96) }
+    /// Scroll/content clearance above ContentView's floating bottom nav on Friends.
+    static func contentBottomClearance(_ layout: PushAdaptiveLayout) -> CGFloat {
+        layout.value(compact: 100, standard: 108, large: 116)
+    }
     static func screenStackSpacing(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 12, standard: 14, large: 16) }
 
     // Header

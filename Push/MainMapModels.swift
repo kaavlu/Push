@@ -47,7 +47,8 @@ enum BottomNavigationItem: String, CaseIterable, Identifiable {
     }
 
     var showsSelectionHighlight: Bool {
-        self != .group
+        // Create is the primary action (scale only); every tab highlights when selected.
+        self != .create
     }
 
     var isPrimaryAction: Bool {

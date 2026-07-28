@@ -1,24 +1,14 @@
 import SwiftUI
 
-/// Full-screen deferred Feed — cream empty state with no CTA (feature not live yet).
+/// Deferred Feed — cream empty state with no CTA (feature not live yet).
+/// Embedded under ContentView's bottom nav; leave via the shared tab bar.
 struct FeedDeferredView: View {
-    @Environment(\.dismiss) private var dismiss
     @Environment(\.pushLayout) private var layout
 
     var body: some View {
         ZStack {
             FriendsBackground()
             VStack(spacing: 0) {
-                HStack {
-                    Spacer(minLength: 0)
-                    FriendsCircleButton(
-                        systemImageName: "xmark",
-                        accessibilityLabel: "Close Feed",
-                        action: { dismiss() }
-                    )
-                }
-                .padding(.horizontal, FriendsLayout.horizontalPadding(layout))
-                .padding(.top, FriendsLayout.topPadding)
                 Spacer(minLength: 0)
                 EmptySurfaceView(
                     title: EmptySurfaceCopy.feedDeferredTitle,
@@ -27,6 +17,8 @@ struct FeedDeferredView: View {
                 )
                 Spacer(minLength: 0)
             }
+            // Keep empty-state content clear of the floating bottom nav.
+            .padding(.bottom, FriendsLayout.contentBottomClearance(layout))
         }
     }
 }

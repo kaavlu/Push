@@ -62,7 +62,8 @@ struct PushAdaptiveLayout: Equatable {
     var avatarMedium: CGFloat { value(compact: 56, standard: 62, large: 68) }
     var avatarLarge: CGFloat { value(compact: 96, standard: 104, large: 112) }
     var iconCircle: CGFloat { value(compact: 32, standard: 34, large: 38) }
-    var bottomOverlayMargin: CGFloat { value(compact: 14, standard: 18, large: 22) }
+    /// Floating bottom nav clearance from the home-indicator safe area.
+    var bottomOverlayMargin: CGFloat { value(compact: 6, standard: 8, large: 10) }
     var bottomContentPadding: CGFloat { value(compact: 82, standard: 92, large: 110) }
     var puckScale: CGFloat { value(compact: 0.90, standard: 0.95, large: 1.0) }
     var onboardingTopInset: CGFloat { value(compact: 72, standard: 92, large: 112) }

@@ -4,14 +4,13 @@
 //
 //  The social layer: "who are my people and what are they up to?" Two modes —
 //  Friends (direct friends with live context) and Groups (circles, reusing the
-//  existing GroupsViewModel + GroupDetailView flow). Presented full-screen from
-//  the map's nav; it owns no tab bar of its own.
+//  existing GroupsViewModel + GroupDetailView flow). Embedded under ContentView's
+//  bottom nav; leave via the shared tab bar (no page-level close control).
 //
 
 import SwiftUI
 
 struct FriendsView: View {
-    @Environment(\.dismiss) private var dismiss
     @Environment(\.pushLayout) private var layout
     private let onLocateFriend: (Person.ID) -> Bool
     @StateObject private var viewModel: FriendsViewModel
@@ -81,10 +80,7 @@ struct FriendsView: View {
             FriendsBackground()
 
             VStack(spacing: FriendsLayout.screenStackSpacing(layout)) {
-                FriendsHeader(
-                    mode: mode,
-                    onClose: { dismiss() }
-                )
+                FriendsHeader(mode: mode)
                 FriendsModeSwitch(
                     mode: $mode,
                     friendsCount: viewModel.friendsCount,
@@ -136,7 +132,7 @@ struct FriendsView: View {
                     onDismiss: { viewModel.dismissActionError() }
                 )
                 .padding(.horizontal, FriendsLayout.horizontalPadding(layout))
-                .padding(.bottom, FriendsLayout.bottomPadding(layout))
+                .padding(.bottom, FriendsLayout.contentBottomClearance(layout))
             }
         }
         .fullScreenCover(isPresented: $isAddFriendPresented) {
@@ -161,7 +157,8 @@ struct FriendsView: View {
                         groupsList
                     }
                 }
-                .padding(.bottom, FriendsLayout.bottomPadding(layout))
+                // Clear the floating bottom nav that stays on this page.
+                .padding(.bottom, FriendsLayout.contentBottomClearance(layout))
             }
             .refreshable {
                 await viewModel.refresh()
@@ -280,9 +277,8 @@ struct FriendsView: View {
     }
 
     private func locateOnMap(_ row: FriendRowModel) {
-        if onLocateFriend(row.friend.id) {
-            dismiss()
-        }
+        // ContentView switches to Map on success; no page-level close control.
+        _ = onLocateFriend(row.friend.id)
     }
 
     private func triggerToast(_ message: String) {
@@ -301,17 +297,11 @@ struct FriendsView: View {
 
 private struct FriendsHeader: View {
     let mode: FriendsMode
-    let onClose: () -> Void
 
     var body: some View {
-        PushCreamPageHeader(title: "Friends", subtitle: mode.subtitle) {
-            PushCircleIconButton(
-                systemImageName: "xmark",
-                accessibilityLabel: "Close friends",
-                action: onClose
-            )
-        }
-        .animation(PushMotion.contentCrossfade, value: mode)
+        // Title only — leave via the shared bottom nav (no close control).
+        PushCreamPageHeader(title: "Friends", subtitle: mode.subtitle)
+            .animation(PushMotion.contentCrossfade, value: mode)
     }
 }
 

@@ -6,15 +6,28 @@ enum PlansLayout {
     static func headerToCalendarSpacing(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 10, standard: 12, large: 14) }
     static let headerSubtitleSpacing: CGFloat = 3
     static let bottomPadding: CGFloat = 110
+    /// Scroll/content clearance above ContentView's floating bottom nav on Pushes.
+    static func contentBottomClearance(_ layout: PushAdaptiveLayout) -> CGFloat {
+        layout.value(compact: 100, standard: 108, large: 116)
+    }
     static func sectionSpacing(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 8, standard: 9, large: 10) }
     static func calendarToYourPushesSpacing(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 12, standard: 15, large: 18) }
     static func pushesModuleSpacing(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 14, standard: 17, large: 20) }
-    static let startButtonTopSpacing: CGFloat = 18
     static let moduleTitleCardSpacing: CGFloat = 12
     static func cardCornerRadius(_ layout: PushAdaptiveLayout) -> CGFloat { layout.cardCornerRadius }
     static func cardPadding(_ layout: PushAdaptiveLayout) -> CGFloat { layout.denseCardPadding }
     static func cardRowSpacing(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 5, standard: 6, large: 6) }
     static func pushCardMinHeight(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 138, standard: 145, large: 152) }
+    /// Empty-state cards ("No current/active pushes") — a touch shorter than filled plan cards.
+    static func emptyPushCardMinHeight(_ layout: PushAdaptiveLayout) -> CGFloat {
+        layout.value(compact: 108, standard: 114, large: 120)
+    }
+    static func emptyPushCardPadding(_ layout: PushAdaptiveLayout) -> CGFloat {
+        layout.value(compact: 12, standard: 13, large: 14)
+    }
+    static func emptyPushCardRowSpacing(_ layout: PushAdaptiveLayout) -> CGFloat {
+        layout.value(compact: 4, standard: 4, large: 5)
+    }
     static let cardDividerOpacity: Double = 0.28
     static func calendarCornerRadius(_ layout: PushAdaptiveLayout) -> CGFloat { layout.cardCornerRadius }
     static func calendarPadding(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 11, standard: 12, large: 14) }
@@ -33,6 +46,7 @@ enum PlansLayout {
     static let currentPushesSpacing: CGFloat = 8
     static let listHeaderToCardsSpacing: CGFloat = 22
     static let reviewAllButtonTopPadding: CGFloat = 4
+    // Shared by `PushGlassRimButton` (design-system primary); not used on Pushes page anymore.
     static let startPlanButtonHeight: CGFloat = 50
     static let startPlanButtonCornerRadius: CGFloat = 25
     static func startPlanButtonBottomPadding(_ layout: PushAdaptiveLayout) -> CGFloat { layout.value(compact: 18, standard: 23, large: 28) }
