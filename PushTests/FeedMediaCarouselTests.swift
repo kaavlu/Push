@@ -16,6 +16,14 @@ final class FeedMediaCarouselTests: XCTestCase {
         XCTAssertLessThanOrEqual(FeedMediaLayout.cornerRadius, 32)
     }
 
+    func testProgressBarHiddenForSingleItem() {
+        XCTAssertEqual(FeedMediaCarouselFixtures.singlePhoto.items.count, 1)
+        XCTAssertEqual(FeedMediaCarouselFixtures.missingMedia.items.count, 1)
+        XCTAssertGreaterThan(FeedMediaCarouselFixtures.threeBundlePhotos.items.count, 1)
+        XCTAssertGreaterThan(FeedMediaLayout.progressHorizontalInset, FeedMediaLayout.progressTopInset)
+        XCTAssertGreaterThan(FeedMediaLayout.autoAdvanceDuration, 0)
+    }
+
     func testFixturesCoverRequiredCarouselStates() {
         let three = FeedMediaCarouselFixtures.threeMixedAspectPhotos
         XCTAssertEqual(three.items.count, 3)

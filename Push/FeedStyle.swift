@@ -51,8 +51,14 @@ enum FeedMediaLayout {
 
     static let progressHeight: CGFloat = 2.5
     static let progressSpacing: CGFloat = 3
-    /// Inset from media edges for the top progress row.
-    static let progressEdgeInset: CGFloat = 12
+    /// Distance from the top edge — sits a bit below the card rim.
+    static let progressTopInset: CGFloat = 18
+    /// Extra side margin so segments clear the rounded corners.
+    static let progressHorizontalInset: CGFloat = 22
+
+    /// Seconds each multi-item page holds before auto-advancing.
+    static let autoAdvanceDuration: TimeInterval = 3.5
+    static let autoAdvanceAnimationDuration: TimeInterval = 0.32
 
     static let placeholderIconSize: CGFloat = 32
     static let placeholderStackSpacing: CGFloat = 10

@@ -3,7 +3,7 @@
 //  Push
 //
 //  Compact cinematic media container for Feed Push cards.
-//  Fixed portrait frame, fill-crop pages, manual paging, segmented progress.
+//  Fixed portrait frame, fill-crop pages, manual + auto paging, segmented progress.
 //  No metadata, controls, or navigation chrome.
 //
 
@@ -16,11 +16,14 @@ struct PushMediaCarousel: View {
 
     private var items: [FeedMediaItem] { data.items }
     private var cornerRadius: CGFloat { FeedMediaLayout.cornerRadius }
+    private var showsProgressBar: Bool { items.count > 1 }
 
     var body: some View {
         ZStack {
             mediaPages
-            progressOverlay
+            if showsProgressBar {
+                progressOverlay
+            }
         }
         .aspectRatio(FeedMediaLayout.aspectRatio, contentMode: .fit)
         .frame(maxWidth: .infinity)
@@ -50,6 +53,31 @@ struct PushMediaCarousel: View {
         }
         .onChange(of: items.count) { count in
             selectedIndex = FeedMediaCarouselSelection.clampedIndex(selectedIndex, itemCount: count)
+        }
+        // Restarts after each advance and after manual swipe so dwell time stays consistent.
+        .task(id: autoAdvanceTaskID) {
+            await runAutoAdvanceLoop()
+        }
+    }
+
+    /// Bumps when the carousel identity or page count changes so autoplay resets cleanly.
+    private var autoAdvanceTaskID: String {
+        "\(data.id)-\(items.count)-\(selectedIndex)"
+    }
+
+    @MainActor
+    private func runAutoAdvanceLoop() async {
+        guard items.count > 1 else { return }
+        let nanos = UInt64(FeedMediaLayout.autoAdvanceDuration * 1_000_000_000)
+        do {
+            try await Task.sleep(nanoseconds: nanos)
+        } catch {
+            return
+        }
+        guard !Task.isCancelled, items.count > 1 else { return }
+        let next = (selectedIndex + 1) % items.count
+        withAnimation(.easeInOut(duration: FeedMediaLayout.autoAdvanceAnimationDuration)) {
+            selectedIndex = next
         }
     }
 
@@ -84,7 +112,7 @@ struct PushMediaCarousel: View {
     // MARK: - Progress
 
     private var progressOverlay: some View {
-        let count = max(items.count, 1)
+        let count = items.count
         return VStack {
             FeedMediaProgressBar(
                 count: count,
@@ -93,8 +121,8 @@ struct PushMediaCarousel: View {
                     itemCount: count
                 )
             )
-            .padding(.horizontal, FeedMediaLayout.progressEdgeInset)
-            .padding(.top, FeedMediaLayout.progressEdgeInset)
+            .padding(.horizontal, FeedMediaLayout.progressHorizontalInset)
+            .padding(.top, FeedMediaLayout.progressTopInset)
             Spacer(minLength: 0)
         }
         .allowsHitTesting(false)
