@@ -1,25 +1,15 @@
-# Issue #9 — Feed media carousel foundation (Prompt 1 of 4)
+# Add Yours — UI pass
 
 ## Status
 
+- [x] Product decisions (single screen, multi photo+video, hero+strip, no caption, success→dismiss)
 - [x] Spec (`tasks/spec.md`)
-- [x] `FeedMediaModels` + fixtures (mixed aspects, single, missing, loading, video poster)
-- [x] `FeedMediaLayout` / progress tokens in `FeedStyle`
-- [x] `PushMediaCarousel` (fixed 3:4 frame, fill-crop, paging, progress)
-- [x] Wire Pushes tab media stack in `FeedView` / `FeedViewModel`
-- [x] Register Xcode sources + `FeedMediaCarouselTests`
-- [x] Build + tests green
-- [x] Commit
+- [x] `AddYoursModels` / `AddYoursViewModel` (local draft state)
+- [x] `AddYoursStyle` + `AddYoursView` + components polished UI
+- [x] Wire Feed `onAddYours` → fullScreenCover
+- [x] Tests + register Xcode sources (`AddYoursViewModelTests` 9/9)
+- [x] Build green
 
-## Decisions
+## Out of scope (next)
 
-| Topic | Choice |
-|---|---|
-| Aspect ratio | 3:4 portrait (stable frame) |
-| Corners | `PushRadiusTokens.card(layout)` |
-| Progress | Stories-style thin white segments; update on swipe |
-| Data | Fixtures only — no repo |
-
-## Out of scope (later prompts)
-
-Auto-advance, timed progress, video playback, metadata, avatars, CTAs, backend.
+Uploads, Storage, captions, camera, backend, feed append after post, video poster extraction.

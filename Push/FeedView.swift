@@ -12,6 +12,7 @@ import SwiftUI
 struct FeedView: View {
     @Environment(\.pushLayout) private var layout
     @StateObject private var viewModel: FeedViewModel
+    @State private var addYoursContext: AddYoursContext?
     let hasUnreadAlerts: Bool
     let onOpenAlerts: () -> Void
     /// Filter/settings is structural only this issue — intentionally no-op.
@@ -57,13 +58,21 @@ struct FeedView: View {
             .padding(.horizontal, FeedLayout.horizontalPadding(layout))
             .padding(.top, FeedLayout.topPadding)
         }
+        .fullScreenCover(item: $addYoursContext) { context in
+            AddYoursView(context: context)
+        }
     }
 
     @ViewBuilder
     private var tabContent: some View {
         switch viewModel.selectedTab {
         case .pushes:
-            FeedPushesMediaStack(carousels: viewModel.mediaCarousels)
+            FeedPushesMediaStack(
+                carousels: viewModel.mediaCarousels,
+                onAddYours: { carousel in
+                    addYoursContext = AddYoursContext(carousel: carousel)
+                }
+            )
         case .now:
             EmptySurfaceView(
                 title: EmptySurfaceCopy.feedNowEmptyTitle,
@@ -175,6 +184,7 @@ private struct FeedFilterChips: View {
 
 private struct FeedPushesMediaStack: View {
     let carousels: [FeedMediaCarouselData]
+    var onAddYours: (FeedMediaCarouselData) -> Void = { _ in }
 
     var body: some View {
         if carousels.isEmpty {
@@ -188,7 +198,10 @@ private struct FeedPushesMediaStack: View {
         } else {
             VStack(spacing: FeedLayout.mediaStackSpacing) {
                 ForEach(carousels) { carousel in
-                    PushMediaCarousel(data: carousel)
+                    PushMediaCarousel(
+                        data: carousel,
+                        onAddYours: { onAddYours(carousel) }
+                    )
                 }
             }
             .frame(maxWidth: .infinity)

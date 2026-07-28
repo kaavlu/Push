@@ -14,7 +14,7 @@ struct PushMediaCarousel: View {
     let data: FeedMediaCarouselData
     /// Overflow menu action — no-op until card chrome menus ship.
     var onOverflowMenu: () -> Void = {}
-    /// Add yours action — no-op until contribution upload ships.
+    /// Opens the Add Yours contribution flow (UI-local; uploads later).
     var onAddYours: () -> Void = {}
     @State private var selectedIndex: Int = 0
     /// Drives auto-advance and the bottom play/pause control.

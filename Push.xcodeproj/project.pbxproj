@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		87C6B88906AC60E18F430E19 /* AddYoursViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A841F5F06CE2431AF9CB786F /* AddYoursViewModelTests.swift */; };
+		BDDBB548A8F404C4F5ECA572 /* AddYoursComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9512DE5E85357F7FF9C4F35 /* AddYoursComponents.swift */; };
+		F69848421FAF4D642B4672FF /* AddYoursView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A13200EA46508BB2A0AE05C6 /* AddYoursView.swift */; };
+		EDBDB542118E6D97058B0240 /* AddYoursStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80EED4F5D4707F56C38779F /* AddYoursStyle.swift */; };
+		5AC171761734E7FDF2DC0DD2 /* AddYoursModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2F339374ED2E22F749A4828 /* AddYoursModels.swift */; };
 		6F67B70359D27E3951173399 /* PushMediaCarouselBottom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9027F53DCDEB095DE6C8BD3E /* PushMediaCarouselBottom.swift */; };
 		5EDE64F4F8165D337821E53E /* FeedMediaCarouselTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32760387A7644CD1B64D2561 /* FeedMediaCarouselTests.swift */; };
 		EA94B79795D377A2CE1EDAD8 /* PushMediaCarousel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA14E3379E68254EA5747DC8 /* PushMediaCarousel.swift */; };
@@ -364,6 +369,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A841F5F06CE2431AF9CB786F /* AddYoursViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddYoursViewModelTests.swift"; sourceTree = "<group>"; };
+		C9512DE5E85357F7FF9C4F35 /* AddYoursComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddYoursComponents.swift"; sourceTree = "<group>"; };
+		A13200EA46508BB2A0AE05C6 /* AddYoursView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddYoursView.swift"; sourceTree = "<group>"; };
+		A80EED4F5D4707F56C38779F /* AddYoursStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddYoursStyle.swift"; sourceTree = "<group>"; };
+		A2F339374ED2E22F749A4828 /* AddYoursModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddYoursModels.swift"; sourceTree = "<group>"; };
 		9027F53DCDEB095DE6C8BD3E /* PushMediaCarouselBottom.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PushMediaCarouselBottom.swift"; sourceTree = "<group>"; };
 		32760387A7644CD1B64D2561 /* FeedMediaCarouselTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedMediaCarouselTests.swift"; sourceTree = "<group>"; };
 		EA14E3379E68254EA5747DC8 /* PushMediaCarousel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PushMediaCarousel.swift"; sourceTree = "<group>"; };
@@ -758,6 +768,10 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				C9512DE5E85357F7FF9C4F35 /* AddYoursComponents.swift */,
+				A13200EA46508BB2A0AE05C6 /* AddYoursView.swift */,
+				A80EED4F5D4707F56C38779F /* AddYoursStyle.swift */,
+				A2F339374ED2E22F749A4828 /* AddYoursModels.swift */,
 				9027F53DCDEB095DE6C8BD3E /* PushMediaCarouselBottom.swift */,
 				EA14E3379E68254EA5747DC8 /* PushMediaCarousel.swift */,
 				0F98454685A06121BC32049A /* FeedMediaModels.swift */,
@@ -1052,6 +1066,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				A841F5F06CE2431AF9CB786F /* AddYoursViewModelTests.swift */,
 				32760387A7644CD1B64D2561 /* FeedMediaCarouselTests.swift */,
 				01FA649DB6CA6F78970E1E4B /* FeedViewModelTests.swift */,
 				C5CE35E0C7E375B1DEB6E1BD /* PlaceResolutionTests.swift */,
@@ -1257,6 +1272,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				BDDBB548A8F404C4F5ECA572 /* AddYoursComponents.swift in Sources */,
+				F69848421FAF4D642B4672FF /* AddYoursView.swift in Sources */,
+				EDBDB542118E6D97058B0240 /* AddYoursStyle.swift in Sources */,
+				5AC171761734E7FDF2DC0DD2 /* AddYoursModels.swift in Sources */,
 				6F67B70359D27E3951173399 /* PushMediaCarouselBottom.swift in Sources */,
 				EA94B79795D377A2CE1EDAD8 /* PushMediaCarousel.swift in Sources */,
 				E2A9E2FC8AE5B86D76DC0DA6 /* FeedMediaModels.swift in Sources */,
@@ -1542,6 +1561,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				87C6B88906AC60E18F430E19 /* AddYoursViewModelTests.swift in Sources */,
 				5EDE64F4F8165D337821E53E /* FeedMediaCarouselTests.swift in Sources */,
 				07E9BD4302FE43DAE64BD769 /* FeedViewModelTests.swift in Sources */,
 				9C1D39122A8F059A477741F4 /* PlaceResolutionTests.swift in Sources */,
