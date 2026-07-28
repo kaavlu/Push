@@ -163,10 +163,9 @@ struct PushMediaCarousel: View {
 
     private var topChrome: some View {
         ZStack(alignment: .top) {
-            if showsFullChrome {
-                FeedMediaTopScrim()
-                    .allowsHitTesting(false)
-            }
+            // Always soft-shade the top edge so progress segments stay readable on light media.
+            FeedMediaTopScrim()
+                .allowsHitTesting(false)
 
             VStack(spacing: 0) {
                 if showsProgressBar {
