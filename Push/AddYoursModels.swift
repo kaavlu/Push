@@ -32,19 +32,9 @@ struct AddYoursContext: Identifiable, Equatable {
         self.dateTimeLabel = carousel.dateTimeLabel
     }
 
-    /// Instructional subtitle in Start Push voice, with place context when known.
+    /// Instructional subtitle — fixed product copy (no location).
     var subtitle: String {
-        let location = locationTitle.trimmingCharacters(in: .whitespacesAndNewlines)
-        if location.isEmpty {
-            return AddYoursCopy.fallbackSubtitle
-        }
-        return "Share photos or videos from \(location)."
-    }
-
-    /// Optional metadata line (time) shown under the header when available.
-    var contextDetail: String? {
-        let when = dateTimeLabel.trimmingCharacters(in: .whitespacesAndNewlines)
-        return when.isEmpty ? nil : when
+        AddYoursCopy.subtitle
     }
 }
 
@@ -92,7 +82,7 @@ struct AddYoursTiming {
 
 enum AddYoursCopy {
     static let title = "Add yours"
-    static let fallbackSubtitle = "Share photos or videos with this push."
+    static let subtitle = "Share photos and videos"
     static let emptyPrompt = "Choose from library"
     static let emptyHint = "Photos and videos · up to \(AddYoursLayout.maxSelectionCount)"
     static let selectedSection = "Selected"

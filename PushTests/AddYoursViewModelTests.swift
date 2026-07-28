@@ -4,20 +4,15 @@ import XCTest
 
 @MainActor
 final class AddYoursViewModelTests: XCTestCase {
-    func testContextSubtitleUsesStartPushVoiceWithLocation() {
-        let context = AddYoursContext(
+    func testContextSubtitleIsFixedCopyWithoutLocation() {
+        let withPlace = AddYoursContext(
             id: "p1",
             locationTitle: "Dolores Park",
             dateTimeLabel: "Sat · 4:30 PM"
         )
-        XCTAssertEqual(context.subtitle, "Share photos or videos from Dolores Park.")
-        XCTAssertEqual(context.contextDetail, "Sat · 4:30 PM")
-    }
-
-    func testContextSubtitleFallsBackWhenEmpty() {
-        let context = AddYoursContext(id: "p1", locationTitle: "  ", dateTimeLabel: "")
-        XCTAssertEqual(context.subtitle, AddYoursCopy.fallbackSubtitle)
-        XCTAssertNil(context.contextDetail)
+        let emptyPlace = AddYoursContext(id: "p2", locationTitle: "  ", dateTimeLabel: "")
+        XCTAssertEqual(withPlace.subtitle, "Share photos and videos")
+        XCTAssertEqual(emptyPlace.subtitle, AddYoursCopy.subtitle)
     }
 
     func testFittedHeroShrinksToAvailableHeight() {
