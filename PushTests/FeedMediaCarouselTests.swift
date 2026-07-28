@@ -128,6 +128,34 @@ final class FeedMediaCarouselTests: XCTestCase {
         XCTAssertFalse(FeedMediaCarouselFixtures.threeBundlePhotos.contributorName.isEmpty)
     }
 
+    func testFullChromeOnlyOnFirstSlide() {
+        XCTAssertTrue(FeedMediaCarouselSelection.showsFullChrome(selectedIndex: 0))
+        XCTAssertFalse(FeedMediaCarouselSelection.showsFullChrome(selectedIndex: 1))
+        XCTAssertFalse(FeedMediaCarouselSelection.showsFullChrome(selectedIndex: 2))
+    }
+
+    func testPrimaryVisibilityRequiresMajorityOnScreen() {
+        let visible = CGRect(x: 0, y: 0, width: 390, height: 700)
+        let fullyOnScreen = CGRect(x: 16, y: 100, width: 358, height: 400)
+        XCTAssertTrue(
+            FeedMediaVisibility.isPrimarilyVisible(
+                frame: fullyOnScreen,
+                in: visible,
+                threshold: FeedMediaLayout.autoplayVisibilityThreshold
+            )
+        )
+
+        // Peeking next card: only a small band visible at the bottom of the viewport.
+        let peeking = CGRect(x: 16, y: 640, width: 358, height: 400)
+        XCTAssertFalse(
+            FeedMediaVisibility.isPrimarilyVisible(
+                frame: peeking,
+                in: visible,
+                threshold: FeedMediaLayout.autoplayVisibilityThreshold
+            )
+        )
+    }
+
     func testSolidImageFactoryProducesRequestedSize() {
         let swatch = FeedSolidMediaSwatch(
             red: 0.5, green: 0.4, blue: 0.3,

@@ -112,6 +112,40 @@ enum FeedMediaCarouselSelection {
         guard itemCount > 0 else { return 0 }
         return min(max(0, index), itemCount - 1)
     }
+
+    /// Full media chrome (location, progress, bottom row) only on the first slide.
+    static func showsFullChrome(selectedIndex: Int) -> Bool {
+        selectedIndex == 0
+    }
+}
+
+// MARK: - Viewport visibility (autoplay)
+
+enum FeedMediaVisibility {
+    /// Visible area used for autoplay — excludes a band for the floating bottom nav.
+    static func visibleScreenBounds(
+        screen: CGRect = UIScreen.main.bounds,
+        bottomChromeInset: CGFloat = 96
+    ) -> CGRect {
+        CGRect(
+            x: screen.minX,
+            y: screen.minY,
+            width: screen.width,
+            height: max(0, screen.height - bottomChromeInset)
+        )
+    }
+
+    /// True when enough of the card sits in the visible bounds (not a peeking neighbor).
+    static func isPrimarilyVisible(
+        frame: CGRect,
+        in visibleBounds: CGRect,
+        threshold: CGFloat
+    ) -> Bool {
+        guard frame.height > 0, threshold > 0 else { return false }
+        let intersection = frame.intersection(visibleBounds)
+        guard !intersection.isNull, intersection.height > 0 else { return false }
+        return (intersection.height / frame.height) >= threshold
+    }
 }
 
 // MARK: - Fixtures

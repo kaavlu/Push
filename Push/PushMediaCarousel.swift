@@ -19,25 +19,31 @@ struct PushMediaCarousel: View {
     @State private var selectedIndex: Int = 0
     /// Drives auto-advance and the bottom play/pause control.
     @State private var isAutoPlaying: Bool = true
+    /// True when this card is the primary on-screen push (not a peeking neighbor).
+    @State private var isPrimarilyVisible: Bool = false
 
     private var items: [FeedMediaItem] { data.items }
     private var cornerRadius: CGFloat { FeedMediaLayout.cornerRadius }
     private var showsProgressBar: Bool { items.count > 1 }
+    /// Full chrome (location, progress, bottom row) only on the first media slide.
+    private var showsFullChrome: Bool { selectedIndex == 0 }
 
     var body: some View {
         ZStack {
             mediaPages
             topChrome
-            FeedMediaBottomInteraction(
-                participants: data.participants,
-                contributorName: data.contributorName,
-                canAddYours: data.canAddYours,
-                isPlaying: isAutoPlaying,
-                onTogglePlayback: {
-                    isAutoPlaying.toggle()
-                },
-                onAddYours: onAddYours
-            )
+            if showsFullChrome {
+                FeedMediaBottomInteraction(
+                    participants: data.participants,
+                    contributorName: data.contributorName,
+                    canAddYours: data.canAddYours,
+                    isPlaying: isAutoPlaying,
+                    onTogglePlayback: {
+                        isAutoPlaying.toggle()
+                    },
+                    onAddYours: onAddYours
+                )
+            }
         }
         .aspectRatio(FeedMediaLayout.aspectRatio, contentMode: .fit)
         .frame(maxWidth: .infinity)
@@ -54,6 +60,7 @@ struct PushMediaCarousel: View {
         // Flatten paging layers so neighbors never bleed past the rounded mask at rest.
         .compositingGroup()
         .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+        .background(visibilityProbe)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(accessibilitySummary)
         .onAppear {
@@ -68,30 +75,59 @@ struct PushMediaCarousel: View {
         .onChange(of: items.count) { count in
             selectedIndex = FeedMediaCarouselSelection.clampedIndex(selectedIndex, itemCount: count)
         }
-        // Restarts after each advance and after manual swipe so dwell time stays consistent.
+        // Restarts after each advance, swipe, play toggle, or visibility change.
         .task(id: autoAdvanceTaskID) {
             await runAutoAdvanceLoop()
         }
     }
 
-    /// Bumps when identity, page, or play state changes so autoplay restarts cleanly.
+    /// Bumps when identity, page, play, or on-screen primacy changes.
     private var autoAdvanceTaskID: String {
-        "\(data.id)-\(items.count)-\(selectedIndex)-\(isAutoPlaying)"
+        "\(data.id)-\(items.count)-\(selectedIndex)-\(isAutoPlaying)-\(isPrimarilyVisible)"
     }
 
     @MainActor
     private func runAutoAdvanceLoop() async {
-        guard items.count > 1, isAutoPlaying else { return }
+        guard items.count > 1, isAutoPlaying, isPrimarilyVisible else { return }
         let nanos = UInt64(FeedMediaLayout.autoAdvanceDuration * 1_000_000_000)
         do {
             try await Task.sleep(nanoseconds: nanos)
         } catch {
             return
         }
-        guard !Task.isCancelled, items.count > 1, isAutoPlaying else { return }
+        guard !Task.isCancelled, items.count > 1, isAutoPlaying, isPrimarilyVisible else { return }
         let next = (selectedIndex + 1) % items.count
         withAnimation(.easeInOut(duration: FeedMediaLayout.autoAdvanceAnimationDuration)) {
             selectedIndex = next
+        }
+    }
+
+    /// Tracks global frame so only the in-view card auto-advances.
+    private var visibilityProbe: some View {
+        GeometryReader { proxy in
+            let frame = proxy.frame(in: .global)
+            Color.clear
+                .onAppear {
+                    updatePrimaryVisibility(frame: frame)
+                }
+                .onChange(of: frame.minY) { _ in
+                    updatePrimaryVisibility(frame: proxy.frame(in: .global))
+                }
+                .onChange(of: frame.height) { _ in
+                    updatePrimaryVisibility(frame: proxy.frame(in: .global))
+                }
+        }
+    }
+
+    private func updatePrimaryVisibility(frame: CGRect) {
+        let visible = FeedMediaVisibility.visibleScreenBounds()
+        let next = FeedMediaVisibility.isPrimarilyVisible(
+            frame: frame,
+            in: visible,
+            threshold: FeedMediaLayout.autoplayVisibilityThreshold
+        )
+        if next != isPrimarilyVisible {
+            isPrimarilyVisible = next
         }
     }
 
@@ -123,37 +159,49 @@ struct PushMediaCarousel: View {
         }
     }
 
-    // MARK: - Top chrome (scrim + progress + metadata)
+    // MARK: - Top chrome (scrim + progress + metadata / ellipsis-only)
 
     private var topChrome: some View {
         ZStack(alignment: .top) {
-            FeedMediaTopScrim()
-                .allowsHitTesting(false)
+            if showsFullChrome {
+                FeedMediaTopScrim()
+                    .allowsHitTesting(false)
+            }
 
             VStack(spacing: 0) {
-                if showsProgressBar {
-                    FeedMediaProgressBar(
-                        count: items.count,
-                        selectedIndex: FeedMediaCarouselSelection.clampedIndex(
-                            selectedIndex,
-                            itemCount: items.count
+                if showsFullChrome {
+                    if showsProgressBar {
+                        FeedMediaProgressBar(
+                            count: items.count,
+                            selectedIndex: FeedMediaCarouselSelection.clampedIndex(
+                                selectedIndex,
+                                itemCount: items.count
+                            )
                         )
-                    )
-                    .padding(.horizontal, FeedMediaLayout.progressHorizontalInset)
-                    .padding(.top, FeedMediaLayout.progressTopInset)
-                    .allowsHitTesting(false)
+                        .padding(.horizontal, FeedMediaLayout.progressHorizontalInset)
+                        .padding(.top, FeedMediaLayout.progressTopInset)
+                        .allowsHitTesting(false)
 
-                    FeedMediaMetadataOverlay(
-                        locationTitle: data.locationTitle,
-                        onOverflowMenu: onOverflowMenu
-                    )
-                    .padding(.horizontal, FeedMediaLayout.metadataHorizontalInset)
-                    .padding(.top, FeedMediaLayout.progressToMetadataSpacing)
+                        FeedMediaMetadataOverlay(
+                            locationTitle: data.locationTitle,
+                            onOverflowMenu: onOverflowMenu
+                        )
+                        .padding(.horizontal, FeedMediaLayout.metadataHorizontalInset)
+                        .padding(.top, FeedMediaLayout.progressToMetadataSpacing)
+                    } else {
+                        FeedMediaMetadataOverlay(
+                            locationTitle: data.locationTitle,
+                            onOverflowMenu: onOverflowMenu
+                        )
+                        .padding(.horizontal, FeedMediaLayout.metadataHorizontalInset)
+                        .padding(.top, FeedMediaLayout.metadataTopInsetWithoutProgress)
+                    }
                 } else {
-                    FeedMediaMetadataOverlay(
-                        locationTitle: data.locationTitle,
-                        onOverflowMenu: onOverflowMenu
-                    )
+                    // Non-first slides: only the overflow control stays on media.
+                    HStack {
+                        Spacer(minLength: 0)
+                        FeedMediaOverflowButton(action: onOverflowMenu)
+                    }
                     .padding(.horizontal, FeedMediaLayout.metadataHorizontalInset)
                     .padding(.top, FeedMediaLayout.metadataTopInsetWithoutProgress)
                 }
