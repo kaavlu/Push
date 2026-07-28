@@ -97,12 +97,21 @@ enum FeedMediaPlaceholderStyle {
 
 /// Top chrome over media — high-contrast type + subtle scrim (Feed media only).
 enum FeedMediaMetadataStyle {
-    static let locationFont = Font.subheadline.weight(.semibold)
-    static let dateTimeFont = Font.caption.weight(.medium)
+    /// Matches Plans/card title weight, sized up for media overlay readability.
+    static let locationFont = Font.headline.weight(.semibold)
+    /// Matches Plans metadata row (subheadline), under the location line.
+    static let dateTimeFont = Font.subheadline.weight(.medium)
     static let textColor = Color.white
+    static let dateTimeOpacity = 0.92
     static let locationShadowRadius: CGFloat = 2
     static let locationShadowY: CGFloat = 1
     static let scrimTopOpacity = 0.52
     static let scrimMidOpacity = 0.22
     static let scrimMidStop = 0.55
+
+    /// Same metrics as map `TopIconButton` / profile control (liquid map glass).
+    static let overflowButtonSize: CGFloat = 44
+    static let overflowIconSize: CGFloat = 17
+    static let overflowIconWeight: Font.Weight = .semibold
+    static var overflowCornerRadius: CGFloat { overflowButtonSize / 2 }
 }

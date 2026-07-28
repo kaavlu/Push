@@ -197,12 +197,13 @@ private struct FeedMediaMetadataOverlay: View {
     let onOverflowMenu: () -> Void
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .center, spacing: 12) {
             VStack(alignment: .leading, spacing: FeedMediaLayout.metadataTextStackSpacing) {
                 Text(locationTitle)
                     .font(FeedMediaMetadataStyle.locationFont)
                     .foregroundStyle(FeedMediaMetadataStyle.textColor)
                     .lineLimit(1)
+                    .minimumScaleFactor(PushOpacityTokens.minimumTextScale)
                     .shadow(
                         color: Color.black.opacity(0.35),
                         radius: FeedMediaMetadataStyle.locationShadowRadius,
@@ -210,8 +211,11 @@ private struct FeedMediaMetadataOverlay: View {
                     )
                 Text(dateTimeLabel)
                     .font(FeedMediaMetadataStyle.dateTimeFont)
-                    .foregroundStyle(FeedMediaMetadataStyle.textColor.opacity(0.92))
+                    .foregroundStyle(
+                        FeedMediaMetadataStyle.textColor.opacity(FeedMediaMetadataStyle.dateTimeOpacity)
+                    )
                     .lineLimit(1)
+                    .minimumScaleFactor(PushOpacityTokens.minimumTextScale)
                     .shadow(
                         color: Color.black.opacity(0.30),
                         radius: FeedMediaMetadataStyle.locationShadowRadius,
@@ -221,13 +225,35 @@ private struct FeedMediaMetadataOverlay: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .accessibilityElement(children: .combine)
 
-            PushCircleIconButton(
-                systemImageName: "ellipsis",
-                accessibilityLabel: "More options",
-                foreground: PushControlColors.activeForeground,
-                action: onOverflowMenu
-            )
+            FeedMediaOverflowButton(action: onOverflowMenu)
         }
+    }
+}
+
+/// Map profile-style liquid glass circle — same `pushMapControlGlass(.profileButton)` as
+/// `TopIconButton` on the live map (DS-011), not cream `PushCircleIconButton`.
+private struct FeedMediaOverflowButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: "ellipsis")
+                .font(.system(
+                    size: FeedMediaMetadataStyle.overflowIconSize,
+                    weight: FeedMediaMetadataStyle.overflowIconWeight
+                ))
+                .foregroundStyle(PushControlColors.activeForeground)
+                .frame(
+                    width: FeedMediaMetadataStyle.overflowButtonSize,
+                    height: FeedMediaMetadataStyle.overflowButtonSize
+                )
+                .pushMapControlGlass(
+                    cornerRadius: FeedMediaMetadataStyle.overflowCornerRadius,
+                    treatment: .profileButton
+                )
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("More options")
     }
 }
 
