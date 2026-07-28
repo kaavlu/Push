@@ -66,6 +66,17 @@ enum FeedMediaLayout {
     /// Soft walnut stroke so the media card sits on ivory without a heavy frame.
     static let mediaStrokeOpacity = 0.12
     static let mediaStrokeWidth: CGFloat = 0.8
+
+    /// Gap between progress row and metadata (location / time / overflow).
+    static let progressToMetadataSpacing: CGFloat = 10
+    /// Side inset for the metadata row (matches progress side margin).
+    static let metadataHorizontalInset: CGFloat = progressHorizontalInset
+    /// Top inset when progress is hidden (single-item carousels).
+    static let metadataTopInsetWithoutProgress: CGFloat = progressTopInset
+    /// Space between location and date/time lines.
+    static let metadataTextStackSpacing: CGFloat = 3
+    /// Soft top scrim height so white type stays legible on light or dark media.
+    static let metadataScrimHeight: CGFloat = 118
 }
 
 enum FeedMediaProgressStyle {
@@ -82,4 +93,16 @@ enum FeedMediaPlaceholderStyle {
     static let iconColor = Color.white.opacity(0.72)
     static let captionColor = Color.white.opacity(0.55)
     static let spinnerTint = PushColorPalette.Accent.sunbeam
+}
+
+/// Top chrome over media — high-contrast type + subtle scrim (Feed media only).
+enum FeedMediaMetadataStyle {
+    static let locationFont = Font.subheadline.weight(.semibold)
+    static let dateTimeFont = Font.caption.weight(.medium)
+    static let textColor = Color.white
+    static let locationShadowRadius: CGFloat = 2
+    static let locationShadowY: CGFloat = 1
+    static let scrimTopOpacity = 0.52
+    static let scrimMidOpacity = 0.22
+    static let scrimMidStop = 0.55
 }

@@ -53,6 +53,10 @@ struct FeedMediaItem: Identifiable, Equatable {
 struct FeedMediaCarouselData: Identifiable, Equatable {
     let id: String
     let items: [FeedMediaItem]
+    /// Upper-left venue / location line (presentation-ready).
+    let locationTitle: String
+    /// Date + time under location (presentation-ready).
+    let dateTimeLabel: String
 
     var isEmpty: Bool { items.isEmpty }
 }
@@ -95,7 +99,9 @@ enum FeedMediaCarouselFixtures {
             FeedMediaItem(id: "mixed-0", kind: .photo, source: .solidColor(portraitSwatch)),
             FeedMediaItem(id: "mixed-1", kind: .photo, source: .solidColor(landscapeSwatch)),
             FeedMediaItem(id: "mixed-2", kind: .photo, source: .solidColor(squareSwatch)),
-        ]
+        ],
+        locationTitle: "Dolores Park",
+        dateTimeLabel: "Sat · 4:30 PM"
     )
 
     /// Single photo carousel.
@@ -107,7 +113,9 @@ enum FeedMediaCarouselFixtures {
                 kind: .photo,
                 source: .assetPath("assets/friends/pranay.png")
             ),
-        ]
+        ],
+        locationTitle: "Home",
+        dateTimeLabel: "Tonight · 8:00 PM"
     )
 
     /// Mixed portrait, landscape, square solids plus a real portrait asset.
@@ -122,7 +130,9 @@ enum FeedMediaCarouselFixtures {
                 kind: .photo,
                 source: .assetPath("assets/friends/roh.png")
             ),
-        ]
+        ],
+        locationTitle: "Ocean Beach",
+        dateTimeLabel: "Sun · 11:00 AM"
     )
 
     /// Empty / unavailable media — polished placeholder.
@@ -130,7 +140,9 @@ enum FeedMediaCarouselFixtures {
         id: "fixture-missing",
         items: [
             FeedMediaItem(id: "missing-0", kind: .photo, source: .missing),
-        ]
+        ],
+        locationTitle: "TBD",
+        dateTimeLabel: "Date · Time"
     )
 
     /// Loading media state.
@@ -139,7 +151,9 @@ enum FeedMediaCarouselFixtures {
         items: [
             FeedMediaItem(id: "loading-0", kind: .photo, source: .loading),
             FeedMediaItem(id: "loading-1", kind: .photo, source: .loading),
-        ]
+        ],
+        locationTitle: "Loading…",
+        dateTimeLabel: "—"
     )
 
     /// Multi-photo stack using bundled friend images (realistic crop demo).
@@ -149,7 +163,9 @@ enum FeedMediaCarouselFixtures {
             FeedMediaItem(id: "bundle-0", kind: .photo, source: .assetPath("assets/friends/ohm.png")),
             FeedMediaItem(id: "bundle-1", kind: .photo, source: .assetPath("assets/friends/viplove.png")),
             FeedMediaItem(id: "bundle-2", kind: .photo, source: .assetPath("assets/friends/ram.png")),
-        ]
+        ],
+        locationTitle: "The Beehive",
+        dateTimeLabel: "Fri · 9:15 PM"
     )
 
     /// Mixed photo + video poster (video is still frame only — no playback).
@@ -166,7 +182,9 @@ enum FeedMediaCarouselFixtures {
                 kind: .video,
                 source: .assetPath("assets/friends/nitin.png")
             ),
-        ]
+        ],
+        locationTitle: "Mission Cliffs",
+        dateTimeLabel: "Thu · 7:00 PM"
     )
 
     /// Default vertical stack shown on the Pushes tab for this foundation step.

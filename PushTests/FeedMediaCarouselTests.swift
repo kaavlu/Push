@@ -92,6 +92,15 @@ final class FeedMediaCarouselTests: XCTestCase {
         )
     }
 
+    func testFixturesIncludeTopMetadata() {
+        for carousel in FeedMediaCarouselFixtures.feedPushesPreviewStack {
+            XCTAssertFalse(carousel.locationTitle.isEmpty, carousel.id)
+            XCTAssertFalse(carousel.dateTimeLabel.isEmpty, carousel.id)
+        }
+        XCTAssertEqual(FeedMediaCarouselFixtures.threeBundlePhotos.locationTitle, "The Beehive")
+        XCTAssertEqual(FeedMediaCarouselFixtures.threeBundlePhotos.dateTimeLabel, "Fri · 9:15 PM")
+    }
+
     func testSolidImageFactoryProducesRequestedSize() {
         let swatch = FeedSolidMediaSwatch(
             red: 0.5, green: 0.4, blue: 0.3,

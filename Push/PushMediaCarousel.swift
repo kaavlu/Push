@@ -3,8 +3,8 @@
 //  Push
 //
 //  Compact cinematic media container for Feed Push cards.
-//  Fixed portrait frame, fill-crop pages, manual + auto paging, segmented progress.
-//  No metadata, controls, or navigation chrome.
+//  Fixed portrait frame, fill-crop pages, manual + auto paging, segmented progress,
+//  and top metadata overlay (location, date/time, overflow).
 //
 
 import SwiftUI
@@ -12,6 +12,8 @@ import UIKit
 
 struct PushMediaCarousel: View {
     let data: FeedMediaCarouselData
+    /// Overflow menu action — no-op until card chrome menus ship.
+    var onOverflowMenu: () -> Void = {}
     @State private var selectedIndex: Int = 0
 
     private var items: [FeedMediaItem] { data.items }
@@ -21,9 +23,7 @@ struct PushMediaCarousel: View {
     var body: some View {
         ZStack {
             mediaPages
-            if showsProgressBar {
-                progressOverlay
-            }
+            topChrome
         }
         .aspectRatio(FeedMediaLayout.aspectRatio, contentMode: .fit)
         .frame(maxWidth: .infinity)
@@ -109,32 +109,125 @@ struct PushMediaCarousel: View {
         }
     }
 
-    // MARK: - Progress
+    // MARK: - Top chrome (scrim + progress + metadata)
 
-    private var progressOverlay: some View {
-        let count = items.count
-        return VStack {
-            FeedMediaProgressBar(
-                count: count,
-                selectedIndex: FeedMediaCarouselSelection.clampedIndex(
-                    selectedIndex,
-                    itemCount: count
-                )
-            )
-            .padding(.horizontal, FeedMediaLayout.progressHorizontalInset)
-            .padding(.top, FeedMediaLayout.progressTopInset)
-            Spacer(minLength: 0)
+    private var topChrome: some View {
+        ZStack(alignment: .top) {
+            FeedMediaTopScrim()
+                .allowsHitTesting(false)
+
+            VStack(spacing: 0) {
+                if showsProgressBar {
+                    FeedMediaProgressBar(
+                        count: items.count,
+                        selectedIndex: FeedMediaCarouselSelection.clampedIndex(
+                            selectedIndex,
+                            itemCount: items.count
+                        )
+                    )
+                    .padding(.horizontal, FeedMediaLayout.progressHorizontalInset)
+                    .padding(.top, FeedMediaLayout.progressTopInset)
+                    .allowsHitTesting(false)
+
+                    FeedMediaMetadataOverlay(
+                        locationTitle: data.locationTitle,
+                        dateTimeLabel: data.dateTimeLabel,
+                        onOverflowMenu: onOverflowMenu
+                    )
+                    .padding(.horizontal, FeedMediaLayout.metadataHorizontalInset)
+                    .padding(.top, FeedMediaLayout.progressToMetadataSpacing)
+                } else {
+                    FeedMediaMetadataOverlay(
+                        locationTitle: data.locationTitle,
+                        dateTimeLabel: data.dateTimeLabel,
+                        onOverflowMenu: onOverflowMenu
+                    )
+                    .padding(.horizontal, FeedMediaLayout.metadataHorizontalInset)
+                    .padding(.top, FeedMediaLayout.metadataTopInsetWithoutProgress)
+                }
+
+                Spacer(minLength: 0)
+            }
         }
-        .allowsHitTesting(false)
     }
 
     private var accessibilitySummary: String {
         let count = items.count
+        let locationBit = data.locationTitle.isEmpty ? "" : ", \(data.locationTitle)"
+        let whenBit = data.dateTimeLabel.isEmpty ? "" : ", \(data.dateTimeLabel)"
         if count == 0 {
-            return "Media unavailable"
+            return "Media unavailable\(locationBit)\(whenBit)"
         }
         let page = FeedMediaCarouselSelection.clampedIndex(selectedIndex, itemCount: count) + 1
-        return "Media \(page) of \(count)"
+        return "Media \(page) of \(count)\(locationBit)\(whenBit)"
+    }
+}
+
+// MARK: - Top scrim
+
+private struct FeedMediaTopScrim: View {
+    var body: some View {
+        VStack(spacing: 0) {
+            LinearGradient(
+                stops: [
+                    .init(
+                        color: Color.black.opacity(FeedMediaMetadataStyle.scrimTopOpacity),
+                        location: 0
+                    ),
+                    .init(
+                        color: Color.black.opacity(FeedMediaMetadataStyle.scrimMidOpacity),
+                        location: FeedMediaMetadataStyle.scrimMidStop
+                    ),
+                    .init(color: Color.clear, location: 1),
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .frame(height: FeedMediaLayout.metadataScrimHeight)
+            Spacer(minLength: 0)
+        }
+    }
+}
+
+// MARK: - Metadata overlay
+
+private struct FeedMediaMetadataOverlay: View {
+    let locationTitle: String
+    let dateTimeLabel: String
+    let onOverflowMenu: () -> Void
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            VStack(alignment: .leading, spacing: FeedMediaLayout.metadataTextStackSpacing) {
+                Text(locationTitle)
+                    .font(FeedMediaMetadataStyle.locationFont)
+                    .foregroundStyle(FeedMediaMetadataStyle.textColor)
+                    .lineLimit(1)
+                    .shadow(
+                        color: Color.black.opacity(0.35),
+                        radius: FeedMediaMetadataStyle.locationShadowRadius,
+                        y: FeedMediaMetadataStyle.locationShadowY
+                    )
+                Text(dateTimeLabel)
+                    .font(FeedMediaMetadataStyle.dateTimeFont)
+                    .foregroundStyle(FeedMediaMetadataStyle.textColor.opacity(0.92))
+                    .lineLimit(1)
+                    .shadow(
+                        color: Color.black.opacity(0.30),
+                        radius: FeedMediaMetadataStyle.locationShadowRadius,
+                        y: FeedMediaMetadataStyle.locationShadowY
+                    )
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .accessibilityElement(children: .combine)
+
+            PushCircleIconButton(
+                systemImageName: "ellipsis",
+                accessibilityLabel: "More options",
+                foreground: PushControlColors.activeForeground,
+                action: onOverflowMenu
+            )
+        }
     }
 }
 
