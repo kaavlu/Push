@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9C1D39122A8F059A477741F4 /* PlaceResolutionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5CE35E0C7E375B1DEB6E1BD /* PlaceResolutionTests.swift */; };
+		A04A9F1C134D339AD3AFEFDE /* MapKitPlaceResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE90F1F4343AB792A09619E9 /* MapKitPlaceResolver.swift */; };
+		556CB72D6E09ABC1E391FE15 /* LocationSession+PlaceResolution.swift in Sources */ = {isa = PBXBuildFile; fileRef = 795FBF52B55FA09A19F3497B /* LocationSession+PlaceResolution.swift */; };
+		B034EB2688AF18264842FD29 /* PlaceCandidateRanker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74B8E7C90BAAF4072EE94F27 /* PlaceCandidateRanker.swift */; };
+		B2D42E6ABA02BA219F062CC0 /* PlaceResolutionConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 630A2868BD591D38F7642EA2 /* PlaceResolutionConfiguration.swift */; };
+		E02B1A3C29CC581B0E945327 /* PlaceResolution.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6C7B9D37F0D30BCA9237870 /* PlaceResolution.swift */; };
 		F9B1D891637B172AB2064FD4 /* DwellLifecycleFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF3EA4B3D5A4CD214A4A8976 /* DwellLifecycleFixtures.swift */; };
 		FBD417D446135487B4ABF263 /* DeterministicDwellDetector+Support.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55C7264718ABCB1065CC4F50 /* DeterministicDwellDetector+Support.swift */; };
 		D7DE91453AE63066B14960A0 /* DwellLifecycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59BFB84DFE4794603A8F9B7A /* DwellLifecycleTests.swift */; };
@@ -350,6 +356,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C5CE35E0C7E375B1DEB6E1BD /* PlaceResolutionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PlaceResolutionTests.swift"; sourceTree = "<group>"; };
+		AE90F1F4343AB792A09619E9 /* MapKitPlaceResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "MapKitPlaceResolver.swift"; path = "Data/Location/MapKitPlaceResolver.swift"; sourceTree = "<group>"; };
+		795FBF52B55FA09A19F3497B /* LocationSession+PlaceResolution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "LocationSession+PlaceResolution.swift"; path = "Data/Domain/LocationSession+PlaceResolution.swift"; sourceTree = "<group>"; };
+		74B8E7C90BAAF4072EE94F27 /* PlaceCandidateRanker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PlaceCandidateRanker.swift"; path = "Data/Domain/PlaceCandidateRanker.swift"; sourceTree = "<group>"; };
+		630A2868BD591D38F7642EA2 /* PlaceResolutionConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PlaceResolutionConfiguration.swift"; path = "Data/Domain/PlaceResolutionConfiguration.swift"; sourceTree = "<group>"; };
+		A6C7B9D37F0D30BCA9237870 /* PlaceResolution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PlaceResolution.swift"; path = "Data/Domain/PlaceResolution.swift"; sourceTree = "<group>"; };
 		DF3EA4B3D5A4CD214A4A8976 /* DwellLifecycleFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "DwellLifecycleFixtures.swift"; path = "Data/Domain/DwellLifecycleFixtures.swift"; sourceTree = "<group>"; };
 		55C7264718ABCB1065CC4F50 /* DeterministicDwellDetector+Support.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "DeterministicDwellDetector+Support.swift"; path = "Data/Domain/DeterministicDwellDetector+Support.swift"; sourceTree = "<group>"; };
 		59BFB84DFE4794603A8F9B7A /* DwellLifecycleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DwellLifecycleTests.swift"; sourceTree = "<group>"; };
@@ -730,6 +742,11 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				AE90F1F4343AB792A09619E9 /* MapKitPlaceResolver.swift */,
+				795FBF52B55FA09A19F3497B /* LocationSession+PlaceResolution.swift */,
+				74B8E7C90BAAF4072EE94F27 /* PlaceCandidateRanker.swift */,
+				630A2868BD591D38F7642EA2 /* PlaceResolutionConfiguration.swift */,
+				A6C7B9D37F0D30BCA9237870 /* PlaceResolution.swift */,
 				DF3EA4B3D5A4CD214A4A8976 /* DwellLifecycleFixtures.swift */,
 				55C7264718ABCB1065CC4F50 /* DeterministicDwellDetector+Support.swift */,
 				81711AE72D886E46F9B0898D /* DwellDetectionFixtures.swift */,
@@ -1013,6 +1030,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				C5CE35E0C7E375B1DEB6E1BD /* PlaceResolutionTests.swift */,
 				59BFB84DFE4794603A8F9B7A /* DwellLifecycleTests.swift */,
 				E499EE9C1D5955908B6F690F /* DwellDetectionTests.swift */,
 				C7B835A88FC797A9326142C8 /* ActivityInferenceIntegrationTests.swift */,
@@ -1215,6 +1233,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				A04A9F1C134D339AD3AFEFDE /* MapKitPlaceResolver.swift in Sources */,
+				556CB72D6E09ABC1E391FE15 /* LocationSession+PlaceResolution.swift in Sources */,
+				B034EB2688AF18264842FD29 /* PlaceCandidateRanker.swift in Sources */,
+				B2D42E6ABA02BA219F062CC0 /* PlaceResolutionConfiguration.swift in Sources */,
+				E02B1A3C29CC581B0E945327 /* PlaceResolution.swift in Sources */,
 				F9B1D891637B172AB2064FD4 /* DwellLifecycleFixtures.swift in Sources */,
 				FBD417D446135487B4ABF263 /* DeterministicDwellDetector+Support.swift in Sources */,
 				D7E509996420AD98056757EE /* DwellDetectionFixtures.swift in Sources */,
@@ -1489,6 +1512,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				9C1D39122A8F059A477741F4 /* PlaceResolutionTests.swift in Sources */,
 				D7DE91453AE63066B14960A0 /* DwellLifecycleTests.swift in Sources */,
 				575A220DCBD5C58E1C8EDAF5 /* DwellDetectionTests.swift in Sources */,
 				DC1DBF618C46AC1D30D43E9A /* ActivityInferenceIntegrationTests.swift in Sources */,

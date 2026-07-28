@@ -40,9 +40,20 @@ final class LocationSession: LocationSessioning {
     var publishSnapshot = PresencePublishSnapshot()
     var pendingTrigger: PresenceSyncTrigger?
     var activityState = LocationSessionActivityState()
-    /// Parallel dwell tracking (Issue #99). Does not affect drafts or labels.
+    /// Parallel dwell tracking (Issue #99–#100). Does not affect drafts or labels.
     var dwellDetector: any DwellDetecting
     var dwellState: DwellDetectionState = .moving
+    /// Place resolution for confirmed dwells (Issue #101). Internal only.
+    let placeResolver: any PlaceResolving
+    var placeResolutionTask: Task<Void, Never>?
+    var activePlaceResolution: PlaceResolutionOutcome?
+    var placeResolveAttemptsForCurrentDwell = 0
+    var lastPlaceLookupDwellSessionID: String?
+    var lastPlaceLookupCentroidLatitude: Double?
+    var lastPlaceLookupCentroidLongitude: Double?
+    var lastConfidentPlaceID: String?
+    /// Armed after a failed lookup so the next process can retry once (not every fix).
+    var pendingPlaceResolutionRetry = false
 
     /// Exposed for tests that need the same sync instance assertions.
     let presenceSync: PresenceSyncing
@@ -53,6 +64,7 @@ final class LocationSession: LocationSessioning {
         inferrer: PresenceInferring = PassthroughPresenceInferrer(),
         activityEngine: ActivityInferenceEngine = DeterministicActivityInferenceEngine(),
         dwellDetector: any DwellDetecting = DeterministicDwellDetector(),
+        placeResolver: any PlaceResolving = NoOpPlaceResolver(),
         sync: PresenceSyncing = NoOpPresenceSync(),
         availabilityProvider: @escaping @MainActor () -> FriendAvailabilityState? = { nil },
         isPresencePublishingEnabled: Bool = true,
@@ -66,6 +78,7 @@ final class LocationSession: LocationSessioning {
         self.inferrer = inferrer
         self.activityEngine = activityEngine
         self.dwellDetector = dwellDetector
+        self.placeResolver = placeResolver
         self.sync = sync
         self.presenceSync = sync
         self.availabilityProvider = availabilityProvider
@@ -149,6 +162,7 @@ final class LocationSession: LocationSessioning {
         activityState.reset()
         dwellDetector.reset()
         dwellState = .moving
+        clearPlaceResolutionContext(cancelTask: true)
         provider.setAuthorizationChangeHandler(nil)
         provider.stopUpdating()
         provider.prepareForShutdown()
@@ -231,6 +245,14 @@ final class LocationSession: LocationSessioning {
     var lastCompletedDwellSessionForTesting: DwellLifecycleSession? {
         dwellState.lastCompletedSession
     }
+
+    /// Test hook — active place resolution for the current dwell (Issue #101).
+    var activePlaceResolutionForTesting: PlaceResolutionOutcome? {
+        activePlaceResolution
+    }
+
+    /// Test hook — resolve attempts billed to the current dwell session.
+    var placeResolveAttemptsForTesting: Int { placeResolveAttemptsForCurrentDwell }
 
     // MARK: - Private
 

@@ -32,11 +32,17 @@ enum LocationSessionFactory {
             arguments: arguments,
             usesCoreLocation: usesCoreLocation
         )
+        // Live Core Location path gets MapKit POI resolution; mock/sim stay no-op
+        // so unit tests and mock dogfood never hit the network for places.
+        let placeResolver: any PlaceResolving = usesCoreLocation
+            ? MapKitPlaceResolver()
+            : NoOpPlaceResolver()
         return LocationSession(
             provider: provider,
             validator: LocationObservationValidator(),
             inferrer: PassthroughPresenceInferrer(),
             activityEngine: DeterministicActivityInferenceEngine(),
+            placeResolver: placeResolver,
             sync: sync,
             availabilityProvider: availabilityProvider,
             isPresencePublishingEnabled: true,
