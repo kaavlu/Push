@@ -92,13 +92,21 @@ final class FeedMediaCarouselTests: XCTestCase {
         )
     }
 
-    func testFixturesIncludeTopMetadata() {
+    func testFixturesIncludeLocationMetadata() {
         for carousel in FeedMediaCarouselFixtures.feedPushesPreviewStack {
             XCTAssertFalse(carousel.locationTitle.isEmpty, carousel.id)
-            XCTAssertFalse(carousel.dateTimeLabel.isEmpty, carousel.id)
         }
         XCTAssertEqual(FeedMediaCarouselFixtures.threeBundlePhotos.locationTitle, "The Beehive")
-        XCTAssertEqual(FeedMediaCarouselFixtures.threeBundlePhotos.dateTimeLabel, "Fri · 9:15 PM")
+        XCTAssertEqual(
+            FeedMediaMetadataStyle.chipCornerRadius,
+            FeedMediaMetadataStyle.overflowCornerRadius,
+            accuracy: 0.01
+        )
+        XCTAssertEqual(
+            FeedMediaMetadataStyle.chipHeight,
+            FeedMediaMetadataStyle.overflowButtonSize,
+            accuracy: 0.01
+        )
     }
 
     func testParticipantNamesLineIncludesRemainingSuffix() {

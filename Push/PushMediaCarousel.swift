@@ -145,7 +145,6 @@ struct PushMediaCarousel: View {
 
                     FeedMediaMetadataOverlay(
                         locationTitle: data.locationTitle,
-                        dateTimeLabel: data.dateTimeLabel,
                         onOverflowMenu: onOverflowMenu
                     )
                     .padding(.horizontal, FeedMediaLayout.metadataHorizontalInset)
@@ -153,7 +152,6 @@ struct PushMediaCarousel: View {
                 } else {
                     FeedMediaMetadataOverlay(
                         locationTitle: data.locationTitle,
-                        dateTimeLabel: data.dateTimeLabel,
                         onOverflowMenu: onOverflowMenu
                     )
                     .padding(.horizontal, FeedMediaLayout.metadataHorizontalInset)
@@ -168,12 +166,11 @@ struct PushMediaCarousel: View {
     private var accessibilitySummary: String {
         let count = items.count
         let locationBit = data.locationTitle.isEmpty ? "" : ", \(data.locationTitle)"
-        let whenBit = data.dateTimeLabel.isEmpty ? "" : ", \(data.dateTimeLabel)"
         if count == 0 {
-            return "Media unavailable\(locationBit)\(whenBit)"
+            return "Media unavailable\(locationBit)"
         }
         let page = FeedMediaCarouselSelection.clampedIndex(selectedIndex, itemCount: count) + 1
-        return "Media \(page) of \(count)\(locationBit)\(whenBit)"
+        return "Media \(page) of \(count)\(locationBit)"
     }
 }
 
@@ -207,49 +204,35 @@ private struct FeedMediaTopScrim: View {
 
 private struct FeedMediaMetadataOverlay: View {
     let locationTitle: String
-    let dateTimeLabel: String
     let onOverflowMenu: () -> Void
 
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
-            FeedMediaLocationTimeChip(
-                locationTitle: locationTitle,
-                dateTimeLabel: dateTimeLabel
-            )
+            FeedMediaLocationChip(locationTitle: locationTitle)
             Spacer(minLength: 8)
             FeedMediaOverflowButton(action: onOverflowMenu)
         }
     }
 }
 
-/// Single liquid-glass chip for location + time — map filter-pill family (DS-011).
-private struct FeedMediaLocationTimeChip: View {
+/// Compact single-row location pill — same height/radius family as the `…` control.
+private struct FeedMediaLocationChip: View {
     let locationTitle: String
-    let dateTimeLabel: String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: FeedMediaLayout.metadataTextStackSpacing) {
-            Text(locationTitle)
-                .font(FeedMediaMetadataStyle.locationFont)
-                .foregroundStyle(FeedMediaMetadataStyle.textColor)
-                .lineLimit(1)
-                .minimumScaleFactor(PushOpacityTokens.minimumTextScale)
-            Text(dateTimeLabel)
-                .font(FeedMediaMetadataStyle.dateTimeFont)
-                .foregroundStyle(
-                    FeedMediaMetadataStyle.textColor.opacity(FeedMediaMetadataStyle.dateTimeOpacity)
-                )
-                .lineLimit(1)
-                .minimumScaleFactor(PushOpacityTokens.minimumTextScale)
-        }
-        .padding(.horizontal, FeedMediaMetadataStyle.chipHorizontalPadding)
-        .padding(.vertical, FeedMediaMetadataStyle.chipVerticalPadding)
-        .fixedSize(horizontal: true, vertical: true)
-        .pushMapControlGlass(
-            cornerRadius: FeedMediaMetadataStyle.chipCornerRadius,
-            treatment: .filterPill
-        )
-        .accessibilityElement(children: .combine)
+        Text(locationTitle)
+            .font(FeedMediaMetadataStyle.locationFont)
+            .foregroundStyle(FeedMediaMetadataStyle.textColor)
+            .lineLimit(1)
+            .minimumScaleFactor(PushOpacityTokens.minimumTextScale)
+            .padding(.horizontal, FeedMediaMetadataStyle.chipHorizontalPadding)
+            .frame(height: FeedMediaMetadataStyle.chipHeight)
+            .fixedSize(horizontal: true, vertical: false)
+            .pushMapControlGlass(
+                cornerRadius: FeedMediaMetadataStyle.chipCornerRadius,
+                treatment: .filterPill
+            )
+            .accessibilityLabel(locationTitle)
     }
 }
 

@@ -135,28 +135,25 @@ enum FeedMediaPlaceholderStyle {
     static let spinnerTint = PushColorPalette.Accent.sunbeam
 }
 
-/// Top chrome over media — liquid glass metadata chip + overflow (Feed media only).
+/// Top chrome over media — compact location pill + overflow (Feed media only).
 enum FeedMediaMetadataStyle {
-    /// Matches Plans/card title weight, sized up for media overlay readability.
-    static let locationFont = Font.headline.weight(.semibold)
-    /// Matches Plans metadata row (subheadline), under the location line.
-    static let dateTimeFont = Font.subheadline.weight(.medium)
+    /// Compact single-line location label on liquid glass.
+    static let locationFont = Font.subheadline.weight(.semibold)
     /// Walnut on liquid glass — same as map filter pill / top controls.
     static let textColor = PushControlColors.activeForeground
-    static let dateTimeOpacity = 0.88
     static let scrimTopOpacity = 0.40
     static let scrimMidOpacity = 0.16
     static let scrimMidStop = 0.55
 
-    /// Map filter-pill family radius (`TopControlLayout.cornerRadius` / segmented track).
-    static let chipCornerRadius = PushRadiusTokens.segmentedTrack
-    static let chipHorizontalPadding: CGFloat = 14
-    static let chipVerticalPadding: CGFloat = 10
-    static let chipMaxWidthFraction: CGFloat = 0.72
-
-    /// Same metrics as map `TopIconButton` / profile control (liquid map glass).
+    /// Same diameter/radius family as the overflow control so the pill and `…`
+    /// circle share visual curvature (half of 44pt control = capsule ends).
     static let overflowButtonSize: CGFloat = 44
     static let overflowIconSize: CGFloat = 17
     static let overflowIconWeight: Font.Weight = .semibold
     static var overflowCornerRadius: CGFloat { overflowButtonSize / 2 }
+
+    /// Single-row pill height matches the overflow circle; radius matches ends.
+    static let chipHeight: CGFloat = overflowButtonSize
+    static let chipCornerRadius: CGFloat = overflowCornerRadius
+    static let chipHorizontalPadding: CGFloat = 16
 }
