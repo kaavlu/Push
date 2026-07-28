@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F9B1D891637B172AB2064FD4 /* DwellLifecycleFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF3EA4B3D5A4CD214A4A8976 /* DwellLifecycleFixtures.swift */; };
+		FBD417D446135487B4ABF263 /* DeterministicDwellDetector+Support.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55C7264718ABCB1065CC4F50 /* DeterministicDwellDetector+Support.swift */; };
+		D7DE91453AE63066B14960A0 /* DwellLifecycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59BFB84DFE4794603A8F9B7A /* DwellLifecycleTests.swift */; };
 		575A220DCBD5C58E1C8EDAF5 /* DwellDetectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E499EE9C1D5955908B6F690F /* DwellDetectionTests.swift */; };
 		D7E509996420AD98056757EE /* DwellDetectionFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81711AE72D886E46F9B0898D /* DwellDetectionFixtures.swift */; };
 		60DC3C1267E2A8DC071E84BA /* DeterministicDwellDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DD5ADAE90E7EE1AD4096536 /* DeterministicDwellDetector.swift */; };
@@ -347,6 +350,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		DF3EA4B3D5A4CD214A4A8976 /* DwellLifecycleFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "DwellLifecycleFixtures.swift"; path = "Data/Domain/DwellLifecycleFixtures.swift"; sourceTree = "<group>"; };
+		55C7264718ABCB1065CC4F50 /* DeterministicDwellDetector+Support.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "DeterministicDwellDetector+Support.swift"; path = "Data/Domain/DeterministicDwellDetector+Support.swift"; sourceTree = "<group>"; };
+		59BFB84DFE4794603A8F9B7A /* DwellLifecycleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DwellLifecycleTests.swift"; sourceTree = "<group>"; };
 		E499EE9C1D5955908B6F690F /* DwellDetectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DwellDetectionTests.swift"; sourceTree = "<group>"; };
 		81711AE72D886E46F9B0898D /* DwellDetectionFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "DwellDetectionFixtures.swift"; path = "Data/Domain/DwellDetectionFixtures.swift"; sourceTree = "<group>"; };
 		8DD5ADAE90E7EE1AD4096536 /* DeterministicDwellDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "DeterministicDwellDetector.swift"; path = "Data/Domain/DeterministicDwellDetector.swift"; sourceTree = "<group>"; };
@@ -724,6 +730,8 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				DF3EA4B3D5A4CD214A4A8976 /* DwellLifecycleFixtures.swift */,
+				55C7264718ABCB1065CC4F50 /* DeterministicDwellDetector+Support.swift */,
 				81711AE72D886E46F9B0898D /* DwellDetectionFixtures.swift */,
 				8DD5ADAE90E7EE1AD4096536 /* DeterministicDwellDetector.swift */,
 				2674DA915B3D3597B781FC69 /* DwellDetectionConfiguration.swift */,
@@ -1005,6 +1013,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				59BFB84DFE4794603A8F9B7A /* DwellLifecycleTests.swift */,
 				E499EE9C1D5955908B6F690F /* DwellDetectionTests.swift */,
 				C7B835A88FC797A9326142C8 /* ActivityInferenceIntegrationTests.swift */,
 				1A7B28E1203ADFDFDE1421F4 /* DeterministicActivityInferenceTests.swift */,
@@ -1206,6 +1215,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				F9B1D891637B172AB2064FD4 /* DwellLifecycleFixtures.swift in Sources */,
+				FBD417D446135487B4ABF263 /* DeterministicDwellDetector+Support.swift in Sources */,
 				D7E509996420AD98056757EE /* DwellDetectionFixtures.swift in Sources */,
 				60DC3C1267E2A8DC071E84BA /* DeterministicDwellDetector.swift in Sources */,
 				42536E3666A23BC615785736 /* DwellDetectionConfiguration.swift in Sources */,
@@ -1478,6 +1489,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				D7DE91453AE63066B14960A0 /* DwellLifecycleTests.swift in Sources */,
 				575A220DCBD5C58E1C8EDAF5 /* DwellDetectionTests.swift in Sources */,
 				DC1DBF618C46AC1D30D43E9A /* ActivityInferenceIntegrationTests.swift in Sources */,
 				2C7535D963BC599C82325F8B /* DeterministicActivityInferenceTests.swift in Sources */,

@@ -2,7 +2,8 @@
 //  DwellDetectionFixtures.swift
 //  Push
 //
-//  Issue #99 (I1) — deterministic observation sequences for dwell tests.
+//  Issue #99 (I1) / #100 (I2) — deterministic observation sequences for
+//  dwell + arrival/departure tests.
 //
 
 import Foundation
@@ -15,20 +16,23 @@ enum DwellDetectionFixtures {
 
     // MARK: Sequences
 
-    /// Long stationary cluster — should promote to `.dwelling`.
+    /// Long stationary cluster — should promote to `.dwelling` with one arrival.
     /// 8 samples × 30s = 210s span (> minimumDwellDuration).
     static func sustainedDwellSequence(
         personID: Person.ID = defaultPersonID,
-        baseDate: Date = baseDate
+        baseDate: Date = baseDate,
+        latitude: Double = 37.7749,
+        longitude: Double = -122.4194,
+        idPrefix: String = "dwell"
     ) -> [LocationObservation] {
         makeSequence(
-            idPrefix: "dwell",
+            idPrefix: idPrefix,
             personID: personID,
             baseDate: baseDate,
             count: 8,
             interval: 30,
-            latitude: 37.7749,
-            longitude: -122.4194,
+            latitude: latitude,
+            longitude: longitude,
             accuracy: 8,
             speed: 0.05,
             stepLatitudeDelta: 0.000005,
@@ -127,32 +131,6 @@ enum DwellDetectionFixtures {
                 speed: 0.08
             )
         }
-    }
-
-    /// Sustained dwell then a clear exit (large jump).
-    static func dwellThenExitSequence(
-        personID: Person.ID = defaultPersonID,
-        baseDate: Date = baseDate
-    ) -> [LocationObservation] {
-        var observations = sustainedDwellSequence(personID: personID, baseDate: baseDate)
-        guard let last = observations.last else { return observations }
-        // Three far samples so consecutive outliers exceed the tolerance.
-        for index in 0..<3 {
-            let t = last.recordedAt.addingTimeInterval(TimeInterval(index + 1) * 20)
-            observations.append(
-                makeObservation(
-                    id: "exit-\(index)",
-                    personID: personID,
-                    latitude: last.latitude + 0.01,
-                    longitude: last.longitude,
-                    accuracy: 10,
-                    recordedAt: t,
-                    receivedAt: t,
-                    speed: 5
-                )
-            )
-        }
-        return observations
     }
 
     /// One mid-cluster outlier blip, then return — must not reset start.

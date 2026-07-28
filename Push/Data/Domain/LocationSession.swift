@@ -224,8 +224,13 @@ final class LocationSession: LocationSessioning {
         activityState.recentObservations
     }
 
-    /// Test hook — latest dwell phase/cluster (Issue #99; not presence-facing).
+    /// Test hook — latest dwell phase/cluster/lifecycle (Issues #99–#100; not presence-facing).
     var dwellStateForTesting: DwellDetectionState { dwellState }
+
+    /// Test hook — most recently completed dwell session after departure.
+    var lastCompletedDwellSessionForTesting: DwellLifecycleSession? {
+        dwellState.lastCompletedSession
+    }
 
     // MARK: - Private
 
