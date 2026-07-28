@@ -4,10 +4,16 @@ import CoreGraphics
 
 @MainActor
 final class FeedMediaCarouselTests: XCTestCase {
-    func testMediaAspectRatioIsPortraitStable() {
-        // width / height < 1 → portrait frame
-        XCTAssertLessThan(FeedMediaLayout.aspectRatio, 1)
-        XCTAssertEqual(FeedMediaLayout.aspectRatio, 3.0 / 4.0, accuracy: 0.0001)
+    func testMediaAspectRatioIsCompactPortrait() {
+        // width / height in the compact cinematic band (not story-tall 3:4).
+        XCTAssertGreaterThanOrEqual(FeedMediaLayout.aspectRatio, 0.84)
+        XCTAssertLessThanOrEqual(FeedMediaLayout.aspectRatio, 0.88)
+        XCTAssertEqual(FeedMediaLayout.aspectRatio, 0.86, accuracy: 0.0001)
+    }
+
+    func testMediaCornerRadiusIsInProductionBand() {
+        XCTAssertGreaterThanOrEqual(FeedMediaLayout.cornerRadius, 28)
+        XCTAssertLessThanOrEqual(FeedMediaLayout.cornerRadius, 32)
     }
 
     func testFixturesCoverRequiredCarouselStates() {

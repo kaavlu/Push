@@ -8,8 +8,9 @@ Ship a polished, reusable media carousel container for Push cards on the Feed Pu
 
 | Topic | Choice |
 |---|---|
-| Aspect ratio | Stable **3:4** (width:height) — immersive portrait; next card can peek |
-| Corner radius | Adaptive `layout.cardCornerRadius` / `PushRadiusTokens.card` |
+| Aspect ratio | Compact portrait **0.86** width÷height (band 0.84–0.88); next card peeks |
+| Corner radius | Fixed **30pt** continuous rounded rectangle (28–32 band) |
+| Group filters | Pinned under segment control (do not scroll away with content) |
 | Margins | Existing `FeedLayout.horizontalPadding` (page padding) |
 | Progress | Thin Stories-style segments at top inset; update on manual swipe |
 | Media crop | `scaledToFill` clipped to rounded frame — no frame resize across items |

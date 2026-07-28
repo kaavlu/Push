@@ -170,12 +170,13 @@ enum FeedMediaCarouselFixtures {
     )
 
     /// Default vertical stack shown on the Pushes tab for this foundation step.
+    /// Real photos first so the production crop/frame reads immediately.
     static let feedPushesPreviewStack: [FeedMediaCarouselData] = [
-        threeMixedAspectPhotos,
         threeBundlePhotos,
-        singlePhoto,
-        mixedPortraitLandscapeSquare,
         photoAndVideoPoster,
+        singlePhoto,
+        threeMixedAspectPhotos,
+        mixedPortraitLandscapeSquare,
         loadingMedia,
         missingMedia,
     ]
@@ -184,73 +185,15 @@ enum FeedMediaCarouselFixtures {
 // MARK: - Solid image render
 
 enum FeedMediaImageFactory {
-    /// Renders a patterned UIImage at the swatch's source size so fill-crop
-    /// differences (portrait / landscape / square) are visible in previews.
+    /// Clean solid fill at the swatch's source size — no labels or demo bands.
+    /// Different source sizes still exercise fill-crop against the fixed frame.
     static func image(for swatch: FeedSolidMediaSwatch) -> UIImage {
         let format = UIGraphicsImageRendererFormat.default()
         format.scale = 1
         let renderer = UIGraphicsImageRenderer(size: swatch.size, format: format)
         return renderer.image { ctx in
-            let rect = CGRect(origin: .zero, size: swatch.size)
-            let cg = ctx.cgContext
-
             swatch.uiColor.setFill()
-            ctx.fill(rect)
-
-            // Diagonal band + edge bars make crop direction obvious.
-            let highlight = UIColor.white.withAlphaComponent(0.18)
-            highlight.setFill()
-            let bandHeight = swatch.height * 0.18
-            ctx.fill(CGRect(
-                x: 0,
-                y: (swatch.height - bandHeight) / 2,
-                width: swatch.width,
-                height: bandHeight
-            ))
-
-            let edge = UIColor.white.withAlphaComponent(0.28)
-            let lineWidth = max(swatch.width, swatch.height) * 0.02
-            edge.setStroke()
-            cg.setLineWidth(lineWidth)
-            cg.stroke(rect.insetBy(dx: lineWidth / 2, dy: lineWidth / 2))
-
-            // Corner ticks — clipped corners prove fill-crop is working.
-            let tick = min(swatch.width, swatch.height) * 0.12
-            edge.setFill()
-            ctx.fill(CGRect(x: 0, y: 0, width: tick, height: tick * 0.22))
-            ctx.fill(CGRect(x: swatch.width - tick, y: 0, width: tick, height: tick * 0.22))
-            ctx.fill(CGRect(x: 0, y: swatch.height - tick * 0.22, width: tick, height: tick * 0.22))
-            ctx.fill(CGRect(
-                x: swatch.width - tick,
-                y: swatch.height - tick * 0.22,
-                width: tick,
-                height: tick * 0.22
-            ))
-
-            let label = aspectLabel(for: swatch)
-            let paragraph = NSMutableParagraphStyle()
-            paragraph.alignment = .center
-            let fontSize = min(swatch.width, swatch.height) * 0.08
-            let attributes: [NSAttributedString.Key: Any] = [
-                .font: UIFont.systemFont(ofSize: fontSize, weight: .semibold),
-                .foregroundColor: UIColor.white.withAlphaComponent(0.9),
-                .paragraphStyle: paragraph,
-            ]
-            let textSize = label.size(withAttributes: attributes)
-            let textRect = CGRect(
-                x: (swatch.width - textSize.width) / 2,
-                y: (swatch.height - textSize.height) / 2,
-                width: textSize.width,
-                height: textSize.height
-            )
-            label.draw(in: textRect, withAttributes: attributes)
+            ctx.fill(CGRect(origin: .zero, size: swatch.size))
         }
-    }
-
-    private static func aspectLabel(for swatch: FeedSolidMediaSwatch) -> String {
-        let ratio = swatch.width / max(swatch.height, 1)
-        if abs(ratio - 1) < 0.05 { return "Square" }
-        if ratio < 1 { return "Portrait" }
-        return "Landscape"
     }
 }

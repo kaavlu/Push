@@ -2,7 +2,7 @@
 //  PushMediaCarousel.swift
 //  Push
 //
-//  Reusable immersive media container for Feed Push cards (Issue #9 prompt 1).
+//  Compact cinematic media container for Feed Push cards.
 //  Fixed portrait frame, fill-crop pages, manual paging, segmented progress.
 //  No metadata, controls, or navigation chrome.
 //
@@ -12,11 +12,10 @@ import UIKit
 
 struct PushMediaCarousel: View {
     let data: FeedMediaCarouselData
-    @Environment(\.pushLayout) private var layout
     @State private var selectedIndex: Int = 0
 
     private var items: [FeedMediaItem] { data.items }
-    private var cornerRadius: CGFloat { FeedMediaLayout.cornerRadius(layout) }
+    private var cornerRadius: CGFloat { FeedMediaLayout.cornerRadius }
 
     var body: some View {
         ZStack {
@@ -25,7 +24,9 @@ struct PushMediaCarousel: View {
         }
         .aspectRatio(FeedMediaLayout.aspectRatio, contentMode: .fit)
         .frame(maxWidth: .infinity)
+        .background(FeedMediaPlaceholderStyle.background)
         .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+        .contentShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                 .stroke(
@@ -33,6 +34,9 @@ struct PushMediaCarousel: View {
                     lineWidth: FeedMediaLayout.mediaStrokeWidth
                 )
         }
+        // Flatten paging layers so neighbors never bleed past the rounded mask at rest.
+        .compositingGroup()
+        .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
         .accessibilityElement(children: .contain)
         .accessibilityLabel(accessibilitySummary)
         .onAppear {
@@ -53,29 +57,35 @@ struct PushMediaCarousel: View {
 
     @ViewBuilder
     private var mediaPages: some View {
-        if items.isEmpty {
-            FeedMediaPlaceholderPage(kind: .missing)
-        } else if items.count == 1, let only = items.first {
-            // Avoid page TabView chrome/overhead for a single frame.
-            FeedMediaPageView(item: only)
-        } else {
-            TabView(selection: $selectedIndex) {
-                ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
-                    FeedMediaPageView(item: item)
-                        .tag(index)
+        GeometryReader { proxy in
+            let size = proxy.size
+            Group {
+                if items.isEmpty {
+                    FeedMediaPlaceholderPage(kind: .missing)
+                } else if items.count == 1, let only = items.first {
+                    FeedMediaPageView(item: only, size: size)
+                } else {
+                    TabView(selection: $selectedIndex) {
+                        ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
+                            FeedMediaPageView(item: item, size: size)
+                                .frame(width: size.width, height: size.height)
+                                .tag(index)
+                        }
+                    }
+                    .tabViewStyle(.page(indexDisplayMode: .never))
+                    .frame(width: size.width, height: size.height)
                 }
             }
-            .tabViewStyle(.page(indexDisplayMode: .never))
+            .frame(width: size.width, height: size.height)
+            .clipped()
         }
     }
 
     // MARK: - Progress
 
-    @ViewBuilder
     private var progressOverlay: some View {
-        // Empty media still shows one subdued segment over the missing placeholder.
         let count = max(items.count, 1)
-        VStack {
+        return VStack {
             FeedMediaProgressBar(
                 count: count,
                 selectedIndex: FeedMediaCarouselSelection.clampedIndex(
@@ -83,8 +93,8 @@ struct PushMediaCarousel: View {
                     itemCount: count
                 )
             )
-            .padding(.horizontal, FeedMediaLayout.progressHorizontalInset)
-            .padding(.top, FeedMediaLayout.progressTopInset)
+            .padding(.horizontal, FeedMediaLayout.progressEdgeInset)
+            .padding(.top, FeedMediaLayout.progressEdgeInset)
             Spacer(minLength: 0)
         }
         .allowsHitTesting(false)
@@ -133,21 +143,19 @@ struct FeedMediaProgressBar: View {
 
 private struct FeedMediaPageView: View {
     let item: FeedMediaItem
+    let size: CGSize
 
     var body: some View {
-        GeometryReader { proxy in
-            let size = proxy.size
-            ZStack {
-                FeedMediaPlaceholderStyle.background
-                pageContent(size: size)
-            }
-            .frame(width: size.width, height: size.height)
-            .clipped()
+        ZStack {
+            FeedMediaPlaceholderStyle.background
+            pageContent
         }
+        .frame(width: size.width, height: size.height)
+        .clipped()
     }
 
     @ViewBuilder
-    private func pageContent(size: CGSize) -> some View {
+    private var pageContent: some View {
         switch item.source {
         case .loading:
             FeedMediaPlaceholderPage(kind: .loading)
@@ -156,11 +164,11 @@ private struct FeedMediaPageView: View {
         case .assetPath(let path):
             FeedMediaResolvedImage(path: path, size: size)
         case .solidColor(let swatch):
-            fillImage(FeedMediaImageFactory.image(for: swatch), size: size)
+            fillImage(FeedMediaImageFactory.image(for: swatch))
         }
     }
 
-    private func fillImage(_ image: UIImage, size: CGSize) -> some View {
+    private func fillImage(_ image: UIImage) -> some View {
         Image(uiImage: image)
             .resizable()
             .scaledToFill()
@@ -191,6 +199,8 @@ private struct FeedMediaResolvedImage: View {
                 FeedMediaPlaceholderPage(kind: .loading)
             }
         }
+        .frame(width: size.width, height: size.height)
+        .clipped()
         .task(id: path) {
             await resolve()
         }
@@ -232,7 +242,6 @@ private struct FeedMediaPlaceholderPage: View {
                     ProgressView()
                         .progressViewStyle(.circular)
                         .tint(FeedMediaPlaceholderStyle.spinnerTint)
-                        .scaleEffect(1.1)
                     Text("Loading media")
                         .font(.subheadline.weight(.medium))
                         .foregroundStyle(FeedMediaPlaceholderStyle.captionColor)
@@ -261,7 +270,7 @@ struct PushMediaCarousel_Previews: PreviewProvider {
     static var previews: some View {
         PushPreviewMatrix {
             ScrollView {
-                VStack(spacing: 16) {
+                VStack(spacing: FeedLayout.mediaStackSpacing) {
                     previewBlock(title: "Three mixed aspect ratios", data: .threeMixedAspectPhotos)
                     previewBlock(title: "Three bundle photos", data: .threeBundlePhotos)
                     previewBlock(title: "Single photo", data: .singlePhoto)

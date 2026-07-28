@@ -45,13 +45,13 @@ struct FeedView: View {
                     onOpenAlerts: onOpenAlerts
                 )
                 FeedTabSwitch(viewModel: viewModel)
+                // Group filters stay pinned under the segment (do not scroll away).
+                FeedFilterChips(viewModel: viewModel)
 
                 ScrollView(showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: FeedLayout.chipToContentSpacing) {
-                        FeedFilterChips(viewModel: viewModel)
-                        tabContent
-                    }
-                    .padding(.bottom, FeedLayout.contentBottomClearance(layout))
+                    tabContent
+                        .padding(.top, FeedLayout.chipToContentSpacing)
+                        .padding(.bottom, FeedLayout.contentBottomClearance(layout))
                 }
             }
             .padding(.horizontal, FeedLayout.horizontalPadding(layout))
@@ -174,7 +174,6 @@ private struct FeedFilterChips: View {
 // MARK: - Pushes media stack
 
 private struct FeedPushesMediaStack: View {
-    @Environment(\.pushLayout) private var layout
     let carousels: [FeedMediaCarouselData]
 
     var body: some View {
@@ -187,7 +186,7 @@ private struct FeedPushesMediaStack: View {
             .frame(maxWidth: .infinity)
             .padding(.top, EmptySurfaceLayout.topPadding)
         } else {
-            VStack(spacing: FeedLayout.mediaStackSpacing(layout)) {
+            VStack(spacing: FeedLayout.mediaStackSpacing) {
                 ForEach(carousels) { carousel in
                     PushMediaCarousel(data: carousel)
                 }
