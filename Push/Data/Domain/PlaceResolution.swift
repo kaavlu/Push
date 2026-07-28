@@ -4,7 +4,7 @@
 //
 //  Issue #101 (I3) — resolve confirmed dwell centroids to nearby places.
 //  Domain types only (Doubles); MapKit stays in infrastructure.
-//  Does not own presence drafts or friend-facing “At …” copy.
+//  Friend-facing “At …” composition lives in ActivityInferencePresentation (#105).
 //
 
 import Foundation

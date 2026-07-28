@@ -1,85 +1,77 @@
-# Issue #101 — Resolve Confirmed Dwells to Places (I3)
+# Issue #105 — Attach Resolved Place Context to Presence Activity
 
 ## Goal
 
-Resolve a confirmed dwell centroid to nearby real-world POIs and attach a structured result to the active dwell. Do **not** yet convert results into friend-facing activity copy (`At Starbucks` is a later issue).
+Connect place resolution + activity inference into one canonical friend-visible presence activity so friends can receive labels such as:
 
-Builds on #99 (cluster) and #100 (arrival/departure).
+- At Crunch Fitness
+- At Starbucks
+- Chilling
+- Walking
+- Driving
+- Moving
+- Nearby
 
-## Abstraction
+Builds on #99–#101 (dwell / lifecycle / place resolution), #94 (activity presentation), and live presence reads/writes/Realtime (`current_presence`).
+
+## Fallback order (canonical)
 
 ```
-PlaceResolving
-  resolve(PlaceResolutionRequest) async throws → PlaceResolutionOutcome
+confident resolved place → At {place}
+confirmed dwell without a reliable place → Chilling
+walking → Walking
+driving → Driving
+generic movement → Moving
+otherwise → Nearby
 ```
 
-- Domain protocol is free of MapKit / Core Location types (Doubles only).
-- Production: `MapKitPlaceResolver` (POI search + reverse-geocode fallback).
-- Mock / tests: `NoOpPlaceResolver`, `FixedPlaceResolver`.
-- Ranking is pure (`PlaceCandidateRanker`) so selection rules are unit-tested without MapKit.
+Place context must not stick after departure, Ghost (friend-visible unpublish), hard expiry, or invalid/non-confident resolution.
 
-## Models
+## Design
 
-| Type | Role |
+### Composition (pure)
+
+`ActivityInferencePresentation.compose` (or apply) merges:
+
+| Input | Role |
 |---|---|
-| `ResolvedPlaceCandidate` | id, name, coordinate, category, distance, score |
-| `GeographicPlaceContext` | reverse-geocode fallback (address / locality) |
-| `PlaceResolutionOutcome` | status + optional selected + ranked candidates + fallback |
-| `PlaceResolutionRequest` | dwell session id, centroid, accuracy, dwell radius, previous id |
+| `InferredActivityResult` + heartbeat hold | Motion class |
+| `activePlaceResolution` | Confident POI only (`.resolved` + selected name) |
+| Confirmed dwell (`phase == .dwelling` + active session) | Enables Chilling when place is weak |
 
-### Status
+Outputs onto `PresenceStatusDraft`:
 
-| Status | Meaning |
-|---|---|
-| `resolved` | One confident named POI selected |
-| `ambiguous` | Multiple plausible POIs — **no** selection |
-| `geographicOnly` | No confident POI; reverse-geocode context only |
-| `empty` | Nothing useful nearby |
+- `activity` (`activity_name` / `activity_symbol`)
+- `statusNote` — set to `At {place}` when place is attached (so existing “At \(place)” UI paths do not double-prefix)
+- `placeID` — resolved candidate id when attached; `nil` otherwise (no places catalog required; friend map place remains synthetic from coords)
+- `confidence` / `source` — inference when classified/place; location for unknown Nearby
 
-Never auto-pick nearest when top scores are close (`ambiguityScoreDelta`).
+No schema migration — reuse `current_presence.activity_name`, `activity_symbol`, `place_id`, `status_note`.
 
-## When to resolve
+### Session wiring
 
-| Trigger | Action |
-|---|---|
-| Dwell `.arrived` | Resolve for that session |
-| Centroid moves ≥ `centroidChangeReresolveMeters` while dwelling | Re-resolve |
-| Prior failure while still dwelling | Retry up to `maxResolveAttempts` |
-| Every GPS fix | **Do not** lookup |
-| `.departed` / shutdown | Cancel in-flight; clear active outcome |
+- `LocationSession.enqueueDraft` always runs composition (never blocks on resolver).
+- On place-resolution **apply** (async success): if publishing, `republishLastAcceptedIfPossible()` so friends get `At {place}` without waiting for movement/heartbeat.
+- On **departure**: clear place context, then republish when publishing so stale place/Chilling leave friend view promptly.
+- Ghost / unpublish: existing unpublish path removes friend-visible presence; local place context may remain for re-dwell/republish after Ghost off.
+- Resolver failure / ambiguous / empty: no confident place; dwell → Chilling; publish path unchanged.
 
-## Ranking signals
+### Non-goals
 
-- Distance from dwell centroid (primary)
-- Representative accuracy + dwell radius (inside likely area boosts; far outside penalized)
-- Optional category weight (light)
-- Previous confirmed place id boost when available
-- Ambiguity gate: require score ≥ `minScoreForSelection` **and** margin over runner-up ≥ `ambiguityScoreDelta`
-
-Poor accuracy lowers effective selection (stricter) rather than inventing a place.
-
-## Integration
-
-- `LocationSession` owns `placeResolver`, `activePlaceResolution`, lookup bookkeeping.
-- Outcome is **internal** — not written to presence drafts, activity labels, Ghost, or UI in this issue.
-- Failures log-safe and leave the existing presence pipeline unchanged.
-- Factory: live/Core Location path → `MapKitPlaceResolver`; mock → `NoOpPlaceResolver`.
-
-## Non-goals
-
-- “At {place}” activity strings
-- Eating / workout / date inference
-- Availability, place correction UI, home/work learning, co-presence, ML, map redesign
+UI redesign, place correction UI, co-presence, background location, ETA, feed, new inference rules, places catalog.
 
 ## Acceptance
 
-- Arrival triggers one lookup (deduped for same dwell/centroid)
-- Clear match → `resolved` + selected candidate
-- Ambiguous neighbors → `ambiguous`, no selected
-- No POIs → geographic fallback or empty
-- Departure clears active place context
-- Architecture swappable via `PlaceResolving`
+- [x] Confident place publishes as `At {place}`
+- [x] Ambiguous / failed / empty resolution falls back safely
+- [x] Friends receive activity via existing writes + Realtime/`LiveDataStore` patches
+- [x] Departure clears friend-visible place activity on next draft
+- [x] Manual availability remains independent
+- [x] Ghost / heartbeat / throttle / teardown behavior preserved
+- [x] Tests: compose, place, fallback, clear, write mapping, remote read
 
 ## Tests
 
-`PlaceResolutionTests`: ranker + session orchestration with `FixedPlaceResolver`.
+- Pure composition unit tests
+- Session: resolve → `At …` draft; empty dwell → Chilling; departure clears
+- Existing `ActivityInferenceIntegrationTests` / presence suites still green (`Moving` label)

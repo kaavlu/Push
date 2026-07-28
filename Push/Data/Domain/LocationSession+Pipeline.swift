@@ -32,7 +32,7 @@ extension LocationSession {
         lastAcceptedValidated = validated
         let evaluationTime = now()
         activityState.recordAccepted(validated.observation, now: evaluationTime)
-        // Dwell runs in parallel — never blocks publish and does not mutate drafts.
+        // Dwell + place resolution run in parallel — never block publish.
         dwellState = dwellDetector.process(validated.observation, at: evaluationTime)
         handleDwellPlaceResolution(dwellState, at: evaluationTime)
         state.lastObservation = validated.observation
@@ -89,9 +89,12 @@ extension LocationSession {
             isPublished: state.isPresencePublishingEnabled,
             previous: nil
         )
+        // Place resolution + dwell + motion → one activity (Issue #105).
         ActivityInferencePresentation.apply(
             inferred,
             fallbackActivity: activityState.fallbackActivity(at: evaluationTime),
+            placeResolution: activePlaceResolution,
+            isConfirmedDwelling: isConfirmedDwelling,
             to: &draft
         )
         // Availability / Ghost remain orthogonal — never invent from motion.
@@ -100,6 +103,11 @@ extension LocationSession {
             draft.availability = availability
         }
         enqueueSync(draft, trigger: trigger)
+    }
+
+    /// Confirmed dwell with an open session — place attachment / Chilling gate.
+    var isConfirmedDwelling: Bool {
+        dwellState.phase == .dwelling && dwellState.activeSession != nil
     }
 
     func mirroredAvailability() -> FriendAvailabilityState? {
