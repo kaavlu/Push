@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		575A220DCBD5C58E1C8EDAF5 /* DwellDetectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E499EE9C1D5955908B6F690F /* DwellDetectionTests.swift */; };
+		D7E509996420AD98056757EE /* DwellDetectionFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81711AE72D886E46F9B0898D /* DwellDetectionFixtures.swift */; };
+		60DC3C1267E2A8DC071E84BA /* DeterministicDwellDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DD5ADAE90E7EE1AD4096536 /* DeterministicDwellDetector.swift */; };
+		42536E3666A23BC615785736 /* DwellDetectionConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2674DA915B3D3597B781FC69 /* DwellDetectionConfiguration.swift */; };
+		B44B422AA5FC3F4A070AC831 /* DwellDetection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7036A7A30D0597D7FB2EAED0 /* DwellDetection.swift */; };
 		DC1DBF618C46AC1D30D43E9A /* ActivityInferenceIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7B835A88FC797A9326142C8 /* ActivityInferenceIntegrationTests.swift */; };
 		7343A8F1430553EA9830B820 /* LocationSession+Pipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 294C5A010F9E0CC12DEE4E22 /* LocationSession+Pipeline.swift */; };
 		12A455BFBB157624250B9D47 /* LocationSessionActivityState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8241202A73D239B2C760204 /* LocationSessionActivityState.swift */; };
@@ -342,6 +347,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		E499EE9C1D5955908B6F690F /* DwellDetectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DwellDetectionTests.swift"; sourceTree = "<group>"; };
+		81711AE72D886E46F9B0898D /* DwellDetectionFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "DwellDetectionFixtures.swift"; path = "Data/Domain/DwellDetectionFixtures.swift"; sourceTree = "<group>"; };
+		8DD5ADAE90E7EE1AD4096536 /* DeterministicDwellDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "DeterministicDwellDetector.swift"; path = "Data/Domain/DeterministicDwellDetector.swift"; sourceTree = "<group>"; };
+		2674DA915B3D3597B781FC69 /* DwellDetectionConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "DwellDetectionConfiguration.swift"; path = "Data/Domain/DwellDetectionConfiguration.swift"; sourceTree = "<group>"; };
+		7036A7A30D0597D7FB2EAED0 /* DwellDetection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "DwellDetection.swift"; path = "Data/Domain/DwellDetection.swift"; sourceTree = "<group>"; };
 		C7B835A88FC797A9326142C8 /* ActivityInferenceIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ActivityInferenceIntegrationTests.swift"; sourceTree = "<group>"; };
 		294C5A010F9E0CC12DEE4E22 /* LocationSession+Pipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "LocationSession+Pipeline.swift"; path = "Data/Domain/LocationSession+Pipeline.swift"; sourceTree = "<group>"; };
 		B8241202A73D239B2C760204 /* LocationSessionActivityState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "LocationSessionActivityState.swift"; path = "Data/Domain/LocationSessionActivityState.swift"; sourceTree = "<group>"; };
@@ -714,6 +724,10 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				81711AE72D886E46F9B0898D /* DwellDetectionFixtures.swift */,
+				8DD5ADAE90E7EE1AD4096536 /* DeterministicDwellDetector.swift */,
+				2674DA915B3D3597B781FC69 /* DwellDetectionConfiguration.swift */,
+				7036A7A30D0597D7FB2EAED0 /* DwellDetection.swift */,
 				294C5A010F9E0CC12DEE4E22 /* LocationSession+Pipeline.swift */,
 				B8241202A73D239B2C760204 /* LocationSessionActivityState.swift */,
 				20B863B432CA5928375D5F37 /* ActivityInferencePresentation.swift */,
@@ -991,6 +1005,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				E499EE9C1D5955908B6F690F /* DwellDetectionTests.swift */,
 				C7B835A88FC797A9326142C8 /* ActivityInferenceIntegrationTests.swift */,
 				1A7B28E1203ADFDFDE1421F4 /* DeterministicActivityInferenceTests.swift */,
 				94B8B006DD18988DFC953F6A /* ActivityInferenceTests.swift */,
@@ -1191,6 +1206,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				D7E509996420AD98056757EE /* DwellDetectionFixtures.swift in Sources */,
+				60DC3C1267E2A8DC071E84BA /* DeterministicDwellDetector.swift in Sources */,
+				42536E3666A23BC615785736 /* DwellDetectionConfiguration.swift in Sources */,
+				B44B422AA5FC3F4A070AC831 /* DwellDetection.swift in Sources */,
 				7343A8F1430553EA9830B820 /* LocationSession+Pipeline.swift in Sources */,
 				12A455BFBB157624250B9D47 /* LocationSessionActivityState.swift in Sources */,
 				BF05027BCBBD92D18A9EC6C0 /* ActivityInferencePresentation.swift in Sources */,
@@ -1459,6 +1478,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				575A220DCBD5C58E1C8EDAF5 /* DwellDetectionTests.swift in Sources */,
 				DC1DBF618C46AC1D30D43E9A /* ActivityInferenceIntegrationTests.swift in Sources */,
 				2C7535D963BC599C82325F8B /* DeterministicActivityInferenceTests.swift in Sources */,
 				DE33E834EBA1BCFF81585C9B /* ActivityInferenceTests.swift in Sources */,

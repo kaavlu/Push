@@ -1,103 +1,108 @@
-# Honest Empty States Across Live Surfaces (Issue #49)
+# Issue #99 — Deterministic Dwell Detection (I1)
 
 ## Goal
-Replace blank, misleading, or prototype-looking live surfaces with intentional empty states
-when live data is empty or deferred — without building presence, Feed, or History backends.
 
-## Design
-Full product contract, phase model, and surface rules:
-`docs/superpowers/specs/2026-07-20-honest-empty-states-design.md`
+Add an independently testable, deterministic dwell detector that consumes validated location fixes and tracks whether the user has stopped long enough for a meaningful dwell. Wire it into `LocationSession` **without** changing activity labels, Ghost behavior, publishing cadence, availability, DB schema, or UI.
 
-## Surfaces (summary)
-- **Map:** empty overlay + Add friends when no friend map content; loading/failed separate
-- **Friends:** empty + Add friends CTA; hidden-presence rows stay content; loading/failed
-- **Feed:** deferred cream screen, copy only (no CTA)
-- **Pushes calendar:** honest empty week footer; hide dead History; suppress empty stats
-- **Your/Active push empty cards:** keep existing
+## Why separate from activity inference
+
+`DeterministicActivityInferenceEngine` already classifies window-level motion (including `.stationary` / `.chilling`). Dwell detection answers a different question: **is there a stable place cluster with a start time and centroid?** That cluster is the foundation for later arrive/leave and venue work; it must not fold into activity labels yet.
+
+## Domain model
+
+### Phase
+
+```
+moving → candidateDwell → dwelling
+                ↓              ↓
+             moving         moving
+```
+
+| Phase | Meaning |
+|---|---|
+| `moving` | Not building a dwell (transit, insufficient evidence, or exited). |
+| `candidateDwell` | Low-motion cluster forming; not yet confirmed. |
+| `dwelling` | Confirmed dwell with a stable centroid and duration. |
+
+### Confirmed / candidate snapshot fields
+
+When phase is `candidateDwell` or `dwelling`, expose:
+
+- Stable centroid (lat / lon)
+- Start time (first accepted inlier of this cluster)
+- Last confirmed time (last accepted inlier)
+- Duration (`lastConfirmed − start`)
+- Sample count (accepted inliers only)
+- Representative accuracy (mean horizontal accuracy of inliers)
+
+## Algorithm (deterministic, incremental)
+
+Process one `LocationObservation` at a time (session-friendly). No Core Location types.
+
+1. **Quality gate** — drop samples with non-finite coords, non-positive accuracy, accuracy worse than `maxHorizontalAccuracyMeters`, or reported speed above `maxSpeedMetersPerSecond`. Dropped samples do not advance or reset state.
+2. **`moving`** — first quality sample starts a `candidateDwell` seed (centroid = sample, count = 1).
+3. **`candidateDwell`**
+   - Inlier if great-circle distance to current centroid ≤ `dwellRadiusMeters` and speed OK.
+   - Inlier → append, bump count / lastConfirmed, recompute centroid from unlocked inliers only (first `centroidLockSampleCount` samples; then freeze).
+   - Outlier → `consecutiveOutliers++`; if > `maxConsecutiveOutliers`, reset to `moving`.
+   - Promote to `dwelling` when `sampleCount ≥ minimumSampleCount` **and** duration ≥ `minimumDwellDuration`. Freeze centroid at promotion.
+4. **`dwelling`**
+   - Inlier → update lastConfirmed, count, representative accuracy; **do not** wander the centroid.
+   - Outlier streak beyond `maxConsecutiveOutliers` → `moving` (dwell ends). Brief GPS blips do not end the dwell.
+5. **Single fix / brief stop / walk-by** never promote: min samples ≥ 3 and min duration (default 3 minutes) block traffic lights and pass-throughs.
+
+## Configuration (`DwellDetectionConfiguration`)
+
+| Constant | Default | Rationale |
+|---|---|---|
+| `dwellRadiusMeters` | 40 | Room-scale cluster; wider than typical pedestrian GPS jitter |
+| `minimumDwellDuration` | 180 s | Longer than typical red light; shorter than “hanging out” |
+| `minimumSampleCount` | 3 | Single/double fix cannot confirm |
+| `maxHorizontalAccuracyMeters` | 50 | Stricter than pipeline accept (100 m) |
+| `maxSpeedMetersPerSecond` | 0.5 | Reject clearly moving samples |
+| `maxConsecutiveOutliers` | 2 | Tolerate GPS blips without reset |
+| `centroidLockSampleCount` | 5 | Stabilize centroid early; freeze on confirm |
+
+All thresholds live in one enum — no magic numbers in the detector.
+
+## Pipeline integration
+
+- `LocationSession` owns a `DeterministicDwellDetector` (injectable for tests).
+- After a validator accept in `process(_:)`, call `dwellDetector.process(...)` and store the latest `DwellDetectionState`.
+- **Do not** feed dwell into `ActivityInferencePresentation`, drafts, sync, Ghost, or availability.
+- Reset detector on `shutdown()`.
+- Test hooks only: expose latest phase / confirmed snapshot for unit tests.
+
+## Non-goals (this issue)
+
+- Venue lookup / reverse geocode
+- Arrival / departure events or friend-facing copy
+- Mapping dwell → `.chilling` or any activity label
+- Database / Realtime / presence draft fields
+- UI
 
 ## Acceptance
-See design doc; focused suites: `EmptySurfaceTests`, related VM suites; mock seed stays populated.
 
----
+| Criterion | Verification |
+|---|---|
+| Sustained stationary cluster → one stable `dwelling` | Fixture sequence ≥ min duration + samples |
+| Single fix / short stop / walk-by → never `dwelling` | Unit cases |
+| GPS drift inside radius does not reset start or wander centroid after lock | Centroid frozen; start time stable |
+| Traffic-light-length stop stays `candidateDwell` or `moving` | Duration < minimum |
+| Activity labels + publish path unchanged | Session integration test: drafts still from activity engine only |
 
-# Block / Unblock User (Issue #52)
+## Tests
 
-## Goal
-Allow a user to block another so further **direct** social interaction is impossible
-(backend-enforced). Unblock removes the restriction but does **not** restore friendship
-or reopen closed requests.
+- `DwellDetectionTests` — pure domain (state machine + fixtures).
+- Light `LocationSession` coverage that accepted fixes update dwell state without changing inferred activity application.
 
-## Contract
-- Directed `public.user_blocks` + `private.is_blocked` (bidirectional) + SECURITY DEFINER
-  RPCs: `block_user` / `unblock_user` / `list_blocked_users` (migration `0016`).
-- Guards on friend request, resolve, search, create_group invitees, and direct push
-  invitees; shared group memberships and historical pushes/groups are not mutated.
-- App API on `FriendRepository`: `blockUser` / `unblockUser` / `blockedUsers` →
-  `[BlockedPerson]`. Mock tears down friendship + pending requests; live RPCs +
-  `notifyFriendshipsChanged`. Soft-hide blocked-pair alerts/pickers.
-- UI: Friends expand **Block** + confirm (no optimistic remove; `ActionErrorBanner`);
-  Profile → Blocked list → Unblock (`fullScreenCover`).
-- Full design: `docs/superpowers/specs/2026-07-20-block-unblock-user-design.md`.
+## Files
 
-## Acceptance
-See design doc acceptance criteria. Focused suites: `BlockUserTests`, plus regression
-on DataLayer / LiveDataStore / Alerts; `scripts/test.sh build`.
-
----
-
-# Complete Group Lifecycle (Issue #43)
-
-## Goal
-Finish live group lifecycle after create + invite accept/deny (`0011`): owners/members
-manage groups from Group Detail; photos persist via Storage; backend-enforced permissions.
-
-## Contract (summary)
-- Design: `docs/superpowers/specs/2026-07-20-complete-group-lifecycle-design.md`
-- Plan: `docs/superpowers/plans/2026-07-20-complete-group-lifecycle.md`
-- Migration `0015_group_lifecycle`: `SECURITY DEFINER` RPCs (rename/photo/invite/cancel/
-  remove/leave/transfer/delete) + public `group-photos` bucket; no broad client writes
-  on `groups` / `group_memberships`.
-- Client: `GroupRepository` lifecycle methods; mock mirrors `0015` rules; live via
-  `SupabaseGroupRepository` → `LiveDataStore` → RPCs + `GroupPhotoStoring` (orphan rollback).
-- UI: Group Detail management hub; `GroupsViewModel` mutations + `ActionErrorBanner`.
-- Hard delete groups; `pushes.group_id` SET NULL; owner leave requires transfer if others remain.
-
-## Acceptance
-See design doc acceptance 1–16; unit coverage in `GroupLifecycleTests` / related suites.
-
----
-
-# Spec: Complete the Push Lifecycle and Live History (Issue #45)
-
-**Design:** `docs/superpowers/specs/2026-07-20-complete-push-lifecycle-design.md`  
-**Issue:** https://github.com/kaavlu/Push/issues/45
-
-## Goal
-
-Finish live Push lifecycle (active → happening → completed), derive History/calendar from real push rows, and wire History › to a month list + read-only detail — without rebuilding create/edit/RSVP/cancel/delete.
-
-## Locked decisions
-
-1. **Derive History on read** from `pushes` + `push_responses` (no hangout table).
-2. **Active** while `cancelledAt == nil && now < expiresAt` (time-only).
-3. **Cancelled** excluded from Active, History, and calendar.
-4. **Lifecycle phases** derived on read; DB `state` not list source of truth.
-5. **Edit + RSVP** allowed until expiry (including after `startsAt`).
-6. **History ›** opens month History list → item detail.
-7. Participants in History = `.in` respondents (not physical attendance).
-8. Mock keeps seed hangouts; live never uses them.
-
-## Deliverables
-
-- [x] `PushLifecycle` + history/hangout builder (pure), unit tests
-- [x] `activePlans` / `historicalPlans` / `pastHangouts` in Local + Supabase repos
-- [x] `PushTimingFormatter` uses derived happening for “now”
-- [x] PlansViewModel: month-change reload; History route/state
-- [x] History list + read-only detail UI; wire History ›
-- [x] Remove/unwire `ManagePushView` stub
-- [x] Focused tests + build
-- [ ] Manual two-account checklist (live env)
-
-## Out of scope
-
-Presence/places backend, attendance, feed, realtime, notifications, weekly recap storytelling, materialized hangouts, cron.
+| Path | Role |
+|---|---|
+| `Push/Data/Domain/DwellDetection.swift` | Phase, snapshot, result, protocol, no-op |
+| `Push/Data/Domain/DwellDetectionConfiguration.swift` | Thresholds |
+| `Push/Data/Domain/DeterministicDwellDetector.swift` | State machine |
+| `Push/Data/Domain/DwellDetectionFixtures.swift` | Deterministic sequences |
+| `PushTests/DwellDetectionTests.swift` | Unit tests |
+| `LocationSession` / `+Pipeline` | Silent wiring + reset |

@@ -40,6 +40,9 @@ final class LocationSession: LocationSessioning {
     var publishSnapshot = PresencePublishSnapshot()
     var pendingTrigger: PresenceSyncTrigger?
     var activityState = LocationSessionActivityState()
+    /// Parallel dwell tracking (Issue #99). Does not affect drafts or labels.
+    var dwellDetector: any DwellDetecting
+    var dwellState: DwellDetectionState = .moving
 
     /// Exposed for tests that need the same sync instance assertions.
     let presenceSync: PresenceSyncing
@@ -49,6 +52,7 @@ final class LocationSession: LocationSessioning {
         validator: LocationObservationValidating = LocationObservationValidator(),
         inferrer: PresenceInferring = PassthroughPresenceInferrer(),
         activityEngine: ActivityInferenceEngine = DeterministicActivityInferenceEngine(),
+        dwellDetector: any DwellDetecting = DeterministicDwellDetector(),
         sync: PresenceSyncing = NoOpPresenceSync(),
         availabilityProvider: @escaping @MainActor () -> FriendAvailabilityState? = { nil },
         isPresencePublishingEnabled: Bool = true,
@@ -61,6 +65,7 @@ final class LocationSession: LocationSessioning {
         self.validator = validator
         self.inferrer = inferrer
         self.activityEngine = activityEngine
+        self.dwellDetector = dwellDetector
         self.sync = sync
         self.presenceSync = sync
         self.availabilityProvider = availabilityProvider
@@ -142,6 +147,8 @@ final class LocationSession: LocationSessioning {
         publishSnapshot = PresencePublishSnapshot()
         pendingTrigger = nil
         activityState.reset()
+        dwellDetector.reset()
+        dwellState = .moving
         provider.setAuthorizationChangeHandler(nil)
         provider.stopUpdating()
         provider.prepareForShutdown()
@@ -216,6 +223,9 @@ final class LocationSession: LocationSessioning {
     var recentActivityObservationsForTesting: [LocationObservation] {
         activityState.recentObservations
     }
+
+    /// Test hook — latest dwell phase/cluster (Issue #99; not presence-facing).
+    var dwellStateForTesting: DwellDetectionState { dwellState }
 
     // MARK: - Private
 
