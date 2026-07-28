@@ -118,10 +118,18 @@ struct PushMediaCarousel: View {
         }
 
         guard !Task.isCancelled, items.count > 1, isAutoPlaying, isPrimarilyVisible else { return }
+
+        // Hold the active segment at full fill, then advance so it becomes a
+        // completed segment (stays full until the loop returns to slide 0).
+        // Never zero progress while this index is still selected — that flashes empty.
+        segmentProgress = 1
         let next = (selectedIndex + 1) % items.count
-        segmentProgress = 0
-        withAnimation(.easeInOut(duration: FeedMediaLayout.autoAdvanceAnimationDuration)) {
+        var handoff = Transaction()
+        handoff.disablesAnimations = true
+        withTransaction(handoff) {
             selectedIndex = next
+            // New active segment starts empty; prior indices render as completed.
+            segmentProgress = 0
         }
     }
 
@@ -342,6 +350,22 @@ struct FeedMediaProgressBar: View {
     }
 
     private func fillAmount(for index: Int) -> CGFloat {
+        FeedMediaProgressFill.amount(
+            for: index,
+            selectedIndex: selectedIndex,
+            currentProgress: currentProgress
+        )
+    }
+}
+
+/// Pure fill rules for Stories-style segments (testable).
+enum FeedMediaProgressFill {
+    /// Completed segments stay full until the carousel loops back to index 0.
+    static func amount(
+        for index: Int,
+        selectedIndex: Int,
+        currentProgress: CGFloat
+    ) -> CGFloat {
         if index < selectedIndex { return 1 }
         if index == selectedIndex { return min(1, max(0, currentProgress)) }
         return 0
@@ -372,6 +396,8 @@ private struct FeedMediaProgressSegment: View {
         }
         .frame(height: FeedMediaLayout.progressHeight)
         .frame(maxWidth: .infinity)
+        // Avoid implicit animations rewinding a completed segment to empty.
+        .transaction { $0.animation = nil }
     }
 }
 

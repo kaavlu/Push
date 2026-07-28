@@ -143,6 +143,42 @@ final class FeedMediaCarouselTests: XCTestCase {
         XCTAssertGreaterThan(FeedMediaLayout.progressTickNanoseconds, 0)
     }
 
+    func testCompletedProgressSegmentsStayFullUntilLoop() {
+        // On slide 2 of 3 with half-filled active segment:
+        XCTAssertEqual(
+            FeedMediaProgressFill.amount(for: 0, selectedIndex: 2, currentProgress: 0.5),
+            1,
+            accuracy: 0.001
+        )
+        XCTAssertEqual(
+            FeedMediaProgressFill.amount(for: 1, selectedIndex: 2, currentProgress: 0.5),
+            1,
+            accuracy: 0.001
+        )
+        XCTAssertEqual(
+            FeedMediaProgressFill.amount(for: 2, selectedIndex: 2, currentProgress: 0.5),
+            0.5,
+            accuracy: 0.001
+        )
+        // After looping to slide 0, prior segments clear.
+        XCTAssertEqual(
+            FeedMediaProgressFill.amount(for: 1, selectedIndex: 0, currentProgress: 0.1),
+            0,
+            accuracy: 0.001
+        )
+        // Handoff: finished segment becomes completed (full) when index advances.
+        XCTAssertEqual(
+            FeedMediaProgressFill.amount(for: 0, selectedIndex: 1, currentProgress: 0),
+            1,
+            accuracy: 0.001
+        )
+        XCTAssertEqual(
+            FeedMediaProgressFill.amount(for: 1, selectedIndex: 1, currentProgress: 0),
+            0,
+            accuracy: 0.001
+        )
+    }
+
     func testPrimaryVisibilityRequiresMajorityOnScreen() {
         let visible = CGRect(x: 0, y: 0, width: 390, height: 700)
         let fullyOnScreen = CGRect(x: 16, y: 100, width: 358, height: 400)
