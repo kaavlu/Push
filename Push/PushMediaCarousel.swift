@@ -198,35 +198,44 @@ private struct FeedMediaMetadataOverlay: View {
 
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
-            VStack(alignment: .leading, spacing: FeedMediaLayout.metadataTextStackSpacing) {
-                Text(locationTitle)
-                    .font(FeedMediaMetadataStyle.locationFont)
-                    .foregroundStyle(FeedMediaMetadataStyle.textColor)
-                    .lineLimit(1)
-                    .minimumScaleFactor(PushOpacityTokens.minimumTextScale)
-                    .shadow(
-                        color: Color.black.opacity(0.35),
-                        radius: FeedMediaMetadataStyle.locationShadowRadius,
-                        y: FeedMediaMetadataStyle.locationShadowY
-                    )
-                Text(dateTimeLabel)
-                    .font(FeedMediaMetadataStyle.dateTimeFont)
-                    .foregroundStyle(
-                        FeedMediaMetadataStyle.textColor.opacity(FeedMediaMetadataStyle.dateTimeOpacity)
-                    )
-                    .lineLimit(1)
-                    .minimumScaleFactor(PushOpacityTokens.minimumTextScale)
-                    .shadow(
-                        color: Color.black.opacity(0.30),
-                        radius: FeedMediaMetadataStyle.locationShadowRadius,
-                        y: FeedMediaMetadataStyle.locationShadowY
-                    )
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .accessibilityElement(children: .combine)
-
+            FeedMediaLocationTimeChip(
+                locationTitle: locationTitle,
+                dateTimeLabel: dateTimeLabel
+            )
+            Spacer(minLength: 8)
             FeedMediaOverflowButton(action: onOverflowMenu)
         }
+    }
+}
+
+/// Single liquid-glass chip for location + time — map filter-pill family (DS-011).
+private struct FeedMediaLocationTimeChip: View {
+    let locationTitle: String
+    let dateTimeLabel: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: FeedMediaLayout.metadataTextStackSpacing) {
+            Text(locationTitle)
+                .font(FeedMediaMetadataStyle.locationFont)
+                .foregroundStyle(FeedMediaMetadataStyle.textColor)
+                .lineLimit(1)
+                .minimumScaleFactor(PushOpacityTokens.minimumTextScale)
+            Text(dateTimeLabel)
+                .font(FeedMediaMetadataStyle.dateTimeFont)
+                .foregroundStyle(
+                    FeedMediaMetadataStyle.textColor.opacity(FeedMediaMetadataStyle.dateTimeOpacity)
+                )
+                .lineLimit(1)
+                .minimumScaleFactor(PushOpacityTokens.minimumTextScale)
+        }
+        .padding(.horizontal, FeedMediaMetadataStyle.chipHorizontalPadding)
+        .padding(.vertical, FeedMediaMetadataStyle.chipVerticalPadding)
+        .fixedSize(horizontal: true, vertical: true)
+        .pushMapControlGlass(
+            cornerRadius: FeedMediaMetadataStyle.chipCornerRadius,
+            treatment: .filterPill
+        )
+        .accessibilityElement(children: .combine)
     }
 }
 

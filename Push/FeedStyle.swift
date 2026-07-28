@@ -95,19 +95,24 @@ enum FeedMediaPlaceholderStyle {
     static let spinnerTint = PushColorPalette.Accent.sunbeam
 }
 
-/// Top chrome over media — high-contrast type + subtle scrim (Feed media only).
+/// Top chrome over media — liquid glass metadata chip + overflow (Feed media only).
 enum FeedMediaMetadataStyle {
     /// Matches Plans/card title weight, sized up for media overlay readability.
     static let locationFont = Font.headline.weight(.semibold)
     /// Matches Plans metadata row (subheadline), under the location line.
     static let dateTimeFont = Font.subheadline.weight(.medium)
-    static let textColor = Color.white
-    static let dateTimeOpacity = 0.92
-    static let locationShadowRadius: CGFloat = 2
-    static let locationShadowY: CGFloat = 1
-    static let scrimTopOpacity = 0.52
-    static let scrimMidOpacity = 0.22
+    /// Walnut on liquid glass — same as map filter pill / top controls.
+    static let textColor = PushControlColors.activeForeground
+    static let dateTimeOpacity = 0.88
+    static let scrimTopOpacity = 0.40
+    static let scrimMidOpacity = 0.16
     static let scrimMidStop = 0.55
+
+    /// Map filter-pill family radius (`TopControlLayout.cornerRadius` / segmented track).
+    static let chipCornerRadius = PushRadiusTokens.segmentedTrack
+    static let chipHorizontalPadding: CGFloat = 14
+    static let chipVerticalPadding: CGFloat = 10
+    static let chipMaxWidthFraction: CGFloat = 0.72
 
     /// Same metrics as map `TopIconButton` / profile control (liquid map glass).
     static let overflowButtonSize: CGFloat = 44
