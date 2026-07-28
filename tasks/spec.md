@@ -1,85 +1,51 @@
-# Issue #101 — Resolve Confirmed Dwells to Places (I3)
+# Issue #9 — Feed shell (structural)
 
 ## Goal
 
-Resolve a confirmed dwell centroid to nearby real-world POIs and attach a structured result to the active dwell. Do **not** yet convert results into friend-facing activity copy (`At Starbucks` is a later issue).
+Ship the first structural Feed surface: entry from bottom nav, header actions, Pushes/Now segmented control, friend/group filter chips, and polished placeholders. No Push cards, carousel, ranking, or live feed data.
 
-Builds on #99 (cluster) and #100 (arrival/departure).
+## Confirmed product decisions
 
-## Abstraction
-
-```
-PlaceResolving
-  resolve(PlaceResolutionRequest) async throws → PlaceResolutionOutcome
-```
-
-- Domain protocol is free of MapKit / Core Location types (Doubles only).
-- Production: `MapKitPlaceResolver` (POI search + reverse-geocode fallback).
-- Mock / tests: `NoOpPlaceResolver`, `FixedPlaceResolver`.
-- Ranking is pure (`PlaceCandidateRanker`) so selection rules are unit-tested without MapKit.
-
-## Models
-
-| Type | Role |
+| Topic | Decision |
 |---|---|
-| `ResolvedPlaceCandidate` | id, name, coordinate, category, distance, score |
-| `GeographicPlaceContext` | reverse-geocode fallback (address / locality) |
-| `PlaceResolutionOutcome` | status + optional selected + ranked candidates + fallback |
-| `PlaceResolutionRequest` | dwell session id, centroid, accuracy, dwell radius, previous id |
+| Subtitle | None for now (title only) |
+| Header actions | `PushCircleIconButton` glass circles for filter/settings + alerts |
+| Segment control while scrolling | Pinned under header |
+| Filter chip row while scrolling | Scrolls away with content |
+| Center `+` on Feed | No-op for this issue (visible, does nothing) |
 
-### Status
+## Scope
 
-| Status | Meaning |
-|---|---|
-| `resolved` | One confident named POI selected |
-| `ambiguous` | Multiple plausible POIs — **no** selection |
-| `geographicOnly` | No confident POI; reverse-geocode context only |
-| `empty` | Nothing useful nearby |
+- Replace deferred empty shell (`FeedDeferredView`) with a real Feed page structure
+- Title: **Feed**
+- Trailing: filter/settings (no-op for now) + alerts (opens existing Alerts; unread badge)
+- Segmented control: **Pushes** (default, first) · **Now**
+- Horizontally scrollable filter chips (fixture: All, India, Michigan, Exec)
+- Filter selection persists across tab switches in-session
+- Pushes tab: lightweight placeholder (“coming next”)
+- Now tab: polished empty state (title + one sentence)
+- Cream Friends-page treatment; shared bottom nav; scroll-safe bottom clearance
+- Contextual `+` on Feed: no-op
 
-Never auto-pick nearest when top scores are close (`ambiguityScoreDelta`).
+## Out of scope
 
-## When to resolve
+Push cards, media carousel, detail, creation, uploads, backend feed events, ranking, Who’s Down / live activity / inference feed.
 
-| Trigger | Action |
-|---|---|
-| Dwell `.arrived` | Resolve for that session |
-| Centroid moves ≥ `centroidChangeReresolveMeters` while dwelling | Re-resolve |
-| Prior failure while still dwelling | Retry up to `maxResolveAttempts` |
-| Every GPS fix | **Do not** lookup |
-| `.departed` / shutdown | Cancel in-flight; clear active outcome |
+## Architecture
 
-## Ranking signals
-
-- Distance from dwell centroid (primary)
-- Representative accuracy + dwell radius (inside likely area boosts; far outside penalized)
-- Optional category weight (light)
-- Previous confirmed place id boost when available
-- Ambiguity gate: require score ≥ `minScoreForSelection` **and** margin over runner-up ≥ `ambiguityScoreDelta`
-
-Poor accuracy lowers effective selection (stricter) rather than inventing a place.
-
-## Integration
-
-- `LocationSession` owns `placeResolver`, `activePlaceResolution`, lookup bookkeeping.
-- Outcome is **internal** — not written to presence drafts, activity labels, Ghost, or UI in this issue.
-- Failures log-safe and leave the existing presence pipeline unchanged.
-- Factory: live/Core Location path → `MapKitPlaceResolver`; mock → `NoOpPlaceResolver`.
-
-## Non-goals
-
-- “At {place}” activity strings
-- Eating / workout / date inference
-- Availability, place correction UI, home/work learning, co-presence, ML, map redesign
+- **MVVM:** `FeedViewModel` owns selected tab + selected filter
+- **View:** `FeedView` render-only; cream page via existing DS components
+- **Models:** `FeedTab`, fixture filter items (not seed/repo)
+- **Fixtures only** for filter labels — no `FeedRepository` wiring this issue
+- **Navigation:** still embedded under `ContentView` tab overlay (not fullScreenCover)
+- Reuse: `PushCreamPageHeader`, `PushIvorySegmentedControl`, `PushIvoryFilterChipRow`, `PushCircleIconButton`, `EmptySurfaceView` / `EmptySurfaceCopy`, `FriendsBackground` / `FriendsLayout` spacing where shared
 
 ## Acceptance
 
-- Arrival triggers one lookup (deduped for same dwell/centroid)
-- Clear match → `resolved` + selected candidate
-- Ambiguous neighbors → `ambiguous`, no selected
-- No POIs → geographic fallback or empty
-- Departure clears active place context
-- Architecture swappable via `PlaceResolving`
-
-## Tests
-
-`PlaceResolutionTests`: ranker + session orchestration with `FixedPlaceResolver`.
+- Feed reachable from bottom nav
+- Pushes first and default-selected
+- Now shows polished empty state
+- Header actions render; alerts badge when unread
+- Filters horizontal-scroll; selection visually clear and tab-persistent
+- Fits existing Push cream UI; no Push card/carousel behavior
+- Center `+` on Feed is a no-op

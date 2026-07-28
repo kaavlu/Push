@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		07E9BD4302FE43DAE64BD769 /* FeedViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01FA649DB6CA6F78970E1E4B /* FeedViewModelTests.swift */; };
+		FE789DDB196D66C764240D1C /* FeedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E50500865C9684FC45D1A25F /* FeedView.swift */; };
+		08A903942FAA3F3D069D8077 /* FeedViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCDF1CA2C6755A28452D7DD8 /* FeedViewModel.swift */; };
+		CC5C7A465CD8C99DB902045A /* FeedStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23057F6BD67CAE9A4143C782 /* FeedStyle.swift */; };
+		E6BA810B23C4F51876D34D7A /* FeedModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDF355D94B44E29293CF522E /* FeedModels.swift */; };
 		9C1D39122A8F059A477741F4 /* PlaceResolutionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5CE35E0C7E375B1DEB6E1BD /* PlaceResolutionTests.swift */; };
 		A04A9F1C134D339AD3AFEFDE /* MapKitPlaceResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE90F1F4343AB792A09619E9 /* MapKitPlaceResolver.swift */; };
 		556CB72D6E09ABC1E391FE15 /* LocationSession+PlaceResolution.swift in Sources */ = {isa = PBXBuildFile; fileRef = 795FBF52B55FA09A19F3497B /* LocationSession+PlaceResolution.swift */; };
@@ -115,7 +120,6 @@
 		B6C29F693FC64B91A5D35D6E /* FakeAuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37FB45BF69501B533041420D /* FakeAuthService.swift */; };
 		E36337AF64C8EF85F8D06D2F /* AuthSocialButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B466898FBC1D567AD990E5 /* AuthSocialButtons.swift */; };
 		A7C8880D4143D13C8566DD41 /* SocialAuthSignIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FDFA7C3A655A371198C45EE /* SocialAuthSignIn.swift */; };
-		11281DC2A4345BAFE89579C1 /* FeedDeferredView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E7D640EAC9375F965E3D9B /* FeedDeferredView.swift */; };
 		D16A4EA302ECBC5BB7B704C7 /* MapEmptyOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA963421CE09159A29FCE55A /* MapEmptyOverlay.swift */; };
 		117AA115D49FD170A614EDD6 /* EmptySurfaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84123F72AC63382EDA610127 /* EmptySurfaceView.swift */; };
 		5E64B61FCD74C989AE6A113F /* EmptySurfaceModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4B96E9283F20FF6B2DC41D6 /* EmptySurfaceModels.swift */; };
@@ -356,6 +360,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		01FA649DB6CA6F78970E1E4B /* FeedViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedViewModelTests.swift"; sourceTree = "<group>"; };
+		E50500865C9684FC45D1A25F /* FeedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedView.swift"; sourceTree = "<group>"; };
+		DCDF1CA2C6755A28452D7DD8 /* FeedViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedViewModel.swift"; sourceTree = "<group>"; };
+		23057F6BD67CAE9A4143C782 /* FeedStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedStyle.swift"; sourceTree = "<group>"; };
+		BDF355D94B44E29293CF522E /* FeedModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedModels.swift"; sourceTree = "<group>"; };
 		C5CE35E0C7E375B1DEB6E1BD /* PlaceResolutionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PlaceResolutionTests.swift"; sourceTree = "<group>"; };
 		AE90F1F4343AB792A09619E9 /* MapKitPlaceResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "MapKitPlaceResolver.swift"; path = "Data/Location/MapKitPlaceResolver.swift"; sourceTree = "<group>"; };
 		795FBF52B55FA09A19F3497B /* LocationSession+PlaceResolution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "LocationSession+PlaceResolution.swift"; path = "Data/Domain/LocationSession+PlaceResolution.swift"; sourceTree = "<group>"; };
@@ -464,7 +473,6 @@
 		37FB45BF69501B533041420D /* FakeAuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "FakeAuthService.swift"; path = "Data/Supabase/FakeAuthService.swift"; sourceTree = "<group>"; };
 		23B466898FBC1D567AD990E5 /* AuthSocialButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "AuthSocialButtons.swift"; path = "Auth/AuthSocialButtons.swift"; sourceTree = "<group>"; };
 		3FDFA7C3A655A371198C45EE /* SocialAuthSignIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SocialAuthSignIn.swift"; path = "Data/Supabase/SocialAuthSignIn.swift"; sourceTree = "<group>"; };
-		D3E7D640EAC9375F965E3D9B /* FeedDeferredView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedDeferredView.swift"; sourceTree = "<group>"; };
 		FA963421CE09159A29FCE55A /* MapEmptyOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MapEmptyOverlay.swift"; sourceTree = "<group>"; };
 		84123F72AC63382EDA610127 /* EmptySurfaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EmptySurfaceView.swift"; sourceTree = "<group>"; };
 		F4B96E9283F20FF6B2DC41D6 /* EmptySurfaceModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EmptySurfaceModels.swift"; sourceTree = "<group>"; };
@@ -742,6 +750,10 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				E50500865C9684FC45D1A25F /* FeedView.swift */,
+				DCDF1CA2C6755A28452D7DD8 /* FeedViewModel.swift */,
+				23057F6BD67CAE9A4143C782 /* FeedStyle.swift */,
+				BDF355D94B44E29293CF522E /* FeedModels.swift */,
 				AE90F1F4343AB792A09619E9 /* MapKitPlaceResolver.swift */,
 				795FBF52B55FA09A19F3497B /* LocationSession+PlaceResolution.swift */,
 				74B8E7C90BAAF4072EE94F27 /* PlaceCandidateRanker.swift */,
@@ -830,7 +842,6 @@
 				37FB45BF69501B533041420D /* FakeAuthService.swift */,
 				23B466898FBC1D567AD990E5 /* AuthSocialButtons.swift */,
 				3FDFA7C3A655A371198C45EE /* SocialAuthSignIn.swift */,
-				D3E7D640EAC9375F965E3D9B /* FeedDeferredView.swift */,
 				FA963421CE09159A29FCE55A /* MapEmptyOverlay.swift */,
 				84123F72AC63382EDA610127 /* EmptySurfaceView.swift */,
 				F4B96E9283F20FF6B2DC41D6 /* EmptySurfaceModels.swift */,
@@ -1030,6 +1041,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				01FA649DB6CA6F78970E1E4B /* FeedViewModelTests.swift */,
 				C5CE35E0C7E375B1DEB6E1BD /* PlaceResolutionTests.swift */,
 				59BFB84DFE4794603A8F9B7A /* DwellLifecycleTests.swift */,
 				E499EE9C1D5955908B6F690F /* DwellDetectionTests.swift */,
@@ -1233,6 +1245,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				FE789DDB196D66C764240D1C /* FeedView.swift in Sources */,
+				08A903942FAA3F3D069D8077 /* FeedViewModel.swift in Sources */,
+				CC5C7A465CD8C99DB902045A /* FeedStyle.swift in Sources */,
+				E6BA810B23C4F51876D34D7A /* FeedModels.swift in Sources */,
 				A04A9F1C134D339AD3AFEFDE /* MapKitPlaceResolver.swift in Sources */,
 				556CB72D6E09ABC1E391FE15 /* LocationSession+PlaceResolution.swift in Sources */,
 				B034EB2688AF18264842FD29 /* PlaceCandidateRanker.swift in Sources */,
@@ -1321,7 +1337,6 @@
 				B6C29F693FC64B91A5D35D6E /* FakeAuthService.swift in Sources */,
 				E36337AF64C8EF85F8D06D2F /* AuthSocialButtons.swift in Sources */,
 				A7C8880D4143D13C8566DD41 /* SocialAuthSignIn.swift in Sources */,
-				11281DC2A4345BAFE89579C1 /* FeedDeferredView.swift in Sources */,
 				D16A4EA302ECBC5BB7B704C7 /* MapEmptyOverlay.swift in Sources */,
 				117AA115D49FD170A614EDD6 /* EmptySurfaceView.swift in Sources */,
 				5E64B61FCD74C989AE6A113F /* EmptySurfaceModels.swift in Sources */,
@@ -1512,6 +1527,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				07E9BD4302FE43DAE64BD769 /* FeedViewModelTests.swift in Sources */,
 				9C1D39122A8F059A477741F4 /* PlaceResolutionTests.swift in Sources */,
 				D7DE91453AE63066B14960A0 /* DwellLifecycleTests.swift in Sources */,
 				575A220DCBD5C58E1C8EDAF5 /* DwellDetectionTests.swift in Sources */,

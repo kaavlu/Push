@@ -1,17 +1,24 @@
-# Issue #101 — Resolve Confirmed Dwells to Places (I3)
+# Issue #9 — Feed shell
 
 ## Status
 
-- [x] Spec
-- [x] Domain types + `PlaceResolving` + config
-- [x] Pure `PlaceCandidateRanker`
-- [x] `MapKitPlaceResolver` + NoOp / Fixed
-- [x] `LocationSession` triggers (arrival / centroid / retry / clear)
-- [x] `PlaceResolutionTests` — 13 green
-- [x] Regression dwell + LocationSession green
+- [x] Clarifying design questions (user answers)
+- [x] Spec (`tasks/spec.md`)
+- [x] FeedModels / FeedViewModel / FeedStyle / FeedView
+- [x] Wire ContentView (replace deferred; + no-op on Feed)
+- [x] EmptySurface copy for Pushes/Now placeholders
+- [x] Optional filter-chip counts (title-only Feed fixtures)
+- [x] Remove `FeedDeferredView`
+- [x] Register Xcode sources + `FeedViewModelTests`
+- [x] Build + tests green
 - [x] Commit
 
-## Out of scope (later)
+## Decisions
 
-- Public “At {place}” activity labels
-- Draft / UI / availability changes
+| Topic | Choice |
+|---|---|
+| Subtitle | None |
+| Header actions | `PushCircleIconButton` glass circles |
+| Segment while scrolling | Pinned under header |
+| Filter chips while scrolling | Scroll with content |
+| Center `+` on Feed | No-op |

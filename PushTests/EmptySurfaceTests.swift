@@ -6,6 +6,8 @@ final class EmptySurfaceTests: XCTestCase {
     func testCopyIsHonestAndDistinct() {
         XCTAssertFalse(EmptySurfaceCopy.mapEmptyTitle.isEmpty)
         XCTAssertFalse(EmptySurfaceCopy.feedDeferredTitle.isEmpty)
+        XCTAssertFalse(EmptySurfaceCopy.feedPushesPlaceholderTitle.isEmpty)
+        XCTAssertFalse(EmptySurfaceCopy.feedNowEmptyTitle.isEmpty)
         XCTAssertNotEqual(EmptySurfaceCopy.mapEmptyTitle, EmptySurfaceCopy.failedTitle(surface: "map"))
         XCTAssertEqual(EmptySurfaceCopy.addFriendsAction, "Add friends")
         XCTAssertEqual(EmptySurfaceCopy.calendarEmptyFooter, "No hangouts this week")

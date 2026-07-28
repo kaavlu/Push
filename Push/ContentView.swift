@@ -78,7 +78,12 @@ struct ContentView: View {
             }
 
             if isFeedPresented {
-                FeedDeferredView()
+                FeedView(
+                    hasUnreadAlerts: alertsViewModel.hasUnreadAlerts,
+                    onOpenAlerts: {
+                        presentedRoute = .alerts
+                    }
+                )
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .transition(.opacity)
                     .zIndex(TabOverlayLayout.zIndex)
@@ -272,6 +277,11 @@ struct ContentView: View {
                 presentedRoute = .addFriend
                 return
             }
+            // Feed shell (Issue #9): + is intentionally a no-op until Feed create is defined.
+            if selectedNavigationItem == .feed {
+                isCreateMenuPresented = false
+                return
+            }
             isCreateMenuPresented.toggle()
             return
         }
@@ -322,7 +332,12 @@ struct ContentView: View {
         case .feed:
             // Feed is embedded under the bottom nav; keep a destination for
             // any residual MainMapRoute.feed presentation.
-            FeedDeferredView()
+            FeedView(
+                hasUnreadAlerts: alertsViewModel.hasUnreadAlerts,
+                onOpenAlerts: {
+                    presentedRoute = .alerts
+                }
+            )
         case .plans:
             // Pushes is embedded under the bottom nav; keep a destination for
             // any residual MainMapRoute.plans presentation.
