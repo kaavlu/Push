@@ -213,17 +213,28 @@ final class AddYoursViewModel: ObservableObject {
         isLoadingPicker = true
         defer { isLoadingPicker = false }
 
-        var next = items
+        var loaded: [AddYoursDraftItem] = []
+        loaded.reserveCapacity(min(batch.count, remainingSlots))
         for item in batch {
-            guard next.count < maxSelection else { break }
+            guard loaded.count < remainingSlots else { break }
             if let draft = await Self.loadDraft(from: item) {
-                next.append(draft)
+                loaded.append(draft)
             }
         }
-        items = next
-        if !next.isEmpty {
-            focusedIndex = next.count - 1
+        applyLoadedDrafts(loaded)
+    }
+
+    /// Appends drafts and focuses the first uploaded item (index 0).
+    func applyLoadedDrafts(_ drafts: [AddYoursDraftItem]) {
+        guard phase == .composing, !drafts.isEmpty else { return }
+        var next = items
+        for draft in drafts {
+            guard next.count < maxSelection else { break }
+            next.append(draft)
         }
+        items = next
+        // Always show the first media the user contributed, not the newest.
+        focusedIndex = 0
     }
 
     private static func loadDraft(from item: PhotosPickerItem) async -> AddYoursDraftItem? {

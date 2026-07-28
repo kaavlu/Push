@@ -79,6 +79,35 @@ final class AddYoursViewModelTests: XCTestCase {
         XCTAssertFalse(viewModel.canSubmit)
     }
 
+    func testApplyLoadedDraftsFocusesFirstUploadedItem() {
+        let viewModel = makeViewModel()
+        let first = draftPhoto()
+        let second = draftPhoto()
+        let third = draftVideo()
+
+        viewModel.applyLoadedDrafts([first, second, third])
+        XCTAssertEqual(viewModel.items.count, 3)
+        XCTAssertEqual(viewModel.focusedIndex, 0)
+        XCTAssertEqual(viewModel.focusedItem?.id, first.id)
+
+        // Adding more later still keeps focus on the original first upload.
+        let fourth = draftPhoto()
+        viewModel.selectItem(at: 2)
+        viewModel.applyLoadedDrafts([fourth])
+        XCTAssertEqual(viewModel.items.count, 4)
+        XCTAssertEqual(viewModel.focusedIndex, 0)
+        XCTAssertEqual(viewModel.focusedItem?.id, first.id)
+    }
+
+    func testSeedFocusesFirstItem() {
+        let first = draftPhoto()
+        let second = draftPhoto()
+        let viewModel = makeViewModel()
+        viewModel.seed(with: [first, second])
+        XCTAssertEqual(viewModel.focusedIndex, 0)
+        XCTAssertEqual(viewModel.focusedItem?.id, first.id)
+    }
+
     func testSubmitTransitionsToSuccessWithImmediateTiming() async {
         let viewModel = makeViewModel()
         viewModel.seed(with: [draftPhoto(), draftVideo()])

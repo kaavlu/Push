@@ -2,8 +2,8 @@
 //  AddYoursView.swift
 //  Push
 //
-//  Single-screen Add Yours contribution flow. Layout mirrors Start Push:
-//  modal gradient, StartPushHeader, form-card media stage, fixed primary CTA.
+//  Single-screen Add Yours contribution flow. Cream-page header (title + close
+//  aligned like Feed/Pushes), form-card media stage, fixed primary CTA.
 //  Thumb strip stays pinned above the button — no scroll to manage selection.
 //
 
@@ -29,7 +29,7 @@ struct AddYoursView: View {
             PushModalBackground()
 
             VStack(spacing: 0) {
-                navBar
+                pageHeader
                     .padding(.horizontal, AddYoursLayout.horizontalPadding(layout))
                     .padding(.top, AddYoursLayout.navTopPadding)
                     .padding(.bottom, AddYoursLayout.navBottomPadding)
@@ -44,11 +44,13 @@ struct AddYoursView: View {
         .animation(PushMotion.contentCrossfade, value: viewModel.phase)
     }
 
-    // MARK: - Nav
+    // MARK: - Header (aligned with close, Pushes/Feed typography)
 
-    private var navBar: some View {
-        HStack {
-            Spacer(minLength: 0)
+    private var pageHeader: some View {
+        PushCreamPageHeader(
+            title: AddYoursCopy.title,
+            subtitle: viewModel.context.subtitle
+        ) {
             PushCircleIconButton(
                 systemImageName: "xmark",
                 accessibilityLabel: "Close"
@@ -65,8 +67,6 @@ struct AddYoursView: View {
     private var composingContent: some View {
         VStack(spacing: 0) {
             VStack(alignment: .leading, spacing: AddYoursLayout.headerToStageSpacing) {
-                header
-
                 AddYoursMediaStage(
                     item: viewModel.focusedItem,
                     isLoading: viewModel.isLoadingPicker,
@@ -109,22 +109,6 @@ struct AddYoursView: View {
             .padding(.horizontal, AddYoursLayout.horizontalPadding(layout))
             .padding(.bottom, AddYoursLayout.bottomPadding(layout))
         }
-    }
-
-    private var header: some View {
-        VStack(alignment: .leading, spacing: StartPushLayout.headerSpacing) {
-            StartPushHeader(
-                title: AddYoursCopy.title,
-                subtitle: viewModel.context.subtitle
-            )
-            if let detail = viewModel.context.contextDetail {
-                Text(detail)
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(PushControlColors.textTertiary)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .accessibilityElement(children: .combine)
     }
 
     // MARK: - Success
