@@ -59,6 +59,8 @@ enum FeedMediaLayout {
     /// Seconds each multi-item page holds before auto-advancing.
     static let autoAdvanceDuration: TimeInterval = 3.5
     static let autoAdvanceAnimationDuration: TimeInterval = 0.32
+    /// Progress-bar tick interval while the active segment fills (~60 fps).
+    static let progressTickNanoseconds: UInt64 = 16_666_666
     /// Fraction of card height that must be on-screen for autoplay (avoids the peeking next card).
     static let autoplayVisibilityThreshold: CGFloat = 0.55
 

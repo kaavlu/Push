@@ -113,8 +113,8 @@ enum FeedMediaCarouselSelection {
         return min(max(0, index), itemCount - 1)
     }
 
-    /// Location pill + bottom interaction only on the first slide.
-    /// Progress segments stay visible on every multi-item slide.
+    /// Bottom interaction only on the first slide.
+    /// Progress + location stay on every multi-item slide.
     static func showsFullChrome(selectedIndex: Int) -> Bool {
         selectedIndex == 0
     }

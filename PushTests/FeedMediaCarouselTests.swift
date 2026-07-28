@@ -128,10 +128,19 @@ final class FeedMediaCarouselTests: XCTestCase {
         XCTAssertFalse(FeedMediaCarouselFixtures.threeBundlePhotos.contributorName.isEmpty)
     }
 
-    func testFullChromeOnlyOnFirstSlide() {
+    func testBottomChromeOnlyOnFirstSlide() {
+        // Bottom row (avatars / Add yours) is first-slide only; location + progress are every slide.
         XCTAssertTrue(FeedMediaCarouselSelection.showsFullChrome(selectedIndex: 0))
         XCTAssertFalse(FeedMediaCarouselSelection.showsFullChrome(selectedIndex: 1))
         XCTAssertFalse(FeedMediaCarouselSelection.showsFullChrome(selectedIndex: 2))
+    }
+
+    func testProgressSegmentFillClampsToUnitInterval() {
+        // Active segment uses 0…1 fill; completed = 1, upcoming = 0.
+        XCTAssertEqual(min(1, max(0, CGFloat(-0.2))), 0, accuracy: 0.001)
+        XCTAssertEqual(min(1, max(0, CGFloat(0.45))), 0.45, accuracy: 0.001)
+        XCTAssertEqual(min(1, max(0, CGFloat(1.4))), 1, accuracy: 0.001)
+        XCTAssertGreaterThan(FeedMediaLayout.progressTickNanoseconds, 0)
     }
 
     func testPrimaryVisibilityRequiresMajorityOnScreen() {

@@ -21,18 +21,20 @@ struct PushMediaCarousel: View {
     @State private var isAutoPlaying: Bool = true
     /// True when this card is the primary on-screen push (not a peeking neighbor).
     @State private var isPrimarilyVisible: Bool = false
+    /// 0…1 fill of the active progress segment (Stories-style timed load).
+    @State private var segmentProgress: CGFloat = 0
 
     private var items: [FeedMediaItem] { data.items }
     private var cornerRadius: CGFloat { FeedMediaLayout.cornerRadius }
     private var showsProgressBar: Bool { items.count > 1 }
-    /// Full chrome (location, progress, bottom row) only on the first media slide.
-    private var showsFullChrome: Bool { selectedIndex == 0 }
+    /// Bottom interaction (avatars / play / Add yours) only on the first media slide.
+    private var showsBottomChrome: Bool { selectedIndex == 0 }
 
     var body: some View {
         ZStack {
             mediaPages
             topChrome
-            if showsFullChrome {
+            if showsBottomChrome {
                 FeedMediaBottomInteraction(
                     participants: data.participants,
                     contributorName: data.contributorName,
@@ -71,9 +73,11 @@ struct PushMediaCarousel: View {
         }
         .onChange(of: data.id) { _ in
             selectedIndex = 0
+            segmentProgress = 0
         }
         .onChange(of: items.count) { count in
             selectedIndex = FeedMediaCarouselSelection.clampedIndex(selectedIndex, itemCount: count)
+            segmentProgress = 0
         }
         // Restarts after each advance, swipe, play toggle, or visibility change.
         .task(id: autoAdvanceTaskID) {
@@ -88,15 +92,34 @@ struct PushMediaCarousel: View {
 
     @MainActor
     private func runAutoAdvanceLoop() async {
-        guard items.count > 1, isAutoPlaying, isPrimarilyVisible else { return }
-        let nanos = UInt64(FeedMediaLayout.autoAdvanceDuration * 1_000_000_000)
-        do {
-            try await Task.sleep(nanoseconds: nanos)
-        } catch {
+        guard items.count > 1 else {
+            segmentProgress = 0
             return
         }
+        // Paused or off-screen: freeze the active segment without advancing.
+        guard isAutoPlaying, isPrimarilyVisible else { return }
+
+        segmentProgress = 0
+        let duration = FeedMediaLayout.autoAdvanceDuration
+        let tickNanos = FeedMediaLayout.progressTickNanoseconds
+        let start = Date()
+
+        while !Task.isCancelled {
+            let elapsed = Date().timeIntervalSince(start)
+            let fraction = min(1, CGFloat(elapsed / duration))
+            segmentProgress = fraction
+            if fraction >= 1 { break }
+            do {
+                try await Task.sleep(nanoseconds: tickNanos)
+            } catch {
+                return
+            }
+            guard isAutoPlaying, isPrimarilyVisible else { return }
+        }
+
         guard !Task.isCancelled, items.count > 1, isAutoPlaying, isPrimarilyVisible else { return }
         let next = (selectedIndex + 1) % items.count
+        segmentProgress = 0
         withAnimation(.easeInOut(duration: FeedMediaLayout.autoAdvanceAnimationDuration)) {
             selectedIndex = next
         }
@@ -159,7 +182,7 @@ struct PushMediaCarousel: View {
         }
     }
 
-    // MARK: - Top chrome (progress always; full metadata only on slide 1)
+    // MARK: - Top chrome (progress + location on every slide)
 
     private var topChrome: some View {
         ZStack(alignment: .top) {
@@ -174,39 +197,25 @@ struct PushMediaCarousel: View {
                         selectedIndex: FeedMediaCarouselSelection.clampedIndex(
                             selectedIndex,
                             itemCount: items.count
-                        )
+                        ),
+                        currentProgress: segmentProgress
                     )
                     .padding(.horizontal, FeedMediaLayout.progressHorizontalInset)
                     .padding(.top, FeedMediaLayout.progressTopInset)
                     .allowsHitTesting(false)
                 }
 
-                if showsFullChrome {
-                    FeedMediaMetadataOverlay(
-                        locationTitle: data.locationTitle,
-                        onOverflowMenu: onOverflowMenu
-                    )
-                    .padding(.horizontal, FeedMediaLayout.metadataHorizontalInset)
-                    .padding(
-                        .top,
-                        showsProgressBar
-                            ? FeedMediaLayout.progressToMetadataSpacing
-                            : FeedMediaLayout.metadataTopInsetWithoutProgress
-                    )
-                } else {
-                    // Later slides: progress stays; only overflow chrome under it.
-                    HStack {
-                        Spacer(minLength: 0)
-                        FeedMediaOverflowButton(action: onOverflowMenu)
-                    }
-                    .padding(.horizontal, FeedMediaLayout.metadataHorizontalInset)
-                    .padding(
-                        .top,
-                        showsProgressBar
-                            ? FeedMediaLayout.progressToMetadataSpacing
-                            : FeedMediaLayout.metadataTopInsetWithoutProgress
-                    )
-                }
+                FeedMediaMetadataOverlay(
+                    locationTitle: data.locationTitle,
+                    onOverflowMenu: onOverflowMenu
+                )
+                .padding(.horizontal, FeedMediaLayout.metadataHorizontalInset)
+                .padding(
+                    .top,
+                    showsProgressBar
+                        ? FeedMediaLayout.progressToMetadataSpacing
+                        : FeedMediaLayout.metadataTopInsetWithoutProgress
+                )
 
                 Spacer(minLength: 0)
             }
@@ -318,27 +327,51 @@ private struct FeedMediaOverflowButton: View {
 struct FeedMediaProgressBar: View {
     let count: Int
     let selectedIndex: Int
+    /// 0…1 fill for the active segment (left → right load).
+    var currentProgress: CGFloat = 0
 
     var body: some View {
         HStack(spacing: FeedMediaLayout.progressSpacing) {
             ForEach(0..<count, id: \.self) { index in
-                Capsule(style: .continuous)
-                    .fill(FeedMediaProgressStyle.segmentColor.opacity(opacity(for: index)))
-                    .frame(height: FeedMediaLayout.progressHeight)
-                    .frame(maxWidth: .infinity)
+                FeedMediaProgressSegment(
+                    fill: fillAmount(for: index)
+                )
             }
         }
         .accessibilityHidden(true)
     }
 
-    private func opacity(for index: Int) -> Double {
-        if index < selectedIndex {
-            return FeedMediaProgressStyle.completedOpacity
+    private func fillAmount(for index: Int) -> CGFloat {
+        if index < selectedIndex { return 1 }
+        if index == selectedIndex { return min(1, max(0, currentProgress)) }
+        return 0
+    }
+}
+
+/// Track + growing fill — Stories-style timed segment.
+private struct FeedMediaProgressSegment: View {
+    let fill: CGFloat
+
+    var body: some View {
+        GeometryReader { proxy in
+            ZStack(alignment: .leading) {
+                Capsule(style: .continuous)
+                    .fill(
+                        FeedMediaProgressStyle.segmentColor.opacity(
+                            FeedMediaProgressStyle.remainingOpacity
+                        )
+                    )
+                Capsule(style: .continuous)
+                    .fill(
+                        FeedMediaProgressStyle.segmentColor.opacity(
+                            FeedMediaProgressStyle.currentOpacity
+                        )
+                    )
+                    .frame(width: max(0, proxy.size.width * fill))
+            }
         }
-        if index == selectedIndex {
-            return FeedMediaProgressStyle.currentOpacity
-        }
-        return FeedMediaProgressStyle.remainingOpacity
+        .frame(height: FeedMediaLayout.progressHeight)
+        .frame(maxWidth: .infinity)
     }
 }
 
