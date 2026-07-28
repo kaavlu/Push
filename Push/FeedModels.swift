@@ -2,7 +2,8 @@
 //  FeedModels.swift
 //  Push
 //
-//  Structural Feed shell (Issue #9) — tabs + fixture filter chips only.
+//  Feed shell models (Issue #9) — tabs + fixture filter chips.
+//  Media carousel models live in FeedMediaModels.swift.
 //
 
 import Foundation

@@ -2,8 +2,8 @@
 //  FeedView.swift
 //  Push
 //
-//  Structural Feed shell (Issue #9): header, Pushes/Now segments, filter chips,
-//  and polished placeholders. No Push cards or live activity yet.
+//  Feed shell (Issue #9): header, Pushes/Now segments, filter chips, and
+//  media-carousel foundation on Pushes. Full Push-card chrome comes later.
 //  Embedded under ContentView's bottom nav; leave via the shared tab bar.
 //
 
@@ -63,7 +63,7 @@ struct FeedView: View {
     private var tabContent: some View {
         switch viewModel.selectedTab {
         case .pushes:
-            FeedPushesPlaceholder()
+            FeedPushesMediaStack(carousels: viewModel.mediaCarousels)
         case .now:
             EmptySurfaceView(
                 title: EmptySurfaceCopy.feedNowEmptyTitle,
@@ -171,25 +171,29 @@ private struct FeedFilterChips: View {
     }
 }
 
-// MARK: - Placeholders
+// MARK: - Pushes media stack
 
-private struct FeedPushesPlaceholder: View {
+private struct FeedPushesMediaStack: View {
     @Environment(\.pushLayout) private var layout
+    let carousels: [FeedMediaCarouselData]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: FeedLayout.placeholderCardSpacing) {
-            Text(EmptySurfaceCopy.feedPushesPlaceholderTitle)
-                .font(.headline.weight(.semibold))
-                .foregroundStyle(PushControlColors.textPrimary)
-            Text(EmptySurfaceCopy.feedPushesPlaceholderMessage)
-                .font(.subheadline)
-                .foregroundStyle(PushControlColors.textSecondary)
+        if carousels.isEmpty {
+            EmptySurfaceView(
+                title: EmptySurfaceCopy.feedPushesPlaceholderTitle,
+                message: EmptySurfaceCopy.feedPushesPlaceholderMessage,
+                systemImage: "rectangle.stack"
+            )
+            .frame(maxWidth: .infinity)
+            .padding(.top, EmptySurfaceLayout.topPadding)
+        } else {
+            VStack(spacing: FeedLayout.mediaStackSpacing(layout)) {
+                ForEach(carousels) { carousel in
+                    PushMediaCarousel(data: carousel)
+                }
+            }
+            .frame(maxWidth: .infinity)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .frame(minHeight: FeedLayout.placeholderCardMinHeight, alignment: .topLeading)
-        .padding(FeedLayout.placeholderCardPadding)
-        .pushSolidCreamCard(cornerRadius: layout.cardCornerRadius)
-        .accessibilityElement(children: .combine)
     }
 }
 
@@ -198,6 +202,23 @@ struct FeedView_Previews: PreviewProvider {
     static var previews: some View {
         PushPreviewMatrix {
             FeedView(hasUnreadAlerts: true)
+        }
+    }
+}
+
+struct FeedMediaCarouselFixtures_Previews: PreviewProvider {
+    static var previews: some View {
+        PushPreviewMatrix {
+            ScrollView {
+                VStack(spacing: 16) {
+                    ForEach(FeedMediaCarouselFixtures.feedPushesPreviewStack) { data in
+                        PushMediaCarousel(data: data)
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 20)
+            }
+            .background(PushIvoryPageBackground())
         }
     }
 }

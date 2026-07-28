@@ -1,51 +1,55 @@
-# Issue #9 — Feed shell (structural)
+# Issue #9 — Feed media carousel foundation (Prompt 1 of 4)
 
 ## Goal
 
-Ship the first structural Feed surface: entry from bottom nav, header actions, Pushes/Now segmented control, friend/group filter chips, and polished placeholders. No Push cards, carousel, ranking, or live feed data.
+Ship a polished, reusable media carousel container for Push cards on the Feed Pushes tab: fixed portrait frame, fill-crop media, manual paging, segmented progress, and media-state fixtures. No card chrome beyond the media surface.
 
-## Confirmed product decisions
+## Decisions (this step)
 
-| Topic | Decision |
+| Topic | Choice |
 |---|---|
-| Subtitle | None for now (title only) |
-| Header actions | `PushCircleIconButton` glass circles for filter/settings + alerts |
-| Segment control while scrolling | Pinned under header |
-| Filter chip row while scrolling | Scrolls away with content |
-| Center `+` on Feed | No-op for this issue (visible, does nothing) |
+| Aspect ratio | Stable **3:4** (width:height) — immersive portrait; next card can peek |
+| Corner radius | Adaptive `layout.cardCornerRadius` / `PushRadiusTokens.card` |
+| Margins | Existing `FeedLayout.horizontalPadding` (page padding) |
+| Progress | Thin Stories-style segments at top inset; update on manual swipe |
+| Media crop | `scaledToFill` clipped to rounded frame — no frame resize across items |
+| Video | Kind exists for fixtures; still poster only (no playback) |
+| Data | DEBUG/fixture local media only — no repo / backend |
 
 ## Scope
 
-- Replace deferred empty shell (`FeedDeferredView`) with a real Feed page structure
-- Title: **Feed**
-- Trailing: filter/settings (no-op for now) + alerts (opens existing Alerts; unread badge)
-- Segmented control: **Pushes** (default, first) · **Now**
-- Horizontally scrollable filter chips (fixture: All, India, Michigan, Exec)
-- Filter selection persists across tab switches in-session
-- Pushes tab: lightweight placeholder (“coming next”)
-- Now tab: polished empty state (title + one sentence)
-- Cream Friends-page treatment; shared bottom nav; scroll-safe bottom clearance
-- Contextual `+` on Feed: no-op
+- Reusable `PushMediaCarousel` presentation component
+- Feed media models + fixture samples
+- Pushes tab renders a vertical stack of fixture carousels
+- States: multi-photo, single photo, mixed aspect sources, missing, loading
+- Manual horizontal swipe + page snap + progress selection
 
 ## Out of scope
 
-Push cards, media carousel, detail, creation, uploads, backend feed events, ranking, Who’s Down / live activity / inference feed.
+Auto-advance, timed progress fill, video playback/controls, title/venue/time, badge, overflow menu, avatars/names, contributor attribution, Add yours, contribution footer, Open Push, uploads, backend, navigation.
 
 ## Architecture
 
-- **MVVM:** `FeedViewModel` owns selected tab + selected filter
-- **View:** `FeedView` render-only; cream page via existing DS components
-- **Models:** `FeedTab`, fixture filter items (not seed/repo)
-- **Fixtures only** for filter labels — no `FeedRepository` wiring this issue
-- **Navigation:** still embedded under `ContentView` tab overlay (not fullScreenCover)
-- Reuse: `PushCreamPageHeader`, `PushIvorySegmentedControl`, `PushIvoryFilterChipRow`, `PushCircleIconButton`, `EmptySurfaceView` / `EmptySurfaceCopy`, `FriendsBackground` / `FriendsLayout` spacing where shared
+- **Models:** `FeedMediaItem` / `FeedMediaCarouselData` + `FeedMediaCarouselFixtures` (isolated fixtures, not seed/repo)
+- **View:** `PushMediaCarousel` — local `@State` selected index; Views remain dumb beyond swipe state
+- **Layout:** `FeedMediaLayout` tokens in `FeedStyle.swift`
+- **FeedView:** Pushes tab stacks carousels; Now tab unchanged empty state
+- **MVVM:** `FeedViewModel` may expose fixture list for previews/tests; no `LoadState`/repo yet
 
 ## Acceptance
 
-- Feed reachable from bottom nav
-- Pushes first and default-selected
-- Now shows polished empty state
-- Header actions render; alerts badge when unread
-- Filters horizontal-scroll; selection visually clear and tab-persistent
-- Fits existing Push cream UI; no Push card/carousel behavior
-- Center `+` on Feed is a no-op
+- [ ] Large portrait media cards with consistent page margins and rounded corners
+- [ ] Fixed aspect; switching items does not resize the card
+- [ ] Media fill-crops; clipped during swipe; no horizontal overflow
+- [ ] Segment progress: one per item; current / completed / remaining distinct
+- [ ] Manual swipe + snap updates selected segment
+- [ ] One-item, missing, and loading fixtures look polished
+- [ ] Previews cover three mixed-aspect photos, single, mixed, missing, loading
+- [ ] No metadata, buttons, avatars, or navigation chrome
+
+## Test stubs
+
+- `testMediaAspectRatioIsPortraitStable`
+- `testFixturesCoverRequiredCarouselStates`
+- `testSelectedIndexClampsToItemBounds`
+- `testProgressSegmentCountMatchesItems`

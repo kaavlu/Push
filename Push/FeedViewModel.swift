@@ -2,7 +2,7 @@
 //  FeedViewModel.swift
 //  Push
 //
-//  Session state for the structural Feed shell (Issue #9).
+//  Session state for the Feed shell + media carousel fixtures (Issue #9).
 //
 
 import Foundation
@@ -14,7 +14,14 @@ final class FeedViewModel: ObservableObject {
     /// Persists across Pushes/Now switches for the session.
     @Published var selectedFilterID: String = FeedFilterFixtures.allID
 
+    /// Fixture media stacks for the Pushes tab until live feed cards land.
+    let mediaCarousels: [FeedMediaCarouselData]
+
     let filterItems: [PushIvoryFilterItem] = FeedFilterFixtures.items
+
+    init(mediaCarousels: [FeedMediaCarouselData] = FeedMediaCarouselFixtures.feedPushesPreviewStack) {
+        self.mediaCarousels = mediaCarousels
+    }
 
     var selectedTabID: String {
         get { selectedTab.rawValue }
