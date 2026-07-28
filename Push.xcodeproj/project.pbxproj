@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B02A9B91E9E61B201D7DC219 /* PresenceActivityCompositionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C029D24C9C19F1A0E5038CC /* PresenceActivityCompositionTests.swift */; };
 		9C1D39122A8F059A477741F4 /* PlaceResolutionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5CE35E0C7E375B1DEB6E1BD /* PlaceResolutionTests.swift */; };
 		A04A9F1C134D339AD3AFEFDE /* MapKitPlaceResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE90F1F4343AB792A09619E9 /* MapKitPlaceResolver.swift */; };
 		556CB72D6E09ABC1E391FE15 /* LocationSession+PlaceResolution.swift in Sources */ = {isa = PBXBuildFile; fileRef = 795FBF52B55FA09A19F3497B /* LocationSession+PlaceResolution.swift */; };
@@ -356,6 +357,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		5C029D24C9C19F1A0E5038CC /* PresenceActivityCompositionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PresenceActivityCompositionTests.swift"; sourceTree = "<group>"; };
 		C5CE35E0C7E375B1DEB6E1BD /* PlaceResolutionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PlaceResolutionTests.swift"; sourceTree = "<group>"; };
 		AE90F1F4343AB792A09619E9 /* MapKitPlaceResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "MapKitPlaceResolver.swift"; path = "Data/Location/MapKitPlaceResolver.swift"; sourceTree = "<group>"; };
 		795FBF52B55FA09A19F3497B /* LocationSession+PlaceResolution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "LocationSession+PlaceResolution.swift"; path = "Data/Domain/LocationSession+PlaceResolution.swift"; sourceTree = "<group>"; };
@@ -1030,6 +1032,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				5C029D24C9C19F1A0E5038CC /* PresenceActivityCompositionTests.swift */,
 				C5CE35E0C7E375B1DEB6E1BD /* PlaceResolutionTests.swift */,
 				59BFB84DFE4794603A8F9B7A /* DwellLifecycleTests.swift */,
 				E499EE9C1D5955908B6F690F /* DwellDetectionTests.swift */,
@@ -1512,6 +1515,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				B02A9B91E9E61B201D7DC219 /* PresenceActivityCompositionTests.swift in Sources */,
 				9C1D39122A8F059A477741F4 /* PlaceResolutionTests.swift in Sources */,
 				D7DE91453AE63066B14960A0 /* DwellLifecycleTests.swift in Sources */,
 				575A220DCBD5C58E1C8EDAF5 /* DwellDetectionTests.swift in Sources */,

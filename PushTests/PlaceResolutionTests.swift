@@ -2,8 +2,8 @@
 //  PlaceResolutionTests.swift
 //  PushTests
 //
-//  Issue #101 (I3) — place ranking + session place-resolution orchestration.
-//  No MapKit network, GPS, or UI.
+//  Issue #101 (I3) / #105 — place ranking, session orchestration, and presence
+//  activity attachment. No MapKit network, GPS, or UI.
 //
 
 import XCTest
@@ -288,6 +288,111 @@ final class PlaceResolutionTests: XCTestCase {
         if let outcome = session.activePlaceResolutionForTesting {
             XCTAssertEqual(outcome.status, .empty)
         }
+        session.shutdown()
+    }
+
+    // MARK: - Presence activity attachment (Issue #105)
+
+    @MainActor
+    func testResolvedPlacePublishesAtPlaceActivity() async {
+        let resolver = CountingPlaceResolver(
+            payload: PlaceSearchPayload(
+                candidates: [
+                    UnrankedPlaceCandidate(
+                        id: "crunch",
+                        name: "Crunch Fitness",
+                        latitude: dwellLat,
+                        longitude: dwellLon,
+                        category: "fitness"
+                    ),
+                ]
+            )
+        )
+        let sync = FakePresenceSync()
+        let session = makeSession(resolver: resolver, sync: sync)
+        await session.startIfEligible()
+
+        for observation in DwellDetectionFixtures.sustainedDwellSequence() {
+            session.process(observation)
+        }
+        await waitUntil {
+            sync.drafts.contains { $0.activity.name == "At Crunch Fitness" }
+        }
+
+        let atPlace = sync.drafts.last { $0.activity.name == "At Crunch Fitness" }
+        XCTAssertEqual(atPlace?.activity.symbolName, "mappin.and.ellipse")
+        XCTAssertEqual(atPlace?.placeID, "crunch")
+        XCTAssertEqual(atPlace?.statusNote, "At Crunch Fitness")
+        XCTAssertEqual(atPlace?.source, .inference)
+        session.shutdown()
+    }
+
+    @MainActor
+    func testDwellWithoutReliablePlacePublishesChilling() async {
+        let sync = FakePresenceSync()
+        let session = makeSession(resolver: NoOpPlaceResolver(), sync: sync)
+        await session.startIfEligible()
+
+        for observation in DwellDetectionFixtures.sustainedDwellSequence() {
+            session.process(observation)
+        }
+        await waitUntil {
+            session.dwellStateForTesting.phase == .dwelling
+                && sync.drafts.contains { $0.activity.name == "Chilling" }
+        }
+
+        let chilling = sync.drafts.last { $0.activity.name == "Chilling" }
+        XCTAssertNotNil(chilling)
+        XCTAssertNil(chilling?.placeID)
+        XCTAssertNil(chilling?.statusNote)
+        session.shutdown()
+    }
+
+    @MainActor
+    func testDepartureClearsAtPlaceFromPublishedDraft() async {
+        let resolver = CountingPlaceResolver(
+            payload: PlaceSearchPayload(
+                candidates: [
+                    UnrankedPlaceCandidate(
+                        id: "sbux",
+                        name: "Starbucks",
+                        latitude: dwellLat,
+                        longitude: dwellLon,
+                        category: "cafe"
+                    ),
+                ]
+            )
+        )
+        let sync = FakePresenceSync()
+        let session = makeSession(resolver: resolver, sync: sync)
+        await session.startIfEligible()
+
+        // Confirm place while dwelling, then exit so resolve is not cancelled early.
+        for observation in DwellDetectionFixtures.sustainedDwellSequence() {
+            session.process(observation)
+        }
+        await waitUntil {
+            sync.drafts.contains { $0.activity.name == "At Starbucks" }
+        }
+        XCTAssertEqual(session.dwellStateForTesting.phase, .dwelling)
+
+        let fullExit = DwellDetectionFixtures.dwellThenExitSequence()
+        let exitOnly = fullExit.filter { $0.id.hasPrefix("exit-") }
+        XCTAssertFalse(exitOnly.isEmpty)
+        for observation in exitOnly {
+            session.process(observation)
+        }
+        await waitUntil {
+            session.dwellStateForTesting.phase == .moving
+                && session.activePlaceResolutionForTesting == nil
+        }
+        await Task.yield()
+        try? await Task.sleep(nanoseconds: 50_000_000)
+
+        let last = sync.drafts.last
+        XCTAssertNotEqual(last?.activity.name, "At Starbucks")
+        XCTAssertNil(last?.placeID)
+        XCTAssertNil(last?.statusNote)
         session.shutdown()
     }
 

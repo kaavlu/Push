@@ -1,17 +1,16 @@
-# Issue #101 — Resolve Confirmed Dwells to Places (I3)
+# Issue #105 — Attach Resolved Place Context to Presence Activity
 
 ## Status
 
 - [x] Spec
-- [x] Domain types + `PlaceResolving` + config
-- [x] Pure `PlaceCandidateRanker`
-- [x] `MapKitPlaceResolver` + NoOp / Fixed
-- [x] `LocationSession` triggers (arrival / centroid / retry / clear)
-- [x] `PlaceResolutionTests` — 13 green
-- [x] Regression dwell + LocationSession green
+- [x] Pure composition (place + dwell + inference)
+- [x] LocationSession draft wiring + place-resolution republish
+- [x] Tests — PresenceActivityCompositionTests + PlaceResolution #105 cases
+- [x] Regression: ActivityInferenceIntegration, LocationSession, LivePresenceWrite, Dwell*, PlaceResolution green
 - [x] Commit
 
-## Out of scope (later)
+## Out of scope
 
-- Public “At {place}” activity labels
-- Draft / UI / availability changes
+- UI redesign / place picker
+- Places catalog
+- Co-presence, feed, ETA, background location

@@ -272,7 +272,7 @@ final class ActivityInferenceIntegrationTests: XCTestCase {
         XCTAssertEqual(InferredActivityKind.walking.presenceActivity.name, "Walking")
         XCTAssertEqual(InferredActivityKind.driving.presenceActivity.name, "Driving")
         XCTAssertEqual(InferredActivityKind.chilling.presenceActivity.name, "Chilling")
-        XCTAssertEqual(InferredActivityKind.moving.presenceActivity.name, "On the move")
+        XCTAssertEqual(InferredActivityKind.moving.presenceActivity.name, "Moving")
         XCTAssertEqual(InferredActivityKind.stationary.presenceActivity, .nearby)
         XCTAssertEqual(InferredActivityKind.unknown.presenceActivity, .nearby)
         XCTAssertEqual(InferredActivityKind.walking.presenceSource, .inference)
