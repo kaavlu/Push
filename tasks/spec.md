@@ -1,108 +1,96 @@
-# Issue #99 — Deterministic Dwell Detection (I1)
+# Issue #100 — Arrival / Departure Lifecycle (I2)
 
 ## Goal
 
-Add an independently testable, deterministic dwell detector that consumes validated location fixes and tracks whether the user has stopped long enough for a meaningful dwell. Wire it into `LocationSession` **without** changing activity labels, Ghost behavior, publishing cadence, availability, DB schema, or UI.
+Track the lifecycle of a **confirmed** dwell so Push knows when the user arrived somewhere and when they meaningfully left. Preserve completed-session metadata for later venue resolution.
 
-## Why separate from activity inference
+Builds on Issue #99 (I1) place-cluster detection. Still no venue lookup, activity labels, presence UI, or DB changes.
 
-`DeterministicActivityInferenceEngine` already classifies window-level motion (including `.stationary` / `.chilling`). Dwell detection answers a different question: **is there a stable place cluster with a start time and centroid?** That cluster is the foundation for later arrive/leave and venue work; it must not fold into activity labels yet.
+## Lifecycle model
 
-## Domain model
-
-### Phase
+### Phases (durable cluster state — unchanged from I1)
 
 ```
-moving → candidateDwell → dwelling
-                ↓              ↓
-             moving         moving
+moving → candidateDwell → dwelling → moving
 ```
 
-| Phase | Meaning |
+### Transitions (edge-triggered, once per dwell)
+
+```
+arrived   — candidate promotes to confirmed dwelling (exactly once)
+departed  — confirmed dwell ends after hysteresis (exactly once)
+```
+
+While the same dwell stays active, **no repeated arrivals**. Between departure and the next confirmation, no further transitions.
+
+### Sessions
+
+| Field | Meaning |
 |---|---|
-| `moving` | Not building a dwell (transit, insufficient evidence, or exited). |
-| `candidateDwell` | Low-motion cluster forming; not yet confirmed. |
-| `dwelling` | Confirmed dwell with a stable centroid and duration. |
+| `startedAt` | First accepted inlier of the cluster |
+| `arrivedAt` | Wall time when the dwell was confirmed (arrival event) |
+| `departedAt` | Wall time when departure hysteresis completed (`nil` while active) |
+| `lastConfirmedAt` | Last inlier / near-zone sample still attributed to the place |
+| centroid, sampleCount, representativeAccuracy | From I1 cluster snapshot |
 
-### Confirmed / candidate snapshot fields
+- **Active session** while `phase == .dwelling`
+- **Last completed session** retained after `.departed` for downstream place resolution (replaced on next completed departure; cleared on `reset()`)
 
-When phase is `candidateDwell` or `dwelling`, expose:
+## Departure hysteresis
 
-- Stable centroid (lat / lon)
-- Start time (first accepted inlier of this cluster)
-- Last confirmed time (last accepted inlier)
-- Duration (`lastConfirmed − start`)
-- Sample count (accepted inliers only)
-- Representative accuracy (mean horizontal accuracy of inliers)
+Ending a confirmed dwell requires **sustained** evidence, not a single bad fix.
 
-## Algorithm (deterministic, incremental)
+1. **Inlier zone** (`≤ dwellRadiusMeters`, default 40 m) — still dwelling; clear any departure tracker; update cluster metrics.
+2. **Near zone** (`≤ departureRadiusMeters`, default 100 m) — still at a large venue / parking lot; **do not** count as departure; clear departure tracker; may refresh `lastConfirmedAt`.
+3. **Outside departure radius** or **clearly moving** — accumulate departure evidence.
+4. Confirm departure only when **both**:
+   - consecutive outside samples ≥ `minimumDepartureSampleCount`
+   - wall-clock span of the departure streak ≥ `minimumDepartureDuration`
+5. One inaccurate fix is still ignored (I1 quality gate) and never ends a dwell.
+6. Returning inside the near zone **before** thresholds are met cancels the departure streak.
 
-Process one `LocationObservation` at a time (session-friendly). No Core Location types.
+Candidate-phase exit stays stricter (I1 outlier budget) so unconfirmed stops still fail fast.
 
-1. **Quality gate** — drop samples with non-finite coords, non-positive accuracy, accuracy worse than `maxHorizontalAccuracyMeters`, or reported speed above `maxSpeedMetersPerSecond`. Dropped samples do not advance or reset state.
-2. **`moving`** — first quality sample starts a `candidateDwell` seed (centroid = sample, count = 1).
-3. **`candidateDwell`**
-   - Inlier if great-circle distance to current centroid ≤ `dwellRadiusMeters` and speed OK.
-   - Inlier → append, bump count / lastConfirmed, recompute centroid from unlocked inliers only (first `centroidLockSampleCount` samples; then freeze).
-   - Outlier → `consecutiveOutliers++`; if > `maxConsecutiveOutliers`, reset to `moving`.
-   - Promote to `dwelling` when `sampleCount ≥ minimumSampleCount` **and** duration ≥ `minimumDwellDuration`. Freeze centroid at promotion.
-4. **`dwelling`**
-   - Inlier → update lastConfirmed, count, representative accuracy; **do not** wander the centroid.
-   - Outlier streak beyond `maxConsecutiveOutliers` → `moving` (dwell ends). Brief GPS blips do not end the dwell.
-5. **Single fix / brief stop / walk-by** never promote: min samples ≥ 3 and min duration (default 3 minutes) block traffic lights and pass-throughs.
+## Parking / no activity toggle
 
-## Configuration (`DwellDetectionConfiguration`)
+Dwell remains parallel to activity inference. Driving samples do not seed clusters; after parking and remaining low-speed nearby, a single dwell confirms. Activity may still read Driving → Stationary independently — dwell does not rewrite labels or presence drafts (I1 contract).
 
-| Constant | Default | Rationale |
+## Configuration additions (`DwellDetectionConfiguration`)
+
+| Constant | Default | Role |
 |---|---|---|
-| `dwellRadiusMeters` | 40 | Room-scale cluster; wider than typical pedestrian GPS jitter |
-| `minimumDwellDuration` | 180 s | Longer than typical red light; shorter than “hanging out” |
-| `minimumSampleCount` | 3 | Single/double fix cannot confirm |
-| `maxHorizontalAccuracyMeters` | 50 | Stricter than pipeline accept (100 m) |
-| `maxSpeedMetersPerSecond` | 0.5 | Reject clearly moving samples |
-| `maxConsecutiveOutliers` | 2 | Tolerate GPS blips without reset |
-| `centroidLockSampleCount` | 5 | Stabilize centroid early; freeze on confirm |
+| `departureRadiusMeters` | 100 | Large-venue / near-lot soft zone |
+| `minimumDepartureDuration` | 90 s | Sustained leave time |
+| `minimumDepartureSampleCount` | 3 | Sustained leave samples |
 
-All thresholds live in one enum — no magic numbers in the detector.
+I1 gates unchanged.
 
-## Pipeline integration
+## Pipeline
 
-- `LocationSession` owns a `DeterministicDwellDetector` (injectable for tests).
-- After a validator accept in `process(_:)`, call `dwellDetector.process(...)` and store the latest `DwellDetectionState`.
-- **Do not** feed dwell into `ActivityInferencePresentation`, drafts, sync, Ghost, or availability.
-- Reset detector on `shutdown()`.
-- Test hooks only: expose latest phase / confirmed snapshot for unit tests.
+- `DeterministicDwellDetector.process` returns `DwellDetectionState` with optional `transition`, `activeSession`, `lastCompletedSession`.
+- `LocationSession` already stores `dwellState`; expose completed session via test hook.
+- Still no draft / publish / Ghost / UI side effects.
 
-## Non-goals (this issue)
+## Non-goals
 
 - Venue lookup / reverse geocode
-- Arrival / departure events or friend-facing copy
-- Mapping dwell → `.chilling` or any activity label
-- Database / Realtime / presence draft fields
-- UI
+- Named activity labels
+- Presence UI
+- Availability inference
+- Co-presence
 
 ## Acceptance
 
 | Criterion | Verification |
 |---|---|
-| Sustained stationary cluster → one stable `dwelling` | Fixture sequence ≥ min duration + samples |
-| Single fix / short stop / walk-by → never `dwelling` | Unit cases |
-| GPS drift inside radius does not reset start or wander centroid after lock | Centroid frozen; start time stable |
-| Traffic-light-length stop stays `candidateDwell` or `moving` | Duration < minimum |
-| Activity labels + publish path unchanged | Session integration test: drafts still from activity engine only |
+| One arrival per confirmed dwell | Transition `.arrived` once on promote |
+| No repeated arrivals while active | Stay `.dwelling` with `transition == nil` |
+| Brief near-zone movement / GPS drift | Stay dwelling |
+| One bad fix | Ignored; no departure |
+| Sustained leave | One `.departed` + completed session |
+| Re-arrival | New session + second `.arrived` |
+| Parking then stay | One dwell (fixture) |
 
 ## Tests
 
-- `DwellDetectionTests` — pure domain (state machine + fixtures).
-- Light `LocationSession` coverage that accepted fixes update dwell state without changing inferred activity application.
-
-## Files
-
-| Path | Role |
-|---|---|
-| `Push/Data/Domain/DwellDetection.swift` | Phase, snapshot, result, protocol, no-op |
-| `Push/Data/Domain/DwellDetectionConfiguration.swift` | Thresholds |
-| `Push/Data/Domain/DeterministicDwellDetector.swift` | State machine |
-| `Push/Data/Domain/DwellDetectionFixtures.swift` | Deterministic sequences |
-| `PushTests/DwellDetectionTests.swift` | Unit tests |
-| `LocationSession` / `+Pipeline` | Silent wiring + reset |
+`DwellLifecycleTests` (and fixture extensions): arrival, large-venue remain, GPS drift, departure, re-arrival, single inaccurate fix, parking-then-stay.

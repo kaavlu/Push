@@ -2,22 +2,26 @@
 //  DeterministicDwellDetector.swift
 //  Push
 //
-//  Issue #99 (I1) — incremental dwell state machine from location observations.
-//  Pure / Sendable; no Core Location, network, or UI.
+//  Issue #99 (I1) / #100 (I2) — incremental dwell state machine with
+//  arrival/departure lifecycle. Pure / Sendable; no Core Location, network, or UI.
 //
 
 import Foundation
 
-/// Deterministic place-cluster detector.
+/// Deterministic place-cluster detector with arrival/departure hysteresis.
 ///
 /// Consumes validated app-owned observations one at a time and emits
-/// `moving` / `candidateDwell` / `dwelling` with a stable centroid.
+/// `moving` / `candidateDwell` / `dwelling` plus one-shot `arrived` /
+/// `departed` transitions and completed session metadata.
 /// Does not infer venues, activity labels, or availability.
 struct DeterministicDwellDetector: DwellDetecting {
     private(set) var state: DwellDetectionState = .moving
 
-    private var working: WorkingCluster?
+    private var working: DwellWorkingCluster?
     private var consecutiveOutliers = 0
+    private var activeSession: DwellLifecycleSession?
+    private var lastCompletedSession: DwellLifecycleSession?
+    private var departureStreak: DwellDepartureStreak?
 
     mutating func process(
         _ observation: LocationObservation,
@@ -25,31 +29,40 @@ struct DeterministicDwellDetector: DwellDetecting {
     ) -> DwellDetectionState {
         _ = evaluationTime
         guard hasUsableAccuracy(observation) else {
-            // Poor / non-finite accuracy — ignore entirely (no inlier, no outlier).
-            return state
-        }
-
-        if isClearlyMoving(observation) {
-            // Speed above the dwell gate ends a cluster but does not seed a new one.
-            if state.phase != .moving {
-                registerOutlier(seedNewCandidate: nil)
-            }
-            return state
+            // Poor / non-finite accuracy — ignore entirely (no inlier, no departure).
+            return republish(transition: nil)
         }
 
         switch state.phase {
         case .moving:
+            if isClearlyMoving(observation) {
+                return republish(transition: nil)
+            }
             beginCandidate(with: observation)
-        case .candidateDwell, .dwelling:
-            handleClustered(observation)
+            return state
+
+        case .candidateDwell:
+            if isClearlyMoving(observation) {
+                // Speed ends an unconfirmed stop without lifecycle events.
+                registerCandidateOutlier(seedNewCandidate: nil)
+                return state
+            }
+            handleCandidate(observation)
+            return state
+
+        case .dwelling:
+            handleDwelling(observation)
+            return state
         }
-        return state
     }
 
     mutating func reset() {
         state = .moving
         working = nil
         consecutiveOutliers = 0
+        activeSession = nil
+        lastCompletedSession = nil
+        departureStreak = nil
     }
 
     // MARK: - Quality
@@ -70,146 +83,287 @@ struct DeterministicDwellDetector: DwellDetecting {
         return speed > DwellDetectionConfiguration.maxSpeedMetersPerSecond
     }
 
-    // MARK: - Transitions
+    // MARK: - Candidate (I1)
 
-    private mutating func beginCandidate(with observation: LocationObservation) {
-        var cluster = WorkingCluster(
+    private mutating func beginCandidate(
+        with observation: LocationObservation,
+        transition: DwellTransition? = nil
+    ) {
+        var cluster = DwellWorkingCluster(
             startedAt: observation.recordedAt,
             centroidLocked: false
         )
         cluster.accept(observation)
         working = cluster
         consecutiveOutliers = 0
-        publish(phase: .candidateDwell, from: cluster)
+        departureStreak = nil
+        activeSession = nil
+        publish(
+            phase: .candidateDwell,
+            from: cluster,
+            transition: transition,
+            active: nil
+        )
     }
 
-    private mutating func handleClustered(_ observation: LocationObservation) {
+    private mutating func handleCandidate(_ observation: LocationObservation) {
         guard var cluster = working else {
             beginCandidate(with: observation)
             return
         }
 
-        let distance = GeoDistance.meters(
-            fromLatitude: cluster.centroidLatitude,
-            longitude: cluster.centroidLongitude,
-            toLatitude: observation.latitude,
-            longitude: observation.longitude
-        )
-
+        let distance = distanceFromCentroid(cluster, to: observation)
         if distance <= DwellDetectionConfiguration.dwellRadiusMeters {
             consecutiveOutliers = 0
             cluster.accept(observation)
             working = cluster
-            publishActivePhase(from: cluster)
+            if shouldConfirm(cluster.snapshot) {
+                promoteToDwelling(cluster: cluster, at: observation.recordedAt)
+            } else {
+                publish(
+                    phase: .candidateDwell,
+                    from: cluster,
+                    transition: nil,
+                    active: nil
+                )
+            }
             return
         }
 
-        // Outside radius: count toward exit. After budget, seed a candidate at the
-        // new place so a real departure continues the stream.
-        registerOutlier(seedNewCandidate: observation)
+        registerCandidateOutlier(seedNewCandidate: observation)
     }
 
-    /// - Parameter seedNewCandidate: When the outlier budget is exceeded, optionally
-    ///   start a new candidate at this observation (distance exits). Pass `nil` for
-    ///   pure motion exits so a single speeding sample does not seed a false dwell.
-    private mutating func registerOutlier(seedNewCandidate: LocationObservation?) {
+    private mutating func registerCandidateOutlier(seedNewCandidate: LocationObservation?) {
         consecutiveOutliers += 1
         guard consecutiveOutliers > DwellDetectionConfiguration.maxConsecutiveOutliers else {
+            _ = republish(transition: nil)
             return
         }
-        resetToMoving()
-        if let seedNewCandidate {
+        clearWorkingCluster()
+        if let seedNewCandidate, !isClearlyMoving(seedNewCandidate) {
             beginCandidate(with: seedNewCandidate)
+        } else {
+            publishMoving(transition: nil)
         }
     }
 
-    private mutating func publishActivePhase(from cluster: WorkingCluster) {
-        let snapshot = cluster.snapshot
-        if shouldConfirm(snapshot) {
-            var locked = cluster
-            locked.centroidLocked = true
-            working = locked
-            publish(phase: .dwelling, from: locked)
-        } else if state.phase == .dwelling {
-            // Already confirmed — stay dwelling with updated metrics.
-            publish(phase: .dwelling, from: cluster)
+    // MARK: - Dwelling + departure (I2)
+
+    private mutating func promoteToDwelling(cluster: DwellWorkingCluster, at arrivedAt: Date) {
+        var locked = cluster
+        locked.centroidLocked = true
+        working = locked
+        consecutiveOutliers = 0
+        departureStreak = nil
+
+        let snapshot = locked.snapshot
+        let session = DwellLifecycleSession(
+            id: DwellLifecycleSession.makeID(
+                startedAt: snapshot.startedAt,
+                latitude: snapshot.centroidLatitude,
+                longitude: snapshot.centroidLongitude
+            ),
+            centroidLatitude: snapshot.centroidLatitude,
+            centroidLongitude: snapshot.centroidLongitude,
+            startedAt: snapshot.startedAt,
+            arrivedAt: arrivedAt,
+            departedAt: nil,
+            lastConfirmedAt: snapshot.lastConfirmedAt,
+            sampleCount: snapshot.sampleCount,
+            representativeAccuracyMeters: snapshot.representativeAccuracyMeters
+        )
+        activeSession = session
+        publish(
+            phase: .dwelling,
+            from: locked,
+            transition: .arrived,
+            active: session
+        )
+    }
+
+    private mutating func handleDwelling(_ observation: LocationObservation) {
+        guard var cluster = working, var session = activeSession else {
+            // Recoverable inconsistency — treat as fresh candidate if slow.
+            if isClearlyMoving(observation) {
+                publishMoving(transition: nil)
+            } else {
+                beginCandidate(with: observation)
+            }
+            return
+        }
+
+        let distance = distanceFromCentroid(cluster, to: observation)
+        let clearlyMoving = isClearlyMoving(observation)
+
+        // Tight inlier zone: refresh cluster + cancel departure streak.
+        if !clearlyMoving && distance <= DwellDetectionConfiguration.dwellRadiusMeters {
+            departureStreak = nil
+            cluster.accept(observation)
+            working = cluster
+            session = session.updating(from: cluster.snapshot)
+            activeSession = session
+            publish(
+                phase: .dwelling,
+                from: cluster,
+                transition: nil,
+                active: session
+            )
+            return
+        }
+
+        // Near zone (large venue / lot): stay dwelling, cancel departure.
+        if !clearlyMoving && distance <= DwellDetectionConfiguration.departureRadiusMeters {
+            departureStreak = nil
+            session = session.refreshingLastConfirmed(at: observation.recordedAt)
+            activeSession = session
+            publish(
+                phase: .dwelling,
+                from: cluster,
+                transition: nil,
+                active: session
+            )
+            return
+        }
+
+        // Outside departure radius and/or clearly moving — accumulate leave evidence.
+        accumulateDeparture(observation: observation, cluster: cluster, session: session)
+    }
+
+    private mutating func accumulateDeparture(
+        observation: LocationObservation,
+        cluster: DwellWorkingCluster,
+        session: DwellLifecycleSession
+    ) {
+        var streak = departureStreak ?? DwellDepartureStreak(
+            firstAt: observation.recordedAt,
+            sampleCount: 0
+        )
+        streak.sampleCount += 1
+        streak.lastAt = observation.recordedAt
+        departureStreak = streak
+
+        let duration = streak.lastAt.timeIntervalSince(streak.firstAt)
+        let samplesOK = streak.sampleCount
+            >= DwellDetectionConfiguration.minimumDepartureSampleCount
+        let durationOK = duration
+            >= DwellDetectionConfiguration.minimumDepartureDuration
+
+        if samplesOK && durationOK {
+            completeDeparture(
+                observation: observation,
+                cluster: cluster,
+                session: session,
+                departedAt: observation.recordedAt
+            )
+            return
+        }
+
+        // Still dwelling until hysteresis completes — no transition.
+        publish(
+            phase: .dwelling,
+            from: cluster,
+            transition: nil,
+            active: session
+        )
+    }
+
+    private mutating func completeDeparture(
+        observation: LocationObservation,
+        cluster: DwellWorkingCluster,
+        session: DwellLifecycleSession,
+        departedAt: Date
+    ) {
+        let completed = session.completing(
+            departedAt: departedAt,
+            lastConfirmedAt: session.lastConfirmedAt,
+            sampleCount: cluster.sampleCount,
+            representativeAccuracyMeters: cluster.snapshot.representativeAccuracyMeters
+        )
+        lastCompletedSession = completed
+        activeSession = nil
+        working = nil
+        consecutiveOutliers = 0
+        departureStreak = nil
+
+        // Distance leave with low speed may seed a new candidate at the new place,
+        // but this process() tick must still surface the one-shot `.departed`.
+        if !isClearlyMoving(observation) {
+            beginCandidate(with: observation, transition: .departed)
         } else {
-            publish(phase: .candidateDwell, from: cluster)
+            state = DwellDetectionState(
+                phase: .moving,
+                cluster: nil,
+                transition: .departed,
+                activeSession: nil,
+                lastCompletedSession: completed
+            )
         }
     }
+
+    // MARK: - Publish helpers
 
     private func shouldConfirm(_ snapshot: DwellClusterSnapshot) -> Bool {
         snapshot.sampleCount >= DwellDetectionConfiguration.minimumSampleCount
             && snapshot.duration >= DwellDetectionConfiguration.minimumDwellDuration
     }
 
-    private mutating func publish(phase: DwellPhase, from cluster: WorkingCluster) {
-        state = DwellDetectionState(phase: phase, cluster: cluster.snapshot)
+    private func distanceFromCentroid(
+        _ cluster: DwellWorkingCluster,
+        to observation: LocationObservation
+    ) -> Double {
+        GeoDistance.meters(
+            fromLatitude: cluster.centroidLatitude,
+            longitude: cluster.centroidLongitude,
+            toLatitude: observation.latitude,
+            longitude: observation.longitude
+        )
     }
 
-    private mutating func resetToMoving() {
-        state = .moving
+    private mutating func publish(
+        phase: DwellPhase,
+        from cluster: DwellWorkingCluster,
+        transition: DwellTransition?,
+        active: DwellLifecycleSession?
+    ) {
+        state = DwellDetectionState(
+            phase: phase,
+            cluster: cluster.snapshot,
+            transition: transition,
+            activeSession: active,
+            lastCompletedSession: lastCompletedSession
+        )
+    }
+
+    private mutating func publishMoving(transition: DwellTransition?) {
         working = nil
         consecutiveOutliers = 0
-    }
-}
-
-// MARK: - Working cluster
-
-private struct WorkingCluster {
-    var startedAt: Date
-    var lastConfirmedAt: Date
-    var sampleCount: Int
-    var sumLatitude: Double
-    var sumLongitude: Double
-    var sumAccuracy: Double
-    /// Samples that still contribute to the running centroid mean.
-    var unlockedSampleCount: Int
-    var centroidLatitude: Double
-    var centroidLongitude: Double
-    var centroidLocked: Bool
-
-    init(startedAt: Date, centroidLocked: Bool) {
-        self.startedAt = startedAt
-        self.lastConfirmedAt = startedAt
-        self.sampleCount = 0
-        self.sumLatitude = 0
-        self.sumLongitude = 0
-        self.sumAccuracy = 0
-        self.unlockedSampleCount = 0
-        self.centroidLatitude = 0
-        self.centroidLongitude = 0
-        self.centroidLocked = centroidLocked
-    }
-
-    mutating func accept(_ observation: LocationObservation) {
-        lastConfirmedAt = observation.recordedAt
-        sampleCount += 1
-        sumAccuracy += observation.horizontalAccuracyMeters
-
-        if !centroidLocked {
-            sumLatitude += observation.latitude
-            sumLongitude += observation.longitude
-            unlockedSampleCount += 1
-            centroidLatitude = sumLatitude / Double(unlockedSampleCount)
-            centroidLongitude = sumLongitude / Double(unlockedSampleCount)
-            if unlockedSampleCount >= DwellDetectionConfiguration.centroidLockSampleCount {
-                centroidLocked = true
-            }
-        }
-    }
-
-    var snapshot: DwellClusterSnapshot {
-        let accuracy = sampleCount > 0
-            ? sumAccuracy / Double(sampleCount)
-            : 0
-        return DwellClusterSnapshot(
-            centroidLatitude: centroidLatitude,
-            centroidLongitude: centroidLongitude,
-            startedAt: startedAt,
-            lastConfirmedAt: lastConfirmedAt,
-            sampleCount: sampleCount,
-            representativeAccuracyMeters: accuracy
+        departureStreak = nil
+        activeSession = nil
+        state = DwellDetectionState(
+            phase: .moving,
+            cluster: nil,
+            transition: transition,
+            activeSession: nil,
+            lastCompletedSession: lastCompletedSession
         )
+    }
+
+    private mutating func clearWorkingCluster() {
+        working = nil
+        consecutiveOutliers = 0
+        activeSession = nil
+        departureStreak = nil
+    }
+
+    /// Re-emit current durable fields with a fresh (usually nil) transition.
+    private mutating func republish(transition: DwellTransition?) -> DwellDetectionState {
+        state = DwellDetectionState(
+            phase: state.phase,
+            cluster: state.cluster,
+            transition: transition,
+            activeSession: activeSession,
+            lastCompletedSession: lastCompletedSession
+        )
+        return state
     }
 }

@@ -1,30 +1,25 @@
-# Issue #99 — Deterministic Dwell Detection (I1)
+# Issue #100 — Arrival / Departure Lifecycle (I2)
 
 ## Status
 
 - [x] Spec (`tasks/spec.md`)
-- [x] Domain types + configuration + fixtures
-- [x] `DeterministicDwellDetector` state machine
-- [x] Silent `LocationSession` wiring (no label / publish changes)
-- [x] `DwellDetectionTests` — 15 green
-- [x] Regression `LocationSessionTests` / activity suites green
-- [x] Register pbxproj + commit
+- [x] Transitions + completed session types
+- [x] Departure hysteresis config + detector
+- [x] Lifecycle fixtures
+- [x] `DwellLifecycleTests` — 13 green
+- [x] I1 `DwellDetectionTests` — 15 green
+- [x] File splits ≤ 400 lines
+- [x] Commit
 
 ## Acceptance
 
-- Sustained stationary → one stable dwell (centroid, start, duration, samples)
-- Single fix / walk-by / traffic-light stop → no false dwell
-- GPS drift does not reset start or wander locked centroid
-- Activity inference + presence publishing unchanged
-
-## Out of scope
-
-- Venue lookup
-- Arrived / left events
-- Activity label changes (`.chilling` stays window-based only)
-- DB / UI
+- One arrival per confirmed dwell; no repeats while active
+- Brief near-zone movement / single bad fix do not depart
+- Sustained leave → one departure + completed session metadata
+- Re-arrival after leave works
+- No venue / UI / activity label / publish changes
 
 ## Related
 
-- #92–#94 activity inference (parallel; not replaced)
-- Location presence architecture Phase 2+ venue path
+- #99 I1 place-cluster detection (done)
+- Later: venue resolution from completed sessions
