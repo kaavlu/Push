@@ -1,25 +1,17 @@
-# Issue #100 — Arrival / Departure Lifecycle (I2)
+# Issue #101 — Resolve Confirmed Dwells to Places (I3)
 
 ## Status
 
-- [x] Spec (`tasks/spec.md`)
-- [x] Transitions + completed session types
-- [x] Departure hysteresis config + detector
-- [x] Lifecycle fixtures
-- [x] `DwellLifecycleTests` — 13 green
-- [x] I1 `DwellDetectionTests` — 15 green
-- [x] File splits ≤ 400 lines
+- [x] Spec
+- [x] Domain types + `PlaceResolving` + config
+- [x] Pure `PlaceCandidateRanker`
+- [x] `MapKitPlaceResolver` + NoOp / Fixed
+- [x] `LocationSession` triggers (arrival / centroid / retry / clear)
+- [x] `PlaceResolutionTests` — 13 green
+- [x] Regression dwell + LocationSession green
 - [x] Commit
 
-## Acceptance
+## Out of scope (later)
 
-- One arrival per confirmed dwell; no repeats while active
-- Brief near-zone movement / single bad fix do not depart
-- Sustained leave → one departure + completed session metadata
-- Re-arrival after leave works
-- No venue / UI / activity label / publish changes
-
-## Related
-
-- #99 I1 place-cluster detection (done)
-- Later: venue resolution from completed sessions
+- Public “At {place}” activity labels
+- Draft / UI / availability changes
