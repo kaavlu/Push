@@ -27,24 +27,15 @@ struct PushMediaCarousel: View {
     private var items: [FeedMediaItem] { data.items }
     private var cornerRadius: CGFloat { FeedMediaLayout.cornerRadius }
     private var showsProgressBar: Bool { items.count > 1 }
-    /// Bottom interaction (avatars / play / Add yours) only on the first media slide.
-    private var showsBottomChrome: Bool { selectedIndex == 0 }
+    /// Multi-page: chrome rides on slide 0 inside the strip. Single: overlay on card.
+    private var showsStandaloneBottomChrome: Bool { items.count <= 1 }
 
     var body: some View {
         ZStack {
             mediaPages
             topChrome
-            if showsBottomChrome {
-                FeedMediaBottomInteraction(
-                    participants: data.participants,
-                    contributorName: data.contributorName,
-                    canAddYours: data.canAddYours,
-                    isPlaying: isAutoPlaying,
-                    onTogglePlayback: {
-                        isAutoPlaying.toggle()
-                    },
-                    onAddYours: onAddYours
-                )
+            if showsStandaloneBottomChrome {
+                bottomChrome
             }
         }
         .aspectRatio(FeedMediaLayout.aspectRatio, contentMode: .fit)
@@ -124,24 +115,11 @@ struct PushMediaCarousel: View {
         // Never zero progress while this index is still selected — that flashes empty.
         segmentProgress = 1
         let next = (selectedIndex + 1) % items.count
-        // Slide to the next page (FeedMediaPageStrip animates offset). When wrapping
-        // last → first, skip the reverse scrub through intermediate pages.
-        if next > selectedIndex {
-            withAnimation(
-                .easeInOut(duration: FeedMediaLayout.autoAdvanceAnimationDuration)
-            ) {
-                selectedIndex = next
-            }
-        } else {
-            var wrap = Transaction()
-            wrap.disablesAnimations = true
-            withTransaction(wrap) {
-                selectedIndex = next
-            }
-        }
-        var progressHandoff = Transaction()
-        progressHandoff.disablesAnimations = true
-        withTransaction(progressHandoff) {
+        // Strip owns page swipe animation (including last → first via a clone page).
+        var handoff = Transaction()
+        handoff.disablesAnimations = true
+        withTransaction(handoff) {
+            selectedIndex = next
             segmentProgress = 0
         }
     }
@@ -190,7 +168,8 @@ struct PushMediaCarousel: View {
                     FeedMediaPageStrip(
                         items: items,
                         selectedIndex: $selectedIndex,
-                        size: size
+                        size: size,
+                        firstPageChrome: { bottomChrome }
                     )
                     .frame(width: size.width, height: size.height)
                 }
@@ -198,6 +177,19 @@ struct PushMediaCarousel: View {
             .frame(width: size.width, height: size.height)
             .clipped()
         }
+    }
+
+    private var bottomChrome: some View {
+        FeedMediaBottomInteraction(
+            participants: data.participants,
+            contributorName: data.contributorName,
+            canAddYours: data.canAddYours,
+            isPlaying: isAutoPlaying,
+            onTogglePlayback: {
+                isAutoPlaying.toggle()
+            },
+            onAddYours: onAddYours
+        )
     }
 
     // MARK: - Top chrome (progress + location on every slide)
