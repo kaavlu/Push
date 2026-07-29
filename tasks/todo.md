@@ -1,25 +1,29 @@
-# Issue #115 — Define Feed and Moment Product Rules
+# Issue #116 — Design Feed and Moment backend architecture
 
 ## Status
 
-- [x] Structured interview (lifecycle, attendance, media, pucks, visibility, feed, notifications)
-- [x] Resolve contradictions (tag editors vs contributors; visibility model; one Moment per Push)
-- [x] Feed Product Contract written
+- [x] Infrastructure reuse audit
+- [x] Domain model + DB relationship sketch
+- [x] Storage / AuthZ / read-write flows
+- [x] Edge cases (graph, tags, blocks, soft-delete, concurrency, order)
+- [x] Migration sequence, RLS checklist, tests, implementation slices
+- [x] Non-goals preserved from product contract
 
 ## Deliverable
 
-`docs/superpowers/specs/2026-07-28-feed-moment-product-contract.md`
+`docs/superpowers/specs/2026-07-28-feed-moment-backend-architecture.md`
 
-## Prior
+## Inputs
 
-- #114 audit: `docs/superpowers/specs/2026-07-28-feed-moment-backend-requirements-audit.md`
+- Contract: `docs/superpowers/specs/2026-07-28-feed-moment-product-contract.md` (#115)
+- Audit: `docs/superpowers/specs/2026-07-28-feed-moment-backend-requirements-audit.md` (#114)
 
 ## Constraints honored
 
-- No code / migrations / implementation
-- Invitees ≠ attendees ≠ contributors ≠ viewers
-- Backend must enforce permissions (documented in contract matrix)
+- Architecture only — no code, migrations, or Storage setup
+- Product decisions unchanged
+- Moment ≠ Push ≠ FeedEvent
 
-## Next (separate issues)
+## Next
 
-Backend architecture + implementation plan from the product contract.
+Implementation issues for slices S1–S5 (backend) then S6–S9 (client wire-up).
