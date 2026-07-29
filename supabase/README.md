@@ -54,6 +54,12 @@ of the files in order reproduces the schema.
   publication `supabase_realtime` (idempotent) so authenticated clients can receive
   `postgres_changes` for friend-visible presence (Issue #84). RLS still filters rows
   per JWT; app bridge patches `LiveDataStore` and reconciles on gaps.
+- `migrations/0021_moments_tables.sql` — `moments` / `moment_members` / `moment_media`
+  (Issue #117 S1): soft-delete, `UNIQUE(push_id)` including soft-deleted rows, feed
+  index, RLS enabled, **SELECT grant only** (no client writes).
+- `migrations/0022_moments_private_helpers.sql` — `private.can_view_moment` and related
+  helpers (friends-of-tagged + block-aware media); SELECT policies only. Mutation RPCs
+  and Storage deferred (S2/S3). Verify with `tests/0021_moments_verify.sql`.
 - `seed.sql` — idempotent public-graph seed keyed off **real** auth IDs (resolved by email).
 
 ## Security model

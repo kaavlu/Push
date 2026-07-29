@@ -1,29 +1,18 @@
-# Issue #116 — Design Feed and Moment backend architecture
+# Issue #117 — Moments S1: tables, helpers, SQL verify
 
 ## Status
 
-- [x] Infrastructure reuse audit
-- [x] Domain model + DB relationship sketch
-- [x] Storage / AuthZ / read-write flows
-- [x] Edge cases (graph, tags, blocks, soft-delete, concurrency, order)
-- [x] Migration sequence, RLS checklist, tests, implementation slices
-- [x] Non-goals preserved from product contract
+- [x] `0021_moments_tables.sql` — moments / members / media, indexes, UNIQUE(push_id), RLS, SELECT grant only
+- [x] `0022_moments_private_helpers.sql` — private AuthZ helpers + SELECT policies
+- [x] `tests/0021_moments_verify.sql` — soft-delete, push slot, stranger, friend, block path/media
+- [x] `supabase/README.md` entries
+- [x] Applied remote via MCP (`0021_moments_tables`, `0022_moments_private_helpers`)
+- [x] Ran verify on remote (alice/bob/carol) — OK
 
-## Deliverable
+## Out of scope (later slices)
 
-`docs/superpowers/specs/2026-07-28-feed-moment-backend-architecture.md`
-
-## Inputs
-
-- Contract: `docs/superpowers/specs/2026-07-28-feed-moment-product-contract.md` (#115)
-- Audit: `docs/superpowers/specs/2026-07-28-feed-moment-backend-requirements-audit.md` (#114)
-
-## Constraints honored
-
-- Architecture only — no code, migrations, or Storage setup
-- Product decisions unchanged
-- Moment ≠ Push ≠ FeedEvent
+Mutation RPCs, Storage, MomentRepository, Feed UI, Realtime, notifications.
 
 ## Next
 
-Implementation issues for slices S1–S5 (backend) then S6–S9 (client wire-up).
+S2 — mutation RPCs + permission matrix SQL cases.
