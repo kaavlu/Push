@@ -25,6 +25,12 @@ struct SeedData {
     let feedEvents: [FeedEvent]
     let friendRequests: [FriendRequest]
     let profile: UserProfile
+    /// Moment album rows. Default-empty so narrower seeds (empty graph, test
+    /// fixtures) opt in explicitly — Moments never leak into a graph that has
+    /// no friends to make them visible.
+    var moments: [Moment] = []
+    var momentMembers: [MomentMember] = []
+    var momentMedia: [MomentMedia] = []
 
     static func standard(now: Date = Date()) -> SeedData {
         let friends = standardFriends()
@@ -45,7 +51,10 @@ struct SeedData {
             hangouts: standardHangouts(now: now),
             feedEvents: standardFeedEvents(now: now),
             friendRequests: standardFriendRequests(now: now, people: people),
-            profile: standardProfile()
+            profile: standardProfile(),
+            moments: standardMoments(now: now),
+            momentMembers: standardMomentMembers(now: now),
+            momentMedia: standardMomentMedia(now: now)
         )
     }
 

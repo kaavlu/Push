@@ -7,6 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E6D4A50B721BC1ECDE4C7CE8 /* MomentPermissionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72C0FE97E381031673A66BA5 /* MomentPermissionTests.swift */; };
+		750D8F78C72FB8B2E4EF981C /* MomentDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C7CF9AB2379CBF8E932B20E /* MomentDataTests.swift */; };
+		A3F1985033F45C43A0CCCFBE /* SeedData+Moments.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26E3A43FCE733893B11A3512 /* SeedData+Moments.swift */; };
+		6D8DC6016B0A6735B7216D86 /* LocalMomentRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9F49BF76E276927D7A9E49 /* LocalMomentRepository.swift */; };
+		FB75614858261EF8E2E9C5CD /* InMemoryDatabase+Moments.swift in Sources */ = {isa = PBXBuildFile; fileRef = B75909DA7A62F24C0215B0A8 /* InMemoryDatabase+Moments.swift */; };
+		77F8F059B058C7B717AA451C /* MomentReadModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F92A17B38589C70EFB787365 /* MomentReadModels.swift */; };
+		70EAD0F5CC1BBE080D540C39 /* MomentCapabilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F63239592CB3F0BF85ECE3 /* MomentCapabilities.swift */; };
+		BE2726ACC19FBD911C4868D1 /* Moment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4138AD24BC5AE3C48BD0F3C7 /* Moment.swift */; };
 		4C636686F66336DB339FD823 /* MomentMediaStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FC773D00A35969791463096 /* MomentMediaStorageTests.swift */; };
 		FE26684C6A5955324FF9B2C0 /* MomentMediaPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B285FF1274B93A38DA82146 /* MomentMediaPublisher.swift */; };
 		701AFBC7AA4FD37A08D7CD4D /* MomentMediaFileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF78AB2238BB896636852607 /* MomentMediaFileStore.swift */; };
@@ -389,6 +397,14 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		72C0FE97E381031673A66BA5 /* MomentPermissionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MomentPermissionTests.swift"; sourceTree = "<group>"; };
+		8C7CF9AB2379CBF8E932B20E /* MomentDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MomentDataTests.swift"; sourceTree = "<group>"; };
+		26E3A43FCE733893B11A3512 /* SeedData+Moments.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SeedData+Moments.swift"; path = "Data/Seed/SeedData+Moments.swift"; sourceTree = "<group>"; };
+		5D9F49BF76E276927D7A9E49 /* LocalMomentRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "LocalMomentRepository.swift"; path = "Data/Repositories/LocalMomentRepository.swift"; sourceTree = "<group>"; };
+		B75909DA7A62F24C0215B0A8 /* InMemoryDatabase+Moments.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "InMemoryDatabase+Moments.swift"; path = "Data/Store/InMemoryDatabase+Moments.swift"; sourceTree = "<group>"; };
+		F92A17B38589C70EFB787365 /* MomentReadModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "MomentReadModels.swift"; path = "Data/Domain/MomentReadModels.swift"; sourceTree = "<group>"; };
+		37F63239592CB3F0BF85ECE3 /* MomentCapabilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "MomentCapabilities.swift"; path = "Data/Domain/MomentCapabilities.swift"; sourceTree = "<group>"; };
+		4138AD24BC5AE3C48BD0F3C7 /* Moment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Moment.swift"; path = "Data/Domain/Moment.swift"; sourceTree = "<group>"; };
 		1FC773D00A35969791463096 /* MomentMediaStorageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MomentMediaStorageTests.swift"; sourceTree = "<group>"; };
 		5B285FF1274B93A38DA82146 /* MomentMediaPublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "MomentMediaPublisher.swift"; path = "Data/MomentMediaPublisher.swift"; sourceTree = "<group>"; };
 		CF78AB2238BB896636852607 /* MomentMediaFileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "MomentMediaFileStore.swift"; path = "Data/MomentMediaFileStore.swift"; sourceTree = "<group>"; };
@@ -808,6 +824,12 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				26E3A43FCE733893B11A3512 /* SeedData+Moments.swift */,
+				5D9F49BF76E276927D7A9E49 /* LocalMomentRepository.swift */,
+				B75909DA7A62F24C0215B0A8 /* InMemoryDatabase+Moments.swift */,
+				F92A17B38589C70EFB787365 /* MomentReadModels.swift */,
+				37F63239592CB3F0BF85ECE3 /* MomentCapabilities.swift */,
+				4138AD24BC5AE3C48BD0F3C7 /* Moment.swift */,
 				5B285FF1274B93A38DA82146 /* MomentMediaPublisher.swift */,
 				CF78AB2238BB896636852607 /* MomentMediaFileStore.swift */,
 				C83AEE5475479B619EC6E726 /* MomentMediaStorage.swift */,
@@ -1122,6 +1144,8 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				72C0FE97E381031673A66BA5 /* MomentPermissionTests.swift */,
+				8C7CF9AB2379CBF8E932B20E /* MomentDataTests.swift */,
 				1FC773D00A35969791463096 /* MomentMediaStorageTests.swift */,
 				97DD2B58ABA0405C3188BB9B /* CreatePostViewModelTests.swift */,
 				A841F5F06CE2431AF9CB786F /* AddYoursViewModelTests.swift */,
@@ -1332,6 +1356,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				A3F1985033F45C43A0CCCFBE /* SeedData+Moments.swift in Sources */,
+				6D8DC6016B0A6735B7216D86 /* LocalMomentRepository.swift in Sources */,
+				FB75614858261EF8E2E9C5CD /* InMemoryDatabase+Moments.swift in Sources */,
+				77F8F059B058C7B717AA451C /* MomentReadModels.swift in Sources */,
+				70EAD0F5CC1BBE080D540C39 /* MomentCapabilities.swift in Sources */,
+				BE2726ACC19FBD911C4868D1 /* Moment.swift in Sources */,
 				FE26684C6A5955324FF9B2C0 /* MomentMediaPublisher.swift in Sources */,
 				701AFBC7AA4FD37A08D7CD4D /* MomentMediaFileStore.swift in Sources */,
 				5D00B8F08C498764B74D9DCB /* MomentMediaStorage.swift in Sources */,
@@ -1637,6 +1667,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				E6D4A50B721BC1ECDE4C7CE8 /* MomentPermissionTests.swift in Sources */,
+				750D8F78C72FB8B2E4EF981C /* MomentDataTests.swift in Sources */,
 				4C636686F66336DB339FD823 /* MomentMediaStorageTests.swift in Sources */,
 				D8BE7384909881A58BCC6629 /* CreatePostViewModelTests.swift in Sources */,
 				87C6B88906AC60E18F430E19 /* AddYoursViewModelTests.swift in Sources */,

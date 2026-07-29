@@ -103,6 +103,9 @@ final class AppDataContainer {
     let profile: ProfileRepository
     let sharing: SharingRepository
     let feed: FeedRepository
+    /// Moments (Feed › Pushes). Mock uses `LocalMomentRepository`; live has no
+    /// repository until S5 and must stay empty rather than fall back to seed.
+    let moments: MomentRepository
     let alerts: AlertRepository
     let referenceDate: Date
 
@@ -176,6 +179,7 @@ final class AppDataContainer {
         self.profile = LocalProfileRepository(database: database)
         self.sharing = LocalSharingRepository(database: database)
         self.feed = LocalFeedRepository(database: database)
+        self.moments = LocalMomentRepository(database: database, clock: resolvedClock)
         self.alerts = LocalAlertRepository(database: database)
         self.presenceRealtimeBridge = nil
         // Explicit nil means "build default"; pass FakeLocationSession for tests.
@@ -237,6 +241,7 @@ final class AppDataContainer {
             ),
             sharing: SupabaseSharingRepository(store: store),
             feed: EmptyLiveFeedRepository(),
+            moments: EmptyLiveMomentRepository(),
             alerts: SupabaseAlertRepository(store: store, currentUserID: currentUserID),
             locationSession: resolvedSession,
             presenceRealtimeBridge: presenceRealtimeBridge
@@ -270,6 +275,7 @@ final class AppDataContainer {
         profile: ProfileRepository,
         sharing: SharingRepository,
         feed: FeedRepository,
+        moments: MomentRepository,
         alerts: AlertRepository,
         locationSession: LocationSessioning?,
         presenceRealtimeBridge: PresenceRealtimeBridging?
@@ -280,6 +286,7 @@ final class AppDataContainer {
         self.liveStore = liveStore
         self.friends = friends; self.groups = groups; self.pushes = pushes
         self.profile = profile; self.sharing = sharing; self.feed = feed
+        self.moments = moments
         self.alerts = alerts
         self.locationSession = locationSession
         self.presenceRealtimeBridge = presenceRealtimeBridge

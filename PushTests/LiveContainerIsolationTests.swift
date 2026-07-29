@@ -49,6 +49,49 @@ final class LiveContainerIsolationTests: XCTestCase {
         XCTAssertTrue(container.alerts is SupabaseAlertRepository)
     }
 
+    func testLiveContainerExposesNoMomentFixtures() async throws {
+        let loader = LiveDataLoaderSpy()
+        loader.presenceRows = []
+        let container = try await AppDataContainer.prepareLive(
+            loader: loader, currentUserID: "self"
+        )
+        XCTAssertTrue(container.moments is EmptyLiveMomentRepository)
+
+        // No seeded albums, no Feed carousel fixtures — empty until S5 lands.
+        let page = try await container.moments.feedPage(cursor: nil, limit: 10, groupID: nil)
+        let hub = try await container.moments.hubMoments()
+        XCTAssertTrue(page.moments.isEmpty)
+        XCTAssertNil(page.nextCursor)
+        XCTAssertTrue(hub.isEmpty)
+    }
+
+    func testLiveMomentWritesFailLoudlyRatherThanTouchingMockState() async throws {
+        let loader = LiveDataLoaderSpy()
+        loader.presenceRows = []
+        let container = try await AppDataContainer.prepareLive(
+            loader: loader, currentUserID: "self"
+        )
+        do {
+            _ = try await container.moments.createMoment(
+                MomentDraft(
+                    title: "Nope",
+                    media: [
+                        MomentMediaDraft(
+                            kind: .photo,
+                            storagePath: "pending/self/a.jpg",
+                            publicURL: "https://example.invalid/a.jpg"
+                        )
+                    ]
+                )
+            )
+            XCTFail("live Moment writes must not silently succeed")
+        } catch SupabaseRepositoryError.writeNotSupported {
+            // Expected: no live Moment writes until S5.
+        } catch {
+            XCTFail("unexpected error: \(type(of: error))")
+        }
+    }
+
     func testMockContainerStillSeedsData() async throws {
         let container = AppDataContainer(seed: .standard())
         let friends = try await container.friends.friends()

@@ -73,6 +73,12 @@ final class InMemoryDatabase: ObservableObject {
     /// Directed block rows (blocker → blocked). Soft-hide only — no hard delete of history.
     private(set) var userBlocks: [UserBlock]
 
+    /// Moment tables (mock mirror of 0021). Writable by `+Moments`; soft-deleted
+    /// rows are retained so Push slots stay consumed.
+    var momentsByID: [Moment.ID: Moment]
+    var momentMembers: [MomentMember]
+    var momentMedia: [MomentMedia]
+
     /// Seed order matters for deterministic UI (avatar stacks, card order).
     private(set) var orderedPeople: [Person]
     var orderedGroups: [FriendGroup]
@@ -97,6 +103,9 @@ final class InMemoryDatabase: ObservableObject {
         acceptedFriendIDs = seed.acceptedFriendIDs
         profile = seed.profile
         userBlocks = []
+        momentsByID = Dictionary(uniqueKeysWithValues: seed.moments.map { ($0.id, $0) })
+        momentMembers = seed.momentMembers
+        momentMedia = seed.momentMedia
     }
 
     /// Internal so lifecycle extensions in sibling files can notify once per write.

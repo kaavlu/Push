@@ -10,10 +10,8 @@
 import Foundation
 import Supabase
 
-enum MomentMediaKind: String, Equatable, CaseIterable {
-    case photo
-    case video
-}
+// `MomentMediaKind` lives in the domain layer (`Domain/Moment.swift`) — Storage
+// and the repository must agree on one kind type.
 
 /// Bytes the client wants to put in the bucket, already processed/compressed.
 struct MomentMediaUpload: Equatable {
