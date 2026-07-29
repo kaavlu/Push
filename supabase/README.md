@@ -54,6 +54,46 @@ of the files in order reproduces the schema.
   publication `supabase_realtime` (idempotent) so authenticated clients can receive
   `postgres_changes` for friend-visible presence (Issue #84). RLS still filters rows
   per JWT; app bridge patches `LiveDataStore` and reconciles on gaps.
+- `migrations/0021_moments_tables.sql` — `moments` / `moment_members` / `moment_media`
+  (Issue #117 S1): soft-delete, `UNIQUE(push_id)` including soft-deleted rows, feed
+  index, RLS enabled, **SELECT grant only** (no client writes).
+- `migrations/0022_moments_private_helpers.sql` — `private.can_view_moment` and related
+  helpers (friends-of-tagged + block-aware media); SELECT policies only. Mutation RPCs
+  and Storage deferred (S2/S3). Verify with `tests/0021_moments_verify.sql`.
+- `migrations/0023_moments_rpcs.sql` — Moment mutation RPCs (Issue #118 S2):
+  `create_moment`, `append_moment_media`, `update_moment_metadata`, `add_moment_members`,
+  `remove_moment_member`, `reorder_moment_media`, `soft_delete_moment_media`,
+  `soft_delete_moment`. Permission matrix + max 8 media; `last_activity_at` only on
+  create/append. No Storage yet (S3). Verify with `tests/0023_moments_rpcs_verify.sql`.
+- `migrations/0024_moment_media_storage.sql` — public `moment-media` Storage bucket
+  (Issue #119 S3). Keys: `pending/{auth.uid()}/{uuid}.{ext}` (primary publish path —
+  `create_moment` needs paths before a moment id exists) and optional
+  `{moment_id}/{uuid}.{ext}` for direct "Add yours" appends; posters are a parallel
+  `…-poster.jpg` key. 100 MiB bucket cap (video ceiling; the client holds photos to
+  10 MiB), mime allow-list jpeg/png/webp + mp4/quicktime. Owner-only CRUD under
+  `pending/…`; `{moment_id}/…` INSERT requires `private.moment_accepts_media`
+  (tagged + not soft-deleted), SELECT/DELETE for the uploader or moment creator.
+  No listable public SELECT. Helpers `private.storage_moment_id` (uuid-or-null path
+  parse) and `private.moment_accepts_media`. Verify with
+  `tests/0024_moment_media_storage_verify.sql`. (Remote history also has
+  `0024_moment_media_storage_select_creator`, the creator-SELECT fix now folded
+  into the file — a from-scratch run of `0024` alone reproduces final state.)
+- `migrations/0025_moment_media_path_validation.sql` — server-side ownership
+  validation for media paths (Issue #119 S3). `create_moment` / `append_moment_media`
+  now require each media and poster path to be an existing `moment-media` object
+  owned by `auth.uid()`, at an allowed key (`pending/{uid}/…`, plus `{moment_id}/…`
+  for appends), with a mime type matching the declared kind, and not already
+  registered by an active `moment_media` row (partial unique indexes back the check
+  under concurrency). `public_url` / `poster_url` are **derived** from the validated
+  path via `private.moment_media_public_url`; caller-supplied URLs are ignored (the
+  RPC arguments stay for signature stability). Base URL override:
+  `alter database postgres set app.settings.storage_public_base_url = '…'`.
+  Verify with `tests/0025_moment_media_validation_verify.sql`.
+  **Public-bucket caveat:** `moment-media` is public, so a URL that has already
+  been seen stays fetchable from the CDN. Blocking a user, untagging them, or
+  soft-deleting a Moment prevents future URL *discovery* through Push but does not
+  revoke an already-known URL. Hard revocation would require a private bucket plus
+  signed URLs on every read; that is deferred unless the product contract demands it.
 - `seed.sql` — idempotent public-graph seed keyed off **real** auth IDs (resolved by email).
 
 ## Security model

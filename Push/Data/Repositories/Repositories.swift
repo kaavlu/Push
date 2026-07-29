@@ -130,8 +130,54 @@ protocol SharingRepository {
     ) async throws
 }
 
+/// Activity timeline (Feed › Now) — deferred and empty in MVP. Moments live
+/// behind `MomentRepository`; the two never share a type.
 protocol FeedRepository {
     func events() async throws -> [FeedEvent]
+}
+
+/// Errors from Moment reads/mutations. Cases mirror the 0023 RPC exception
+/// strings so mock and live surface the same failures to view models.
+enum MomentRepositoryError: Error, Equatable {
+    case notAuthenticated
+    case notFound
+    case notAllowed
+    case mediaRequired
+    case mediaLimitExceeded
+    case invalidTag
+    case invalidPush
+    case momentExistsForPush
+    case cannotRemoveCreator
+    /// Reorder set mismatch — someone else changed the album first.
+    case conflict
+}
+
+/// Moments (Feed › Pushes). Reads are viewer-scoped: media and counts arrive
+/// already block-filtered, and every row carries its capability projection.
+protocol MomentRepository {
+    /// Newest activity first, keyset-paginated on `(lastActivityAt, id)`.
+    /// `groupID` filters to Moments with a tagged member the viewer shares
+    /// that group with; nil means no group predicate.
+    func feedPage(
+        cursor: MomentFeedCursor?, limit: Int, groupID: FriendGroup.ID?
+    ) async throws -> MomentFeedPage
+    /// Hub list: Moments the viewer created, is tagged in, or contributed to.
+    func hubMoments() async throws -> [MomentSummary]
+    func moment(id: Moment.ID) async throws -> MomentDetail
+    /// Publish. Requires ≥1 media; the creator is tagged automatically.
+    func createMoment(_ draft: MomentDraft) async throws -> Moment.ID
+    /// Add yours. Appends at the end and bumps activity; items that fit the
+    /// cap stay committed if a later one is rejected.
+    func appendMedia(momentID: Moment.ID, items: [MomentMediaDraft]) async throws
+    func updateMetadata(momentID: Moment.ID, title: String, locationText: String) async throws
+    func addTags(momentID: Moment.ID, personIDs: [Person.ID]) async throws
+    /// Removing yourself is the "hide attendance" path; the creator can never
+    /// be removed. Uploaded media is kept either way.
+    func removeTag(momentID: Moment.ID, personID: Person.ID) async throws
+    func reorderMedia(momentID: Moment.ID, orderedMediaIDs: [MomentMedia.ID]) async throws
+    /// Soft-deletes one item; deleting the last active item soft-deletes the Moment.
+    func softDeleteMedia(mediaID: MomentMedia.ID) async throws
+    func softDeleteMoment(momentID: Moment.ID) async throws
 }
 
 protocol AlertRepository {

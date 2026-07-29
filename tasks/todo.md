@@ -1,20 +1,18 @@
-# Feed Create Post — UI pass
+# Issue #118 — Moments S2: mutation RPCs
 
 ## Status
 
-- [x] Product decisions (hub + compose, media-first cards, tap→prefill, scratch empty draft)
-- [x] Design note (`docs/superpowers/specs/2026-07-28-feed-create-post-design.md`)
-- [x] Models / fixtures / ViewModel
-- [x] Hub + Compose + Flow UI
-- [x] Wire Feed center `+` in `ContentView`
-- [x] Tests (`CreatePostViewModelTests`) + pbxproj register
-- [x] Refine hub: compact richer History rows (thumb, meta, people, media badge, chevron)
-- [x] Pushes-style header + aligned close; Existing Moments / Past Pushes segment; distinct row styles
-- [x] DS alignment audit: promote chooser rows/chips (DS-091), EmptySurface empties, edit “Save changes”
-- [x] Scratch friend selection page (Start Push style; friends only; solo allowed)
-- [x] Moment card cream band (title/meta; participant + / … → Add Yours / edit moment)
-- [x] Tap media pause/resume autoplay; remove Feed header alerts/settings
+- [x] `0023_moments_rpcs.sql` — create, append, metadata, tags, reorder, soft-delete media/moment
+- [x] Permission matrix + max 8 + one Moment per Push + creator immutability
+- [x] `last_activity_at` only on create/append (`clock_timestamp` for same-txn distinguishability)
+- [x] `tests/0023_moments_rpcs_verify.sql`
+- [x] Applied remotely (plus small fix migrations for PL/pgSQL ambiguity + clock_timestamp)
+- [x] Smoke verify on alice/bob (create, append bump, metadata deny, cap 8, soft-delete, empty media)
 
-## Out of scope (next)
+## Out of scope
 
-Publishing, Storage uploads, feed append after post, audience, captions, live history from repos.
+Storage, Swift, UI, Realtime, notifications.
+
+## Next
+
+S3 Storage bucket / client media upload.
