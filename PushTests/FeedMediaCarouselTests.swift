@@ -84,8 +84,12 @@ final class FeedMediaCarouselTests: XCTestCase {
         XCTAssertTrue(videoKinds.contains(.video))
     }
 
-    func testViewModelExposesMediaFixtures() {
-        let viewModel = FeedViewModel()
+    /// Fixtures are reachable only through the explicit preview seam — the
+    /// default initializer loads from `MomentRepository` (Issue #125).
+    func testPreviewSeamExposesInjectedCarousels() {
+        let viewModel = FeedViewModel(
+            carousels: FeedMediaCarouselFixtures.feedPushesPreviewStack
+        )
         XCTAssertEqual(
             viewModel.mediaCarousels.map(\.id),
             FeedMediaCarouselFixtures.feedPushesPreviewStack.map(\.id)

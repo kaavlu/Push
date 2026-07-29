@@ -75,3 +75,15 @@ Durable, non-obvious learnings. Keep entries short; link code/docs rather than r
 - After DDL, run `get_advisors(security)`; treat only high-severity findings from
   the new schema/RLS/`SECURITY DEFINER` objects as blocking. (The
   `auth_leaked_password_protection` WARN is an unrelated dashboard toggle.)
+
+## Paginated view models (Issue #125, Feed › Pushes)
+
+- ViewModels that kick off `Task { await load() }` in `init` race any load a test
+  starts next. With a load-generation guard (needed so a slow page from the old
+  group filter can't overwrite newer content), the loser's result is *discarded* —
+  so a test that awaits only its own `load()` can observe `.loading` forever.
+  Fix: expose the bootstrap task (`private(set) var initialLoad: Task<Void, Never>?`)
+  and `await viewModel.initialLoad?.value` in tests.
+- Fakes for keyset pagination should serve a **cursor-keyed chain**, not a
+  consuming queue: the bootstrap load would otherwise shift every page boundary.
+  Make the page list a `var` so refresh/filter tests can change what page one returns.

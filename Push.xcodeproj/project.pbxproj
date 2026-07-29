@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1F65E5C4978D593F9B209F22 /* MomentFeedTestDoubles.swift in Sources */ = {isa = PBXBuildFile; fileRef = E272BEBC6335F6903A7389E6 /* MomentFeedTestDoubles.swift */; };
+		AB7C94BBDC549FE0DEE58F65 /* MomentFeedCardBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26C3436FFDAFC7E8049BAA3B /* MomentFeedCardBuilderTests.swift */; };
+		C0BC3A87DDBBCD60A18C695A /* MomentFeedCardBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1B9D2AD43C6253646EA6F9 /* MomentFeedCardBuilder.swift */; };
 		6E9E5816C4D0B170133E1B47 /* SupabaseMomentRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C37BC06DEAFE3151B177652 /* SupabaseMomentRepositoryTests.swift */; };
 		33AC2890939FBEAC51DF1EFF /* SupabaseMomentRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD798962CB6EF284DD313FA2 /* SupabaseMomentRepository.swift */; };
 		3391BBB5B5D57C1147535A3E /* MomentRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 265DD9DCBAE10B812B5DD1BC /* MomentRow.swift */; };
@@ -400,6 +403,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		E272BEBC6335F6903A7389E6 /* MomentFeedTestDoubles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MomentFeedTestDoubles.swift"; sourceTree = "<group>"; };
+		26C3436FFDAFC7E8049BAA3B /* MomentFeedCardBuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MomentFeedCardBuilderTests.swift"; sourceTree = "<group>"; };
+		DD1B9D2AD43C6253646EA6F9 /* MomentFeedCardBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "MomentFeedCardBuilder.swift"; path = "Data/Derived/MomentFeedCardBuilder.swift"; sourceTree = "<group>"; };
 		1C37BC06DEAFE3151B177652 /* SupabaseMomentRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SupabaseMomentRepositoryTests.swift"; sourceTree = "<group>"; };
 		CD798962CB6EF284DD313FA2 /* SupabaseMomentRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SupabaseMomentRepository.swift"; path = "Data/Supabase/SupabaseMomentRepository.swift"; sourceTree = "<group>"; };
 		265DD9DCBAE10B812B5DD1BC /* MomentRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "MomentRow.swift"; path = "Data/Supabase/Rows/MomentRow.swift"; sourceTree = "<group>"; };
@@ -830,6 +836,7 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				DD1B9D2AD43C6253646EA6F9 /* MomentFeedCardBuilder.swift */,
 				CD798962CB6EF284DD313FA2 /* SupabaseMomentRepository.swift */,
 				265DD9DCBAE10B812B5DD1BC /* MomentRow.swift */,
 				26E3A43FCE733893B11A3512 /* SeedData+Moments.swift */,
@@ -1152,6 +1159,8 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				E272BEBC6335F6903A7389E6 /* MomentFeedTestDoubles.swift */,
+				26C3436FFDAFC7E8049BAA3B /* MomentFeedCardBuilderTests.swift */,
 				1C37BC06DEAFE3151B177652 /* SupabaseMomentRepositoryTests.swift */,
 				72C0FE97E381031673A66BA5 /* MomentPermissionTests.swift */,
 				8C7CF9AB2379CBF8E932B20E /* MomentDataTests.swift */,
@@ -1365,6 +1374,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				C0BC3A87DDBBCD60A18C695A /* MomentFeedCardBuilder.swift in Sources */,
 				33AC2890939FBEAC51DF1EFF /* SupabaseMomentRepository.swift in Sources */,
 				3391BBB5B5D57C1147535A3E /* MomentRow.swift in Sources */,
 				A3F1985033F45C43A0CCCFBE /* SeedData+Moments.swift in Sources */,
@@ -1678,6 +1688,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				1F65E5C4978D593F9B209F22 /* MomentFeedTestDoubles.swift in Sources */,
+				AB7C94BBDC549FE0DEE58F65 /* MomentFeedCardBuilderTests.swift in Sources */,
 				6E9E5816C4D0B170133E1B47 /* SupabaseMomentRepositoryTests.swift in Sources */,
 				E6D4A50B721BC1ECDE4C7CE8 /* MomentPermissionTests.swift in Sources */,
 				750D8F78C72FB8B2E4EF981C /* MomentDataTests.swift in Sources */,

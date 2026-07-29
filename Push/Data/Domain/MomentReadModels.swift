@@ -9,19 +9,23 @@
 
 import Foundation
 
-/// Feed / hub row. Carries the cover and a viewer-visible count rather than
-/// the whole album (contract §7.4, §7.6).
+/// Feed / hub row. Carries the viewer-visible album (Feed cards are swipeable,
+/// and `feed_moments` already ships the block-filtered media) plus a
+/// viewer-visible count (contract §7.4, §7.6).
 struct MomentSummary: Identifiable, Equatable {
     let moment: Moment
     /// Creator first, then tag order; blocked people already removed.
     let taggedPersonIDs: [Person.ID]
-    /// First viewer-visible item — not necessarily global `sortOrder` 0 when
-    /// the cover's uploader is blocked for this viewer.
-    let coverMedia: MomentMedia?
+    /// Viewer-visible items in album order; blocked uploaders already removed.
+    let media: [MomentMedia]
     let visibleMediaCount: Int
     let capabilities: MomentCapabilities
 
     var id: Moment.ID { moment.id }
+
+    /// First viewer-visible item — not necessarily global `sortOrder` 0 when
+    /// the cover's uploader is blocked for this viewer.
+    var coverMedia: MomentMedia? { media.first }
 }
 
 /// Full album for edit / Add yours surfaces.

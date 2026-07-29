@@ -40,9 +40,23 @@ struct FeedView: View {
                         .padding(.top, FeedLayout.chipToContentSpacing)
                         .padding(.bottom, FeedLayout.contentBottomClearance(layout))
                 }
+                .refreshable {
+                    await viewModel.refresh()
+                }
             }
             .padding(.horizontal, FeedLayout.horizontalPadding(layout))
             .padding(.top, FeedLayout.topPadding)
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if let actionError = viewModel.actionError {
+                ActionErrorBanner(
+                    message: actionError.message,
+                    onRetry: { Task { await viewModel.retryLoadMore() } },
+                    onDismiss: { viewModel.dismissActionError() }
+                )
+                .padding(.horizontal, FeedLayout.horizontalPadding(layout))
+                .padding(.bottom, FeedLayout.contentBottomClearance(layout))
+            }
         }
         .fullScreenCover(item: $addYoursContext) { context in
             AddYoursView(context: context)
@@ -58,15 +72,7 @@ struct FeedView: View {
     private var tabContent: some View {
         switch viewModel.selectedTab {
         case .pushes:
-            FeedPushesMediaStack(
-                carousels: viewModel.mediaCarousels,
-                onAddYours: { carousel in
-                    addYoursContext = AddYoursContext(carousel: carousel)
-                },
-                onEditMoment: { carousel in
-                    editMomentCarousel = carousel
-                }
-            )
+            pushesContent
         case .now:
             EmptySurfaceView(
                 title: EmptySurfaceCopy.feedNowEmptyTitle,
@@ -75,6 +81,46 @@ struct FeedView: View {
             )
             .frame(maxWidth: .infinity)
             .padding(.top, EmptySurfaceLayout.topPadding)
+        }
+    }
+
+    /// Moment stream states (DS-070/071). Content stays on screen while a
+    /// refresh or an incremental page is in flight.
+    @ViewBuilder
+    private var pushesContent: some View {
+        switch viewModel.contentPhase {
+        case .loading, .deferred:
+            EmptySurfaceStateView.loading
+                .frame(minHeight: FeedLayout.statePlaceholderMinHeight)
+        case .failed:
+            EmptySurfaceStateView.failed(surface: MomentFeedCopy.surfaceName) {
+                Task { await viewModel.load() }
+            }
+            .frame(minHeight: FeedLayout.statePlaceholderMinHeight)
+        case .empty:
+            EmptySurfaceView(
+                title: MomentFeedCopy.emptyTitle,
+                message: viewModel.selectedFilterID == MomentFeedFilter.allID
+                    ? MomentFeedCopy.emptyMessage
+                    : MomentFeedCopy.emptyGroupMessage,
+                systemImage: "rectangle.stack"
+            )
+            .frame(maxWidth: .infinity)
+            .padding(.top, EmptySurfaceLayout.topPadding)
+        case .content:
+            FeedPushesMediaStack(
+                carousels: viewModel.mediaCarousels,
+                isLoadingMore: viewModel.isLoadingMore,
+                onAddYours: { carousel in
+                    addYoursContext = AddYoursContext(carousel: carousel)
+                },
+                onEditMoment: { carousel in
+                    editMomentCarousel = carousel
+                },
+                onCardAppear: { carousel in
+                    Task { await viewModel.loadMoreIfNeeded(after: carousel.id) }
+                }
+            )
         }
     }
 }
@@ -121,30 +167,30 @@ private struct FeedFilterChips: View {
 
 private struct FeedPushesMediaStack: View {
     let carousels: [FeedMediaCarouselData]
+    var isLoadingMore = false
     var onAddYours: (FeedMediaCarouselData) -> Void = { _ in }
     var onEditMoment: (FeedMediaCarouselData) -> Void = { _ in }
+    /// Fires per card so the last one can request the next keyset page.
+    var onCardAppear: (FeedMediaCarouselData) -> Void = { _ in }
 
     var body: some View {
-        if carousels.isEmpty {
-            EmptySurfaceView(
-                title: EmptySurfaceCopy.feedPushesPlaceholderTitle,
-                message: EmptySurfaceCopy.feedPushesPlaceholderMessage,
-                systemImage: "rectangle.stack"
-            )
-            .frame(maxWidth: .infinity)
-            .padding(.top, EmptySurfaceLayout.topPadding)
-        } else {
-            VStack(spacing: FeedLayout.mediaStackSpacing) {
-                ForEach(carousels) { carousel in
-                    PushMediaCarousel(
-                        data: carousel,
-                        onOverflowMenu: { onEditMoment(carousel) },
-                        onAddYours: { onAddYours(carousel) }
-                    )
-                }
+        LazyVStack(spacing: FeedLayout.mediaStackSpacing) {
+            ForEach(carousels) { carousel in
+                PushMediaCarousel(
+                    data: carousel,
+                    onOverflowMenu: { onEditMoment(carousel) },
+                    onAddYours: { onAddYours(carousel) }
+                )
+                .onAppear { onCardAppear(carousel) }
             }
-            .frame(maxWidth: .infinity)
+
+            if isLoadingMore {
+                ProgressView()
+                    .tint(PushControlColors.activeForeground)
+                    .padding(.vertical, FeedLayout.loadMoreSpinnerPadding)
+            }
         }
+        .frame(maxWidth: .infinity)
     }
 }
 
@@ -152,7 +198,13 @@ private struct FeedPushesMediaStack: View {
 struct FeedView_Previews: PreviewProvider {
     static var previews: some View {
         PushPreviewMatrix {
-            FeedView()
+            // Fixture seam — the app path always loads from `MomentRepository`.
+            FeedView(
+                viewModel: FeedViewModel(
+                    carousels: FeedMediaCarouselFixtures.feedPushesPreviewStack,
+                    filterItems: FeedFilterFixtures.items
+                )
+            )
         }
     }
 }
