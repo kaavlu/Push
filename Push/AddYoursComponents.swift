@@ -100,10 +100,16 @@ struct AddYoursHeroPreview: View {
                             width: AddYoursLayout.removeControlSize,
                             height: AddYoursLayout.removeControlSize
                         )
-                        .pushGlassBackground(
-                            cornerRadius: AddYoursLayout.removeControlSize / 2,
-                            showsShadow: false
-                        )
+                        // Opaque cream — glass would sample dark photos and go dark.
+                        .background(Circle().fill(PushCreamTokens.solidCard))
+                        .overlay {
+                            Circle().stroke(
+                                PushColorPalette.Accent.walnut.opacity(
+                                    PushCreamTokens.solidCardStrokeOpacity
+                                ),
+                                lineWidth: PushCreamTokens.solidCardStrokeWidth
+                            )
+                        }
                 }
                 .buttonStyle(.plain)
                 .padding(AddYoursLayout.removeInset)

@@ -24,7 +24,6 @@ enum FeedLayout {
         FriendsLayout.contentBottomClearance(layout)
     }
 
-    static let headerActionSpacing: CGFloat = 10
     /// Space between pinned filter chips and scroll content.
     static let chipToContentSpacing: CGFloat = 14
     static let placeholderCardMinHeight: CGFloat = 120
@@ -33,11 +32,6 @@ enum FeedLayout {
 
     /// Consistent vertical gap between media cards (next card peeks slightly).
     static let mediaStackSpacing: CGFloat = 24
-
-    /// Unread-dot metrics — match map top-control indicator scale.
-    static let alertIndicatorSize: CGFloat = 9
-    static let alertIndicatorStrokeWidth: CGFloat = 1.5
-    static let alertIndicatorInset: CGFloat = 1
 }
 
 /// Compact cinematic media frame for Feed Push cards.
@@ -71,27 +65,41 @@ enum FeedMediaLayout {
     static let mediaStrokeOpacity = 0.12
     static let mediaStrokeWidth: CGFloat = 0.8
 
-    /// Gap between progress row and metadata (location / time / overflow).
-    static let progressToMetadataSpacing: CGFloat = 10
-    /// Side inset for the metadata row (matches progress side margin).
-    static let metadataHorizontalInset: CGFloat = progressHorizontalInset
-    /// Top inset when progress is hidden (single-item carousels).
-    static let metadataTopInsetWithoutProgress: CGFloat = progressTopInset
-    /// Space between location and date/time lines.
-    static let metadataTextStackSpacing: CGFloat = 3
-    /// Soft top scrim height so white type stays legible on light or dark media.
+    /// Soft top scrim height so progress stays legible on light or dark media.
     static let metadataScrimHeight: CGFloat = 118
 
     /// Bottom interaction inset from media edges (matches top chrome side inset).
     static let bottomHorizontalInset: CGFloat = progressHorizontalInset
     static let bottomEdgeInset: CGFloat = 16
-    /// Gap between participant row and Add yours.
-    static let bottomRowToCTASpacing: CGFloat = 12
-    /// Soft bottom scrim height behind the interaction section.
-    static let bottomScrimHeight: CGFloat = 168
+    /// Soft bottom scrim behind participants + playback (Add yours is under media).
+    static let bottomScrimHeight: CGFloat = 112
+
+    /// Shared outer radius for media + cream content band (one unified card).
+    static var cardCornerRadius: CGFloat { cornerRadius }
 }
 
-/// Bottom media interaction chrome (avatars, names, play, Add yours).
+/// Compact cream band under feed media (title, meta, trailing + / …).
+enum FeedMediaContentSectionStyle {
+    /// Outer padding — compact so the stack stays dense on the Feed.
+    static let horizontalPadding: CGFloat = 14
+    static let topPadding: CGFloat = 12
+    static let bottomPadding: CGFloat = 12
+    /// Title → location · date line.
+    static let titleToMetaSpacing: CGFloat = 4
+    /// Gap between title/meta column and trailing action cluster.
+    static let titleToOverflowSpacing: CGFloat = 10
+    /// Gap between sunbeam + and overflow … (same-size circle pair).
+    static let actionSpacing: CGFloat = 8
+
+    static let titleFont = Font.headline.weight(.semibold)
+    static let titleColor = PushControlColors.textEspresso
+    static let metaFont = Font.caption.weight(.medium)
+    static let metaColor = PushControlColors.textSecondary
+    static let titleLineLimit = 2
+    static let metaLineLimit = 1
+}
+
+/// Bottom media interaction chrome (avatars + names on media).
 enum FeedMediaBottomStyle {
     static let avatarSize: CGFloat = 34
     static let avatarOverlap: CGFloat = -11
@@ -99,7 +107,6 @@ enum FeedMediaBottomStyle {
     static let avatarStrokeOpacity = 0.92
     static let avatarToTextSpacing: CGFloat = 10
     static let textStackSpacing: CGFloat = 2
-    static let rowToPlaySpacing: CGFloat = 10
 
     static let namesFont = Font.subheadline.weight(.semibold)
     static let contributorFont = Font.caption.weight(.medium)
@@ -109,14 +116,6 @@ enum FeedMediaBottomStyle {
     static let textShadowY: CGFloat = 1
 
     static let overflowFontSize: CGFloat = 12
-    static let playButtonSize: CGFloat = 44
-    static let playIconSize: CGFloat = 16
-    static var playCornerRadius: CGFloat { playButtonSize / 2 }
-
-    static let addYoursHeight: CGFloat = 52
-    static let addYoursIconSize: CGFloat = 15
-    static let addYoursLabelSpacing: CGFloat = 8
-    static let addYoursFont = Font.headline.weight(.bold)
 
     static let scrimBottomOpacity = 0.58
     static let scrimMidOpacity = 0.28
@@ -139,25 +138,9 @@ enum FeedMediaPlaceholderStyle {
     static let spinnerTint = PushColorPalette.Accent.sunbeam
 }
 
-/// Top chrome over media — compact location pill + overflow (Feed media only).
+/// Soft top scrim over media (progress readability).
 enum FeedMediaMetadataStyle {
-    /// Compact single-line location label on liquid glass.
-    static let locationFont = Font.subheadline.weight(.semibold)
-    /// Walnut on liquid glass — same as map filter pill / top controls.
-    static let textColor = PushControlColors.activeForeground
     static let scrimTopOpacity = 0.40
     static let scrimMidOpacity = 0.16
     static let scrimMidStop = 0.55
-
-    /// Same diameter/radius family as the overflow control so the pill and `…`
-    /// circle share visual curvature (half of 44pt control = capsule ends).
-    static let overflowButtonSize: CGFloat = 44
-    static let overflowIconSize: CGFloat = 17
-    static let overflowIconWeight: Font.Weight = .semibold
-    static var overflowCornerRadius: CGFloat { overflowButtonSize / 2 }
-
-    /// Single-row pill height matches the overflow circle; radius matches ends.
-    static let chipHeight: CGFloat = overflowButtonSize
-    static let chipCornerRadius: CGFloat = overflowCornerRadius
-    static let chipHorizontalPadding: CGFloat = 16
 }

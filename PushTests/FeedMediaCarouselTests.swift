@@ -92,21 +92,22 @@ final class FeedMediaCarouselTests: XCTestCase {
         )
     }
 
-    func testFixturesIncludeLocationMetadata() {
+    func testFixturesIncludeTitleAndLocationMetadata() {
         for carousel in FeedMediaCarouselFixtures.feedPushesPreviewStack {
+            XCTAssertFalse(carousel.title.isEmpty, carousel.id)
             XCTAssertFalse(carousel.locationTitle.isEmpty, carousel.id)
+            XCTAssertFalse(carousel.locationDateMetaLine.isEmpty, carousel.id)
         }
+        XCTAssertEqual(FeedMediaCarouselFixtures.threeBundlePhotos.title, "Friday night out")
         XCTAssertEqual(FeedMediaCarouselFixtures.threeBundlePhotos.locationTitle, "The Beehive")
         XCTAssertEqual(
-            FeedMediaMetadataStyle.chipCornerRadius,
-            FeedMediaMetadataStyle.overflowCornerRadius,
-            accuracy: 0.01
+            FeedMediaCarouselFixtures.threeBundlePhotos.locationDateMetaLine,
+            "The Beehive · Fri · 9:15 PM"
         )
-        XCTAssertEqual(
-            FeedMediaMetadataStyle.chipHeight,
-            FeedMediaMetadataStyle.overflowButtonSize,
-            accuracy: 0.01
-        )
+        // Compact cream content band under media.
+        XCTAssertLessThanOrEqual(FeedMediaContentSectionStyle.topPadding, 14)
+        XCTAssertLessThanOrEqual(FeedMediaContentSectionStyle.bottomPadding, 14)
+        XCTAssertEqual(FeedMediaLayout.cardCornerRadius, FeedMediaLayout.cornerRadius, accuracy: 0.01)
     }
 
     func testParticipantNamesLineIncludesRemainingSuffix() {
@@ -121,15 +122,20 @@ final class FeedMediaCarouselTests: XCTestCase {
         )
     }
 
-    func testAddYoursHiddenForNonParticipants() {
+    func testParticipantActionsOnlyWhenViewerIsPartOfMoment() {
+        // + and … share canAddYours — non-participants see neither control.
         XCTAssertFalse(FeedMediaCarouselFixtures.mixedPortraitLandscapeSquare.canAddYours)
         XCTAssertTrue(FeedMediaCarouselFixtures.threeBundlePhotos.canAddYours)
         XCTAssertFalse(FeedMediaCarouselFixtures.threeBundlePhotos.participants.isEmpty)
         XCTAssertFalse(FeedMediaCarouselFixtures.threeBundlePhotos.contributorName.isEmpty)
+        XCTAssertEqual(
+            CreatePostHistoryItem.feedMomentID(forCarouselID: "fixture-three-bundle"),
+            "moment-fixture-three-bundle"
+        )
     }
 
     func testBottomChromeOnlyOnFirstSlide() {
-        // Bottom row (avatars / Add yours) is first-slide only; location + progress are every slide.
+        // In-media participants/playback are first-slide only; cream content band is always below media.
         XCTAssertTrue(FeedMediaCarouselSelection.showsFullChrome(selectedIndex: 0))
         XCTAssertFalse(FeedMediaCarouselSelection.showsFullChrome(selectedIndex: 1))
         XCTAssertFalse(FeedMediaCarouselSelection.showsFullChrome(selectedIndex: 2))

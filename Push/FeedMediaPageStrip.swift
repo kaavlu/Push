@@ -14,7 +14,9 @@ struct FeedMediaPageStrip<FirstPageChrome: View>: View {
     let items: [FeedMediaItem]
     @Binding var selectedIndex: Int
     let size: CGSize
-    /// Overlay on the first media page (and its loop clone) — avatars / play / Add yours.
+    /// Tap on the current page (not a page drag) — e.g. pause/play auto-advance.
+    var onMediaTap: () -> Void = {}
+    /// Overlay on the first media page (and its loop clone) — participants.
     @ViewBuilder var firstPageChrome: () -> FirstPageChrome
 
     @State private var scrollIndex: Int = 0
@@ -55,7 +57,11 @@ struct FeedMediaPageStrip<FirstPageChrome: View>: View {
         .frame(width: pageWidth, height: size.height, alignment: .leading)
         .clipped()
         .contentShape(Rectangle())
+        // Drag min distance leaves short taps free for pause/play.
         .gesture(pageDragGesture)
+        .onTapGesture {
+            onMediaTap()
+        }
         .onAppear {
             scrollIndex = logicalIndex
         }

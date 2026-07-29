@@ -37,7 +37,7 @@ Open this file **before** creating UI chrome. Discover → reuse → extend → 
 | New status capsule recipes | Chip menu (§ Availability / chips) |
 | New spring/duration literals for shared motion | `PushMotion` |
 | Freeform elevation / shadow APIs | Inside named surfaces only |
-| Feed/activity-row chrome | Deferred until Feed ships (DS-033) |
+| Feed/activity-row chrome | Deferred until Feed ships (DS-033); **exception:** create-post hub choosers use DS-091 |
 | Onboarding CTAs inside main app | Domain-local until alignment pass |
 
 ---
@@ -116,6 +116,7 @@ Map profile control, bottom-nav raised +, product circles with intentionally dif
 | **`PushExpandablePersonRow` + rail** (DS-028/008) | Multi-action expand under person row | Baking expand into base person row |
 | **`PushGroupRow`** (DS-019) | Group list identity cards | Forcing groups into person-row |
 | **`PushHistoryRow`** (DS-021) | Plans history list | DIY cream history chrome |
+| **`PushMomentChooserRow` / `PushPastPushChooserRow` / `PushCreateActionChooserRow`** (DS-091) | Share a moment hub choosers (media / people / create) | Parallel create-post cream rows |
 | **`PushListSectionHeader`** (DS-034) | Alerts/Friends section titles + counts | One-off section header chrome |
 | **`ActionErrorBanner`** (DS-022) | Inline mutation recovery on cream foundation | Full-page `.failed` for mutation errors |
 | Request cards (DS-020) | Friend request via person-row + Accept/Deny; group via `GroupRequestCard` | New request chrome families |
@@ -163,6 +164,7 @@ Map profile control, bottom-nav raised +, product circles with intentionally dif
 | Availability chip (DS-044) | `PushAvailabilityChip` (`.compact` / `.sheet`) | Cream lists + friend-detail headers |
 | Map activity badge (DS-044) | `ActivityBadge` | Map pucks only — not list trailing chips |
 | Brand sunbeam pill (DS-045) | `PushBrandSunbeamPill` / `StatusPill` / `YourPushTimeChip` / `PushGroupStatusPill` | Non-availability labels |
+| Moment contribution chip (DS-091) | `PushContributionChip` | Open for adds / You contributed on moment chooser rows |
 | Plan status pill (DS-046) | `PlanStatusPill` | Plan/RSVP state on plan cards only |
 | Live dot + time (DS-047) | Person-row trailing accessory | Uses availability accent |
 | Person avatar (DS-050) | `PushPersonAvatar` (fallback `.dark` / `.sunbeam`) | All person faces; shims: `ProfilePhotoAvatar`, `RecipientAvatarView` |
@@ -235,9 +237,9 @@ Map profile control, bottom-nav raised +, product circles with intentionally dif
 | `Tokens/` | `PushAvailabilityTokens`, `PushMotion`, `PushOpacityTokens`, `PushRadiusTokens`, `PushTypographyTokens` |
 | `Surfaces/` | Control / map / puck / card glass, cream, modal |
 | `Components/Buttons/` | Circle, solid sunbeam, glass rim, create-menu icon |
-| `Components/Rows/` | Person, expandable, group, history, section header |
+| `Components/Rows/` | Person, expandable, group, history, moment chooser (DS-091), section header |
 | `Components/Cards/` | Plans plan card, review card, plan subcomponents |
-| `Components/Chips/` | Availability chip, brand sunbeam pill |
+| `Components/Chips/` | Availability chip, brand sunbeam pill, contribution chip (DS-091) |
 | `Components/Avatars/` | Person avatar |
 | `Components/EmptyStates/` | EmptySurface family, map overlay |
 | `Components/Selectors/` | Segmented, filter chips, single-select, modal choice pill |

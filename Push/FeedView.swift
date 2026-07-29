@@ -13,21 +13,11 @@ struct FeedView: View {
     @Environment(\.pushLayout) private var layout
     @StateObject private var viewModel: FeedViewModel
     @State private var addYoursContext: AddYoursContext?
-    let hasUnreadAlerts: Bool
-    let onOpenAlerts: () -> Void
-    /// Filter/settings is structural only this issue — intentionally no-op.
-    var onFilterSettings: () -> Void = {}
+    /// Participant card … → edit that moment in Create Post compose.
+    @State private var editMomentCarousel: FeedMediaCarouselData?
 
     @MainActor
-    init(
-        hasUnreadAlerts: Bool = false,
-        onOpenAlerts: @escaping () -> Void = {},
-        onFilterSettings: @escaping () -> Void = {},
-        viewModel: FeedViewModel? = nil
-    ) {
-        self.hasUnreadAlerts = hasUnreadAlerts
-        self.onOpenAlerts = onOpenAlerts
-        self.onFilterSettings = onFilterSettings
+    init(viewModel: FeedViewModel? = nil) {
         if let viewModel {
             _viewModel = StateObject(wrappedValue: viewModel)
         } else {
@@ -40,11 +30,7 @@ struct FeedView: View {
             FriendsBackground()
 
             VStack(spacing: FeedLayout.screenStackSpacing(layout)) {
-                FeedPageHeader(
-                    hasUnreadAlerts: hasUnreadAlerts,
-                    onFilterSettings: onFilterSettings,
-                    onOpenAlerts: onOpenAlerts
-                )
+                PushCreamPageHeader(title: "Feed")
                 FeedTabSwitch(viewModel: viewModel)
                 // Group filters stay pinned under the segment (do not scroll away).
                 FeedFilterChips(viewModel: viewModel)
@@ -61,6 +47,11 @@ struct FeedView: View {
         .fullScreenCover(item: $addYoursContext) { context in
             AddYoursView(context: context)
         }
+        .fullScreenCover(item: $editMomentCarousel) { carousel in
+            CreatePostFlowView(
+                viewModel: CreatePostViewModel.forEditingFeedMoment(carousel)
+            )
+        }
     }
 
     @ViewBuilder
@@ -71,6 +62,9 @@ struct FeedView: View {
                 carousels: viewModel.mediaCarousels,
                 onAddYours: { carousel in
                     addYoursContext = AddYoursContext(carousel: carousel)
+                },
+                onEditMoment: { carousel in
+                    editMomentCarousel = carousel
                 }
             )
         case .now:
@@ -82,63 +76,6 @@ struct FeedView: View {
             .frame(maxWidth: .infinity)
             .padding(.top, EmptySurfaceLayout.topPadding)
         }
-    }
-}
-
-// MARK: - Header
-
-private struct FeedPageHeader: View {
-    let hasUnreadAlerts: Bool
-    let onFilterSettings: () -> Void
-    let onOpenAlerts: () -> Void
-
-    var body: some View {
-        PushCreamPageHeader(title: "Feed") {
-            HStack(spacing: FeedLayout.headerActionSpacing) {
-                PushCircleIconButton(
-                    systemImageName: "slider.horizontal.3",
-                    accessibilityLabel: "Feed filter settings",
-                    action: onFilterSettings
-                )
-                FeedAlertsButton(
-                    hasUnreadAlerts: hasUnreadAlerts,
-                    action: onOpenAlerts
-                )
-            }
-        }
-    }
-}
-
-private struct FeedAlertsButton: View {
-    let hasUnreadAlerts: Bool
-    let action: () -> Void
-
-    var body: some View {
-        PushCircleIconButton(
-            systemImageName: MainMapRoute.alerts.systemImageName,
-            accessibilityLabel: MainMapRoute.alerts.accessibilityLabel,
-            action: action
-        )
-        .overlay(alignment: .topTrailing) {
-            if hasUnreadAlerts {
-                Circle()
-                    .fill(PushControlColors.activeFill)
-                    .frame(
-                        width: FeedLayout.alertIndicatorSize,
-                        height: FeedLayout.alertIndicatorSize
-                    )
-                    .overlay {
-                        Circle()
-                            .stroke(
-                                PushControlColors.activeForeground,
-                                lineWidth: FeedLayout.alertIndicatorStrokeWidth
-                            )
-                    }
-                    .padding(FeedLayout.alertIndicatorInset)
-                    .accessibilityHidden(true)
-            }
-        }
-        .accessibilityValue(hasUnreadAlerts ? "Unread alerts" : "No unread alerts")
     }
 }
 
@@ -185,6 +122,7 @@ private struct FeedFilterChips: View {
 private struct FeedPushesMediaStack: View {
     let carousels: [FeedMediaCarouselData]
     var onAddYours: (FeedMediaCarouselData) -> Void = { _ in }
+    var onEditMoment: (FeedMediaCarouselData) -> Void = { _ in }
 
     var body: some View {
         if carousels.isEmpty {
@@ -200,6 +138,7 @@ private struct FeedPushesMediaStack: View {
                 ForEach(carousels) { carousel in
                     PushMediaCarousel(
                         data: carousel,
+                        onOverflowMenu: { onEditMoment(carousel) },
                         onAddYours: { onAddYours(carousel) }
                     )
                 }
@@ -213,7 +152,7 @@ private struct FeedPushesMediaStack: View {
 struct FeedView_Previews: PreviewProvider {
     static var previews: some View {
         PushPreviewMatrix {
-            FeedView(hasUnreadAlerts: true)
+            FeedView()
         }
     }
 }

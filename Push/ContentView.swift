@@ -21,6 +21,8 @@ struct ContentView: View {
     @State private var selectedPuck: MapPuckData?
     @State private var selectedRegionalPuck: RegionalPuckModel?
     @State private var startPushContext: StartPushLaunchContext?
+    /// Feed tab center + → create-post hub (fixture UI pass).
+    @State private var isCreatePostPresented = false
     @State private var mapSpan = MapDefaults.region.span
     @State private var forcedRenderSpan: MKCoordinateSpan?
     /// Skip the first `.active` after launch — bootstrap already warms the live store.
@@ -78,12 +80,7 @@ struct ContentView: View {
             }
 
             if isFeedPresented {
-                FeedView(
-                    hasUnreadAlerts: alertsViewModel.hasUnreadAlerts,
-                    onOpenAlerts: {
-                        presentedRoute = .alerts
-                    }
-                )
+                FeedView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .transition(.opacity)
                     .zIndex(TabOverlayLayout.zIndex)
@@ -162,6 +159,9 @@ struct ContentView: View {
         }
         .fullScreenCover(item: $startPushContext) { context in
             StartPushFlowView(context: context)
+        }
+        .fullScreenCover(isPresented: $isCreatePostPresented) {
+            CreatePostFlowView()
         }
         .onChange(of: scenePhase) { newPhase in
             handleScenePhase(newPhase)
@@ -277,9 +277,10 @@ struct ContentView: View {
                 presentedRoute = .addFriend
                 return
             }
-            // Feed shell (Issue #9): + is intentionally a no-op until Feed create is defined.
+            // Feed: open create-post hub (fixture UI — same spirit as Feed media stack).
             if selectedNavigationItem == .feed {
                 isCreateMenuPresented = false
+                isCreatePostPresented = true
                 return
             }
             isCreateMenuPresented.toggle()
@@ -332,12 +333,7 @@ struct ContentView: View {
         case .feed:
             // Feed is embedded under the bottom nav; keep a destination for
             // any residual MainMapRoute.feed presentation.
-            FeedView(
-                hasUnreadAlerts: alertsViewModel.hasUnreadAlerts,
-                onOpenAlerts: {
-                    presentedRoute = .alerts
-                }
-            )
+            FeedView()
         case .plans:
             // Pushes is embedded under the bottom nav; keep a destination for
             // any residual MainMapRoute.plans presentation.

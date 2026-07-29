@@ -63,22 +63,32 @@ struct FeedMediaParticipant: Identifiable, Equatable {
     }
 }
 
-/// One immersive media stack that will later sit under full Push-card chrome.
+/// One feed media card: cinematic stack + cream content band (title / meta / CTA).
 struct FeedMediaCarouselData: Identifiable, Equatable {
     let id: String
     let items: [FeedMediaItem]
-    /// Upper-left venue / location line (presentation-ready).
+    /// Primary line in the cream content section under media.
+    let title: String
+    /// Venue / location (presentation-ready).
     let locationTitle: String
-    /// Date + time under location (presentation-ready).
+    /// Date + time (presentation-ready).
     let dateTimeLabel: String
     /// People in the Push (avatar stack + names).
     let participants: [FeedMediaParticipant]
-    /// Current media contributor attribution (secondary line).
+    /// Current media contributor attribution (secondary line on media).
     let contributorName: String
-    /// When false, hides the Add yours CTA (viewer was not a participant).
+    /// Viewer is part of this moment — shows + / … actions (Add yours + edit).
     let canAddYours: Bool
 
     var isEmpty: Bool { items.isEmpty }
+
+    /// Single secondary meta line for the cream content section.
+    var locationDateMetaLine: String {
+        [locationTitle, dateTimeLabel]
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+            .joined(separator: " · ")
+    }
 }
 
 // MARK: - Participant copy helpers
@@ -203,6 +213,7 @@ enum FeedMediaCarouselFixtures {
             FeedMediaItem(id: "mixed-1", kind: .photo, source: .solidColor(landscapeSwatch)),
             FeedMediaItem(id: "mixed-2", kind: .photo, source: .solidColor(squareSwatch)),
         ],
+        title: "Park hang",
         locationTitle: "Dolores Park",
         dateTimeLabel: "Sat · 4:30 PM",
         participants: [ohm, viplove, ram, pranay],
@@ -220,6 +231,7 @@ enum FeedMediaCarouselFixtures {
                 source: .assetPath("assets/friends/pranay.png")
             ),
         ],
+        title: "Dinner at home",
         locationTitle: "Home",
         dateTimeLabel: "Tonight · 8:00 PM",
         participants: [pranay],
@@ -241,6 +253,7 @@ enum FeedMediaCarouselFixtures {
                 source: .assetPath("assets/friends/roh.png")
             ),
         ],
+        title: "Beach morning",
         locationTitle: "Ocean Beach",
         dateTimeLabel: "Sun · 11:00 AM",
         participants: [roh, ryan, ishan],
@@ -254,6 +267,7 @@ enum FeedMediaCarouselFixtures {
         items: [
             FeedMediaItem(id: "missing-0", kind: .photo, source: .missing),
         ],
+        title: "Untitled moment",
         locationTitle: "TBD",
         dateTimeLabel: "Date · Time",
         participants: [ohm, viplove],
@@ -268,6 +282,7 @@ enum FeedMediaCarouselFixtures {
             FeedMediaItem(id: "loading-0", kind: .photo, source: .loading),
             FeedMediaItem(id: "loading-1", kind: .photo, source: .loading),
         ],
+        title: "Loading moment",
         locationTitle: "Loading…",
         dateTimeLabel: "—",
         participants: [ram],
@@ -283,6 +298,7 @@ enum FeedMediaCarouselFixtures {
             FeedMediaItem(id: "bundle-1", kind: .photo, source: .assetPath("assets/friends/viplove.png")),
             FeedMediaItem(id: "bundle-2", kind: .photo, source: .assetPath("assets/friends/ram.png")),
         ],
+        title: "Friday night out",
         locationTitle: "The Beehive",
         dateTimeLabel: "Fri · 9:15 PM",
         participants: [ohm, viplove, ram, pranay, ryan],
@@ -305,6 +321,7 @@ enum FeedMediaCarouselFixtures {
                 source: .assetPath("assets/friends/nitin.png")
             ),
         ],
+        title: "Climbing session",
         locationTitle: "Mission Cliffs",
         dateTimeLabel: "Thu · 7:00 PM",
         participants: [ishan, nitin, ohm],

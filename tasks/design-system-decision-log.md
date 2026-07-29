@@ -1223,10 +1223,27 @@ _Interview complete (Categories 1–12). Decisions DS-001–DS-089. Specificatio
 ## Post-interview extensions
 
 - **DS-090** (Issue #83): branded destructive confirmation dialogs. Spec: `docs/superpowers/specs/2026-07-24-confirmation-dialogs-design.md`.
+- **DS-091** (Issue #9 Feed create-post): Share a moment hub chooser rows + contribution chips.
+
+### DS-091 — Moment / past-Push chooser rows (Feed create hub)
+
+- **Existing UI:** `CreatePostChooserRow` family on Share a moment (media-thumb moments, avatar-stack past Pushes, pinned create-from-scratch action) + compact contribution capsules.
+- **My decision:** Promote to DesignSystem as **semantic cream chooser rows**, separate from Plans `PushHistoryRow` (DS-021) and still distinct from deferred Feed activity-list chrome (DS-033):
+  - `PushMomentChooserRow` — existing moment (leading media slot, title, date · location, contributor stack + media count + contribution chip, chevron)
+  - `PushPastPushChooserRow` — past Push without a moment (fixed-width attendee stack, title, meta, chevron; no media thumb)
+  - `PushCreateActionChooserRow` — pinned create-from-scratch (square sunbeam + mark matching thumb size)
+  - Shared: `PushChooserThumbFrame`, `PushChooserAvatarStack`, `PushChooserPerson`, `PushMomentChooserMetrics`
+  - `PushContributionChip` — compact **Open for adds** (sunbeam) / **You contributed** (muted walnut); not availability chips (DS-044) and not brand status pills (DS-045)
+- **Must remain consistent:** `pushSolidCreamCard` + Friends list density; chevron affordance; fixed past-Push stack width for column align.
+- **May vary:** Leading media content (feature supplies thumb); product copy for chips/titles.
+- **Out of scope:** Live feed activity timeline rows (still DS-033); publishing/backend.
+- **Reuse required for future features:** **Yes** for create-post / moment chooser lists.
+- **Existing screens need migration:** **Done** for create-post hub adapters.
+- **Recommended mechanism:** Exact shared components + feature adapters over `CreatePostHistoryItem` / media types.
 
 ## Interview complete
 
-All categories 1–12 confirmed (DS-001–DS-089); DS-090 added for confirmation dialogs.  
+All categories 1–12 confirmed (DS-001–DS-089); DS-090 confirmations; DS-091 moment chooser rows.  
 **Spec (design system):** `docs/superpowers/specs/2026-07-21-push-design-system-specification.md`  
 **Spec (confirmations):** `docs/superpowers/specs/2026-07-24-confirmation-dialogs-design.md`  
 **Handoff (history):** `tasks/design-system-handoff.md`  

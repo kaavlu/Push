@@ -2,9 +2,8 @@
 //  PushMediaCarousel.swift
 //  Push
 //
-//  Compact cinematic media container for Feed Push cards.
-//  Fixed portrait frame, fill-crop pages, manual + auto paging, segmented progress,
-//  and top metadata overlay (location, date/time, overflow).
+//  Feed media card: cinematic media stack (progress, participants; tap media to
+//  pause/play auto-advance) plus cream content band (title, meta, + / …).
 //
 
 import SwiftUI
@@ -12,12 +11,12 @@ import UIKit
 
 struct PushMediaCarousel: View {
     let data: FeedMediaCarouselData
-    /// Overflow menu action — no-op until card chrome menus ship.
+    /// Participant-only: opens edit moment (Create Post compose for this card).
     var onOverflowMenu: () -> Void = {}
-    /// Opens the Add Yours contribution flow (UI-local; uploads later).
+    /// Participant-only: opens the Add Yours contribution flow.
     var onAddYours: () -> Void = {}
     @State private var selectedIndex: Int = 0
-    /// Drives auto-advance and the bottom play/pause control.
+    /// Drives auto-advance; toggled by tapping the current media page.
     @State private var isAutoPlaying: Bool = true
     /// True when this card is the primary on-screen push (not a peeking neighbor).
     @State private var isPrimarilyVisible: Bool = false
@@ -25,35 +24,35 @@ struct PushMediaCarousel: View {
     @State private var segmentProgress: CGFloat = 0
 
     private var items: [FeedMediaItem] { data.items }
-    private var cornerRadius: CGFloat { FeedMediaLayout.cornerRadius }
+    private var cornerRadius: CGFloat { FeedMediaLayout.cardCornerRadius }
     private var showsProgressBar: Bool { items.count > 1 }
-    /// Multi-page: chrome rides on slide 0 inside the strip. Single: overlay on card.
+    /// Multi-page: chrome rides on slide 0 inside the strip. Single: overlay on media.
     private var showsStandaloneBottomChrome: Bool { items.count <= 1 }
 
     var body: some View {
-        ZStack {
-            mediaPages
-            topChrome
-            if showsStandaloneBottomChrome {
-                bottomChrome
-            }
+        VStack(spacing: 0) {
+            mediaSurface
+            FeedMediaCardContentSection(
+                title: data.title,
+                metaLine: data.locationDateMetaLine,
+                canAddYours: data.canAddYours,
+                onOverflowMenu: onOverflowMenu,
+                onAddYours: onAddYours
+            )
         }
-        .aspectRatio(FeedMediaLayout.aspectRatio, contentMode: .fit)
         .frame(maxWidth: .infinity)
-        .background(FeedMediaPlaceholderStyle.background)
         .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
         .contentShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                 .stroke(
-                    PushColorPalette.Accent.walnut.opacity(FeedMediaLayout.mediaStrokeOpacity),
-                    lineWidth: FeedMediaLayout.mediaStrokeWidth
+                    PushColorPalette.Accent.walnut.opacity(PushCreamTokens.solidCardStrokeOpacity),
+                    lineWidth: PushCreamTokens.solidCardStrokeWidth
                 )
         }
         // Flatten paging layers so neighbors never bleed past the rounded mask at rest.
         .compositingGroup()
         .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-        .background(visibilityProbe)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(accessibilitySummary)
         .onAppear {
@@ -70,10 +69,41 @@ struct PushMediaCarousel: View {
             selectedIndex = FeedMediaCarouselSelection.clampedIndex(selectedIndex, itemCount: count)
             segmentProgress = 0
         }
-        // Restarts after each advance, swipe, play toggle, or visibility change.
+        // New page (swipe or auto-advance) always starts its segment empty.
+        .onChange(of: selectedIndex) { _ in
+            segmentProgress = 0
+        }
+        // Restarts after advance, swipe, play toggle, or visibility change.
+        // Pause freezes fill; resume continues from `segmentProgress` (not zero).
         .task(id: autoAdvanceTaskID) {
             await runAutoAdvanceLoop()
         }
+    }
+
+    /// Media frame only — progress + first-slide participants.
+    private var mediaSurface: some View {
+        ZStack {
+            mediaPages
+            topChrome
+            if showsStandaloneBottomChrome {
+                bottomChrome
+            }
+        }
+        .aspectRatio(FeedMediaLayout.aspectRatio, contentMode: .fit)
+        .frame(maxWidth: .infinity)
+        .background(FeedMediaPlaceholderStyle.background)
+        .background(visibilityProbe)
+        .accessibilityAddTraits(.isButton)
+        .accessibilityHint(isAutoPlaying ? "Double tap to pause" : "Double tap to play")
+        .accessibilityAction {
+            toggleAutoplay()
+        }
+    }
+
+    private func toggleAutoplay() {
+        // Auto-advance only applies to multi-item stacks; still toggle so a11y
+        // state stays consistent if items are added later in-session.
+        isAutoPlaying.toggle()
     }
 
     /// Bumps when identity, page, play, or on-screen primacy changes.
@@ -90,10 +120,11 @@ struct PushMediaCarousel: View {
         // Paused or off-screen: freeze the active segment without advancing.
         guard isAutoPlaying, isPrimarilyVisible else { return }
 
-        segmentProgress = 0
         let duration = FeedMediaLayout.autoAdvanceDuration
         let tickNanos = FeedMediaLayout.progressTickNanoseconds
-        let start = Date()
+        // Resume from frozen fill (tap-to-pause); new slides reset via onChange(selectedIndex).
+        let startProgress = min(1, max(0, segmentProgress))
+        let start = Date().addingTimeInterval(-duration * Double(startProgress))
 
         while !Task.isCancelled {
             let elapsed = Date().timeIntervalSince(start)
@@ -116,11 +147,11 @@ struct PushMediaCarousel: View {
         segmentProgress = 1
         let next = (selectedIndex + 1) % items.count
         // Strip owns page swipe animation (including last → first via a clone page).
+        // onChange(selectedIndex) clears progress for the next segment.
         var handoff = Transaction()
         handoff.disablesAnimations = true
         withTransaction(handoff) {
             selectedIndex = next
-            segmentProgress = 0
         }
     }
 
@@ -162,13 +193,17 @@ struct PushMediaCarousel: View {
             Group {
                 if items.isEmpty {
                     FeedMediaPlaceholderPage(kind: .missing)
+                        .onTapGesture(perform: toggleAutoplay)
                 } else if items.count == 1, let only = items.first {
                     FeedMediaPageView(item: only, size: size)
+                        .contentShape(Rectangle())
+                        .onTapGesture(perform: toggleAutoplay)
                 } else {
                     FeedMediaPageStrip(
                         items: items,
                         selectedIndex: $selectedIndex,
                         size: size,
+                        onMediaTap: toggleAutoplay,
                         firstPageChrome: { bottomChrome }
                     )
                     .frame(width: size.width, height: size.height)
@@ -182,64 +217,46 @@ struct PushMediaCarousel: View {
     private var bottomChrome: some View {
         FeedMediaBottomInteraction(
             participants: data.participants,
-            contributorName: data.contributorName,
-            canAddYours: data.canAddYours,
-            isPlaying: isAutoPlaying,
-            onTogglePlayback: {
-                isAutoPlaying.toggle()
-            },
-            onAddYours: onAddYours
+            contributorName: data.contributorName
         )
     }
 
-    // MARK: - Top chrome (progress + location on every slide)
+    // MARK: - Top chrome (progress only — title / location / overflow live below media)
 
     private var topChrome: some View {
         ZStack(alignment: .top) {
-            // Always soft-shade the top edge so progress segments stay readable on light media.
+            // Soft-shade the top edge so progress segments stay readable on light media.
             FeedMediaTopScrim()
                 .allowsHitTesting(false)
 
-            VStack(spacing: 0) {
-                if showsProgressBar {
-                    FeedMediaProgressBar(
-                        count: items.count,
-                        selectedIndex: FeedMediaCarouselSelection.clampedIndex(
-                            selectedIndex,
-                            itemCount: items.count
-                        ),
-                        currentProgress: segmentProgress
-                    )
-                    .padding(.horizontal, FeedMediaLayout.progressHorizontalInset)
-                    .padding(.top, FeedMediaLayout.progressTopInset)
-                    .allowsHitTesting(false)
-                }
-
-                FeedMediaMetadataOverlay(
-                    locationTitle: data.locationTitle,
-                    onOverflowMenu: onOverflowMenu
+            if showsProgressBar {
+                FeedMediaProgressBar(
+                    count: items.count,
+                    selectedIndex: FeedMediaCarouselSelection.clampedIndex(
+                        selectedIndex,
+                        itemCount: items.count
+                    ),
+                    currentProgress: segmentProgress
                 )
-                .padding(.horizontal, FeedMediaLayout.metadataHorizontalInset)
-                .padding(
-                    .top,
-                    showsProgressBar
-                        ? FeedMediaLayout.progressToMetadataSpacing
-                        : FeedMediaLayout.metadataTopInsetWithoutProgress
-                )
-
-                Spacer(minLength: 0)
+                .padding(.horizontal, FeedMediaLayout.progressHorizontalInset)
+                .padding(.top, FeedMediaLayout.progressTopInset)
+                .allowsHitTesting(false)
             }
         }
     }
 
     private var accessibilitySummary: String {
+        let titleBit = data.title.isEmpty ? "" : data.title
+        let metaBit = data.locationDateMetaLine.isEmpty ? "" : ", \(data.locationDateMetaLine)"
         let count = items.count
-        let locationBit = data.locationTitle.isEmpty ? "" : ", \(data.locationTitle)"
         if count == 0 {
-            return "Media unavailable\(locationBit)"
+            return [titleBit, "Media unavailable\(metaBit)"]
+                .filter { !$0.isEmpty }
+                .joined(separator: ", ")
         }
         let page = FeedMediaCarouselSelection.clampedIndex(selectedIndex, itemCount: count) + 1
-        return "Media \(page) of \(count)\(locationBit)"
+        let mediaBit = "Media \(page) of \(count)\(metaBit)"
+        return titleBit.isEmpty ? mediaBit : "\(titleBit), \(mediaBit)"
     }
 }
 
@@ -266,69 +283,6 @@ private struct FeedMediaTopScrim: View {
             .frame(height: FeedMediaLayout.metadataScrimHeight)
             Spacer(minLength: 0)
         }
-    }
-}
-
-// MARK: - Metadata overlay
-
-private struct FeedMediaMetadataOverlay: View {
-    let locationTitle: String
-    let onOverflowMenu: () -> Void
-
-    var body: some View {
-        HStack(alignment: .center, spacing: 12) {
-            FeedMediaLocationChip(locationTitle: locationTitle)
-            Spacer(minLength: 8)
-            FeedMediaOverflowButton(action: onOverflowMenu)
-        }
-    }
-}
-
-/// Compact single-row location pill — same height/radius family as the `…` control.
-private struct FeedMediaLocationChip: View {
-    let locationTitle: String
-
-    var body: some View {
-        Text(locationTitle)
-            .font(FeedMediaMetadataStyle.locationFont)
-            .foregroundStyle(FeedMediaMetadataStyle.textColor)
-            .lineLimit(1)
-            .minimumScaleFactor(PushOpacityTokens.minimumTextScale)
-            .padding(.horizontal, FeedMediaMetadataStyle.chipHorizontalPadding)
-            .frame(height: FeedMediaMetadataStyle.chipHeight)
-            .fixedSize(horizontal: true, vertical: false)
-            .pushMapControlGlass(
-                cornerRadius: FeedMediaMetadataStyle.chipCornerRadius,
-                treatment: .filterPill
-            )
-            .accessibilityLabel(locationTitle)
-    }
-}
-
-/// Map profile-style liquid glass circle — same `pushMapControlGlass(.profileButton)` as
-/// `TopIconButton` on the live map (DS-011), not cream `PushCircleIconButton`.
-private struct FeedMediaOverflowButton: View {
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Image(systemName: "ellipsis")
-                .font(.system(
-                    size: FeedMediaMetadataStyle.overflowIconSize,
-                    weight: FeedMediaMetadataStyle.overflowIconWeight
-                ))
-                .foregroundStyle(PushControlColors.activeForeground)
-                .frame(
-                    width: FeedMediaMetadataStyle.overflowButtonSize,
-                    height: FeedMediaMetadataStyle.overflowButtonSize
-                )
-                .pushMapControlGlass(
-                    cornerRadius: FeedMediaMetadataStyle.overflowCornerRadius,
-                    treatment: .profileButton
-                )
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("More options")
     }
 }
 

@@ -7,6 +7,18 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1384FB382A7C1DAC4E4BFFA5 /* FeedMediaCardContentSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C91691DB35C3740221F53B0 /* FeedMediaCardContentSection.swift */; };
+		C732DF9AE835DE76A92946B4 /* CreatePostSelectFriendsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB5E5F827351E02AB0479E74 /* CreatePostSelectFriendsView.swift */; };
+		68B901F4B20CF4ABC301D0C5 /* PushMomentChooserRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E09A161105A47DEA8244302 /* PushMomentChooserRow.swift */; };
+		CAF11F6A178A05AAF694640C /* PushContributionChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86F2DCCD58BC876A98A81AD0 /* PushContributionChip.swift */; };
+		6EF4C0B87BA36DE7712C10BB /* CreatePostComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D839EF152EBFEC1FE927EE9 /* CreatePostComponents.swift */; };
+		4EB8CF7FF8396718611C6744 /* CreatePostViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09C99A84B86D21F35F3B233F /* CreatePostViewModel.swift */; };
+		D8BE7384909881A58BCC6629 /* CreatePostViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97DD2B58ABA0405C3188BB9B /* CreatePostViewModelTests.swift */; };
+		B45E18FCBFC4324FA18464A8 /* CreatePostFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9478419EA96B2B49E92F4AE0 /* CreatePostFlowView.swift */; };
+		42546E0CC75318F385BFBBE1 /* CreatePostComposeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD578DD87C193E3143CD4EFD /* CreatePostComposeView.swift */; };
+		B3AAAA6D4E6AAE3C7BB338EE /* CreatePostHubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E6007F45D4CD47FACEEBCBC /* CreatePostHubView.swift */; };
+		6214A85DD1374DE5870817DE /* CreatePostStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08B9209BD84DC117774CF715 /* CreatePostStyle.swift */; };
+		79D6189CC9AF540BA4F23274 /* CreatePostModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D057CA6C4069CCD25DD677D /* CreatePostModels.swift */; };
 		385379EF6517781AD4B024F1 /* FeedMediaPageStrip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39C2E7E18FF87ACE50F8A408 /* FeedMediaPageStrip.swift */; };
 		87C6B88906AC60E18F430E19 /* AddYoursViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A841F5F06CE2431AF9CB786F /* AddYoursViewModelTests.swift */; };
 		BDDBB548A8F404C4F5ECA572 /* AddYoursComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9512DE5E85357F7FF9C4F35 /* AddYoursComponents.swift */; };
@@ -370,6 +382,18 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0C91691DB35C3740221F53B0 /* FeedMediaCardContentSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedMediaCardContentSection.swift"; sourceTree = "<group>"; };
+		FB5E5F827351E02AB0479E74 /* CreatePostSelectFriendsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostSelectFriendsView.swift"; sourceTree = "<group>"; };
+		2E09A161105A47DEA8244302 /* PushMomentChooserRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushMomentChooserRow.swift"; path = "DesignSystem/Components/Rows/PushMomentChooserRow.swift"; sourceTree = "<group>"; };
+		86F2DCCD58BC876A98A81AD0 /* PushContributionChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushContributionChip.swift"; path = "DesignSystem/Components/Chips/PushContributionChip.swift"; sourceTree = "<group>"; };
+		1D839EF152EBFEC1FE927EE9 /* CreatePostComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostComponents.swift"; sourceTree = "<group>"; };
+		09C99A84B86D21F35F3B233F /* CreatePostViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostViewModel.swift"; sourceTree = "<group>"; };
+		97DD2B58ABA0405C3188BB9B /* CreatePostViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostViewModelTests.swift"; sourceTree = "<group>"; };
+		9478419EA96B2B49E92F4AE0 /* CreatePostFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostFlowView.swift"; sourceTree = "<group>"; };
+		AD578DD87C193E3143CD4EFD /* CreatePostComposeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostComposeView.swift"; sourceTree = "<group>"; };
+		0E6007F45D4CD47FACEEBCBC /* CreatePostHubView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostHubView.swift"; sourceTree = "<group>"; };
+		08B9209BD84DC117774CF715 /* CreatePostStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostStyle.swift"; sourceTree = "<group>"; };
+		7D057CA6C4069CCD25DD677D /* CreatePostModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostModels.swift"; sourceTree = "<group>"; };
 		39C2E7E18FF87ACE50F8A408 /* FeedMediaPageStrip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedMediaPageStrip.swift"; sourceTree = "<group>"; };
 		A841F5F06CE2431AF9CB786F /* AddYoursViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddYoursViewModelTests.swift"; sourceTree = "<group>"; };
 		C9512DE5E85357F7FF9C4F35 /* AddYoursComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddYoursComponents.swift"; sourceTree = "<group>"; };
@@ -770,6 +794,17 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				0C91691DB35C3740221F53B0 /* FeedMediaCardContentSection.swift */,
+				FB5E5F827351E02AB0479E74 /* CreatePostSelectFriendsView.swift */,
+				2E09A161105A47DEA8244302 /* PushMomentChooserRow.swift */,
+				86F2DCCD58BC876A98A81AD0 /* PushContributionChip.swift */,
+				1D839EF152EBFEC1FE927EE9 /* CreatePostComponents.swift */,
+				09C99A84B86D21F35F3B233F /* CreatePostViewModel.swift */,
+				9478419EA96B2B49E92F4AE0 /* CreatePostFlowView.swift */,
+				AD578DD87C193E3143CD4EFD /* CreatePostComposeView.swift */,
+				0E6007F45D4CD47FACEEBCBC /* CreatePostHubView.swift */,
+				08B9209BD84DC117774CF715 /* CreatePostStyle.swift */,
+				7D057CA6C4069CCD25DD677D /* CreatePostModels.swift */,
 				39C2E7E18FF87ACE50F8A408 /* FeedMediaPageStrip.swift */,
 				C9512DE5E85357F7FF9C4F35 /* AddYoursComponents.swift */,
 				A13200EA46508BB2A0AE05C6 /* AddYoursView.swift */,
@@ -1069,6 +1104,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				97DD2B58ABA0405C3188BB9B /* CreatePostViewModelTests.swift */,
 				A841F5F06CE2431AF9CB786F /* AddYoursViewModelTests.swift */,
 				32760387A7644CD1B64D2561 /* FeedMediaCarouselTests.swift */,
 				01FA649DB6CA6F78970E1E4B /* FeedViewModelTests.swift */,
@@ -1275,6 +1311,17 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				1384FB382A7C1DAC4E4BFFA5 /* FeedMediaCardContentSection.swift in Sources */,
+				C732DF9AE835DE76A92946B4 /* CreatePostSelectFriendsView.swift in Sources */,
+				68B901F4B20CF4ABC301D0C5 /* PushMomentChooserRow.swift in Sources */,
+				CAF11F6A178A05AAF694640C /* PushContributionChip.swift in Sources */,
+				6EF4C0B87BA36DE7712C10BB /* CreatePostComponents.swift in Sources */,
+				4EB8CF7FF8396718611C6744 /* CreatePostViewModel.swift in Sources */,
+				B45E18FCBFC4324FA18464A8 /* CreatePostFlowView.swift in Sources */,
+				42546E0CC75318F385BFBBE1 /* CreatePostComposeView.swift in Sources */,
+				B3AAAA6D4E6AAE3C7BB338EE /* CreatePostHubView.swift in Sources */,
+				6214A85DD1374DE5870817DE /* CreatePostStyle.swift in Sources */,
+				79D6189CC9AF540BA4F23274 /* CreatePostModels.swift in Sources */,
 				385379EF6517781AD4B024F1 /* FeedMediaPageStrip.swift in Sources */,
 				BDDBB548A8F404C4F5ECA572 /* AddYoursComponents.swift in Sources */,
 				F69848421FAF4D642B4672FF /* AddYoursView.swift in Sources */,
@@ -1565,6 +1612,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				D8BE7384909881A58BCC6629 /* CreatePostViewModelTests.swift in Sources */,
 				87C6B88906AC60E18F430E19 /* AddYoursViewModelTests.swift in Sources */,
 				5EDE64F4F8165D337821E53E /* FeedMediaCarouselTests.swift in Sources */,
 				07E9BD4302FE43DAE64BD769 /* FeedViewModelTests.swift in Sources */,
