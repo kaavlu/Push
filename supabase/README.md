@@ -107,6 +107,11 @@ of the files in order reproduces the schema.
   the filtered group. Verify with `tests/0026_moment_feed_rpcs_verify.sql`.
   (Remote history also has `0026_moment_feed_rpcs_group_filter_fix`, folded into
   the file — a from-scratch run of `0026` alone reproduces final state.)
+- `migrations/0027_friend_request_mutual_counts.sql` — authenticated, parameterless
+  `incoming_friend_request_mutual_counts()` RPC. Returns only request id + aggregate
+  count for the caller's pending incoming requests; mutual identities stay private.
+  Uses the existing two-sided friendship indexes and batches every inbox card in one
+  query. Verify with `tests/0027_friend_request_mutual_counts_verify.sql`.
 - `seed.sql` — idempotent public-graph seed keyed off **real** auth IDs (resolved by email).
 
 ## Security model

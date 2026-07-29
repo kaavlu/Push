@@ -176,6 +176,15 @@ final class SupabaseLiveDataLoader: LiveDataLoading {
         }
     }
 
+    func incomingFriendRequestMutualCounts() async throws -> [IncomingFriendRequestMutualCountRow] {
+        try await PushLog.logged("incomingFriendRequestMutualCounts") {
+            try await client
+                .rpc("incoming_friend_request_mutual_counts")
+                .execute()
+                .value
+        }
+    }
+
     func searchProfiles(query: String, limit: Int) async throws -> [SearchProfileRow] {
         try await PushLog.logged("searchProfiles") {
             try await client

@@ -119,7 +119,7 @@ struct AlertsView: View {
 
         return FriendRowCard(
             row: request.row,
-            showsGroupLabel: false,
+            showsGroupLabel: true,
             showsStatusDetail: true,
             usesAvailabilityAppearance: false,
             customTrailing: AnyView(trailing(for: request, phase: phase))
@@ -147,22 +147,13 @@ struct AlertsView: View {
             if phase == .added {
                 AlertAddedBadge()
             } else {
-                HStack(spacing: AlertsLayout.actionSpacing) {
-                    AlertActionButton(
-                        title: "Deny",
-                        style: .deny,
-                        disabled: isResolving,
-                        accessibilityLabel: "Deny friend request from \(name)",
-                        action: { Task { await viewModel.deny(request) } }
-                    )
-                    AlertActionButton(
-                        title: "Accept",
-                        style: .accept,
-                        disabled: isResolving,
-                        accessibilityLabel: "Accept friend request from \(name)",
-                        action: { Task { await viewModel.accept(request) } }
-                    )
-                }
+                AlertRequestActionCapsule(
+                    disabled: isResolving,
+                    denyAccessibilityLabel: "Deny friend request from \(name)",
+                    acceptAccessibilityLabel: "Accept friend request from \(name)",
+                    onDeny: { Task { await viewModel.deny(request) } },
+                    onAccept: { Task { await viewModel.accept(request) } }
+                )
             }
         }
         .animation(

@@ -114,7 +114,8 @@ struct SeedData {
                 recipientID: SeedIDs.currentUser,
                 createdAt: now.addingTimeInterval(-SeedTime.halfHour),
                 status: .pending,
-                isUnread: true
+                isUnread: true,
+                mutualFriendCount: 4
             )
         ]
     }

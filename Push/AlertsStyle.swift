@@ -7,11 +7,13 @@ enum AlertsLayout {
     static let contentTopSpacing: CGFloat = 6
     /// Gap between the Friend Requests and Group Requests sections.
     static let sectionTopSpacing: CGFloat = 18
-    static let actionSpacing: CGFloat = 8
+    static let actionSegmentWidth: CGFloat = 38
+    static let actionCapsuleHeight: CGFloat = 38
+    static let actionIconSize: CGFloat = 13
+    static let actionDividerHeight: CGFloat = 18
     static let actionHorizontalPadding: CGFloat = 12
     static let actionVerticalPadding: CGFloat = 7
     static let actionStrokeWidth: CGFloat = 0.9
-    static let actionMinWidth: CGFloat = 58
     static let stateSpacing: CGFloat = 10
     static let stateIconSize: CGFloat = 28
     static let stateHorizontalPadding: CGFloat = 36
@@ -25,8 +27,9 @@ enum AlertsLayout {
 }
 
 enum AlertsColor {
-    static let denyStrokeOpacity = 0.22
-    static let denyFillOpacity = 0.42
+    static let actionStrokeOpacity = 0.22
+    static let actionFillOpacity = 0.52
+    static let actionDividerOpacity = 0.18
     static let disabledOpacity = 0.55
     static let addedFillOpacity = 0.88
 }
@@ -38,43 +41,85 @@ enum AlertActionStyle {
     case deny
 }
 
-/// Extracted from `AlertsView` so `GroupRequestCard` renders pixel-identical
-/// accept/deny capsules without duplicating the styling constants.
-struct AlertActionButton: View {
-    let title: String
-    let style: AlertActionStyle
+/// Compact request action system shared by friend and group request cards.
+/// The actions stay independently accessible while reading as one segmented
+/// capsule in the row.
+struct AlertRequestActionCapsule: View {
     let disabled: Bool
+    let denyAccessibilityLabel: String
+    let acceptAccessibilityLabel: String
+    let onDeny: () -> Void
+    let onAccept: () -> Void
+
+    var body: some View {
+        HStack(spacing: 0) {
+            AlertActionButton(
+                systemImageName: "xmark",
+                style: .deny,
+                accessibilityLabel: denyAccessibilityLabel,
+                action: onDeny
+            )
+
+            Rectangle()
+                .fill(
+                    PushColorPalette.Accent.walnut
+                        .opacity(AlertsColor.actionDividerOpacity)
+                )
+                .frame(width: AlertsLayout.actionStrokeWidth)
+                .frame(height: AlertsLayout.actionDividerHeight)
+
+            AlertActionButton(
+                systemImageName: "checkmark",
+                style: .accept,
+                accessibilityLabel: acceptAccessibilityLabel,
+                action: onAccept
+            )
+        }
+        .frame(height: AlertsLayout.actionCapsuleHeight)
+        .background(
+            PushCreamTokens.pageIvory.opacity(AlertsColor.actionFillOpacity),
+            in: Capsule()
+        )
+        .overlay {
+            Capsule()
+                .stroke(
+                    PushColorPalette.Accent.walnut
+                        .opacity(AlertsColor.actionStrokeOpacity),
+                    lineWidth: AlertsLayout.actionStrokeWidth
+                )
+        }
+        .clipShape(Capsule())
+        .disabled(disabled)
+        .opacity(disabled ? AlertsColor.disabledOpacity : 1)
+    }
+}
+
+/// One independently accessible segment inside `AlertRequestActionCapsule`.
+struct AlertActionButton: View {
+    let systemImageName: String
+    let style: AlertActionStyle
     let accessibilityLabel: String
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            Text(title)
-                .font(.caption.weight(.bold))
-                .foregroundStyle(PushControlColors.activeForeground)
-                .frame(minWidth: AlertsLayout.actionMinWidth)
-                .padding(.horizontal, AlertsLayout.actionHorizontalPadding)
-                .padding(.vertical, AlertsLayout.actionVerticalPadding)
-                .background(backgroundFill, in: Capsule())
-                .overlay {
-                    if style == .deny {
-                        Capsule().stroke(
-                            PushColorPalette.Accent.walnut.opacity(AlertsColor.denyStrokeOpacity),
-                            lineWidth: AlertsLayout.actionStrokeWidth
-                        )
-                    }
-                }
+            Image(systemName: systemImageName)
+                .font(.system(size: AlertsLayout.actionIconSize, weight: .bold))
+                .foregroundStyle(foregroundColor)
+                .frame(
+                    width: AlertsLayout.actionSegmentWidth,
+                    height: AlertsLayout.actionCapsuleHeight
+                )
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .disabled(disabled)
-        .opacity(disabled ? AlertsColor.disabledOpacity : 1)
         .accessibilityLabel(accessibilityLabel)
     }
 
-    private var backgroundFill: Color {
+    private var foregroundColor: Color {
         switch style {
-        case .accept: return PushControlColors.activeFill
-        case .deny: return FriendsColor.cardCream.opacity(AlertsColor.denyFillOpacity)
+        case .accept: return PushControlColors.activeForeground
+        case .deny: return PushControlColors.textSecondary
         }
     }
 }
