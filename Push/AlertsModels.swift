@@ -20,7 +20,11 @@ struct FriendRequestAlertModel: Identifiable, Equatable {
             venueStatusText: AlertsCopy.requestSubtitle,
             lastUpdated: ""
         )
-        return FriendRowModel(id: request.id, friend: friend, groupLabel: nil)
+        return FriendRowModel(
+            id: request.id,
+            friend: friend,
+            groupLabel: AlertsCopy.mutualFriendCountLabel(request.mutualFriendCount)
+        )
     }
 }
 
@@ -33,10 +37,15 @@ enum AlertsCopy {
     static let addedLabel = "Added"
 
     static func groupInviteSubtitle(inviterName: String) -> String {
-        "\(inviterName) invited you to join."
+        "\(inviterName) invited you"
     }
 
     static func groupMemberCountLabel(_ count: Int) -> String {
         "\(count) member\(count == 1 ? "" : "s")"
+    }
+
+    static func mutualFriendCountLabel(_ count: Int) -> String {
+        let count = max(0, count)
+        return "\(count) mutual friend\(count == 1 ? "" : "s")"
     }
 }

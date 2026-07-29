@@ -84,22 +84,13 @@ struct GroupRequestCard: View {
         if phase == .added {
             AlertAddedBadge()
         } else {
-            HStack(spacing: AlertsLayout.actionSpacing) {
-                AlertActionButton(
-                    title: "Deny",
-                    style: .deny,
-                    disabled: isResolving,
-                    accessibilityLabel: "Deny group invite to \(invite.groupName)",
-                    action: onDeny
-                )
-                AlertActionButton(
-                    title: "Accept",
-                    style: .accept,
-                    disabled: isResolving,
-                    accessibilityLabel: "Accept group invite to \(invite.groupName)",
-                    action: onAccept
-                )
-            }
+            AlertRequestActionCapsule(
+                disabled: isResolving,
+                denyAccessibilityLabel: "Deny group invite to \(invite.groupName)",
+                acceptAccessibilityLabel: "Accept group invite to \(invite.groupName)",
+                onDeny: onDeny,
+                onAccept: onAccept
+            )
         }
     }
 }

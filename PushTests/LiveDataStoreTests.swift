@@ -604,11 +604,17 @@ final class LiveDataLoaderSpy: LiveDataLoading {
             created_at: "2026-07-14T00:00:00Z"
         )
     ]
+    var mutualFriendCountRows: [IncomingFriendRequestMutualCountRow] = []
     var searchRows: [SearchProfileRow] = []
 
     func loadFriendships() async throws -> [FriendshipRow] {
         try await load(index: Index.friendships)
         return friendshipRows
+    }
+
+    func incomingFriendRequestMutualCounts() async throws -> [IncomingFriendRequestMutualCountRow] {
+        if let writeError { throw writeError }
+        return mutualFriendCountRows
     }
 
     func searchProfiles(query: String, limit: Int) async throws -> [SearchProfileRow] {

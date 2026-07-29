@@ -13,6 +13,27 @@ struct FriendRequest: Identifiable, Codable, Equatable {
     let createdAt: Date
     let status: Status
     let isUnread: Bool
+    /// Server-derived for live incoming requests; fixture-backed in mock.
+    /// The underlying friend identities remain private.
+    let mutualFriendCount: Int
+
+    init(
+        id: String,
+        requester: Person,
+        recipientID: Person.ID,
+        createdAt: Date,
+        status: Status,
+        isUnread: Bool,
+        mutualFriendCount: Int = 0
+    ) {
+        self.id = id
+        self.requester = requester
+        self.recipientID = recipientID
+        self.createdAt = createdAt
+        self.status = status
+        self.isUnread = isUnread
+        self.mutualFriendCount = mutualFriendCount
+    }
 }
 
 /// How the current user relates to a discovered person.

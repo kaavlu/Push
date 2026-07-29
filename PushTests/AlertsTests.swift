@@ -16,6 +16,8 @@ final class AlertsTests: XCTestCase {
 
         XCTAssertEqual(viewModel.requests.map(\.id), ["request-austin"])
         XCTAssertTrue(viewModel.hasUnreadAlerts)
+        XCTAssertEqual(viewModel.requests.first?.request.mutualFriendCount, 4)
+        XCTAssertEqual(viewModel.requests.first?.row.groupLabel, "4 mutual friends")
 
         await viewModel.accept(try XCTUnwrap(viewModel.requests.first))
 
@@ -25,6 +27,44 @@ final class AlertsTests: XCTestCase {
         // badge stays lit until those are resolved too.
         XCTAssertTrue(viewModel.hasUnreadAlerts)
         XCTAssertEqual(container.database.friendRequests.first?.status, .accepted)
+    }
+
+    func testLiveRequestUsesServerMutualFriendCount() async throws {
+        let loader = LiveDataLoaderSpy()
+        loader.friendshipRows = [
+            FriendshipRow(
+                id: "pending-incoming",
+                user_low: "friend",
+                user_high: "self",
+                status: "pending",
+                requested_by: "friend",
+                created_at: "2026-07-29T12:00:00Z"
+            )
+        ]
+        loader.mutualFriendCountRows = [
+            IncomingFriendRequestMutualCountRow(
+                request_id: "pending-incoming",
+                mutual_friend_count: 7
+            )
+        ]
+        let repository = SupabaseAlertRepository(
+            store: LiveDataStore(loader: loader),
+            currentUserID: "self"
+        )
+
+        let requests = try await repository.incomingFriendRequests()
+
+        XCTAssertEqual(requests.map(\.id), ["pending-incoming"])
+        XCTAssertEqual(requests.first?.mutualFriendCount, 7)
+        XCTAssertEqual(
+            FriendRequestAlertModel(request: try XCTUnwrap(requests.first)).row.groupLabel,
+            "7 mutual friends"
+        )
+    }
+
+    func testMutualFriendCopyHandlesSingularAndZero() {
+        XCTAssertEqual(AlertsCopy.mutualFriendCountLabel(0), "0 mutual friends")
+        XCTAssertEqual(AlertsCopy.mutualFriendCountLabel(1), "1 mutual friend")
     }
 
     func testMockRequestCanBeDenied() async throws {

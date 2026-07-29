@@ -20,9 +20,20 @@ final class SupabaseAlertRepository: AlertRepository {
     func incomingFriendRequests() async throws -> [FriendRequest] {
         let rows = try await store.friendships()
             .filter { $0.isPending && $0.involves(currentUserID) && !$0.isRequester(currentUserID) }
+        guard !rows.isEmpty else { return [] }
+
+        let mutualCounts = Dictionary(
+            uniqueKeysWithValues: try await store.incomingFriendRequestMutualCounts().map {
+                ($0.request_id.lowercased(), max(0, $0.mutual_friend_count))
+            }
+        )
 
         var results: [FriendRequest] = []
         for row in rows {
+            // The RPC is the current, server-authorized inbox snapshot. If a
+            // warm friendship row no longer appears, the request was resolved
+            // or cancelled after bootstrap and should not be rendered.
+            guard let mutualFriendCount = mutualCounts[row.id.lowercased()] else { continue }
             guard let requesterID = row.requested_by else { continue }
             let profile = try await store.profileForFriendship(userID: requesterID)
             results.append(
@@ -32,7 +43,8 @@ final class SupabaseAlertRepository: AlertRepository {
                     recipientID: currentUserID,
                     createdAt: PushDateFormatting.parse(row.created_at) ?? Date(),
                     status: .pending,
-                    isUnread: true
+                    isUnread: true,
+                    mutualFriendCount: mutualFriendCount
                 )
             )
         }

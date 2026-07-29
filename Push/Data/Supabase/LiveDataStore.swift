@@ -25,6 +25,7 @@ protocol LiveDataLoading: AnyObject {
     func upsertResponse(_ payload: PushResponsePayload) async throws
     func deleteResponses(pushID: String, personIDs: [String]) async throws
     func loadFriendships() async throws -> [FriendshipRow]
+    func incomingFriendRequestMutualCounts() async throws -> [IncomingFriendRequestMutualCountRow]
     func searchProfiles(query: String, limit: Int) async throws -> [SearchProfileRow]
     func discoverProfiles(limit: Int) async throws -> [SearchProfileRow]
     func setGlobalSharingDefaults(
@@ -754,6 +755,12 @@ final class LiveDataStore {
         return try await finish(
             task, cache: { friendshipRows = $0 }, clear: { friendshipsTask = nil }
         )
+    }
+
+    /// Not session-cached: this aggregate is inbox-specific and should reflect
+    /// request cancellation or friendship changes whenever Alerts reloads.
+    func incomingFriendRequestMutualCounts() async throws -> [IncomingFriendRequestMutualCountRow] {
+        try await loader.incomingFriendRequestMutualCounts()
     }
 
     func searchProfiles(query: String, limit: Int = 20) async throws -> [SearchProfileRow] {

@@ -122,7 +122,8 @@ final class InMemoryDatabase: ObservableObject {
             recipientID: request.recipientID,
             createdAt: request.createdAt,
             status: status,
-            isUnread: false
+            isUnread: false,
+            mutualFriendCount: request.mutualFriendCount
         )
         if status == .accepted {
             acceptedFriendIDs.insert(request.requester.id)
@@ -160,7 +161,8 @@ final class InMemoryDatabase: ObservableObject {
                 recipientID: personID,
                 createdAt: Date(),
                 status: .pending,
-                isUnread: true
+                isUnread: true,
+                mutualFriendCount: 0
             )
             friendRequests[deniedIndex] = reopened
             didMutate()
@@ -175,7 +177,8 @@ final class InMemoryDatabase: ObservableObject {
             recipientID: personID,
             createdAt: Date(),
             status: .pending,
-            isUnread: true
+            isUnread: true,
+            mutualFriendCount: 0
         )
         // Keep person in the directory so the recipient can resolve them later.
         _ = person

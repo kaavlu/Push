@@ -34,6 +34,13 @@ struct FriendshipRow: Decodable, Equatable {
     }
 }
 
+/// Aggregate returned only for the caller's pending incoming requests.
+/// It intentionally exposes a count, never the mutual friends' identities.
+struct IncomingFriendRequestMutualCountRow: Decodable, Equatable {
+    let request_id: String
+    let mutual_friend_count: Int
+}
+
 /// Limited public fields returned by `search_profiles`.
 struct SearchProfileRow: Decodable, Equatable {
     let id: String
