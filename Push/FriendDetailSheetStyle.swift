@@ -149,27 +149,12 @@ enum FriendDetailSheetContent {
         return "\(count) \(noun) together"
     }
 
+    /// Prefer the builder status line (note / activity / place); fall back to activity.
     static func hangoutActivityLine(activity: String, venueStatusText: String) -> String {
-        let venueName = strippedVenueName(from: venueStatusText)
-        let prefix: String
-        switch activity.lowercased() {
-        case "coffee":          prefix = "Coffee at"
-        case "lunch", "food":   prefix = "Lunch at"
-        case "dinner":          prefix = "Dinner at"
-        case "park":            prefix = "Hanging at"
-        case "gym":             prefix = "Working out at"
-        case "work":            prefix = "Working at"
-        case "driving":         prefix = "Driving to"
-        default:                prefix = "At"
-        }
-        return "\(prefix) \(venueName)"
-    }
-
-    private static func strippedVenueName(from text: String) -> String {
-        for prefix in ["Eating at ", "At the ", "At ", "Near ", "Group forming near "] {
-            if text.hasPrefix(prefix) { return String(text.dropFirst(prefix.count)) }
-        }
-        return text
+        PresenceActivityPresentation.detailStatusLine(
+            activityName: activity,
+            venueStatusText: venueStatusText
+        )
     }
 
     static func firstName(_ person: FriendPuckData) -> String {

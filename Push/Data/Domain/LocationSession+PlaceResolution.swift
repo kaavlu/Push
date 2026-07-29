@@ -2,8 +2,8 @@
 //  LocationSession+PlaceResolution.swift
 //  Push
 //
-//  Issue #101 (I3) — schedule place resolution for confirmed dwells.
-//  Does not mutate presence drafts or activity labels.
+//  Issue #101 (I3) / #105 — schedule place resolution for confirmed dwells
+//  and republish presence when place context attaches or clears.
 //
 
 import Foundation
@@ -11,13 +11,16 @@ import Foundation
 @MainActor
 extension LocationSession {
     /// React to dwell lifecycle: resolve on arrival / centroid change / retry;
-    /// clear on departure. Never blocks the publish path.
+    /// clear + republish on departure. Never blocks the publish path.
     func handleDwellPlaceResolution(
         _ dwell: DwellDetectionState,
         at evaluationTime: Date
     ) {
         if dwell.transition == .departed {
             clearPlaceResolutionContext(cancelTask: true)
+            // Drop At {place} / Chilling without waiting on movement throttle.
+            // (.departed only fires after a confirmed dwell.)
+            republishPresenceAfterPlaceContextChange()
             return
         }
 
@@ -33,6 +36,8 @@ extension LocationSession {
             pendingPlaceResolutionRetry = false
             activePlaceResolution = nil
             schedulePlaceResolution(for: session, at: evaluationTime)
+            // First dwell confirmation → Chilling until (if) place resolves.
+            republishPresenceAfterPlaceContextChange()
             return
         }
 
@@ -124,19 +129,28 @@ extension LocationSession {
         guard !isShutDown else { return }
         guard dwellState.activeSession?.id == expectedDwellSessionID else { return }
         pendingPlaceResolutionRetry = false
+        let previous = activePlaceResolution
         activePlaceResolution = outcome
         if outcome.status == .resolved, let id = outcome.selected?.id {
             lastConfidentPlaceID = id
+        }
+        // Only republish when friend-visible activity would change.
+        if shouldRepublishForPlaceOutcomeChange(from: previous, to: outcome) {
+            republishPresenceAfterPlaceContextChange()
         }
     }
 
     func recordPlaceResolutionFailure(expectedDwellSessionID: String) {
         guard !isShutDown else { return }
         guard dwellState.activeSession?.id == expectedDwellSessionID else { return }
+        let hadConfidentPlace = activePlaceResolution?.confidentPlaceName != nil
         if activePlaceResolution?.dwellSessionID == expectedDwellSessionID {
             activePlaceResolution = nil
         }
         pendingPlaceResolutionRetry = true
+        if hadConfidentPlace {
+            republishPresenceAfterPlaceContextChange()
+        }
     }
 
     func clearPlaceResolutionContext(cancelTask: Bool) {
@@ -151,5 +165,20 @@ extension LocationSession {
         lastPlaceLookupCentroidLongitude = nil
         pendingPlaceResolutionRetry = false
         // Keep lastConfidentPlaceID across dwells for previous-match boost.
+    }
+
+    /// Immediate presence rewrite after place attach / clear (bypasses GPS throttle).
+    func republishPresenceAfterPlaceContextChange() {
+        guard state.isPresencePublishingEnabled else { return }
+        republishLastAcceptedIfPossible()
+    }
+
+    /// Compare confident place identity only — ambiguous↔empty need no extra write.
+    func shouldRepublishForPlaceOutcomeChange(
+        from previous: PlaceResolutionOutcome?,
+        to next: PlaceResolutionOutcome
+    ) -> Bool {
+        previous?.confidentPlaceName != next.confidentPlaceName
+            || previous?.selected?.id != next.selected?.id
     }
 }

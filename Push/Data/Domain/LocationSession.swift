@@ -40,10 +40,10 @@ final class LocationSession: LocationSessioning {
     var publishSnapshot = PresencePublishSnapshot()
     var pendingTrigger: PresenceSyncTrigger?
     var activityState = LocationSessionActivityState()
-    /// Parallel dwell tracking (Issue #99–#100). Does not affect drafts or labels.
+    /// Parallel dwell tracking (Issue #99–#100). Confirmed dwell gates Chilling (#105).
     var dwellDetector: any DwellDetecting
     var dwellState: DwellDetectionState = .moving
-    /// Place resolution for confirmed dwells (Issue #101). Internal only.
+    /// Place resolution for confirmed dwells (#101); feeds presence activity (#105).
     let placeResolver: any PlaceResolving
     var placeResolutionTask: Task<Void, Never>?
     var activePlaceResolution: PlaceResolutionOutcome?

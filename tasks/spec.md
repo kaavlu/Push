@@ -1,50 +1,41 @@
-# Add Yours — contribution UI pass (Issue #9)
+# Feed Create Post + Add Yours — UI pass (Issue #9)
 
 ## Goal
 
-Ship a polished **Add Yours** full-screen page opened from a Push card media CTA. The flow is a **lightweight media contribution** to an existing Push — not a new Push creator.
+Ship polished Feed moment UI: media cards with cream content band, **Add Yours** contribution from participant cards, and **Share a Moment** create/edit flow from Feed center `+` / card `…`.
 
-**This pass:** fixture + local PhotosPicker state only. No uploads, Storage, repos, or feed mutation.
+**This pass:** fixture + local PhotosPicker / draft state only. No uploads, Storage, repos, or feed mutation.
 
-## Product decisions (agreed)
+## Product decisions
 
 | Topic | Choice |
 |---|---|
-| Structure | **Single screen** (no step indicator) |
-| Media | **Photos + videos, multi-select** |
-| Preview | **Large hero + horizontal thumb strip** (focus, remove, add more) |
-| Caption | **None in v1** |
-| Submit | **Post → brief success → auto-dismiss** (simulated; no backend) |
-| Surface | `PushModalBackground` (enter → complete → exit), Start Push chrome language |
-| Primary CTA | `PushSolidSunbeamButton` — “Add to push” |
-| Close | Trailing `PushCircleIconButton` (x) |
-
-## Visual / interaction
-
-- **Chrome:** modal gradient, close top-trailing (Start Push / modal-flow family). No numbered step dots.
-- **Header:** title **Add yours**; subtitle uses push location (and optional date line) from the launching card.
-- **Empty:** glass dashed pick surface + multi `PhotosPicker` (images + videos).
-- **With media:** feed-like portrait hero (`FeedMediaLayout.aspectRatio` / corner language), fill-crop; video badge when kind is video; thumb strip for switch/remove; trailing **+** to add more until max.
-- **Submit:** disabled with zero items; on tap → short submitting state → success checkmark moment → dismiss.
-- **Out of scope:** captions, reorder, camera capture, crop/edit tools, real upload, feed append, offline queue.
+| Create structure | Single hub + compose (`CreatePostFlowView`) |
+| Add Yours | Single-screen media contribution to an existing moment |
+| Media | Photos + videos, multi-select |
+| Submit | Simulated success → dismiss (no backend) |
+| Participant actions | `+` / `…` only when `canAddYours` |
+| Card `…` | Opens edit-moment compose for that card |
 
 ## Architecture
 
 | Piece | Role |
 |---|---|
-| `AddYoursContext` | Launch payload from a Feed carousel (`id`, location, date label) |
-| `AddYoursDraftItem` | Local draft media (kind + optional `UIImage` preview) |
-| `AddYoursViewModel` | Picker load, focus/remove, max count, submit phase machine |
-| `AddYoursView` | Dumb presentation; dismiss on success |
-| `AddYoursLayout` | Spacing / hero / thumb tokens |
-| Feed wiring | `PushMediaCarousel.onAddYours` → `fullScreenCover` |
+| `PushMediaCarousel` + `FeedMediaCardContentSection` | Media + cream title/meta band |
+| `AddYoursView` / `AddYoursViewModel` | Contribution draft + submit |
+| `CreatePostFlowView` / `CreatePostViewModel` | Hub → friends → compose; edit from feed |
+| Feed wiring | Center `+` create post; card `+` Add Yours; card `…` edit moment |
 
 ## Acceptance
 
-- [ ] Open from Feed **Add yours** as full-screen modal
-- [ ] Empty → pick multi photo/video; hero + strip when selected
-- [ ] Remove / re-focus / add more up to max
-- [ ] Primary enabled only with ≥1 item; success then dismiss
-- [ ] Design-system surfaces/buttons only; no captions
-- [ ] No backend / no feed mutation
-- [ ] Unit tests for selection + submit phase (injectable timing)
+- [x] Feed Pushes media stack with title/meta content band
+- [x] Participant-only `+` / `…`; non-participants see neither
+- [x] Add Yours modal from `+`
+- [x] Edit moment compose from `…`
+- [x] Create post hub from tab `+`
+- [x] Unit tests for create post / feed media / Add Yours / feed shell
+- [ ] No backend / no feed mutation (intentional)
+
+## Out of scope
+
+Publishing, Storage, live history, audience, Now tab content, filter chip → real groups.

@@ -12,6 +12,8 @@
 - [x] Pushes-style header + aligned close; Existing Moments / Past Pushes segment; distinct row styles
 - [x] DS alignment audit: promote chooser rows/chips (DS-091), EmptySurface empties, edit “Save changes”
 - [x] Scratch friend selection page (Start Push style; friends only; solo allowed)
+- [x] Moment card cream band (title/meta; participant + / … → Add Yours / edit moment)
+- [x] Tap media pause/resume autoplay; remove Feed header alerts/settings
 
 ## Out of scope (next)
 

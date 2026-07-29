@@ -75,13 +75,19 @@ enum MapContentBuilder {
             people.insert(groupAvatarEntry(for: group, members: members, at: place, now: now), at: 0)
         }
 
+        let leadActivity = members.first.map { PresenceActivityPresentation.fields(from: $0) }
         return MapPuckData(
             id: "puck-\(place.id)",
             kind: kind,
             people: people,
-            activity: members.first?.activity?.name ?? "",
+            activity: leadActivity?.activityName ?? "",
             availability: isMulti ? .joinable : (members.first?.availability ?? .unavailable),
-            venueStatusText: puckVenueText(kind: kind, place: place, members: members),
+            venueStatusText: puckVenueText(
+                kind: kind,
+                place: place,
+                members: members,
+                leadActivity: leadActivity
+            ),
             coordinate: place.coordinate,
             groupIDs: groupTags(
                 memberIDs: memberIDs, isMulti: isMulti,
@@ -109,11 +115,12 @@ enum MapContentBuilder {
     private static func puckVenueText(
         kind: MapPuckKind,
         place: Place,
-        members: [VisiblePresence]
+        members: [VisiblePresence],
+        leadActivity: PresenceActivityPresentation.SurfaceFields?
     ) -> String {
         switch kind {
         case .individual:
-            return members.first?.statusNote ?? "At \(place.shortName)"
+            return leadActivity?.venueStatusText ?? "At \(place.shortName)"
         case .hangout, .friendGroup:
             return "At \(place.shortName)"
         case .cluster:
@@ -149,16 +156,17 @@ enum MapContentBuilder {
         let companions = others
             .filter { $0.person.id != member.person.id }
             .map(\.person.displayName)
+        let activity = PresenceActivityPresentation.fields(from: member)
         return FriendPuckData(
             id: member.person.id,
             name: member.person.displayName,
             avatarPlaceholder: member.person.initials,
             profileImageAssetName: member.person.imageAssetPath,
-            activity: member.activity?.name ?? "",
-            activitySymbolName: member.activity?.symbolName ?? "mappin",
-            activityDisplayText: place.shortName,
+            activity: activity.activityName,
+            activitySymbolName: activity.activitySymbolName,
+            activityDisplayText: activity.activityDisplayText,
             availability: isMulti ? .joinable : (member.availability ?? .unavailable),
-            venueStatusText: member.statusNote ?? "At \(place.shortName)",
+            venueStatusText: activity.venueStatusText,
             lastUpdated: RelativeTimeFormatter.label(
                 for: member.updatedAt, now: now, isCurrentUser: member.isCurrentUser
             ),
@@ -176,14 +184,15 @@ enum MapContentBuilder {
         now: Date
     ) -> FriendPuckData {
         let newest = members.map(\.updatedAt).max() ?? now
+        let lead = members.first.map { PresenceActivityPresentation.fields(from: $0) }
         return FriendPuckData(
             id: "group-\(group.id)",
             name: group.name,
             avatarPlaceholder: group.initials,
             profileImageAssetName: group.imageAssetPath,
-            activity: members.first?.activity?.name ?? "",
+            activity: lead?.activityName ?? "",
             activitySymbolName: "person.3.fill",
-            activityDisplayText: place.shortName,
+            activityDisplayText: lead?.activityDisplayText ?? place.shortName,
             availability: .joinable,
             venueStatusText: "\(group.name) is together",
             lastUpdated: RelativeTimeFormatter.label(for: newest, now: now),
