@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4C636686F66336DB339FD823 /* MomentMediaStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FC773D00A35969791463096 /* MomentMediaStorageTests.swift */; };
+		FE26684C6A5955324FF9B2C0 /* MomentMediaPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B285FF1274B93A38DA82146 /* MomentMediaPublisher.swift */; };
+		701AFBC7AA4FD37A08D7CD4D /* MomentMediaFileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF78AB2238BB896636852607 /* MomentMediaFileStore.swift */; };
+		5D00B8F08C498764B74D9DCB /* MomentMediaStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83AEE5475479B619EC6E726 /* MomentMediaStorage.swift */; };
 		1384FB382A7C1DAC4E4BFFA5 /* FeedMediaCardContentSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C91691DB35C3740221F53B0 /* FeedMediaCardContentSection.swift */; };
 		C732DF9AE835DE76A92946B4 /* CreatePostSelectFriendsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB5E5F827351E02AB0479E74 /* CreatePostSelectFriendsView.swift */; };
 		68B901F4B20CF4ABC301D0C5 /* PushMomentChooserRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E09A161105A47DEA8244302 /* PushMomentChooserRow.swift */; };
@@ -385,6 +389,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1FC773D00A35969791463096 /* MomentMediaStorageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MomentMediaStorageTests.swift"; sourceTree = "<group>"; };
+		5B285FF1274B93A38DA82146 /* MomentMediaPublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "MomentMediaPublisher.swift"; path = "Data/MomentMediaPublisher.swift"; sourceTree = "<group>"; };
+		CF78AB2238BB896636852607 /* MomentMediaFileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "MomentMediaFileStore.swift"; path = "Data/MomentMediaFileStore.swift"; sourceTree = "<group>"; };
+		C83AEE5475479B619EC6E726 /* MomentMediaStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "MomentMediaStorage.swift"; path = "Data/Supabase/MomentMediaStorage.swift"; sourceTree = "<group>"; };
 		0C91691DB35C3740221F53B0 /* FeedMediaCardContentSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedMediaCardContentSection.swift"; sourceTree = "<group>"; };
 		FB5E5F827351E02AB0479E74 /* CreatePostSelectFriendsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostSelectFriendsView.swift"; sourceTree = "<group>"; };
 		2E09A161105A47DEA8244302 /* PushMomentChooserRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PushMomentChooserRow.swift"; path = "DesignSystem/Components/Rows/PushMomentChooserRow.swift"; sourceTree = "<group>"; };
@@ -800,6 +808,9 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				5B285FF1274B93A38DA82146 /* MomentMediaPublisher.swift */,
+				CF78AB2238BB896636852607 /* MomentMediaFileStore.swift */,
+				C83AEE5475479B619EC6E726 /* MomentMediaStorage.swift */,
 				0C91691DB35C3740221F53B0 /* FeedMediaCardContentSection.swift */,
 				FB5E5F827351E02AB0479E74 /* CreatePostSelectFriendsView.swift */,
 				2E09A161105A47DEA8244302 /* PushMomentChooserRow.swift */,
@@ -1111,6 +1122,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				1FC773D00A35969791463096 /* MomentMediaStorageTests.swift */,
 				97DD2B58ABA0405C3188BB9B /* CreatePostViewModelTests.swift */,
 				A841F5F06CE2431AF9CB786F /* AddYoursViewModelTests.swift */,
 				32760387A7644CD1B64D2561 /* FeedMediaCarouselTests.swift */,
@@ -1320,6 +1332,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				FE26684C6A5955324FF9B2C0 /* MomentMediaPublisher.swift in Sources */,
+				701AFBC7AA4FD37A08D7CD4D /* MomentMediaFileStore.swift in Sources */,
+				5D00B8F08C498764B74D9DCB /* MomentMediaStorage.swift in Sources */,
 				1384FB382A7C1DAC4E4BFFA5 /* FeedMediaCardContentSection.swift in Sources */,
 				C732DF9AE835DE76A92946B4 /* CreatePostSelectFriendsView.swift in Sources */,
 				68B901F4B20CF4ABC301D0C5 /* PushMomentChooserRow.swift in Sources */,
@@ -1622,6 +1637,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				4C636686F66336DB339FD823 /* MomentMediaStorageTests.swift in Sources */,
 				D8BE7384909881A58BCC6629 /* CreatePostViewModelTests.swift in Sources */,
 				87C6B88906AC60E18F430E19 /* AddYoursViewModelTests.swift in Sources */,
 				5EDE64F4F8165D337821E53E /* FeedMediaCarouselTests.swift in Sources */,

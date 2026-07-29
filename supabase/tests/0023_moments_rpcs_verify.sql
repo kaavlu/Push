@@ -2,7 +2,11 @@
 -- Issue #118. Run as privileged SQL (service_role / dashboard) after applying 0023.
 --
 -- Prerequisites: alice@ / bob@ / carol@ pushapp.dev auth users + profiles.
--- Safe to re-run: cleans fixture moments by title prefix 'S2 '.
+-- Safe to re-run: cleans fixture moments by title prefix 'S2 ' and fixture
+-- storage objects by name prefix 's2-'.
+--
+-- Media paths must be real caller-owned `moment-media` objects since 0025, so
+-- `pg_temp.s2_object` seeds each one exactly as the Storage API would.
 --
 -- Auth for RPCs: set JWT claims + SET LOCAL ROLE authenticated so auth.uid() works
 -- inside SECURITY DEFINER functions.
@@ -32,6 +36,26 @@ begin
 end;
 $$;
 
+-- Seeds a pending object owned by `u` and returns its key. Callable while the
+-- session role is that same user (pending-owner INSERT policy, 0024).
+create or replace function pg_temp.s2_object(u uuid, label text)
+returns text
+language plpgsql
+as $$
+declare
+  v_name text := 'pending/' || u::text || '/s2-' || label || '.jpg';
+begin
+  insert into storage.objects (bucket_id, name, owner, owner_id, metadata)
+  values (
+    'moment-media', v_name, u, u::text,
+    jsonb_build_object('mimetype', 'image/jpeg', 'size', 1)
+  )
+  on conflict (bucket_id, name) do update
+    set metadata = excluded.metadata;
+  return v_name;
+end;
+$$;
+
 do $$
 declare
   alice uuid;
@@ -57,7 +81,10 @@ begin
     raise exception 'test auth users missing — create alice/bob/carol via Auth + seed first';
   end if;
 
-  -- Cleanup prior S2 fixtures.
+  -- Cleanup prior S2 fixtures. storage.protect_delete() blocks SQL deletes on
+  -- storage.objects without this transaction-local escape hatch.
+  perform set_config('storage.allow_delete_query', 'true', true);
+  delete from storage.objects where bucket_id = 'moment-media' and name like '%s2-%';
   delete from public.moments where title like 'S2 %';
   delete from public.pushes where title = 'S2 push for moment slot';
 
@@ -83,7 +110,7 @@ begin
     jsonb_build_array(
       jsonb_build_object(
         'kind', 'photo',
-        'storage_path', 'pending/a/1.jpg',
+        'storage_path', pg_temp.s2_object(alice, '1'),
         'public_url', 'https://example.test/s2-1.jpg'
       )
     )
@@ -119,7 +146,7 @@ begin
   -- ------------------------------------------------------------------
   perform pg_temp.s2_as_user(bob);
   v_media_b := public.append_moment_media(
-    v_moment, 'photo', 'pending/b/2.jpg', 'https://example.test/s2-2.jpg'
+    v_moment, 'photo', pg_temp.s2_object(bob, '2'), 'https://example.test/s2-2.jpg'
   );
   perform pg_temp.s2_reset_role();
 
@@ -184,8 +211,8 @@ begin
     null,
     '{}',
     jsonb_build_array(
-      jsonb_build_object('kind','photo','storage_path','p/a.jpg','public_url','https://example.test/a.jpg'),
-      jsonb_build_object('kind','photo','storage_path','p/b.jpg','public_url','https://example.test/b.jpg')
+      jsonb_build_object('kind','photo','storage_path',pg_temp.s2_object(alice,'a'),'public_url','https://example.test/a.jpg'),
+      jsonb_build_object('kind','photo','storage_path',pg_temp.s2_object(alice,'b'),'public_url','https://example.test/b.jpg')
     )
   );
   perform pg_temp.s2_reset_role();
@@ -241,7 +268,7 @@ begin
     v_push,
     '{}',
     jsonb_build_array(
-      jsonb_build_object('kind','photo','storage_path','p/p.jpg','public_url','https://example.test/p.jpg')
+      jsonb_build_object('kind','photo','storage_path',pg_temp.s2_object(alice,'p'),'public_url','https://example.test/p.jpg')
     )
   );
   perform public.soft_delete_moment(v_moment);
@@ -255,7 +282,7 @@ begin
       v_push,
       '{}',
       jsonb_build_array(
-        jsonb_build_object('kind','photo','storage_path','p/q.jpg','public_url','https://example.test/q.jpg')
+        jsonb_build_object('kind','photo','storage_path',pg_temp.s2_object(alice,'q'),'public_url','https://example.test/q.jpg')
       )
     );
     perform pg_temp.s2_reset_role();
@@ -281,7 +308,7 @@ begin
     null,
     array[bob],
     jsonb_build_array(
-      jsonb_build_object('kind','photo','storage_path','p/d1.jpg','public_url','https://example.test/d1.jpg')
+      jsonb_build_object('kind','photo','storage_path',pg_temp.s2_object(alice,'d1'),'public_url','https://example.test/d1.jpg')
     )
   );
   perform pg_temp.s2_reset_role();
@@ -293,7 +320,7 @@ begin
   begin
     perform pg_temp.s2_as_user(carol);
     perform public.append_moment_media(
-      v_moment, 'photo', 'p/x.jpg', 'https://example.test/x.jpg'
+      v_moment, 'photo', pg_temp.s2_object(carol, 'x'), 'https://example.test/x.jpg'
     );
     perform pg_temp.s2_reset_role();
     raise exception 'expected stranger append denied';
@@ -390,7 +417,7 @@ begin
   -- bob appends so he has own media; try delete alice's
   perform pg_temp.s2_as_user(bob);
   v_media_b := public.append_moment_media(
-    v_moment, 'photo', 'p/bob.jpg', 'https://example.test/bob.jpg'
+    v_moment, 'photo', pg_temp.s2_object(bob, 'bob'), 'https://example.test/bob.jpg'
   );
   perform pg_temp.s2_reset_role();
 
@@ -414,7 +441,7 @@ begin
     perform public.append_moment_media(
       v_moment,
       'photo',
-      'p/fill-' || i || '.jpg',
+      pg_temp.s2_object(alice, 'fill-' || i),
       'https://example.test/fill-' || i || '.jpg'
     );
   end loop;
@@ -429,7 +456,7 @@ begin
   begin
     perform pg_temp.s2_as_user(alice);
     perform public.append_moment_media(
-      v_moment, 'photo', 'p/nine.jpg', 'https://example.test/nine.jpg'
+      v_moment, 'photo', pg_temp.s2_object(alice, 'nine'), 'https://example.test/nine.jpg'
     );
     perform pg_temp.s2_reset_role();
     raise exception 'expected 9th media denied';
@@ -483,6 +510,7 @@ begin
 
   -- Cleanup
   delete from public.moments where title like 'S2 %';
+  delete from storage.objects where bucket_id = 'moment-media' and name like '%s2-%';
   delete from public.pushes where title = 'S2 push for moment slot';
   delete from public.friendships
   where user_low = least(bob, carol) and user_high = greatest(bob, carol);

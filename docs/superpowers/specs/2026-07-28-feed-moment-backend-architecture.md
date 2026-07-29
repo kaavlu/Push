@@ -210,6 +210,15 @@ profiles ──┬──< moment_members >── moments ──?── pushes
 
 - Local file store under Application Support `moment-media/` (like `GroupPhotoFileStore`) **or** fixture asset paths only until mock write path needed.
 
+### 4.5 As-built notes (S3 — migrations `0024`, `0025`)
+
+Implementation annotations, not product changes:
+
+- **Keys:** `pending/{auth.uid()}/{uuid}.{ext}` is the primary publish path and stays pending after `create_moment` (no server-side move); `{moment_id}/{uuid}.{ext}` is accepted for appends. Posters are a parallel `…-poster.jpg` key.
+- **Limits:** bucket cap 100 MiB (single value, sized for video); the client holds photos to 10 MiB.
+- **Path authorization is server-side.** Storage RLS alone would not stop a caller *registering* someone else's object in their own Moment, so `create_moment` / `append_moment_media` validate every path against `storage.objects`: exists in `moment-media`, owned by `auth.uid()`, allowed key layout, mime matching the declared kind, not already registered by an active media row. `public_url` / `poster_url` are derived server-side; caller-supplied URLs are ignored.
+- **Public-bucket limitation (accepted for MVP):** because the bucket is public, an already-known object URL remains fetchable from the CDN. Blocking, untagging, or soft-deleting a Moment prevents future URL *discovery* through Push but cannot revoke a URL someone already holds. Hard revocation would need a private bucket plus signed URLs on every read — deferred unless the product contract requires it (contract §4 does not).
+
 ---
 
 ## 5. Authorization model
