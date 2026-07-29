@@ -48,9 +48,10 @@ struct MomentRow: Decodable {
         return MomentSummary(
             moment: moment(),
             taggedPersonIDs: tagged_person_ids,
-            // First *visible* item, which may not be global sort_order 0 when
-            // the cover's uploader is blocked for this viewer.
-            coverMedia: items.first,
+            // Already viewer-visible and album-ordered; the cover is `first`,
+            // which may not be global sort_order 0 when that uploader is
+            // blocked for this viewer.
+            media: items,
             visibleMediaCount: visible_media_count,
             capabilities: momentCapabilities(viewerID: viewerID)
         )

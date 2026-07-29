@@ -32,6 +32,11 @@ enum FeedLayout {
 
     /// Consistent vertical gap between media cards (next card peeks slightly).
     static let mediaStackSpacing: CGFloat = 24
+
+    /// Keeps loading / failed states centered in the same band the first card
+    /// would occupy, so the surface doesn't jump when content arrives.
+    static let statePlaceholderMinHeight: CGFloat = 320
+    static let loadMoreSpinnerPadding: CGFloat = 16
 }
 
 /// Compact cinematic media frame for Feed Push cards.

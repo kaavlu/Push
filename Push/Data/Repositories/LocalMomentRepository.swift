@@ -148,7 +148,7 @@ final class LocalMomentRepository: MomentRepository {
             taggedPersonIDs: members
                 .filter { !graph.isBlocked($0.personID) }
                 .map(\.personID),
-            coverMedia: visible.first,
+            media: visible,
             visibleMediaCount: visible.count,
             capabilities: MomentAuthorization.capabilities(
                 moment: moment, members: members, media: allMedia,

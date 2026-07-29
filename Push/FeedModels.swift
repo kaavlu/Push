@@ -22,9 +22,11 @@ enum FeedTab: String, CaseIterable, Identifiable {
     }
 }
 
-/// Isolated fixture filters for the Feed shell until live group data drives chips.
+/// Preview / design-lab filter chips only. The app builds chips from the
+/// viewer's groups via `MomentFeedFilter` (Issue #125).
 enum FeedFilterFixtures {
-    static let allID = "all"
+    /// Same "no group predicate" id the repository-backed chips use.
+    static let allID = MomentFeedFilter.allID
 
     static let items: [PushIvoryFilterItem] = [
         PushIvoryFilterItem(id: allID, title: "All"),
