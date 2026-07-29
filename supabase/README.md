@@ -94,6 +94,19 @@ of the files in order reproduces the schema.
   soft-deleting a Moment prevents future URL *discovery* through Push but does not
   revoke an already-known URL. Hard revocation would require a private bucket plus
   signed URLs on every read; that is deferred unless the product contract demands it.
+- `migrations/0026_moment_feed_rpcs.sql` — Moment read RPCs (Issue #122 S5):
+  `feed_moments` (keyset pagination on `(last_activity_at, id)` desc, optional
+  group filter), `hub_moments` (created ∪ tagged ∪ contributed), and
+  `moment_detail` (raises `not found` when no visibility path exists). All three
+  return the `private.moment_dto` projection: moment columns, creator-first tag
+  ids, viewer-visible media in dense order, a viewer-visible media count, and
+  `private.moment_capabilities` — block filtering happens server-side so the
+  client never re-filters. The group predicate deliberately avoids
+  `private.shares_group` (true for *any* shared group, which leaked Moments into
+  the wrong chip): the viewer and a tagged member must both be active members of
+  the filtered group. Verify with `tests/0026_moment_feed_rpcs_verify.sql`.
+  (Remote history also has `0026_moment_feed_rpcs_group_filter_fix`, folded into
+  the file — a from-scratch run of `0026` alone reproduces final state.)
 - `seed.sql` — idempotent public-graph seed keyed off **real** auth IDs (resolved by email).
 
 ## Security model

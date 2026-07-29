@@ -34,18 +34,22 @@ final class AppDataContainer {
             currentUserID: currentUserID,
             photoStorage: SupabaseProfilePhotoStorage(client: client),
             groupPhotoStorage: SupabaseGroupPhotoStorage(client: client),
-            presenceRealtimeBridge: bridge
+            presenceRealtimeBridge: bridge,
+            moments: SupabaseMomentRepository(client: client, currentUserID: currentUserID)
         )
     }
 
     static func prepareLive(loader: LiveDataLoading, currentUserID: Person.ID) async throws -> AppDataContainer {
         let store = LiveDataStore(loader: loader)
+        // Loader-only live containers have no client, so Moments stay empty
+        // rather than falling back to mock albums.
         return try await preparedLive(
             store: store,
             currentUserID: currentUserID,
             photoStorage: nil,
             groupPhotoStorage: nil,
-            presenceRealtimeBridge: nil
+            presenceRealtimeBridge: nil,
+            moments: nil
         )
     }
 
@@ -54,15 +58,18 @@ final class AppDataContainer {
         currentUserID: Person.ID,
         photoStorage: ProfilePhotoStoring?,
         groupPhotoStorage: GroupPhotoStoring?,
-        presenceRealtimeBridge: PresenceRealtimeBridging?
+        presenceRealtimeBridge: PresenceRealtimeBridging?,
+        moments: MomentRepository?
     ) async throws -> AppDataContainer {
+        // Moments are paginated on demand — never part of the session warm.
         try await store.warm()
         let container = live(
             store: store,
             currentUserID: currentUserID,
             photoStorage: photoStorage,
             groupPhotoStorage: groupPhotoStorage,
-            presenceRealtimeBridge: presenceRealtimeBridge
+            presenceRealtimeBridge: presenceRealtimeBridge,
+            moments: moments
         )
         _ = try await container.friends.currentUser()
         return container
@@ -213,7 +220,8 @@ final class AppDataContainer {
             referenceDate: referenceDate,
             photoStorage: SupabaseProfilePhotoStorage(client: client),
             groupPhotoStorage: SupabaseGroupPhotoStorage(client: client),
-            presenceRealtimeBridge: bridge
+            presenceRealtimeBridge: bridge,
+            moments: SupabaseMomentRepository(client: client, currentUserID: currentUserID)
         )
     }
 
@@ -224,7 +232,8 @@ final class AppDataContainer {
         photoStorage: ProfilePhotoStoring? = nil,
         groupPhotoStorage: GroupPhotoStoring? = nil,
         locationSession: LocationSessioning? = nil,
-        presenceRealtimeBridge: PresenceRealtimeBridging? = nil
+        presenceRealtimeBridge: PresenceRealtimeBridging? = nil,
+        moments: MomentRepository? = nil
     ) -> AppDataContainer {
         let resolvedSession = locationSession ?? makeLiveLocationSession(
             store: store, currentUserID: currentUserID
@@ -241,7 +250,7 @@ final class AppDataContainer {
             ),
             sharing: SupabaseSharingRepository(store: store),
             feed: EmptyLiveFeedRepository(),
-            moments: EmptyLiveMomentRepository(),
+            moments: moments ?? EmptyLiveMomentRepository(),
             alerts: SupabaseAlertRepository(store: store, currentUserID: currentUserID),
             locationSession: resolvedSession,
             presenceRealtimeBridge: presenceRealtimeBridge
