@@ -150,6 +150,9 @@ enum MomentRepositoryError: Error, Equatable {
     case cannotRemoveCreator
     /// Reorder set mismatch — someone else changed the album first.
     case conflict
+    /// Live only: the server rejected a media path (0025 ownership/type/reuse
+    /// validation). The mock never produces one — it has no Storage objects.
+    case invalidMediaPath
 }
 
 /// Moments (Feed › Pushes). Reads are viewer-scoped: media and counts arrive

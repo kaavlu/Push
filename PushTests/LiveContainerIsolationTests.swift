@@ -49,15 +49,26 @@ final class LiveContainerIsolationTests: XCTestCase {
         XCTAssertTrue(container.alerts is SupabaseAlertRepository)
     }
 
+    func testLiveContainerWiresTheSupabaseMomentRepository() {
+        let container = AppDataContainer.live(
+            client: SupabaseClientProvider.shared.client,
+            currentUserID: "11111111-1111-1111-1111-111111111111"
+        )
+        XCTAssertTrue(container.moments is SupabaseMomentRepository)
+        XCTAssertFalse(container.moments is LocalMomentRepository)
+    }
+
     func testLiveContainerExposesNoMomentFixtures() async throws {
         let loader = LiveDataLoaderSpy()
         loader.presenceRows = []
         let container = try await AppDataContainer.prepareLive(
             loader: loader, currentUserID: "self"
         )
+        // No Supabase client on this path, so Moments stay inert rather than
+        // falling back to seeded albums.
         XCTAssertTrue(container.moments is EmptyLiveMomentRepository)
 
-        // No seeded albums, no Feed carousel fixtures — empty until S5 lands.
+        // No seeded albums, no Feed carousel fixtures.
         let page = try await container.moments.feedPage(cursor: nil, limit: 10, groupID: nil)
         let hub = try await container.moments.hubMoments()
         XCTAssertTrue(page.moments.isEmpty)
