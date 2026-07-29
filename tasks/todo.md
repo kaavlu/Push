@@ -1,18 +1,18 @@
-# Issue #117 — Moments S1: tables, helpers, SQL verify
+# Issue #118 — Moments S2: mutation RPCs
 
 ## Status
 
-- [x] `0021_moments_tables.sql` — moments / members / media, indexes, UNIQUE(push_id), RLS, SELECT grant only
-- [x] `0022_moments_private_helpers.sql` — private AuthZ helpers + SELECT policies
-- [x] `tests/0021_moments_verify.sql` — soft-delete, push slot, stranger, friend, block path/media
-- [x] `supabase/README.md` entries
-- [x] Applied remote via MCP (`0021_moments_tables`, `0022_moments_private_helpers`)
-- [x] Ran verify on remote (alice/bob/carol) — OK
+- [x] `0023_moments_rpcs.sql` — create, append, metadata, tags, reorder, soft-delete media/moment
+- [x] Permission matrix + max 8 + one Moment per Push + creator immutability
+- [x] `last_activity_at` only on create/append (`clock_timestamp` for same-txn distinguishability)
+- [x] `tests/0023_moments_rpcs_verify.sql`
+- [x] Applied remotely (plus small fix migrations for PL/pgSQL ambiguity + clock_timestamp)
+- [x] Smoke verify on alice/bob (create, append bump, metadata deny, cap 8, soft-delete, empty media)
 
-## Out of scope (later slices)
+## Out of scope
 
-Mutation RPCs, Storage, MomentRepository, Feed UI, Realtime, notifications.
+Storage, Swift, UI, Realtime, notifications.
 
 ## Next
 
-S2 — mutation RPCs + permission matrix SQL cases.
+S3 Storage bucket / client media upload.

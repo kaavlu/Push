@@ -60,6 +60,11 @@ of the files in order reproduces the schema.
 - `migrations/0022_moments_private_helpers.sql` — `private.can_view_moment` and related
   helpers (friends-of-tagged + block-aware media); SELECT policies only. Mutation RPCs
   and Storage deferred (S2/S3). Verify with `tests/0021_moments_verify.sql`.
+- `migrations/0023_moments_rpcs.sql` — Moment mutation RPCs (Issue #118 S2):
+  `create_moment`, `append_moment_media`, `update_moment_metadata`, `add_moment_members`,
+  `remove_moment_member`, `reorder_moment_media`, `soft_delete_moment_media`,
+  `soft_delete_moment`. Permission matrix + max 8 media; `last_activity_at` only on
+  create/append. No Storage yet (S3). Verify with `tests/0023_moments_rpcs_verify.sql`.
 - `seed.sql` — idempotent public-graph seed keyed off **real** auth IDs (resolved by email).
 
 ## Security model
