@@ -1,20 +1,25 @@
-# Feed Create Post — UI pass
+# Issue #115 — Define Feed and Moment Product Rules
 
 ## Status
 
-- [x] Product decisions (hub + compose, media-first cards, tap→prefill, scratch empty draft)
-- [x] Design note (`docs/superpowers/specs/2026-07-28-feed-create-post-design.md`)
-- [x] Models / fixtures / ViewModel
-- [x] Hub + Compose + Flow UI
-- [x] Wire Feed center `+` in `ContentView`
-- [x] Tests (`CreatePostViewModelTests`) + pbxproj register
-- [x] Refine hub: compact richer History rows (thumb, meta, people, media badge, chevron)
-- [x] Pushes-style header + aligned close; Existing Moments / Past Pushes segment; distinct row styles
-- [x] DS alignment audit: promote chooser rows/chips (DS-091), EmptySurface empties, edit “Save changes”
-- [x] Scratch friend selection page (Start Push style; friends only; solo allowed)
-- [x] Moment card cream band (title/meta; participant + / … → Add Yours / edit moment)
-- [x] Tap media pause/resume autoplay; remove Feed header alerts/settings
+- [x] Structured interview (lifecycle, attendance, media, pucks, visibility, feed, notifications)
+- [x] Resolve contradictions (tag editors vs contributors; visibility model; one Moment per Push)
+- [x] Feed Product Contract written
 
-## Out of scope (next)
+## Deliverable
 
-Publishing, Storage uploads, feed append after post, audience, captions, live history from repos.
+`docs/superpowers/specs/2026-07-28-feed-moment-product-contract.md`
+
+## Prior
+
+- #114 audit: `docs/superpowers/specs/2026-07-28-feed-moment-backend-requirements-audit.md`
+
+## Constraints honored
+
+- No code / migrations / implementation
+- Invitees ≠ attendees ≠ contributors ≠ viewers
+- Backend must enforce permissions (documented in contract matrix)
+
+## Next (separate issues)
+
+Backend architecture + implementation plan from the product contract.
