@@ -59,9 +59,15 @@ enum MomentMediaStorageConfig {
     /// CDN-friendly cache; every upload writes a new object key.
     static let cacheControlSeconds = "3600"
 
-    static let photoContentTypes = ["image/jpeg", "image/png", "image/webp"]
-    static let videoContentTypes = ["video/mp4", "video/quicktime"]
-    static let posterContentType = "image/jpeg"
+    /// Named so the compose path can pick the type it just encoded to instead of
+    /// indexing into the accepted lists.
+    static let jpegContentType = "image/jpeg"
+    static let mp4ContentType = "video/mp4"
+    static let quickTimeContentType = "video/quicktime"
+
+    static let photoContentTypes = [jpegContentType, "image/png", "image/webp"]
+    static let videoContentTypes = [mp4ContentType, quickTimeContentType]
+    static let posterContentType = jpegContentType
     static let posterSuffix = "-poster"
     static let posterFileExtension = "jpg"
 

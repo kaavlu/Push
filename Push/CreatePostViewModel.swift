@@ -2,9 +2,13 @@
 //  CreatePostViewModel.swift
 //  Push
 //
-//  Local-only ViewModel for Feed create-post hub → (scratch friends) → compose.
+//  Feed create-post hub → (scratch friends) → compose. Hub rows and the friend
+//  catalog come from repositories (see `CreatePostViewModel+Hub`), and publish
+//  goes through Storage + `MomentRepository` (see `CreatePostViewModel+Publish`).
+//  Fixture lists survive only behind the preview initializer.
 //
 
+import Combine
 import Foundation
 import PhotosUI
 import SwiftUI
@@ -12,17 +16,24 @@ import UniformTypeIdentifiers
 
 @MainActor
 final class CreatePostViewModel: ObservableObject {
+    // `internal(set)` (not `private(set)`) on the state the `+Hub`, `+Friends`,
+    // and `+Publish` extensions own — a `private` setter is file-scoped, and this
+    // view model is split by responsibility to stay inside the file-size rule.
     @Published private(set) var screen: CreatePostScreen = .hub
     @Published private(set) var source: CreatePostSource = .scratch
     @Published var selectedSegment: CreatePostHubSegment = .existingMoments
-    @Published private(set) var existingMoments: [CreatePostHistoryItem]
-    @Published private(set) var pastPushes: [CreatePostHistoryItem]
+    @Published internal(set) var existingMoments: [CreatePostHistoryItem]
+    @Published internal(set) var pastPushes: [CreatePostHistoryItem]
     @Published private(set) var selectedHistoryID: String?
+    /// Hub chooser load (Existing Moments + Past Pushes + friend catalog).
+    @Published internal(set) var hubLoadState: LoadState<Void> = .idle
+    /// Recoverable publish failure. The draft stays intact so Retry can resubmit.
+    @Published internal(set) var actionError: ActionErrorState?
 
-    /// Friend picker catalog (fixture + any prefilled members).
-    @Published private(set) var availableFriends: [PushRecipientItem]
+    /// Friend picker catalog — the viewer's friends, plus anyone already tagged.
+    @Published internal(set) var availableFriends: [PushRecipientItem]
     @Published var friendSearchText: String = ""
-    @Published private(set) var selectedFriendIDs: Set<String> = []
+    @Published internal(set) var selectedFriendIDs: Set<String> = []
     /// Drives friend-picker back target and navigation stack shape.
     @Published private(set) var friendPickerEntry: CreatePostFriendPickerEntry = .initialScratch
 
@@ -49,155 +60,76 @@ final class CreatePostViewModel: ObservableObject {
             Task { await consumePickerItems() }
         }
     }
-    @Published private(set) var phase: CreatePostPhase = .composing
+    @Published internal(set) var phase: CreatePostPhase = .composing
     @Published private(set) var isLoadingPicker = false
-    @Published private(set) var displayParticipants: [FeedMediaParticipant] = []
+    @Published internal(set) var displayParticipants: [FeedMediaParticipant] = []
     /// Compose “With” section — selected friends (scratch) or original membership.
-    @Published private(set) var memberPersonRows: [FriendRowModel] = []
+    @Published internal(set) var memberPersonRows: [FriendRowModel] = []
 
-    private let timing: CreatePostTiming
-    private let maxSelection: Int
-    private let baseAvailableFriends: [PushRecipientItem]
+    let timing: CreatePostTiming
+    let maxSelection: Int
+    /// Nil only on the preview seam, which never touches repositories.
+    let container: AppDataContainer?
+    /// Test/preview seams so a fake or failing repository / bucket can be injected.
+    let momentsOverride: MomentRepository?
+    let mediaStorageOverride: MomentMediaStoring?
+    /// People cache for tag ids → faces, shared by hub rows and the friend catalog.
+    var peopleByID: [Person.ID: Person] = [:]
+    /// Push slots the viewer can already see consumed by a Moment (chooser hint).
+    var momentPushIDs: Set<PushPlan.ID> = []
+    var baseAvailableFriends: [PushRecipientItem]
+    /// Handle on the bootstrap hub load so tests can await it instead of racing.
+    private(set) var initialLoad: Task<Void, Never>?
     /// Selection snapshot when opening Edit from compose — restored on cancel.
     private var friendSelectionSnapshot: Set<String> = []
+    private var storeChangeSub: AnyCancellable?
+    private var lastSeenRevision = 0
 
-    var visibleChooserItems: [CreatePostHistoryItem] {
-        switch selectedSegment {
-        case .existingMoments: return existingMoments
-        case .pastPushes: return pastPushes
-        }
-    }
-
-    var segmentItems: [PushIvorySegmentedItem] {
-        CreatePostHubSegment.allCases.map { segment in
-            let count: Int
-            switch segment {
-            case .existingMoments: count = existingMoments.count
-            case .pastPushes: count = pastPushes.count
-            }
-            return PushIvorySegmentedItem(id: segment.rawValue, title: segment.title, count: count)
-        }
-    }
-
-    var selectedSegmentID: String {
-        get { selectedSegment.rawValue }
-        set { selectedSegment = CreatePostHubSegment(rawValue: newValue) ?? .existingMoments }
-    }
-
-    var filteredFriends: [PushRecipientItem] {
-        let query = friendSearchText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !query.isEmpty else { return availableFriends }
-        return availableFriends.filter { $0.name.localizedCaseInsensitiveContains(query) }
-    }
-
-    var selectedFriends: [PushRecipientItem] {
-        availableFriends.filter { selectedFriendIDs.contains($0.id) }
-    }
-
-    /// Scratch friend step allows solo (empty selection).
-    var canContinueFromFriends: Bool {
-        screen == .selectFriends && phase == .composing
-    }
-
-    var canSubmit: Bool {
-        !items.isEmpty && phase == .composing && !isLoadingPicker && screen == .compose
-    }
-
-    var canAddMore: Bool {
-        items.count < maxSelection && phase == .composing && screen == .compose
-    }
-
-    var remainingSlots: Int {
-        max(0, maxSelection - items.count)
-    }
-
-    var focusedItem: AddYoursDraftItem? {
-        guard items.indices.contains(focusedIndex) else { return nil }
-        return items[focusedIndex]
-    }
-
-    /// Existing moment edit path — different primary copy from create.
-    var isEditingExistingMoment: Bool {
-        if case .existingMoment = source { return true }
-        return false
-    }
-
-    /// Scratch path uses friend selection before compose.
-    var usesFriendSelection: Bool {
-        if case .scratch = source { return true }
-        return false
-    }
-
-    /// Friend picker opened from compose “With · Edit” (any source).
-    var isEditingPeopleFromCompose: Bool {
-        friendPickerEntry == .editFromCompose
-    }
-
-    var friendPickerPrimaryTitle: String {
-        isEditingPeopleFromCompose
-            ? CreatePostCopy.selectFriendsDone
-            : CreatePostCopy.selectFriendsNext
-    }
-
-    /// Compose always shows the With section so Edit can add people.
-    var showsPeopleSection: Bool {
-        screen == .compose && phase != .success
-    }
-
-    var canEditPeople: Bool {
-        phase == .composing && screen == .compose
-    }
-
-    var primaryButtonTitle: String {
-        if phase == .submitting {
-            return isEditingExistingMoment
-                ? CreatePostCopy.editSubmittingAction
-                : CreatePostCopy.submittingAction
-        }
-        return isEditingExistingMoment
-            ? CreatePostCopy.editPrimaryAction
-            : CreatePostCopy.primaryAction
-    }
-
-    var isPrimaryLoading: Bool {
-        phase == .submitting
-    }
-
-    var composeTitle: String {
-        if case .existingMoment = source {
-            return CreatePostCopy.composeEditTitle
-        }
-        return CreatePostCopy.composeTitle
-    }
-
-    var composeSubtitle: String {
-        switch source {
-        case .scratch:
-            return CreatePostCopy.composeFromScratchSubtitle
-        case .existingMoment:
-            return CreatePostCopy.composeFromExistingSubtitle
-        case .pastPush:
-            return CreatePostCopy.composeFromPastSubtitle
-        }
-    }
-
-    var showsParticipants: Bool {
-        !memberPersonRows.isEmpty
-    }
-
+    // `container` defaults via `?? .shared` (not `= .shared`) — `.shared` is a
+    // MainActor mutable static and cannot be a default argument.
     init(
-        existingMoments: [CreatePostHistoryItem] = CreatePostFixtures.existingMoments,
-        pastPushes: [CreatePostHistoryItem] = CreatePostFixtures.pastPushes,
+        container: AppDataContainer? = nil,
+        moments: MomentRepository? = nil,
+        mediaStorage: MomentMediaStoring? = nil,
+        timing: CreatePostTiming = .production,
+        maxSelection: Int = CreatePostLayout.maxSelectionCount
+    ) {
+        let container = container ?? .shared
+        self.container = container
+        self.momentsOverride = moments
+        self.mediaStorageOverride = mediaStorage
+        self.timing = timing
+        self.maxSelection = max(1, maxSelection)
+        self.existingMoments = []
+        self.pastPushes = []
+        self.baseAvailableFriends = []
+        self.availableFriends = []
+        initialLoad = Task { await load() }
+        storeChangeSub = container.onStoreChange { [weak self] revision in
+            guard let self, revision != self.lastSeenRevision else { return }
+            Task { await self.load() }
+        }
+    }
+
+    /// Preview / design-lab seam. Never used by the app: it has no repositories,
+    /// so fixture rows can't leak into a session and publish stays simulated.
+    init(
+        existingMoments: [CreatePostHistoryItem],
+        pastPushes: [CreatePostHistoryItem] = [],
         availableFriends: [PushRecipientItem] = CreatePostFixtures.selectableFriends,
         timing: CreatePostTiming = .production,
         maxSelection: Int = CreatePostLayout.maxSelectionCount
     ) {
+        self.container = nil
+        self.momentsOverride = nil
+        self.mediaStorageOverride = nil
+        self.timing = timing
+        self.maxSelection = max(1, maxSelection)
         self.existingMoments = existingMoments
         self.pastPushes = pastPushes
         self.baseAvailableFriends = availableFriends
         self.availableFriends = availableFriends
-        self.timing = timing
-        self.maxSelection = max(1, maxSelection)
+        self.hubLoadState = .loaded(())
     }
 
     // MARK: - Navigation
@@ -223,11 +155,11 @@ final class CreatePostViewModel: ObservableObject {
         }
     }
 
-    /// Feed card overflow — open compose prefilled for this moment (viewer is a participant).
+    /// Feed card overflow — open compose prefilled for this moment (viewer is a
+    /// participant). The feed card id **is** the Moment id (S6).
     func openFeedMomentForEdit(_ carousel: FeedMediaCarouselData) {
         guard phase == .composing || phase == .success else { return }
-        let momentID = CreatePostHistoryItem.feedMomentID(forCarouselID: carousel.id)
-        if let item = existingMoments.first(where: { $0.id == momentID }) {
+        if let item = existingMoments.first(where: { $0.id == carousel.id }) {
             openCompose(from: item, source: .existingMoment(id: item.id))
             return
         }
@@ -238,9 +170,10 @@ final class CreatePostViewModel: ObservableObject {
     /// Prefills compose for a feed moment (used when launching edit from the Feed card).
     static func forEditingFeedMoment(
         _ carousel: FeedMediaCarouselData,
+        container: AppDataContainer? = nil,
         timing: CreatePostTiming = .production
     ) -> CreatePostViewModel {
-        let viewModel = CreatePostViewModel(timing: timing)
+        let viewModel = CreatePostViewModel(container: container, timing: timing)
         viewModel.openFeedMomentForEdit(carousel)
         return viewModel
     }
@@ -309,22 +242,6 @@ final class CreatePostViewModel: ObservableObject {
         phase = .composing
     }
 
-    // MARK: - Friend selection
-
-    func isFriendSelected(_ id: String) -> Bool {
-        selectedFriendIDs.contains(id)
-    }
-
-    func toggleFriend(_ id: String) {
-        guard phase == .composing, screen == .selectFriends else { return }
-        guard availableFriends.contains(where: { $0.id == id }) else { return }
-        if selectedFriendIDs.contains(id) {
-            selectedFriendIDs.remove(id)
-        } else {
-            selectedFriendIDs.insert(id)
-        }
-    }
-
     // MARK: - Media
 
     func seed(with draftItems: [AddYoursDraftItem]) {
@@ -384,19 +301,13 @@ final class CreatePostViewModel: ObservableObject {
         focusedIndex = 0
     }
 
-    func submit() async {
-        guard canSubmit else { return }
-        phase = .submitting
-        if timing.submitDelayNanoseconds > 0 {
-            try? await Task.sleep(nanoseconds: timing.submitDelayNanoseconds)
-        }
-        phase = .success
-        if timing.successHoldNanoseconds > 0 {
-            try? await Task.sleep(nanoseconds: timing.successHoldNanoseconds)
-        }
-    }
+    // MARK: - Internals
 
-    // MARK: - Private
+    /// Stamped after every successful load / publish so the store subscription
+    /// can tell its own write apart from someone else's.
+    func stampStoreRevision() {
+        lastSeenRevision = container?.storeRevision ?? lastSeenRevision
+    }
 
     private func openCompose(from item: CreatePostHistoryItem, source: CreatePostSource) {
         resetDraft()
@@ -411,73 +322,6 @@ final class CreatePostViewModel: ObservableObject {
         seedMedia(from: item.mediaItems)
         screen = .compose
         phase = .composing
-    }
-
-    private func applySelectedFriendsToMembers() {
-        let byID = Dictionary(uniqueKeysWithValues: availableFriends.map { ($0.id, $0) })
-        // Keep prior With order for still-selected people; append newly tagged friends.
-        let retainedIDs = memberPersonRows.map(\.id).filter { selectedFriendIDs.contains($0) }
-        let retainedSet = Set(retainedIDs)
-        let newcomers = availableFriends.filter {
-            selectedFriendIDs.contains($0.id) && !retainedSet.contains($0.id)
-        }
-        let ordered = retainedIDs.compactMap { byID[$0] } + newcomers
-
-        displayParticipants = ordered.map { friend in
-            FeedMediaParticipant(
-                id: friend.id,
-                displayName: friend.name,
-                imageAssetPath: friend.imageAssetName
-            )
-        }
-        memberPersonRows = ordered.map(Self.personRow(from:))
-    }
-
-    private func seedSelectedFriendsFromMembers() {
-        mergeParticipantsIntoAvailableFriends(displayParticipants)
-        // Prefer current member order; fall back to selected set already on the draft.
-        if !memberPersonRows.isEmpty {
-            selectedFriendIDs = Set(memberPersonRows.map(\.id))
-        }
-    }
-
-    private func mergeParticipantsIntoAvailableFriends(_ people: [FeedMediaParticipant]) {
-        var byID = Dictionary(uniqueKeysWithValues: availableFriends.map { ($0.id, $0) })
-        for person in people where byID[person.id] == nil {
-            byID[person.id] = PushRecipientItem(
-                id: person.id,
-                name: person.displayName,
-                memberCount: nil,
-                imageAssetName: person.imageAssetPath,
-                initials: person.initials,
-                isGroup: false
-            )
-        }
-        // Catalog first (stable order), then any extras not already listed.
-        let baseIDs = Set(baseAvailableFriends.map(\.id))
-        let extras = byID.values
-            .filter { !baseIDs.contains($0.id) }
-            .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
-        availableFriends = baseAvailableFriends + extras
-    }
-
-    private static func personRow(from friend: PushRecipientItem) -> FriendRowModel {
-        FriendRowModel(
-            id: friend.id,
-            friend: FriendPuckData(
-                id: friend.id,
-                name: friend.name,
-                avatarPlaceholder: friend.initials,
-                profileImageAssetName: friend.imageAssetName,
-                activity: "",
-                activitySymbolName: "",
-                activityDisplayText: "",
-                availability: .busy,
-                venueStatusText: "",
-                lastUpdated: ""
-            ),
-            groupLabel: nil
-        )
     }
 
     private func resetDraft() {
@@ -496,6 +340,7 @@ final class CreatePostViewModel: ObservableObject {
         friendSelectionSnapshot = []
         friendPickerEntry = .initialScratch
         availableFriends = baseAvailableFriends
+        actionError = nil
     }
 
     private func seedMedia(from mediaItems: [FeedMediaItem]) {
@@ -516,13 +361,14 @@ final class CreatePostViewModel: ObservableObject {
         loaded.reserveCapacity(min(batch.count, remainingSlots))
         for item in batch {
             guard loaded.count < remainingSlots else { break }
-            if let draft = await Self.loadDraft(from: item) {
+            if let draft = await CreatePostMediaLoader.draft(from: item) {
                 loaded.append(draft)
             }
         }
         applyLoadedDrafts(loaded)
     }
 
+    /// Prefilled media that already lives in Storage: previewable, never re-uploaded.
     private static func draft(from media: FeedMediaItem) -> AddYoursDraftItem? {
         switch media.source {
         case .assetPath(let path):
@@ -536,24 +382,5 @@ final class CreatePostViewModel: ObservableObject {
         case .loading, .missing:
             return nil
         }
-    }
-
-    private static func loadDraft(from item: PhotosPickerItem) async -> AddYoursDraftItem? {
-        let isVideo = item.supportedContentTypes.contains { type in
-            type.conforms(to: .movie)
-                || type.conforms(to: .video)
-                || type.identifier.contains("video")
-                || type.identifier.contains("movie")
-        }
-        if isVideo {
-            return AddYoursDraftItem(kind: .video, previewImage: nil)
-        }
-        guard
-            let data = try? await item.loadTransferable(type: Data.self),
-            let image = UIImage(data: data)
-        else {
-            return nil
-        }
-        return AddYoursDraftItem(kind: .photo, previewImage: image)
     }
 }

@@ -233,7 +233,7 @@ struct CreatePostFlowView: View {
 struct CreatePostFlowView_Previews: PreviewProvider {
     static var previews: some View {
         PushPreviewMatrix {
-            CreatePostFlowView()
+            CreatePostFlowView(viewModel: fixtureViewModel())
         }
 
         PushPreviewMatrix {
@@ -245,16 +245,26 @@ struct CreatePostFlowView_Previews: PreviewProvider {
         }
     }
 
+    /// Fixture seam — the app path always loads the hub from repositories.
+    @MainActor
+    private static func fixtureViewModel() -> CreatePostViewModel {
+        CreatePostViewModel(
+            existingMoments: CreatePostFixtures.existingMoments,
+            pastPushes: CreatePostFixtures.pastPushes,
+            timing: .immediate
+        )
+    }
+
     @MainActor
     private static func seededComposeViewModel() -> CreatePostViewModel {
-        let viewModel = CreatePostViewModel(timing: .immediate)
+        let viewModel = fixtureViewModel()
         viewModel.selectChooserItem(id: CreatePostFixtures.existingMoments[0].id)
         return viewModel
     }
 
     @MainActor
     private static func scratchFriendsViewModel() -> CreatePostViewModel {
-        let viewModel = CreatePostViewModel(timing: .immediate)
+        let viewModel = fixtureViewModel()
         viewModel.startFromScratch()
         return viewModel
     }

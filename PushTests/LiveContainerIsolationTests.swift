@@ -56,6 +56,9 @@ final class LiveContainerIsolationTests: XCTestCase {
         )
         XCTAssertTrue(container.moments is SupabaseMomentRepository)
         XCTAssertFalse(container.moments is LocalMomentRepository)
+        // Publishes upload to the bucket, never to the mock file store.
+        XCTAssertTrue(container.momentMedia is SupabaseMomentMediaStorage)
+        XCTAssertFalse(container.momentMedia is LocalMomentMediaStorage)
     }
 
     func testLiveContainerExposesNoMomentFixtures() async throws {
@@ -67,6 +70,8 @@ final class LiveContainerIsolationTests: XCTestCase {
         // No Supabase client on this path, so Moments stay inert rather than
         // falling back to seeded albums.
         XCTAssertTrue(container.moments is EmptyLiveMomentRepository)
+        // No bucket either: this session cannot publish media at all.
+        XCTAssertNil(container.momentMedia)
 
         // No seeded albums, no Feed carousel fixtures.
         let page = try await container.moments.feedPage(cursor: nil, limit: 10, groupID: nil)

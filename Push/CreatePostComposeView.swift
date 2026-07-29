@@ -45,10 +45,20 @@ struct CreatePostComposeView: View {
             .padding(.bottom, CreatePostLayout.contentTopSpacing)
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            primaryActionBar
-                .padding(.horizontal, CreatePostLayout.horizontalPadding(layout))
-                .padding(.bottom, CreatePostLayout.bottomPadding(layout))
-                .background(bottomBarBackground)
+            VStack(spacing: CreatePostLayout.fieldStackSpacing) {
+                // Recoverable publish failure — the draft below stays intact.
+                if let actionError = viewModel.actionError {
+                    ActionErrorBanner(
+                        message: actionError.message,
+                        onRetry: { Task { await viewModel.retryPublish() } },
+                        onDismiss: { viewModel.dismissActionError() }
+                    )
+                }
+                primaryActionBar
+            }
+            .padding(.horizontal, CreatePostLayout.horizontalPadding(layout))
+            .padding(.bottom, CreatePostLayout.bottomPadding(layout))
+            .background(bottomBarBackground)
         }
     }
 

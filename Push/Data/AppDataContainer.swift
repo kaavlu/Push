@@ -35,7 +35,10 @@ final class AppDataContainer {
             photoStorage: SupabaseProfilePhotoStorage(client: client),
             groupPhotoStorage: SupabaseGroupPhotoStorage(client: client),
             presenceRealtimeBridge: bridge,
-            moments: SupabaseMomentRepository(client: client, currentUserID: currentUserID)
+            moments: SupabaseMomentRepository(
+                client: client, currentUserID: currentUserID, store: store
+            ),
+            momentMedia: SupabaseMomentMediaStorage(client: client)
         )
     }
 
@@ -49,7 +52,8 @@ final class AppDataContainer {
             photoStorage: nil,
             groupPhotoStorage: nil,
             presenceRealtimeBridge: nil,
-            moments: nil
+            moments: nil,
+            momentMedia: nil
         )
     }
 
@@ -59,7 +63,8 @@ final class AppDataContainer {
         photoStorage: ProfilePhotoStoring?,
         groupPhotoStorage: GroupPhotoStoring?,
         presenceRealtimeBridge: PresenceRealtimeBridging?,
-        moments: MomentRepository?
+        moments: MomentRepository?,
+        momentMedia: MomentMediaStoring?
     ) async throws -> AppDataContainer {
         // Moments are paginated on demand — never part of the session warm.
         try await store.warm()
@@ -69,7 +74,8 @@ final class AppDataContainer {
             photoStorage: photoStorage,
             groupPhotoStorage: groupPhotoStorage,
             presenceRealtimeBridge: presenceRealtimeBridge,
-            moments: moments
+            moments: moments,
+            momentMedia: momentMedia
         )
         _ = try await container.friends.currentUser()
         return container
@@ -113,6 +119,10 @@ final class AppDataContainer {
     /// Moments (Feed › Pushes). Mock uses `LocalMomentRepository`; live has no
     /// repository until S5 and must stay empty rather than fall back to seed.
     let moments: MomentRepository
+    /// Storage seam for Moment media publishes (S7). Mock writes local files with
+    /// the live key layout; loader-only live containers have no bucket, so nil
+    /// means "this session cannot publish media".
+    let momentMedia: MomentMediaStoring?
     let alerts: AlertRepository
     let referenceDate: Date
 
@@ -187,6 +197,7 @@ final class AppDataContainer {
         self.sharing = LocalSharingRepository(database: database)
         self.feed = LocalFeedRepository(database: database)
         self.moments = LocalMomentRepository(database: database, clock: resolvedClock)
+        self.momentMedia = LocalMomentMediaStorage()
         self.alerts = LocalAlertRepository(database: database)
         self.presenceRealtimeBridge = nil
         // Explicit nil means "build default"; pass FakeLocationSession for tests.
@@ -221,7 +232,10 @@ final class AppDataContainer {
             photoStorage: SupabaseProfilePhotoStorage(client: client),
             groupPhotoStorage: SupabaseGroupPhotoStorage(client: client),
             presenceRealtimeBridge: bridge,
-            moments: SupabaseMomentRepository(client: client, currentUserID: currentUserID)
+            moments: SupabaseMomentRepository(
+                client: client, currentUserID: currentUserID, store: store
+            ),
+            momentMedia: SupabaseMomentMediaStorage(client: client)
         )
     }
 
@@ -233,7 +247,8 @@ final class AppDataContainer {
         groupPhotoStorage: GroupPhotoStoring? = nil,
         locationSession: LocationSessioning? = nil,
         presenceRealtimeBridge: PresenceRealtimeBridging? = nil,
-        moments: MomentRepository? = nil
+        moments: MomentRepository? = nil,
+        momentMedia: MomentMediaStoring? = nil
     ) -> AppDataContainer {
         let resolvedSession = locationSession ?? makeLiveLocationSession(
             store: store, currentUserID: currentUserID
@@ -251,6 +266,7 @@ final class AppDataContainer {
             sharing: SupabaseSharingRepository(store: store),
             feed: EmptyLiveFeedRepository(),
             moments: moments ?? EmptyLiveMomentRepository(),
+            momentMedia: momentMedia,
             alerts: SupabaseAlertRepository(store: store, currentUserID: currentUserID),
             locationSession: resolvedSession,
             presenceRealtimeBridge: presenceRealtimeBridge
@@ -285,6 +301,7 @@ final class AppDataContainer {
         sharing: SharingRepository,
         feed: FeedRepository,
         moments: MomentRepository,
+        momentMedia: MomentMediaStoring?,
         alerts: AlertRepository,
         locationSession: LocationSessioning?,
         presenceRealtimeBridge: PresenceRealtimeBridging?
@@ -296,6 +313,7 @@ final class AppDataContainer {
         self.friends = friends; self.groups = groups; self.pushes = pushes
         self.profile = profile; self.sharing = sharing; self.feed = feed
         self.moments = moments
+        self.momentMedia = momentMedia
         self.alerts = alerts
         self.locationSession = locationSession
         self.presenceRealtimeBridge = presenceRealtimeBridge

@@ -7,6 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F765CB0F7835A1A949AC20AE /* CreatePostHubBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FA520CB1AFA89EAA51B5B8D /* CreatePostHubBuilderTests.swift */; };
+		5BC27660E516781C9E9AADC5 /* CreatePostPublishTestDoubles.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5EA99C12398531EC04285FB /* CreatePostPublishTestDoubles.swift */; };
+		460F67C0910A0F0E478EED2B /* CreatePostPublishTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23AF9B70E414DF28ED10F8C7 /* CreatePostPublishTests.swift */; };
+		DD932E9AE6DD7863C560CD86 /* CreatePostViewModel+Presentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEB91C2E462468A7DBFEE49 /* CreatePostViewModel+Presentation.swift */; };
+		EDB0DE9829259544727C6EEE /* CreatePostViewModel+Friends.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF867E46FBABEFB083C9385 /* CreatePostViewModel+Friends.swift */; };
+		A07B668590A03C17532E71BB /* CreatePostViewModel+Publish.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33126E12A678807BB8DEC6FF /* CreatePostViewModel+Publish.swift */; };
+		2C339B28E11E8034E4BA0220 /* CreatePostViewModel+Hub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C512DAA2C837613CA5AA9C9 /* CreatePostViewModel+Hub.swift */; };
+		7453FF49CE56336C4AF36D73 /* CreatePostMediaLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3F08A17E112662B08748D83 /* CreatePostMediaLoader.swift */; };
+		87793F01B440DF1BEE02B6E7 /* CreatePostHubBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F388A67E264B2264FD133A0 /* CreatePostHubBuilder.swift */; };
 		1F65E5C4978D593F9B209F22 /* MomentFeedTestDoubles.swift in Sources */ = {isa = PBXBuildFile; fileRef = E272BEBC6335F6903A7389E6 /* MomentFeedTestDoubles.swift */; };
 		AB7C94BBDC549FE0DEE58F65 /* MomentFeedCardBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26C3436FFDAFC7E8049BAA3B /* MomentFeedCardBuilderTests.swift */; };
 		C0BC3A87DDBBCD60A18C695A /* MomentFeedCardBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1B9D2AD43C6253646EA6F9 /* MomentFeedCardBuilder.swift */; };
@@ -403,6 +412,15 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		9FA520CB1AFA89EAA51B5B8D /* CreatePostHubBuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostHubBuilderTests.swift"; sourceTree = "<group>"; };
+		D5EA99C12398531EC04285FB /* CreatePostPublishTestDoubles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostPublishTestDoubles.swift"; sourceTree = "<group>"; };
+		23AF9B70E414DF28ED10F8C7 /* CreatePostPublishTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostPublishTests.swift"; sourceTree = "<group>"; };
+		BCEB91C2E462468A7DBFEE49 /* CreatePostViewModel+Presentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostViewModel+Presentation.swift"; sourceTree = "<group>"; };
+		3BF867E46FBABEFB083C9385 /* CreatePostViewModel+Friends.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostViewModel+Friends.swift"; sourceTree = "<group>"; };
+		33126E12A678807BB8DEC6FF /* CreatePostViewModel+Publish.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostViewModel+Publish.swift"; sourceTree = "<group>"; };
+		3C512DAA2C837613CA5AA9C9 /* CreatePostViewModel+Hub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostViewModel+Hub.swift"; sourceTree = "<group>"; };
+		C3F08A17E112662B08748D83 /* CreatePostMediaLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostMediaLoader.swift"; sourceTree = "<group>"; };
+		4F388A67E264B2264FD133A0 /* CreatePostHubBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "CreatePostHubBuilder.swift"; path = "Data/Derived/CreatePostHubBuilder.swift"; sourceTree = "<group>"; };
 		E272BEBC6335F6903A7389E6 /* MomentFeedTestDoubles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MomentFeedTestDoubles.swift"; sourceTree = "<group>"; };
 		26C3436FFDAFC7E8049BAA3B /* MomentFeedCardBuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MomentFeedCardBuilderTests.swift"; sourceTree = "<group>"; };
 		DD1B9D2AD43C6253646EA6F9 /* MomentFeedCardBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "MomentFeedCardBuilder.swift"; path = "Data/Derived/MomentFeedCardBuilder.swift"; sourceTree = "<group>"; };
@@ -836,6 +854,12 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				BCEB91C2E462468A7DBFEE49 /* CreatePostViewModel+Presentation.swift */,
+				3BF867E46FBABEFB083C9385 /* CreatePostViewModel+Friends.swift */,
+				33126E12A678807BB8DEC6FF /* CreatePostViewModel+Publish.swift */,
+				3C512DAA2C837613CA5AA9C9 /* CreatePostViewModel+Hub.swift */,
+				C3F08A17E112662B08748D83 /* CreatePostMediaLoader.swift */,
+				4F388A67E264B2264FD133A0 /* CreatePostHubBuilder.swift */,
 				DD1B9D2AD43C6253646EA6F9 /* MomentFeedCardBuilder.swift */,
 				CD798962CB6EF284DD313FA2 /* SupabaseMomentRepository.swift */,
 				265DD9DCBAE10B812B5DD1BC /* MomentRow.swift */,
@@ -1159,6 +1183,9 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				9FA520CB1AFA89EAA51B5B8D /* CreatePostHubBuilderTests.swift */,
+				D5EA99C12398531EC04285FB /* CreatePostPublishTestDoubles.swift */,
+				23AF9B70E414DF28ED10F8C7 /* CreatePostPublishTests.swift */,
 				E272BEBC6335F6903A7389E6 /* MomentFeedTestDoubles.swift */,
 				26C3436FFDAFC7E8049BAA3B /* MomentFeedCardBuilderTests.swift */,
 				1C37BC06DEAFE3151B177652 /* SupabaseMomentRepositoryTests.swift */,
@@ -1374,6 +1401,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				DD932E9AE6DD7863C560CD86 /* CreatePostViewModel+Presentation.swift in Sources */,
+				EDB0DE9829259544727C6EEE /* CreatePostViewModel+Friends.swift in Sources */,
+				A07B668590A03C17532E71BB /* CreatePostViewModel+Publish.swift in Sources */,
+				2C339B28E11E8034E4BA0220 /* CreatePostViewModel+Hub.swift in Sources */,
+				7453FF49CE56336C4AF36D73 /* CreatePostMediaLoader.swift in Sources */,
+				87793F01B440DF1BEE02B6E7 /* CreatePostHubBuilder.swift in Sources */,
 				C0BC3A87DDBBCD60A18C695A /* MomentFeedCardBuilder.swift in Sources */,
 				33AC2890939FBEAC51DF1EFF /* SupabaseMomentRepository.swift in Sources */,
 				3391BBB5B5D57C1147535A3E /* MomentRow.swift in Sources */,
@@ -1688,6 +1721,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				F765CB0F7835A1A949AC20AE /* CreatePostHubBuilderTests.swift in Sources */,
+				5BC27660E516781C9E9AADC5 /* CreatePostPublishTestDoubles.swift in Sources */,
+				460F67C0910A0F0E478EED2B /* CreatePostPublishTests.swift in Sources */,
 				1F65E5C4978D593F9B209F22 /* MomentFeedTestDoubles.swift in Sources */,
 				AB7C94BBDC549FE0DEE58F65 /* MomentFeedCardBuilderTests.swift in Sources */,
 				6E9E5816C4D0B170133E1B47 /* SupabaseMomentRepositoryTests.swift in Sources */,
