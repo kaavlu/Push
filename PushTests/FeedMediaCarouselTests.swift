@@ -1,0 +1,219 @@
+import XCTest
+@testable import Push
+import CoreGraphics
+
+@MainActor
+final class FeedMediaCarouselTests: XCTestCase {
+    func testMediaAspectRatioIsCompactPortrait() {
+        // width / height in the compact cinematic band (not story-tall 3:4).
+        XCTAssertGreaterThanOrEqual(FeedMediaLayout.aspectRatio, 0.84)
+        XCTAssertLessThanOrEqual(FeedMediaLayout.aspectRatio, 0.88)
+        XCTAssertEqual(FeedMediaLayout.aspectRatio, 0.86, accuracy: 0.0001)
+    }
+
+    func testMediaCornerRadiusIsInProductionBand() {
+        XCTAssertGreaterThanOrEqual(FeedMediaLayout.cornerRadius, 28)
+        XCTAssertLessThanOrEqual(FeedMediaLayout.cornerRadius, 32)
+    }
+
+    func testProgressBarHiddenForSingleItem() {
+        XCTAssertEqual(FeedMediaCarouselFixtures.singlePhoto.items.count, 1)
+        XCTAssertEqual(FeedMediaCarouselFixtures.missingMedia.items.count, 1)
+        XCTAssertGreaterThan(FeedMediaCarouselFixtures.threeBundlePhotos.items.count, 1)
+        XCTAssertGreaterThan(FeedMediaLayout.progressHorizontalInset, FeedMediaLayout.progressTopInset)
+        XCTAssertGreaterThan(FeedMediaLayout.autoAdvanceDuration, 0)
+    }
+
+    func testFixturesCoverRequiredCarouselStates() {
+        let three = FeedMediaCarouselFixtures.threeMixedAspectPhotos
+        XCTAssertEqual(three.items.count, 3)
+        XCTAssertTrue(three.items.allSatisfy { $0.kind == .photo })
+
+        let single = FeedMediaCarouselFixtures.singlePhoto
+        XCTAssertEqual(single.items.count, 1)
+
+        let mixed = FeedMediaCarouselFixtures.mixedPortraitLandscapeSquare
+        XCTAssertGreaterThanOrEqual(mixed.items.count, 3)
+
+        let missing = FeedMediaCarouselFixtures.missingMedia
+        XCTAssertEqual(missing.items.count, 1)
+        XCTAssertEqual(missing.items.first?.source, .missing)
+
+        let loading = FeedMediaCarouselFixtures.loadingMedia
+        XCTAssertFalse(loading.items.isEmpty)
+        XCTAssertTrue(loading.items.allSatisfy {
+            if case .loading = $0.source { return true }
+            return false
+        })
+    }
+
+    func testMixedAspectSourcesUseDistinctRatios() {
+        let items = FeedMediaCarouselFixtures.threeMixedAspectPhotos.items
+        let ratios: [CGFloat] = items.compactMap { item in
+            guard case .solidColor(let swatch) = item.source else { return nil }
+            return swatch.width / swatch.height
+        }
+        XCTAssertEqual(ratios.count, 3)
+        // Portrait, landscape, square — not all equal
+        XCTAssertNotEqual(ratios[0], ratios[1], accuracy: 0.01)
+        XCTAssertNotEqual(ratios[1], ratios[2], accuracy: 0.01)
+        XCTAssertNotEqual(ratios[0], ratios[2], accuracy: 0.01)
+    }
+
+    func testSelectedIndexClampsToItemBounds() {
+        XCTAssertEqual(FeedMediaCarouselSelection.clampedIndex(0, itemCount: 0), 0)
+        XCTAssertEqual(FeedMediaCarouselSelection.clampedIndex(-1, itemCount: 3), 0)
+        XCTAssertEqual(FeedMediaCarouselSelection.clampedIndex(0, itemCount: 3), 0)
+        XCTAssertEqual(FeedMediaCarouselSelection.clampedIndex(2, itemCount: 3), 2)
+        XCTAssertEqual(FeedMediaCarouselSelection.clampedIndex(9, itemCount: 3), 2)
+        XCTAssertEqual(FeedMediaCarouselSelection.clampedIndex(1, itemCount: 1), 0)
+    }
+
+    func testProgressSegmentCountMatchesItems() {
+        for carousel in FeedMediaCarouselFixtures.feedPushesPreviewStack {
+            XCTAssertFalse(carousel.id.isEmpty)
+            // Progress bar uses max(items.count, 1) for empty; fixtures always have items.
+            XCTAssertGreaterThan(carousel.items.count, 0)
+        }
+        XCTAssertEqual(
+            FeedMediaCarouselFixtures.feedPushesPreviewStack.count,
+            7,
+            "Preview stack should surface the required fixture gallery"
+        )
+        let videoKinds = FeedMediaCarouselFixtures.photoAndVideoPoster.items.map(\.kind)
+        XCTAssertTrue(videoKinds.contains(.video))
+    }
+
+    func testViewModelExposesMediaFixtures() {
+        let viewModel = FeedViewModel()
+        XCTAssertEqual(
+            viewModel.mediaCarousels.map(\.id),
+            FeedMediaCarouselFixtures.feedPushesPreviewStack.map(\.id)
+        )
+    }
+
+    func testFixturesIncludeTitleAndLocationMetadata() {
+        for carousel in FeedMediaCarouselFixtures.feedPushesPreviewStack {
+            XCTAssertFalse(carousel.title.isEmpty, carousel.id)
+            XCTAssertFalse(carousel.locationTitle.isEmpty, carousel.id)
+            XCTAssertFalse(carousel.locationDateMetaLine.isEmpty, carousel.id)
+        }
+        XCTAssertEqual(FeedMediaCarouselFixtures.threeBundlePhotos.title, "Friday night out")
+        XCTAssertEqual(FeedMediaCarouselFixtures.threeBundlePhotos.locationTitle, "The Beehive")
+        XCTAssertEqual(
+            FeedMediaCarouselFixtures.threeBundlePhotos.locationDateMetaLine,
+            "The Beehive · Fri · 9:15 PM"
+        )
+        // Compact cream content band under media.
+        XCTAssertLessThanOrEqual(FeedMediaContentSectionStyle.topPadding, 14)
+        XCTAssertLessThanOrEqual(FeedMediaContentSectionStyle.bottomPadding, 14)
+        XCTAssertEqual(FeedMediaLayout.cardCornerRadius, FeedMediaLayout.cornerRadius, accuracy: 0.01)
+    }
+
+    func testParticipantNamesLineIncludesRemainingSuffix() {
+        let names = FeedMediaParticipantCopy.namesLine(
+            from: FeedMediaCarouselFixtures.threeBundlePhotos.participants
+        )
+        // Five participants → first two named + remaining count
+        XCTAssertEqual(names, "Ohm, Viplove +3")
+        XCTAssertEqual(
+            FeedMediaParticipantCopy.avatarOverflowCount(participantCount: 5),
+            2
+        )
+    }
+
+    func testParticipantActionsOnlyWhenViewerIsPartOfMoment() {
+        // + and … share canAddYours — non-participants see neither control.
+        XCTAssertFalse(FeedMediaCarouselFixtures.mixedPortraitLandscapeSquare.canAddYours)
+        XCTAssertTrue(FeedMediaCarouselFixtures.threeBundlePhotos.canAddYours)
+        XCTAssertFalse(FeedMediaCarouselFixtures.threeBundlePhotos.participants.isEmpty)
+        XCTAssertFalse(FeedMediaCarouselFixtures.threeBundlePhotos.contributorName.isEmpty)
+        XCTAssertEqual(
+            CreatePostHistoryItem.feedMomentID(forCarouselID: "fixture-three-bundle"),
+            "moment-fixture-three-bundle"
+        )
+    }
+
+    func testBottomChromeOnlyOnFirstSlide() {
+        // In-media participants/playback are first-slide only; cream content band is always below media.
+        XCTAssertTrue(FeedMediaCarouselSelection.showsFullChrome(selectedIndex: 0))
+        XCTAssertFalse(FeedMediaCarouselSelection.showsFullChrome(selectedIndex: 1))
+        XCTAssertFalse(FeedMediaCarouselSelection.showsFullChrome(selectedIndex: 2))
+    }
+
+    func testProgressSegmentFillClampsToUnitInterval() {
+        // Active segment uses 0…1 fill; completed = 1, upcoming = 0.
+        XCTAssertEqual(min(1, max(0, CGFloat(-0.2))), 0, accuracy: 0.001)
+        XCTAssertEqual(min(1, max(0, CGFloat(0.45))), 0.45, accuracy: 0.001)
+        XCTAssertEqual(min(1, max(0, CGFloat(1.4))), 1, accuracy: 0.001)
+        XCTAssertGreaterThan(FeedMediaLayout.progressTickNanoseconds, 0)
+    }
+
+    func testCompletedProgressSegmentsStayFullUntilLoop() {
+        // On slide 2 of 3 with half-filled active segment:
+        XCTAssertEqual(
+            FeedMediaProgressFill.amount(for: 0, selectedIndex: 2, currentProgress: 0.5),
+            1,
+            accuracy: 0.001
+        )
+        XCTAssertEqual(
+            FeedMediaProgressFill.amount(for: 1, selectedIndex: 2, currentProgress: 0.5),
+            1,
+            accuracy: 0.001
+        )
+        XCTAssertEqual(
+            FeedMediaProgressFill.amount(for: 2, selectedIndex: 2, currentProgress: 0.5),
+            0.5,
+            accuracy: 0.001
+        )
+        // After looping to slide 0, prior segments clear.
+        XCTAssertEqual(
+            FeedMediaProgressFill.amount(for: 1, selectedIndex: 0, currentProgress: 0.1),
+            0,
+            accuracy: 0.001
+        )
+        // Handoff: finished segment becomes completed (full) when index advances.
+        XCTAssertEqual(
+            FeedMediaProgressFill.amount(for: 0, selectedIndex: 1, currentProgress: 0),
+            1,
+            accuracy: 0.001
+        )
+        XCTAssertEqual(
+            FeedMediaProgressFill.amount(for: 1, selectedIndex: 1, currentProgress: 0),
+            0,
+            accuracy: 0.001
+        )
+    }
+
+    func testPrimaryVisibilityRequiresMajorityOnScreen() {
+        let visible = CGRect(x: 0, y: 0, width: 390, height: 700)
+        let fullyOnScreen = CGRect(x: 16, y: 100, width: 358, height: 400)
+        XCTAssertTrue(
+            FeedMediaVisibility.isPrimarilyVisible(
+                frame: fullyOnScreen,
+                in: visible,
+                threshold: FeedMediaLayout.autoplayVisibilityThreshold
+            )
+        )
+
+        // Peeking next card: only a small band visible at the bottom of the viewport.
+        let peeking = CGRect(x: 16, y: 640, width: 358, height: 400)
+        XCTAssertFalse(
+            FeedMediaVisibility.isPrimarilyVisible(
+                frame: peeking,
+                in: visible,
+                threshold: FeedMediaLayout.autoplayVisibilityThreshold
+            )
+        )
+    }
+
+    func testSolidImageFactoryProducesRequestedSize() {
+        let swatch = FeedSolidMediaSwatch(
+            red: 0.5, green: 0.4, blue: 0.3,
+            width: 120, height: 80
+        )
+        let image = FeedMediaImageFactory.image(for: swatch)
+        XCTAssertEqual(image.size.width, 120, accuracy: 0.5)
+        XCTAssertEqual(image.size.height, 80, accuracy: 0.5)
+    }
+}

@@ -1,18 +1,20 @@
-# Issue #109 — Surface Inferred Activity Across Push
+# Feed Create Post — UI pass
 
 ## Status
 
-- [x] Spec (`tasks/spec.md`)
-- [x] `PresenceActivityPresentation` pure helper
-- [x] Wire Friends / Map / Regional / Group / Profile builders
-- [x] Friend detail + hangout status lines use canonical activity (no invent prefixes)
-- [x] Tests — `PresenceActivityPresentationTests` + Derivation/MapRender/EmptySurface/PushTests
-- [x] Commit (`ca8a795`)
+- [x] Product decisions (hub + compose, media-first cards, tap→prefill, scratch empty draft)
+- [x] Design note (`docs/superpowers/specs/2026-07-28-feed-create-post-design.md`)
+- [x] Models / fixtures / ViewModel
+- [x] Hub + Compose + Flow UI
+- [x] Wire Feed center `+` in `ContentView`
+- [x] Tests (`CreatePostViewModelTests`) + pbxproj register
+- [x] Refine hub: compact richer History rows (thumb, meta, people, media badge, chevron)
+- [x] Pushes-style header + aligned close; Existing Moments / Past Pushes segment; distinct row styles
+- [x] DS alignment audit: promote chooser rows/chips (DS-091), EmptySurface empties, edit “Save changes”
+- [x] Scratch friend selection page (Start Push style; friends only; solo allowed)
+- [x] Moment card cream band (title/meta; participant + / … → Add Yours / edit moment)
+- [x] Tap media pause/resume autoplay; remove Feed header alerts/settings
 
-## Out of scope
+## Out of scope (next)
 
-- New inference / place resolution
-- Schema migrations
-- Place-correction UI / background location
-- Seed rewrite to only canonical labels
-- Major redesign
+Publishing, Storage uploads, feed append after post, audience, captions, live history from repos.

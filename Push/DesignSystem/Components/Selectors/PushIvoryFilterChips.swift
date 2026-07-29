@@ -10,7 +10,8 @@ import SwiftUI
 struct PushIvoryFilterItem: Identifiable, Equatable {
     let id: String
     let title: String
-    var count: Int = 0
+    /// When nil, the chip shows title only (Feed shell fixtures have no counts yet).
+    var count: Int? = nil
 }
 
 enum PushIvoryFilterChipMetrics {
@@ -48,22 +49,24 @@ struct PushIvoryFilterChipRow: View {
             HStack(spacing: PushIvoryFilterChipMetrics.countSpacing) {
                 Text(item.title)
                     .font(.subheadline.weight(.semibold))
-                Text("\(item.count)")
-                    .font(.caption.weight(.bold))
-                    .padding(.horizontal, PushIvoryFilterChipMetrics.countHorizontalPadding)
-                    .padding(.vertical, PushIvoryFilterChipMetrics.countVerticalPadding)
-                    .background(
-                        Capsule().fill(
-                            .white.opacity(isSelected ? FriendsColor.chipCountSelectedOpacity : 0)
-                        )
-                    )
-                    .background(
-                        Capsule().fill(
-                            PushColorPalette.Accent.walnut.opacity(
-                                isSelected ? 0 : FriendsColor.chipCountInactiveOpacity
+                if let count = item.count {
+                    Text("\(count)")
+                        .font(.caption.weight(.bold))
+                        .padding(.horizontal, PushIvoryFilterChipMetrics.countHorizontalPadding)
+                        .padding(.vertical, PushIvoryFilterChipMetrics.countVerticalPadding)
+                        .background(
+                            Capsule().fill(
+                                .white.opacity(isSelected ? FriendsColor.chipCountSelectedOpacity : 0)
                             )
                         )
-                    )
+                        .background(
+                            Capsule().fill(
+                                PushColorPalette.Accent.walnut.opacity(
+                                    isSelected ? 0 : FriendsColor.chipCountInactiveOpacity
+                                )
+                            )
+                        )
+                }
             }
             .foregroundStyle(isSelected ? FriendsColor.chipSelectedText : PushControlColors.textPrimary)
             .padding(.horizontal, PushIvoryFilterChipMetrics.horizontalPadding)
@@ -72,7 +75,7 @@ struct PushIvoryFilterChipRow: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(item.title)
-        .accessibilityValue("\(item.count)")
+        .accessibilityValue(item.count.map(String.init) ?? "")
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 

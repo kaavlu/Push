@@ -30,8 +30,15 @@ enum EmptySurfaceCopy {
     static let searchNoMatchTitle = "No matches"
     static let searchNoMatchMessage = "Try a different name or place."
 
+    /// Legacy deferred Feed copy (kept for EmptySurfaceTests / deferred-phase coverage).
     static let feedDeferredTitle = "No Feed activity yet"
     static let feedDeferredMessage = "Feed isn't live yet — check back later."
+
+    static let feedPushesPlaceholderTitle = "Pushes coming next"
+    static let feedPushesPlaceholderMessage = "Shared pushes will show up here soon."
+
+    static let feedNowEmptyTitle = "Nothing live yet"
+    static let feedNowEmptyMessage = "Live friend activity will appear here later."
 
     static let calendarEmptyFooter = "No hangouts this week"
 
