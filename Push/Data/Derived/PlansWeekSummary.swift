@@ -53,7 +53,6 @@ enum PlansWeekSummary {
             date: date,
             pushCount: 0,
             hadPlan: false,
-            almostHappened: false,
             hangouts: []
         )
     }

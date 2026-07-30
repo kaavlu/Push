@@ -13,7 +13,7 @@ extension SeedData {
     // MARK: - Past hangouts
 
     static func standardHangouts(now: Date) -> [PastHangout] {
-        var hangouts: [PastHangout] = [
+        [
             hangout(day: 3, index: 0, ["chitty", "ishan"], "Coffee run downtown", "10:00am–11:30am", now: now),
             hangout(day: 3, index: 1, ["viplove"], "Gym session", "6:00pm–7:30pm", now: now),
             hangout(day: 5, index: 0, ["chitty"], "Pre-dinner drinks", "5:30pm–7:00pm", cameFromPush: true, now: now),
@@ -34,10 +34,6 @@ extension SeedData {
             hangout(day: 23, index: 1, ["rohan", "ryan", "pranay"], "Beach afternoon", "2:00pm–6:00pm", now: now),
             hangout(day: 23, index: 2, ["ram", "ohm"], "Dinner to end the day", "7:30pm–9:30pm", now: now)
         ]
-        // Days where something almost formed but never happened.
-        hangouts.append(almostHangout(day: 14, participants: ["chitty", "ram"], now: now))
-        hangouts.append(almostHangout(day: 25, participants: ["ishan", "rohan"], now: now))
-        return hangouts
     }
 
     private static func hangout(
@@ -55,20 +51,7 @@ extension SeedData {
             participantIDs: participantIDs,
             note: note,
             timeRange: timeRange,
-            cameFromPush: cameFromPush,
-            didHappen: true
-        )
-    }
-
-    private static func almostHangout(day: Int, participants: [String], now: Date) -> PastHangout {
-        PastHangout(
-            id: "hangout-\(day)-almost",
-            date: date(day: day, in: now),
-            participantIDs: participants,
-            note: "Almost happened",
-            timeRange: "",
-            cameFromPush: false,
-            didHappen: false
+            cameFromPush: cameFromPush
         )
     }
 

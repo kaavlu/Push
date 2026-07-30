@@ -111,11 +111,7 @@ struct DayDetailBottomSheet: View {
 
     @ViewBuilder
     private var pushCountLine: some View {
-        if day.almostHappened {
-            Text("Almost happened")
-                .font(.subheadline)
-                .foregroundStyle(PushControlColors.textTertiary)
-        } else if day.pushCount == 0 {
+        if day.pushCount == 0 {
             Text("Nothing happened")
                 .font(.subheadline)
                 .foregroundStyle(PushControlColors.textTertiary)

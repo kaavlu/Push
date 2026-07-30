@@ -42,8 +42,7 @@ enum PastHangoutBuilder {
             participantIDs: participantIDs,
             note: plan.title,
             timeRange: timeRange(for: plan),
-            cameFromPush: true,
-            didHappen: true
+            cameFromPush: true
         )
     }
 

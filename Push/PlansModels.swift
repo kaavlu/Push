@@ -87,7 +87,6 @@ struct CalendarDayData: Identifiable {
     let date: Date
     let pushCount: Int
     let hadPlan: Bool
-    let almostHappened: Bool
     let hangouts: [DayHangoutEntry]
 }
 
@@ -101,7 +100,6 @@ struct HistoryItemData: Identifiable, Equatable {
     let groupName: String
     let participants: [HangoutPerson]
     let cameFromPush: Bool
-    let didHappen: Bool
 }
 
 enum SwipeDirection { case left, right, up }

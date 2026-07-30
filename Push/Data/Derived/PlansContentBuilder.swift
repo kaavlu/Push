@@ -121,14 +121,12 @@ enum PlansContentBuilder {
                 return nil
             }
             let dayHangouts = hangouts.filter { calendar.isDate($0.date, inSameDayAs: date) }
-            let happened = dayHangouts.filter(\.didHappen)
             return CalendarDayData(
                 id: formatter.string(from: date),
                 date: date,
-                pushCount: happened.count,
-                hadPlan: happened.contains(where: \.cameFromPush),
-                almostHappened: dayHangouts.contains { !$0.didHappen },
-                hangouts: happened.map { entry(for: $0, peopleByID: peopleByID) }
+                pushCount: dayHangouts.count,
+                hadPlan: dayHangouts.contains(where: \.cameFromPush),
+                hangouts: dayHangouts.map { entry(for: $0, peopleByID: peopleByID) }
             )
         }
     }
@@ -156,7 +154,7 @@ enum PlansContentBuilder {
             .reduce(into: [:]) { $0[$1.groupID, default: []].insert($1.personID) }
 
         var appearances: [FriendGroup.ID: Int] = [:]
-        for hangout in hangouts where hangout.didHappen {
+        for hangout in hangouts {
             for (groupID, members) in membersByGroup {
                 appearances[groupID, default: 0] += hangout.participantIDs
                     .filter(members.contains).count
