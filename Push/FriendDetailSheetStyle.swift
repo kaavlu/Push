@@ -44,24 +44,31 @@ enum FriendDetailSheetLayout {
 
     static let sheetCornerRadius: CGFloat = 32
 
-    /// Shared height for all map puck detail sheets — info row + divider + actions.
-    /// Sized for the taller case (Ask to join + secondary row). When join is
-    /// unavailable only the secondary row shows; extra height sits under actions.
-    static func compactSheetHeight(_ layout: PushAdaptiveLayout) -> CGFloat {
-        layout.value(compact: 246, standard: 238, large: 232)
+    /// Shared height for map puck detail sheets — info row + divider + actions.
+    /// Shrinks by one action row when Ask to join is absent so bottom padding
+    /// under Directions / Start push matches the join-available layout.
+    static func compactSheetHeight(
+        _ layout: PushAdaptiveLayout,
+        showsAskToJoin: Bool = true
+    ) -> CGFloat {
+        let withPrimary = layout.value(compact: 246, standard: 238, large: 232)
+        guard showsAskToJoin else {
+            return withPrimary - multiPersonSecondaryHeight - multiPersonActionsSpacing
+        }
+        return withPrimary
     }
 
-    /// Legacy aliases — all puck kinds share `compactSheetHeight`.
+    /// Legacy aliases.
     static func individualSheetHeight(_ layout: PushAdaptiveLayout) -> CGFloat {
-        compactSheetHeight(layout)
+        compactSheetHeight(layout, showsAskToJoin: true)
     }
 
     static func multiPersonSheetHeight(_ layout: PushAdaptiveLayout) -> CGFloat {
-        compactSheetHeight(layout)
+        compactSheetHeight(layout, showsAskToJoin: true)
     }
 
     static func hangoutSheetHeight(_ layout: PushAdaptiveLayout) -> CGFloat {
-        compactSheetHeight(layout)
+        compactSheetHeight(layout, showsAskToJoin: true)
     }
 
     static let multiPersonSectionSpacing: CGFloat = 12

@@ -22,8 +22,10 @@ struct FriendDetailBottomSheet: View {
     @State private var isDragging = false
 
     private var sheetHeight: CGFloat {
-        // Individual + multi-person share one compact sheet height.
-        FriendDetailSheetLayout.compactSheetHeight(layout)
+        FriendDetailSheetLayout.compactSheetHeight(
+            layout,
+            showsAskToJoin: FriendDetailSheetContent.showsAskToJoin(for: puck)
+        )
     }
 
     private var sheetSurface: MapPopupSheetSurface {
