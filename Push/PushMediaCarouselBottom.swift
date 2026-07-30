@@ -13,7 +13,6 @@ import SwiftUI
 
 struct FeedMediaBottomInteraction: View {
     let participants: [FeedMediaParticipant]
-    let contributorName: String
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -30,32 +29,20 @@ struct FeedMediaBottomInteraction: View {
         HStack(alignment: .center, spacing: FeedMediaBottomStyle.avatarToTextSpacing) {
             FeedMediaParticipantAvatarStack(participants: participants)
 
-            VStack(alignment: .leading, spacing: FeedMediaBottomStyle.textStackSpacing) {
-                Text(FeedMediaParticipantCopy.namesLine(from: participants))
-                    .font(FeedMediaBottomStyle.namesFont)
-                    .foregroundStyle(FeedMediaBottomStyle.textColor)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-                    .minimumScaleFactor(PushOpacityTokens.minimumTextScale)
-                    .shadow(
-                        color: Color.black.opacity(0.35),
-                        radius: FeedMediaBottomStyle.textShadowRadius,
-                        y: FeedMediaBottomStyle.textShadowY
-                    )
-                Text(contributorName)
-                    .font(FeedMediaBottomStyle.contributorFont)
-                    .foregroundStyle(
-                        FeedMediaBottomStyle.textColor.opacity(FeedMediaBottomStyle.contributorOpacity)
-                    )
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-                    .shadow(
-                        color: Color.black.opacity(0.30),
-                        radius: FeedMediaBottomStyle.textShadowRadius,
-                        y: FeedMediaBottomStyle.textShadowY
-                    )
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            // Names only: per-item uploader attribution would be wrong here —
+            // the line sits on the first slide but the album mixes contributors.
+            Text(FeedMediaParticipantCopy.namesLine(from: participants))
+                .font(FeedMediaBottomStyle.namesFont)
+                .foregroundStyle(FeedMediaBottomStyle.textColor)
+                .lineLimit(1)
+                .truncationMode(.tail)
+                .minimumScaleFactor(PushOpacityTokens.minimumTextScale)
+                .shadow(
+                    color: Color.black.opacity(0.35),
+                    radius: FeedMediaBottomStyle.textShadowRadius,
+                    y: FeedMediaBottomStyle.textShadowY
+                )
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
         .accessibilityElement(children: .contain)
     }

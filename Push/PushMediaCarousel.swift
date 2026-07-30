@@ -215,10 +215,7 @@ struct PushMediaCarousel: View {
     }
 
     private var bottomChrome: some View {
-        FeedMediaBottomInteraction(
-            participants: data.participants,
-            contributorName: data.contributorName
-        )
+        FeedMediaBottomInteraction(participants: data.participants)
     }
 
     // MARK: - Top chrome (progress only — title / location / overflow live below media)

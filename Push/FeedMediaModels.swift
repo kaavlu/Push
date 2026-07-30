@@ -75,8 +75,6 @@ struct FeedMediaCarouselData: Identifiable, Equatable {
     let dateTimeLabel: String
     /// People in the Push (avatar stack + names).
     let participants: [FeedMediaParticipant]
-    /// Current media contributor attribution (secondary line on media).
-    let contributorName: String
     /// Viewer is part of this moment — shows + / … actions (Add yours + edit).
     let canAddYours: Bool
 
@@ -217,7 +215,6 @@ enum FeedMediaCarouselFixtures {
         locationTitle: "Dolores Park",
         dateTimeLabel: "Sat · 4:30 PM",
         participants: [ohm, viplove, ram, pranay],
-        contributorName: "Ohm",
         canAddYours: true
     )
 
@@ -235,7 +232,6 @@ enum FeedMediaCarouselFixtures {
         locationTitle: "Home",
         dateTimeLabel: "Tonight · 8:00 PM",
         participants: [pranay],
-        contributorName: "Pranay",
         canAddYours: true
     )
 
@@ -257,7 +253,6 @@ enum FeedMediaCarouselFixtures {
         locationTitle: "Ocean Beach",
         dateTimeLabel: "Sun · 11:00 AM",
         participants: [roh, ryan, ishan],
-        contributorName: "Roh",
         canAddYours: false
     )
 
@@ -271,7 +266,6 @@ enum FeedMediaCarouselFixtures {
         locationTitle: "TBD",
         dateTimeLabel: "Date · Time",
         participants: [ohm, viplove],
-        contributorName: "Ohm",
         canAddYours: false
     )
 
@@ -286,7 +280,6 @@ enum FeedMediaCarouselFixtures {
         locationTitle: "Loading…",
         dateTimeLabel: "—",
         participants: [ram],
-        contributorName: "Ram",
         canAddYours: true
     )
 
@@ -302,7 +295,6 @@ enum FeedMediaCarouselFixtures {
         locationTitle: "The Beehive",
         dateTimeLabel: "Fri · 9:15 PM",
         participants: [ohm, viplove, ram, pranay, ryan],
-        contributorName: "Viplove",
         canAddYours: true
     )
 
@@ -325,7 +317,6 @@ enum FeedMediaCarouselFixtures {
         locationTitle: "Mission Cliffs",
         dateTimeLabel: "Thu · 7:00 PM",
         participants: [ishan, nitin, ohm],
-        contributorName: "Ishan",
         canAddYours: true
     )
 

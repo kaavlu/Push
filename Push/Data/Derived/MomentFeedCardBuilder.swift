@@ -35,7 +35,6 @@ enum MomentFeedCardBuilder {
             locationTitle: moment.locationText,
             dateTimeLabel: dateTimeLabel(for: moment.publishedAt, now: now),
             participants: participants(for: summary, people: people),
-            contributorName: contributorName(for: summary, people: people),
             // Add yours is the tagged-only affordance; the server re-checks it.
             canAddYours: summary.capabilities.canAddMedia
         )
@@ -81,16 +80,6 @@ enum MomentFeedCardBuilder {
                 imageAssetPath: person.imageAssetPath
             )
         }
-    }
-
-    /// Attribution for the visible cover item. Empty when the uploader is not
-    /// in the viewer's people cache — the card then shows names only.
-    private static func contributorName(
-        for summary: MomentSummary,
-        people: [Person.ID: Person]
-    ) -> String {
-        guard let uploaderID = summary.coverMedia?.uploaderID else { return "" }
-        return people[uploaderID]?.displayName ?? ""
     }
 
     // MARK: - Copy

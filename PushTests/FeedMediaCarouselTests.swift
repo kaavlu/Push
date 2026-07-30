@@ -131,7 +131,6 @@ final class FeedMediaCarouselTests: XCTestCase {
         XCTAssertFalse(FeedMediaCarouselFixtures.mixedPortraitLandscapeSquare.canAddYours)
         XCTAssertTrue(FeedMediaCarouselFixtures.threeBundlePhotos.canAddYours)
         XCTAssertFalse(FeedMediaCarouselFixtures.threeBundlePhotos.participants.isEmpty)
-        XCTAssertFalse(FeedMediaCarouselFixtures.threeBundlePhotos.contributorName.isEmpty)
         // Card id is the Moment id, so edit-from-feed needs no id translation.
         XCTAssertEqual(
             CreatePostHistoryItem.fromFeedCarousel(
