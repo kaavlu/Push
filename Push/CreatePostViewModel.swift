@@ -3,9 +3,9 @@
 //  Push
 //
 //  Feed create-post hub → (scratch friends) → compose. Hub rows and the friend
-//  catalog come from repositories (see `CreatePostViewModel+Hub`), and publish
-//  goes through Storage + `MomentRepository` (see `CreatePostViewModel+Publish`).
-//  Fixture lists survive only behind the preview initializer.
+//  catalog come from repositories (see `CreatePostViewModel+Hub`); publish and
+//  existing-Moment edit live in `+Publish` / `+Edit`. Fixture lists survive only
+//  behind the preview initializer.
 //
 
 import Combine
@@ -17,8 +17,8 @@ import UniformTypeIdentifiers
 @MainActor
 final class CreatePostViewModel: ObservableObject {
     // `internal(set)` (not `private(set)`) on the state the `+Hub`, `+Friends`,
-    // and `+Publish` extensions own — a `private` setter is file-scoped, and this
-    // view model is split by responsibility to stay inside the file-size rule.
+    // `+Publish`, and `+Edit` extensions own — a `private` setter is file-scoped,
+    // and this view model is split by responsibility to stay inside the file-size rule.
     @Published private(set) var screen: CreatePostScreen = .hub
     @Published private(set) var source: CreatePostSource = .scratch
     @Published var selectedSegment: CreatePostHubSegment = .existingMoments
@@ -27,7 +27,7 @@ final class CreatePostViewModel: ObservableObject {
     @Published private(set) var selectedHistoryID: String?
     /// Hub chooser load (Existing Moments + Past Pushes + friend catalog).
     @Published internal(set) var hubLoadState: LoadState<Void> = .idle
-    /// Recoverable publish failure. The draft stays intact so Retry can resubmit.
+    /// Recoverable publish / edit failure. The draft stays intact so Retry can resubmit.
     @Published internal(set) var actionError: ActionErrorState?
 
     /// Friend picker catalog — the viewer's friends, plus anyone already tagged.
@@ -52,7 +52,7 @@ final class CreatePostViewModel: ObservableObject {
         }
     }
 
-    @Published private(set) var items: [AddYoursDraftItem] = []
+    @Published internal(set) var items: [AddYoursDraftItem] = []
     @Published var focusedIndex: Int = 0
     @Published var pickerItems: [PhotosPickerItem] = [] {
         didSet {
@@ -65,6 +65,12 @@ final class CreatePostViewModel: ObservableObject {
     @Published internal(set) var displayParticipants: [FeedMediaParticipant] = []
     /// Compose “With” section — selected friends (scratch) or original membership.
     @Published internal(set) var memberPersonRows: [FriendRowModel] = []
+
+    /// Server detail for the open existing-Moment edit (S9). Nil on create paths.
+    @Published internal(set) var editDetail: MomentDetail?
+    @Published internal(set) var editLoadState: LoadState<Void> = .idle
+    /// Delete / leave / last-media auto-delete should dismiss the flow.
+    @Published internal(set) var shouldDismissAfterEdit = false
 
     let timing: CreatePostTiming
     let maxSelection: Int
@@ -80,10 +86,18 @@ final class CreatePostViewModel: ObservableObject {
     var baseAvailableFriends: [PushRecipientItem]
     /// Handle on the bootstrap hub load so tests can await it instead of racing.
     private(set) var initialLoad: Task<Void, Never>?
+    /// Handle on the in-flight edit detail load (tests await this).
+    var editLoadTask: Task<Void, Never>?
     /// Selection snapshot when opening Edit from compose — restored on cancel.
-    private var friendSelectionSnapshot: Set<String> = []
+    var friendSelectionSnapshot: Set<String> = []
     private var storeChangeSub: AnyCancellable?
     private var lastSeenRevision = 0
+
+    // Baseline snapshot for S9 diffs (set when `applyEditDetail` runs).
+    var baselineTitle = ""
+    var baselineLocation = ""
+    var baselineTagIDs: [Person.ID] = []
+    var baselineMediaIDs: [MomentMedia.ID] = []
 
     // `container` defaults via `?? .shared` (not `= .shared`) — `.shared` is a
     // MainActor mutable static and cannot be a default argument.
@@ -155,8 +169,8 @@ final class CreatePostViewModel: ObservableObject {
         }
     }
 
-    /// Feed card overflow — open compose prefilled for this moment (viewer is a
-    /// participant). The feed card id **is** the Moment id (S6).
+    /// Feed card overflow — open compose for this Moment. The card id **is** the
+    /// Moment id (S6); album + capabilities always reload from the repository.
     func openFeedMomentForEdit(_ carousel: FeedMediaCarouselData) {
         guard phase == .composing || phase == .success else { return }
         if let item = existingMoments.first(where: { $0.id == carousel.id }) {
@@ -171,9 +185,12 @@ final class CreatePostViewModel: ObservableObject {
     static func forEditingFeedMoment(
         _ carousel: FeedMediaCarouselData,
         container: AppDataContainer? = nil,
+        moments: MomentRepository? = nil,
         timing: CreatePostTiming = .production
     ) -> CreatePostViewModel {
-        let viewModel = CreatePostViewModel(container: container, timing: timing)
+        let viewModel = CreatePostViewModel(
+            container: container, moments: moments, timing: timing
+        )
         viewModel.openFeedMomentForEdit(carousel)
         return viewModel
     }
@@ -212,6 +229,11 @@ final class CreatePostViewModel: ObservableObject {
         friendSearchText = ""
         screen = .selectFriends
         phase = .composing
+    }
+
+    /// Clears the post-delete dismiss flag after the flow has closed.
+    func acknowledgeEditDismissal() {
+        shouldDismissAfterEdit = false
     }
 
     /// Friend picker Back / swipe cancel when editing from compose.
@@ -262,6 +284,7 @@ final class CreatePostViewModel: ObservableObject {
 
     func removeItem(at index: Int) {
         guard phase == .composing, items.indices.contains(index) else { return }
+        guard canDeleteDraftMedia(items[index]) else { return }
         items.remove(at: index)
         focusedIndex = AddYoursSelection.clampedIndex(
             min(index, items.count - 1),
@@ -272,6 +295,7 @@ final class CreatePostViewModel: ObservableObject {
     /// Reorders media; index 0 remains the feed thumbnail after the move.
     func moveMedia(from fromIndex: Int, to toIndex: Int) {
         guard phase == .composing else { return }
+        guard canReorderEditMedia else { return }
         guard items.indices.contains(fromIndex) else { return }
         guard fromIndex != toIndex else { return }
         let clampedTo = min(max(0, toIndex), items.count - 1)
@@ -309,7 +333,7 @@ final class CreatePostViewModel: ObservableObject {
         lastSeenRevision = container?.storeRevision ?? lastSeenRevision
     }
 
-    private func openCompose(from item: CreatePostHistoryItem, source: CreatePostSource) {
+    func openCompose(from item: CreatePostHistoryItem, source: CreatePostSource) {
         resetDraft()
         self.source = source
         selectedHistoryID = item.id
@@ -319,12 +343,17 @@ final class CreatePostViewModel: ObservableObject {
         memberPersonRows = item.memberPersonRows
         mergeParticipantsIntoAvailableFriends(item.participants)
         selectedFriendIDs = Set(item.participants.map(\.id))
+        // Existing media ids travel with feed/hub items until detail reloads.
         seedMedia(from: item.mediaItems)
         screen = .compose
         phase = .composing
+
+        if case .existingMoment(let momentID) = source, isRepositoryBacked {
+            editLoadTask = Task { await loadEditDetail(momentID: momentID) }
+        }
     }
 
-    private func resetDraft() {
+    func resetDraft() {
         titleText = ""
         locationText = ""
         items = []
@@ -341,12 +370,7 @@ final class CreatePostViewModel: ObservableObject {
         friendPickerEntry = .initialScratch
         availableFriends = baseAvailableFriends
         actionError = nil
-    }
-
-    private func seedMedia(from mediaItems: [FeedMediaItem]) {
-        let drafts = mediaItems.compactMap(Self.draft(from:)).prefix(maxSelection)
-        items = Array(drafts)
-        focusedIndex = AddYoursSelection.clampedIndex(0, itemCount: items.count)
+        clearEditBaseline()
     }
 
     private func consumePickerItems() async {
@@ -366,21 +390,5 @@ final class CreatePostViewModel: ObservableObject {
             }
         }
         applyLoadedDrafts(loaded)
-    }
-
-    /// Prefilled media that already lives in Storage: previewable, never re-uploaded.
-    private static func draft(from media: FeedMediaItem) -> AddYoursDraftItem? {
-        switch media.source {
-        case .assetPath(let path):
-            let image = AvatarImageLoader.localImage(for: path)
-            return AddYoursDraftItem(kind: media.kind, previewImage: image)
-        case .solidColor(let swatch):
-            return AddYoursDraftItem(
-                kind: media.kind,
-                previewImage: FeedMediaImageFactory.image(for: swatch)
-            )
-        case .loading, .missing:
-            return nil
-        }
     }
 }

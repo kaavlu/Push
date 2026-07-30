@@ -135,7 +135,7 @@ final class SupabaseMomentRepository: MomentRepository {
     }
 
     func updateMetadata(momentID: Moment.ID, title: String, locationText: String) async throws {
-        try await run("updateMomentMetadata") {
+        try await mutate("updateMomentMetadata") {
             try await client
                 .rpc(
                     "update_moment_metadata",
@@ -148,7 +148,7 @@ final class SupabaseMomentRepository: MomentRepository {
     }
 
     func addTags(momentID: Moment.ID, personIDs: [Person.ID]) async throws {
-        try await run("addMomentMembers") {
+        try await mutate("addMomentMembers") {
             try await client
                 .rpc(
                     "add_moment_members",
@@ -159,7 +159,7 @@ final class SupabaseMomentRepository: MomentRepository {
     }
 
     func removeTag(momentID: Moment.ID, personID: Person.ID) async throws {
-        try await run("removeMomentMember") {
+        try await mutate("removeMomentMember") {
             try await client
                 .rpc(
                     "remove_moment_member",
@@ -170,7 +170,7 @@ final class SupabaseMomentRepository: MomentRepository {
     }
 
     func reorderMedia(momentID: Moment.ID, orderedMediaIDs: [MomentMedia.ID]) async throws {
-        try await run("reorderMomentMedia") {
+        try await mutate("reorderMomentMedia") {
             try await client
                 .rpc(
                     "reorder_moment_media",
@@ -183,7 +183,7 @@ final class SupabaseMomentRepository: MomentRepository {
     }
 
     func softDeleteMedia(mediaID: MomentMedia.ID) async throws {
-        try await run("softDeleteMomentMedia") {
+        try await mutate("softDeleteMomentMedia") {
             try await client
                 .rpc("soft_delete_moment_media", params: SoftDeleteMediaParams(p_media_id: mediaID))
                 .execute()
@@ -191,7 +191,7 @@ final class SupabaseMomentRepository: MomentRepository {
     }
 
     func softDeleteMoment(momentID: Moment.ID) async throws {
-        try await run("softDeleteMoment") {
+        try await mutate("softDeleteMoment") {
             try await client
                 .rpc("soft_delete_moment", params: SoftDeleteMomentParams(p_moment_id: momentID))
                 .execute()
@@ -209,6 +209,13 @@ final class SupabaseMomentRepository: MomentRepository {
         } catch {
             throw MomentErrorMapper.map(error)
         }
+    }
+
+    /// Successful edit mutations bump the session revision so Feed / hub
+    /// reloads without Realtime (architecture S9).
+    private func mutate(_ label: String, _ operation: () async throws -> Void) async throws {
+        try await run(label, operation)
+        await store?.notifyMomentsChanged()
     }
 }
 

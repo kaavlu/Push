@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8BDF531889A0174E70BA7F0A /* CreatePostViewModel+EditCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0120D5EA9ADD255E73B723 /* CreatePostViewModel+EditCopy.swift */; };
+		F04392169EB42B3B8BC8C05C /* CreatePostEditTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A659FFB2ABEBCFDFA883703 /* CreatePostEditTests.swift */; };
+		F4465299E64AB175C61CC61B /* CreatePostViewModel+Edit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51F31B9A67538BF134DF38A0 /* CreatePostViewModel+Edit.swift */; };
 		13315C5D3EAE658F2C948566 /* AddYoursPartialAppendTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 955193270E59D653D8D91481 /* AddYoursPartialAppendTests.swift */; };
 		9CAC3C86D8EB3D01601926A4 /* AddYoursAppendTestDoubles.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9419DD1356FC5CECF609E6F /* AddYoursAppendTestDoubles.swift */; };
 		F97807EE9040D517A9CCD627 /* AddYoursAppendTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16B6FBF0A573316E1B8BD66F /* AddYoursAppendTests.swift */; };
@@ -417,6 +420,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8B0120D5EA9ADD255E73B723 /* CreatePostViewModel+EditCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostViewModel+EditCopy.swift"; sourceTree = "<group>"; };
+		6A659FFB2ABEBCFDFA883703 /* CreatePostEditTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostEditTests.swift"; sourceTree = "<group>"; };
+		51F31B9A67538BF134DF38A0 /* CreatePostViewModel+Edit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostViewModel+Edit.swift"; sourceTree = "<group>"; };
 		955193270E59D653D8D91481 /* AddYoursPartialAppendTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddYoursPartialAppendTests.swift"; sourceTree = "<group>"; };
 		D9419DD1356FC5CECF609E6F /* AddYoursAppendTestDoubles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddYoursAppendTestDoubles.swift"; sourceTree = "<group>"; };
 		16B6FBF0A573316E1B8BD66F /* AddYoursAppendTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddYoursAppendTests.swift"; sourceTree = "<group>"; };
@@ -864,6 +870,8 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				8B0120D5EA9ADD255E73B723 /* CreatePostViewModel+EditCopy.swift */,
+				51F31B9A67538BF134DF38A0 /* CreatePostViewModel+Edit.swift */,
 				AAEFAF88E20A454F00B8CCC5 /* AddYoursViewModel+Append.swift */,
 				7983D4756B613312DF585958 /* AddYoursViewModel.swift */,
 				BCEB91C2E462468A7DBFEE49 /* CreatePostViewModel+Presentation.swift */,
@@ -1195,6 +1203,7 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				6A659FFB2ABEBCFDFA883703 /* CreatePostEditTests.swift */,
 				955193270E59D653D8D91481 /* AddYoursPartialAppendTests.swift */,
 				D9419DD1356FC5CECF609E6F /* AddYoursAppendTestDoubles.swift */,
 				16B6FBF0A573316E1B8BD66F /* AddYoursAppendTests.swift */,
@@ -1416,6 +1425,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				8BDF531889A0174E70BA7F0A /* CreatePostViewModel+EditCopy.swift in Sources */,
+				F4465299E64AB175C61CC61B /* CreatePostViewModel+Edit.swift in Sources */,
 				4EE20D2A3884949DB191A974 /* AddYoursViewModel+Append.swift in Sources */,
 				D44B4270FED417127DD0F48B /* AddYoursViewModel.swift in Sources */,
 				DD932E9AE6DD7863C560CD86 /* CreatePostViewModel+Presentation.swift in Sources */,
@@ -1738,6 +1749,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				F04392169EB42B3B8BC8C05C /* CreatePostEditTests.swift in Sources */,
 				13315C5D3EAE658F2C948566 /* AddYoursPartialAppendTests.swift in Sources */,
 				9CAC3C86D8EB3D01601926A4 /* AddYoursAppendTestDoubles.swift in Sources */,
 				F97807EE9040D517A9CCD627 /* AddYoursAppendTests.swift in Sources */,

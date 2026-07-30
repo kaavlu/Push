@@ -18,6 +18,9 @@ struct AddYoursMediaStage: View {
     let item: AddYoursDraftItem?
     let isLoading: Bool
     let showsRemove: Bool
+    /// When false, an empty stage is a static placeholder (existing-Moment edit
+    /// never opens the library — Add Yours owns append).
+    var showsPicker: Bool = true
     @Binding var pickerSelection: [PhotosPickerItem]
     let maxSelection: Int
     let onRemove: () -> Void
@@ -34,7 +37,7 @@ struct AddYoursMediaStage: View {
                         showsRemove: showsRemove,
                         onRemove: onRemove
                     )
-                } else {
+                } else if showsPicker {
                     AddYoursEmptyPicker(
                         isLoading: isLoading,
                         selection: $pickerSelection,
@@ -42,6 +45,14 @@ struct AddYoursMediaStage: View {
                         size: size,
                         cornerRadius: AddYoursLayout.cardCornerRadius(layout)
                     )
+                } else {
+                    // Edit path with no remaining media — empty placeholder only.
+                    RoundedRectangle(
+                        cornerRadius: AddYoursLayout.cardCornerRadius(layout),
+                        style: .continuous
+                    )
+                    .fill(PushCreamTokens.solidCard)
+                    .frame(width: size.width, height: size.height)
                 }
             }
             .frame(width: geo.size.width, height: geo.size.height, alignment: .center)
