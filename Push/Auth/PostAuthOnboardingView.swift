@@ -53,8 +53,6 @@ struct PostAuthOnboardingView: View {
             PostAuthCoordinateScreen(model: model)
         case .notifications:
             PostAuthNotificationsScreen(model: model)
-        case .contacts:
-            PostAuthContactsScreen(model: model)
         case .findPeople:
             PostAuthFindPeopleScreen(model: model)
         case .done:

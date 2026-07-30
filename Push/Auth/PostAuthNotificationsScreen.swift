@@ -41,7 +41,7 @@ struct PostAuthNotificationsScreen: View {
                 + layout.value(compact: 2, standard: 3, large: 4)
         )
         .padding(.bottom, NotificationsLayout.bottomPadding)
-        .animation(OnboardingCascadeTiming.cascade, value: revealStep)
+        .animation(OnboardingCascadeTiming.laterCascade, value: revealStep)
         .task { await runCascade() }
     }
 
@@ -125,8 +125,8 @@ struct PostAuthNotificationsScreen: View {
 
     private func runCascade() async {
         for step in 1...5 {
-            OnboardingCascadeRunner.step(&revealStep, to: step)
-            await OnboardingCascadeRunner.sleepStagger()
+            OnboardingCascadeRunner.step(&revealStep, to: step, laterScreen: true)
+            await OnboardingCascadeRunner.sleepStagger(laterScreen: true)
         }
     }
 }

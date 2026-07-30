@@ -12,7 +12,6 @@ enum PostAuthOnboardingScreen: Equatable {
     case ghost
     case coordinate
     case notifications
-    case contacts
     case findPeople
     case done
 
@@ -20,7 +19,7 @@ enum PostAuthOnboardingScreen: Equatable {
         switch self {
         case .locationPrimer, .locationBlocked, .done:
             return false
-        case .ghost, .coordinate, .notifications, .contacts, .findPeople:
+        case .ghost, .coordinate, .notifications, .findPeople:
             return true
         }
     }
@@ -32,13 +31,12 @@ enum PostAuthOnboardingScreen: Equatable {
         case .ghost: return 2
         case .coordinate: return 3
         case .notifications: return 4
-        case .contacts: return 5
-        case .findPeople: return 6
+        case .findPeople: return 5
         case .done: return 0
         }
     }
 
-    static let progressTotal = 6
+    static let progressTotal = 5
 }
 
 /// One discoverable person on the find-people step.
@@ -88,6 +86,8 @@ final class PostAuthOnboardingViewModel: ObservableObject {
     @Published var isFinished = false
     /// Teaching map puck for the location primer (fixed SF center; no GPS).
     @Published var selfPuck: SelfPuckData?
+    /// Find-people directory load runs once when that screen appears.
+    var didLoadFindPeopleDirectory = false
 
     let container: AppDataContainer
     let notificationCenter: UNUserNotificationCenter
@@ -143,10 +143,8 @@ final class PostAuthOnboardingViewModel: ObservableObject {
             screen = .ghost
         case .notifications:
             screen = .coordinate
-        case .contacts:
-            screen = .notifications
         case .findPeople:
-            screen = .contacts
+            screen = .notifications
         case .locationPrimer, .locationBlocked, .done:
             break
         }
@@ -215,7 +213,7 @@ final class PostAuthOnboardingViewModel: ObservableObject {
         screen = .notifications
     }
 
-    // MARK: - Notifications → contacts
+    // MARK: - Notifications → find people
 
     func enableNotifications() async {
         guard !isBusy else { return }
@@ -223,12 +221,12 @@ final class PostAuthOnboardingViewModel: ObservableObject {
         errorMessage = nil
         defer { isBusy = false }
         _ = try? await notificationCenter.requestAuthorization(options: [.alert, .badge, .sound])
-        screen = .contacts
+        screen = .findPeople
     }
 
     func skipNotifications() async {
         errorMessage = nil
-        screen = .contacts
+        screen = .findPeople
     }
 
     func openApp() {

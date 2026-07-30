@@ -1,70 +1,7 @@
 // Push/Auth/PostAuthConnectScreens.swift
 import SwiftUI
 
-// MARK: - Contacts (optional)
-
-struct PostAuthContactsScreen: View {
-    @Environment(\.pushLayout) private var layout
-    @ObservedObject var model: PostAuthOnboardingViewModel
-    @State private var revealStep = 0
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            hero
-                .frame(maxWidth: .infinity)
-                .padding(.top, ContactsScreenLayout.heroTop)
-                .onboardingCascadeVisible(revealStep >= 1)
-            OnboardingHeader(
-                title: "Find friends already here.",
-                subtitle: "See who's on Push from your contacts. We don't message them for you.",
-                alignment: .center
-            )
-            .padding(.top, ContactsScreenLayout.headerTop)
-            .onboardingCascadeVisible(revealStep >= 2)
-            Spacer(minLength: ContactsScreenLayout.ctaSpacerMin)
-            OnboardingCTAButton(title: model.isBusy ? "Loading…" : "Continue") {
-                Task { await model.enableContacts() }
-            }
-            .disabled(model.isBusy || revealStep < 3)
-            .onboardingCascadeVisible(revealStep >= 3)
-            OnboardingTextButton(title: "Not now") {
-                Task { await model.skipContacts() }
-            }
-            .disabled(model.isBusy || revealStep < 4)
-            .onboardingCascadeVisible(revealStep >= 4)
-        }
-        .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
-        .padding(.top, OnboardingLabMetric.contentTopInset(layout))
-        .padding(.bottom, ContactsScreenLayout.bottomPadding)
-        .animation(OnboardingCascadeTiming.cascade, value: revealStep)
-        .task { await runCascade() }
-    }
-
-    private var hero: some View {
-        Image(systemName: "person.crop.circle.badge.plus")
-            .font(.system(size: ContactsScreenLayout.iconSize, weight: .semibold))
-            .foregroundStyle(OnboardingLabColor.espresso)
-            .frame(width: ContactsScreenLayout.heroSize, height: ContactsScreenLayout.heroSize)
-            .background(
-                Circle()
-                    .fill(OnboardingLabColor.sunbeam.opacity(ContactsScreenLayout.heroFillOpacity))
-            )
-            .overlay(
-                Circle()
-                    .stroke(OnboardingLabColor.walnut.opacity(ContactsScreenLayout.heroStrokeOpacity), lineWidth: 1)
-            )
-            .accessibilityHidden(true)
-    }
-
-    private func runCascade() async {
-        for step in 1...4 {
-            OnboardingCascadeRunner.step(&revealStep, to: step)
-            await OnboardingCascadeRunner.sleepStagger()
-        }
-    }
-}
-
-// MARK: - Find people (soft nudge)
+// MARK: - Find people (soft nudge; contacts matched on appear)
 
 struct PostAuthFindPeopleScreen: View {
     @Environment(\.pushLayout) private var layout
@@ -75,7 +12,7 @@ struct PostAuthFindPeopleScreen: View {
         VStack(alignment: .leading, spacing: 0) {
             OnboardingHeader(
                 title: "Add people on Push.",
-                subtitle: "They're already here. Continue even if you add no one."
+                subtitle: "Friends from your contacts who are already here — continue even if you add no one."
             )
             .onboardingCascadeVisible(revealStep >= 1)
             content
@@ -92,14 +29,17 @@ struct PostAuthFindPeopleScreen: View {
             OnboardingCTAButton(title: model.isBusy ? "Finishing…" : model.findPeopleCTALabel) {
                 Task { await model.continueFromFindPeople() }
             }
-            .disabled(model.isBusy || revealStep < 3)
+            .disabled(model.isBusy || model.isLoadingPeople || revealStep < 3)
             .onboardingCascadeVisible(revealStep >= 3)
         }
         .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
         .padding(.top, OnboardingLabMetric.contentTopInset(layout) + layout.value(compact: 2, standard: 3, large: 4))
         .padding(.bottom, FindPeopleLayout.bottomPadding)
-        .animation(OnboardingCascadeTiming.cascade, value: revealStep)
-        .task { await runCascade() }
+        .animation(OnboardingCascadeTiming.laterCascade, value: revealStep)
+        .task {
+            await model.loadFindPeopleDirectoryIfNeeded()
+            await runCascade()
+        }
     }
 
     @ViewBuilder
@@ -109,7 +49,7 @@ struct PostAuthFindPeopleScreen: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, FindPeopleLayout.loadingVertical)
         } else if model.people.isEmpty {
-            Text("No one to suggest yet — you can add friends anytime from the app.")
+            Text("No matches yet — you can add friends anytime from the app.")
                 .font(OnboardingLabFont.text(15, .medium))
                 .foregroundStyle(OnboardingLabColor.textSecondary)
                 .padding(.vertical, FindPeopleLayout.emptyVertical)
@@ -180,8 +120,8 @@ struct PostAuthFindPeopleScreen: View {
 
     private func runCascade() async {
         for step in 1...3 {
-            OnboardingCascadeRunner.step(&revealStep, to: step)
-            await OnboardingCascadeRunner.sleepStagger()
+            OnboardingCascadeRunner.step(&revealStep, to: step, laterScreen: true)
+            await OnboardingCascadeRunner.sleepStagger(laterScreen: true)
         }
     }
 }
@@ -213,30 +153,19 @@ struct PostAuthDoneScreen: View {
                 .onboardingCascadeVisible(revealStep >= 3)
         }
         .padding(.top, DoneScreenLayout.topPadding)
-        .animation(OnboardingCascadeTiming.cascade, value: revealStep)
+        .animation(OnboardingCascadeTiming.laterCascade, value: revealStep)
         .task { await runCascade() }
     }
 
     private func runCascade() async {
         for step in 1...3 {
-            OnboardingCascadeRunner.step(&revealStep, to: step)
-            await OnboardingCascadeRunner.sleepStagger()
+            OnboardingCascadeRunner.step(&revealStep, to: step, laterScreen: true)
+            await OnboardingCascadeRunner.sleepStagger(laterScreen: true)
         }
     }
 }
 
 // MARK: - Layout
-
-private enum ContactsScreenLayout {
-    static let heroTop: CGFloat = 12
-    static let heroSize: CGFloat = 96
-    static let iconSize: CGFloat = 36
-    static let heroFillOpacity = 0.55
-    static let heroStrokeOpacity = 0.12
-    static let headerTop: CGFloat = 20
-    static let ctaSpacerMin: CGFloat = 22
-    static let bottomPadding: CGFloat = 26
-}
 
 private enum FindPeopleLayout {
     static let listTop: CGFloat = 20

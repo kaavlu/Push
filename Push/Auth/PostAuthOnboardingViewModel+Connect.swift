@@ -2,34 +2,31 @@
 import Foundation
 
 extension PostAuthOnboardingViewModel {
-    // MARK: - Contacts → find people
+    // MARK: - Find people (contacts matched inline — no separate contacts primer)
 
-    /// Optional contacts access; denied/restricted still advances to find people.
-    func enableContacts() async {
-        guard !isBusy else { return }
-        isBusy = true
+    /// Loads the Add People directory once: request Contacts (system sheet only),
+    /// match names against people on Push, fall back to discover if empty/denied.
+    func loadFindPeopleDirectoryIfNeeded() async {
+        guard !didLoadFindPeopleDirectory else { return }
+        didLoadFindPeopleDirectory = true
+        isLoadingPeople = true
         errorMessage = nil
-        defer { isBusy = false }
-        let granted = await contacts.requestAccess()
+        defer { isLoadingPeople = false }
+
         var hints: [ContactMatchHint] = []
+        let granted = await contacts.requestAccess()
         if granted {
             hints = (try? await contacts.fetchMatchHints(limit: Limit.contactHintFetch)) ?? []
         }
-        await loadPeopleAndAdvance(contactHints: hints)
-    }
 
-    func skipContacts() async {
-        guard !isBusy else { return }
-        errorMessage = nil
-        await loadPeopleAndAdvance(contactHints: [])
+        do {
+            let hits = try await resolveFindPeopleResults(contactHints: hints)
+            people = hits.map { OnboardingDiscoverPerson(result: $0) }
+        } catch {
+            people = []
+            errorMessage = Copy.friendsLoadFailed
+        }
     }
-
-    /// Primary CTA on contacts primer — requests access when possible.
-    func continueFromContacts() async {
-        await enableContacts()
-    }
-
-    // MARK: - Find people
 
     func toggleFriend(_ id: Person.ID) async {
         if addedIDs.contains(id) {
@@ -69,20 +66,6 @@ extension PostAuthOnboardingViewModel {
 
     func continueFromFindPeople() async {
         await finishOnboarding()
-    }
-
-    func loadPeopleAndAdvance(contactHints: [ContactMatchHint]) async {
-        isLoadingPeople = true
-        errorMessage = nil
-        defer { isLoadingPeople = false }
-        do {
-            let hits = try await resolveFindPeopleResults(contactHints: contactHints)
-            people = hits.map { OnboardingDiscoverPerson(result: $0) }
-        } catch {
-            people = []
-            errorMessage = Copy.friendsLoadFailed
-        }
-        screen = .findPeople
     }
 
     /// Prefer contact-name search hits; fall back to discover when empty.
@@ -131,5 +114,4 @@ extension PostAuthOnboardingViewModel {
         }
         return queries
     }
-
 }

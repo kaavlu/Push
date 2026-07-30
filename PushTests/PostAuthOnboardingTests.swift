@@ -46,7 +46,7 @@ final class PostAuthOnboardingTests: XCTestCase {
     }
 
     func testProgressAndBackChrome() {
-        XCTAssertEqual(PostAuthOnboardingScreen.progressTotal, 6)
+        XCTAssertEqual(PostAuthOnboardingScreen.progressTotal, 5)
         XCTAssertEqual(PostAuthOnboardingScreen.locationPrimer.progressStep, 1)
         XCTAssertFalse(PostAuthOnboardingScreen.locationPrimer.showsBackButton)
         XCTAssertEqual(PostAuthOnboardingScreen.locationBlocked.progressStep, 1)
@@ -55,8 +55,7 @@ final class PostAuthOnboardingTests: XCTestCase {
         XCTAssertTrue(PostAuthOnboardingScreen.ghost.showsBackButton)
         XCTAssertEqual(PostAuthOnboardingScreen.coordinate.progressStep, 3)
         XCTAssertEqual(PostAuthOnboardingScreen.notifications.progressStep, 4)
-        XCTAssertEqual(PostAuthOnboardingScreen.contacts.progressStep, 5)
-        XCTAssertEqual(PostAuthOnboardingScreen.findPeople.progressStep, 6)
+        XCTAssertEqual(PostAuthOnboardingScreen.findPeople.progressStep, 5)
         XCTAssertEqual(PostAuthOnboardingScreen.done.progressStep, 0)
         XCTAssertFalse(PostAuthOnboardingScreen.done.showsBackButton)
     }
@@ -71,30 +70,20 @@ final class PostAuthOnboardingTests: XCTestCase {
         vm.continueFromCoordinate()
         XCTAssertEqual(vm.screen, .notifications)
         await vm.skipNotifications()
-        XCTAssertEqual(vm.screen, .contacts)
-        await vm.skipContacts()
         XCTAssertEqual(vm.screen, .findPeople)
+        await vm.loadFindPeopleDirectoryIfNeeded()
         await vm.continueFromFindPeople()
         XCTAssertEqual(vm.screen, .done)
     }
 
-    func testSkipContactsAdvancesWithoutRequestingAccess() async {
-        let contacts = FixedContactsProvider(grantAccess: true, hints: [
-            ContactMatchHint(id: "c1", displayName: "Austin", phoneDigits: nil)
-        ])
-        let vm = makeVM(auth: .whenInUse, contacts: contacts)
-        await vm.skipNotifications()
-        await vm.skipContacts()
-        XCTAssertEqual(vm.screen, .findPeople)
-        XCTAssertEqual(contacts.requestAccessCount, 0)
-    }
-
-    func testEnableContactsRequestsAccessThenAdvances() async {
+    func testFindPeopleLoadRequestsContactsOnce() async {
         let contacts = FixedContactsProvider(grantAccess: false, hints: [])
         let vm = makeVM(auth: .whenInUse, contacts: contacts)
         await vm.skipNotifications()
-        await vm.enableContacts()
         XCTAssertEqual(vm.screen, .findPeople)
+        await vm.loadFindPeopleDirectoryIfNeeded()
+        XCTAssertEqual(contacts.requestAccessCount, 1)
+        await vm.loadFindPeopleDirectoryIfNeeded()
         XCTAssertEqual(contacts.requestAccessCount, 1)
     }
 
@@ -200,14 +189,14 @@ final class PostAuthOnboardingTests: XCTestCase {
         XCTAssertEqual(session.startIfEligibleCount, 1)
     }
 
-    func testSkipNotificationsGoesToContactsWithoutBlocking() async {
+    func testSkipNotificationsGoesToFindPeopleWithoutBlocking() async {
         let vm = makeVM(auth: .whenInUse)
         await vm.enableLocation()
         vm.continueFromGhost()
         vm.continueFromCoordinate()
         XCTAssertEqual(vm.screen, .notifications)
         await vm.skipNotifications()
-        XCTAssertEqual(vm.screen, .contacts)
+        XCTAssertEqual(vm.screen, .findPeople)
     }
 
     func testRetryLocationAccessIncrementsStartIfEligible() async {
@@ -235,11 +224,8 @@ final class PostAuthOnboardingTests: XCTestCase {
         vm.continueFromGhost()
         vm.continueFromCoordinate()
         await vm.skipNotifications()
-        await vm.skipContacts()
         XCTAssertEqual(vm.screen, .findPeople)
 
-        vm.goBack()
-        XCTAssertEqual(vm.screen, .contacts)
         vm.goBack()
         XCTAssertEqual(vm.screen, .notifications)
         vm.goBack()

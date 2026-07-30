@@ -32,10 +32,10 @@ struct PostAuthGhostScreen: View {
         .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
         .padding(.top, OnboardingLabMetric.contentTopInset(layout))
         .padding(.bottom, GhostScreenLayout.bottomPadding)
-        .animation(OnboardingCascadeTiming.cascade, value: revealStep)
-        .animation(OnboardingCascadeTiming.cascade, value: showSelfPuck)
-        .animation(OnboardingCascadeTiming.cascade, value: showGhostIcon)
-        .animation(OnboardingCascadeTiming.cascade, value: mapBlur)
+        .animation(OnboardingCascadeTiming.laterCascade, value: revealStep)
+        .animation(OnboardingCascadeTiming.laterCascade, value: showSelfPuck)
+        .animation(OnboardingCascadeTiming.laterCascade, value: showGhostIcon)
+        .animation(OnboardingCascadeTiming.laterCascade, value: mapBlur)
         .task {
             await model.loadSelfPuckPreview()
             await runSequence()
@@ -112,9 +112,9 @@ struct PostAuthGhostScreen: View {
     // MARK: Sequence
 
     private func runSequence() async {
-        OnboardingCascadeRunner.step(&revealStep, to: GhostReveal.title)
-        await OnboardingCascadeRunner.sleepStagger()
-        OnboardingCascadeRunner.step(&revealStep, to: GhostReveal.map)
+        OnboardingCascadeRunner.step(&revealStep, to: GhostReveal.title, laterScreen: true)
+        await OnboardingCascadeRunner.sleepStagger(laterScreen: true)
+        OnboardingCascadeRunner.step(&revealStep, to: GhostReveal.map, laterScreen: true)
         if isMapReady {
             await continueAfterMapReady()
         }
@@ -124,20 +124,20 @@ struct PostAuthGhostScreen: View {
         guard !didRunSequence else { return }
         didRunSequence = true
         try? await Task.sleep(nanoseconds: GhostReveal.mapSettleNanoseconds)
-        OnboardingCascadeRunner.step(&revealStep, to: GhostReveal.mapPainted)
+        OnboardingCascadeRunner.step(&revealStep, to: GhostReveal.mapPainted, laterScreen: true)
         // Hold on the clear self-puck map so the vanish reads clearly.
-        await OnboardingCascadeRunner.sleepBeat()
-        await OnboardingCascadeRunner.sleepBeat()
+        await OnboardingCascadeRunner.sleepBeat(laterScreen: true)
+        await OnboardingCascadeRunner.sleepBeat(laterScreen: true)
         // Vanish self + blur map + center eye + subtitle together.
-        withAnimation(OnboardingCascadeTiming.cascade) {
+        withAnimation(OnboardingCascadeTiming.laterCascade) {
             showSelfPuck = false
             mapBlur = GhostScreenLayout.mapBlurRadius
             showGhostIcon = true
             revealStep = max(revealStep, GhostReveal.ghostMoment)
         }
-        await OnboardingCascadeRunner.sleepStagger()
-        await OnboardingCascadeRunner.sleepBeat()
-        OnboardingCascadeRunner.step(&revealStep, to: GhostReveal.cta)
+        await OnboardingCascadeRunner.sleepStagger(laterScreen: true)
+        await OnboardingCascadeRunner.sleepBeat(laterScreen: true)
+        OnboardingCascadeRunner.step(&revealStep, to: GhostReveal.cta, laterScreen: true)
     }
 
     private var teachingRegion: MKCoordinateRegion {
@@ -164,7 +164,7 @@ private enum GhostReveal {
     static let mapPainted = 3
     static let ghostMoment = 4
     static let cta = 5
-    static let mapSettleNanoseconds: UInt64 = 400_000_000
+    static let mapSettleNanoseconds: UInt64 = 550_000_000
 }
 
 private enum GhostScreenLayout {

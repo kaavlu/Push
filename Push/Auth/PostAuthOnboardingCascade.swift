@@ -2,22 +2,24 @@
 import SwiftUI
 
 /// Shared top-down reveal timing for post-auth onboarding screens.
-/// Tuned deliberately slow — product prefers calm, readable staging over snap.
+/// Slide 1 (Know the move) uses default pace; slides 2+ use `later` pace (slower).
 enum OnboardingCascadeTiming {
-    /// Delay between cascade steps (title → subtitle → …).
-    static let staggerNanoseconds: UInt64 = 380_000_000
-    /// Delay between each friend puck pop on Know the move.
-    static let friendPopNanoseconds: UInt64 = 520_000_000
-    static let revealOffsetY: CGFloat = 10
-    /// Pause after map paints before friend pops / ghost sequence.
-    static let beatNanoseconds: UInt64 = 520_000_000
+    // MARK: Slide 1 (Know the move)
 
-    /// Default fade/rise for staged onboarding content.
+    static let staggerNanoseconds: UInt64 = 380_000_000
+    static let friendPopNanoseconds: UInt64 = 520_000_000
+    static let beatNanoseconds: UInt64 = 520_000_000
+    static let revealOffsetY: CGFloat = 10
     static let cascade = Animation.easeInOut(duration: 0.55)
-    /// Friend pucks: slower opacity + scale so they read as sequential arrivals.
     static let friendPop = Animation.easeOut(duration: 0.70)
+
+    // MARK: Slide 2 onwards (noticeably slower)
+
+    static let laterStaggerNanoseconds: UInt64 = 620_000_000
+    static let laterBeatNanoseconds: UInt64 = 780_000_000
+    static let laterCascade = Animation.easeInOut(duration: 0.90)
     /// Between post-auth screens (container transition).
-    static let screenChange = Animation.easeOut(duration: 0.65)
+    static let screenChange = Animation.easeOut(duration: 0.95)
 }
 
 extension View {
@@ -39,11 +41,15 @@ enum OnboardingCascadeRunner {
     static func step(
         _ current: inout Int,
         to target: Int,
+        laterScreen: Bool = false,
         animated: Bool = true
     ) {
         guard target > current else { return }
+        let animation = laterScreen
+            ? OnboardingCascadeTiming.laterCascade
+            : OnboardingCascadeTiming.cascade
         if animated {
-            withAnimation(OnboardingCascadeTiming.cascade) {
+            withAnimation(animation) {
                 current = target
             }
         } else {
@@ -51,16 +57,22 @@ enum OnboardingCascadeRunner {
         }
     }
 
-    static func sleepStagger() async {
-        try? await Task.sleep(nanoseconds: OnboardingCascadeTiming.staggerNanoseconds)
+    static func sleepStagger(laterScreen: Bool = false) async {
+        let ns = laterScreen
+            ? OnboardingCascadeTiming.laterStaggerNanoseconds
+            : OnboardingCascadeTiming.staggerNanoseconds
+        try? await Task.sleep(nanoseconds: ns)
     }
 
     static func sleepFriendPop() async {
         try? await Task.sleep(nanoseconds: OnboardingCascadeTiming.friendPopNanoseconds)
     }
 
-    static func sleepBeat() async {
-        try? await Task.sleep(nanoseconds: OnboardingCascadeTiming.beatNanoseconds)
+    static func sleepBeat(laterScreen: Bool = false) async {
+        let ns = laterScreen
+            ? OnboardingCascadeTiming.laterBeatNanoseconds
+            : OnboardingCascadeTiming.beatNanoseconds
+        try? await Task.sleep(nanoseconds: ns)
     }
 }
 

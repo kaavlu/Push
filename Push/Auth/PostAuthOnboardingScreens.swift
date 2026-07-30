@@ -43,7 +43,7 @@ struct PostAuthCoordinateScreen: View {
         .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
         .padding(.top, OnboardingLabMetric.contentTopInset(layout))
         .padding(.bottom, CoordinateTeachLayout.bottomPadding)
-        .animation(OnboardingCascadeTiming.cascade, value: revealStep)
+        .animation(OnboardingCascadeTiming.laterCascade, value: revealStep)
         .task { await runCascade() }
     }
 
@@ -83,8 +83,8 @@ struct PostAuthCoordinateScreen: View {
 
     private func runCascade() async {
         for step in 1...4 {
-            OnboardingCascadeRunner.step(&revealStep, to: step)
-            await OnboardingCascadeRunner.sleepStagger()
+            OnboardingCascadeRunner.step(&revealStep, to: step, laterScreen: true)
+            await OnboardingCascadeRunner.sleepStagger(laterScreen: true)
         }
     }
 }

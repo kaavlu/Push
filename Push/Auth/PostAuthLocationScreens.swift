@@ -212,7 +212,7 @@ struct PostAuthLocationBlockedScreen: View {
         .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
         .padding(.top, OnboardingLabMetric.contentTopInset(layout))
         .padding(.bottom, LocationBlockedLayout.bottomPadding)
-        .animation(OnboardingCascadeTiming.cascade, value: revealStep)
+        .animation(OnboardingCascadeTiming.laterCascade, value: revealStep)
         .task { await runCascade() }
     }
 
@@ -234,8 +234,8 @@ struct PostAuthLocationBlockedScreen: View {
 
     private func runCascade() async {
         for step in 1...5 {
-            OnboardingCascadeRunner.step(&revealStep, to: step)
-            await OnboardingCascadeRunner.sleepStagger()
+            OnboardingCascadeRunner.step(&revealStep, to: step, laterScreen: true)
+            await OnboardingCascadeRunner.sleepStagger(laterScreen: true)
         }
     }
 }
