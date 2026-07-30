@@ -198,11 +198,26 @@ struct RootView: View {
             let container = try await AppDataContainer.prepareLive(
                 client: SupabaseClientProvider.shared.client, currentUserID: user.id
             )
-            AppDataContainer.installPreparedLive(container)
+            // Fail closed: do not enter .app without knowing completion status.
+            // Skip location start when onboarding is still required so the OS
+            // permission prompt is not raced before the onboarding location step.
+            let needsOnboarding: Bool
+            do {
+                needsOnboarding = try await container.profile.needsPostAuthOnboarding()
+            } catch {
+                PushLog.bootstrap.error(
+                    "needsPostAuthOnboarding failed: \(PushLog.safeDescription(for: error), privacy: .public)"
+                )
+                enter(.preparationFailed(user, AuthUserMessage.generic))
+                return
+            }
+            AppDataContainer.installPreparedLive(
+                container,
+                startLocationIfEligible: !needsOnboarding
+            )
             // Sign-up may have held a JPEG until the session + profile row exist.
             await uploadPendingSignUpPhotoIfNeeded(using: container)
             PushLog.bootstrap.log("live data ready")
-            let needsOnboarding = (try? await container.profile.needsPostAuthOnboarding()) ?? false
             if needsOnboarding {
                 PushLog.bootstrap.log("post-auth onboarding required")
                 enter(.onboarding(user))
