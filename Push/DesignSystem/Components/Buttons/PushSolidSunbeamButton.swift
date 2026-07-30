@@ -13,6 +13,7 @@ struct PushSolidSunbeamButton: View {
     @Environment(\.pushLayout) private var layout
 
     let title: String
+    var systemImageName: String? = nil
     var isEnabled: Bool = true
     var isLoading: Bool = false
     let action: () -> Void
@@ -24,7 +25,7 @@ struct PushSolidSunbeamButton: View {
     var body: some View {
         Button(action: action) {
             ZStack {
-                Text(title)
+                labelContent
                     .opacity(isLoading ? 0 : 1)
                 if isLoading {
                     ProgressView()
@@ -55,6 +56,27 @@ struct PushSolidSunbeamButton: View {
         .animation(PushMotion.press, value: isLoading)
         .accessibilityLabel(title)
     }
+
+    @ViewBuilder
+    private var labelContent: some View {
+        if let systemImageName {
+            HStack(spacing: PushSolidSunbeamButtonMetrics.iconTitleSpacing) {
+                Image(systemName: systemImageName)
+                    .font(.system(
+                        size: PushSolidSunbeamButtonMetrics.iconSize,
+                        weight: .bold
+                    ))
+                Text(title)
+            }
+        } else {
+            Text(title)
+        }
+    }
+}
+
+private enum PushSolidSunbeamButtonMetrics {
+    static let iconTitleSpacing: CGFloat = 7
+    static let iconSize: CGFloat = 16
 }
 
 /// Migration shim — prefer `PushSolidSunbeamButton`.

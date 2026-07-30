@@ -158,11 +158,29 @@ private extension PushMapControlTreatment {
     }
 }
 
-/// Shared cream-glass surface for map friend popup and calendar day sheet.
+/// Map popup sheet surface treatment (DS-011).
+enum MapPopupSheetSurface {
+    /// Existing cream-glass over satellite (individual friend / day detail).
+    case mapGlass
+    /// Warmer solid cream for multi-person Friends-row sheets (Issue #139).
+    case solidCream
+}
+
+/// Shared map popup surface for friend detail and calendar day sheets.
 struct MapPopupSheetBackground<S: Shape>: View {
     let shape: S
+    var surface: MapPopupSheetSurface = .mapGlass
 
     var body: some View {
+        switch surface {
+        case .mapGlass:
+            mapGlassBody
+        case .solidCream:
+            solidCreamBody
+        }
+    }
+
+    private var mapGlassBody: some View {
         ZStack {
             shape.fill(.ultraThinMaterial)
             shape.fill(PushMapGlassTokens.sheetCreamFill)
@@ -178,6 +196,21 @@ struct MapPopupSheetBackground<S: Shape>: View {
                 )
                 .padding(PushMapGlassTokens.sheetHighlightInset)
         }
+    }
+
+    private var solidCreamBody: some View {
+        ZStack {
+            shape.fill(PushCreamTokens.solidCard)
+            shape.stroke(
+                PushColorPalette.Accent.walnut.opacity(PushCreamTokens.solidCardStrokeOpacity),
+                lineWidth: PushCreamTokens.solidCardStrokeWidth
+            )
+        }
+        .shadow(
+            color: PushMapGlassTokens.shadow,
+            radius: PushMapGlassTokens.shadowRadius,
+            y: PushMapGlassTokens.shadowYOffset
+        )
     }
 
     private var sunbeamAccent: RadialGradient {
@@ -207,7 +240,7 @@ struct MapPopupSheetBackground<S: Shape>: View {
 }
 
 extension MapPopupSheetBackground where S == Rectangle {
-    init() {
-        self.init(shape: Rectangle())
+    init(surface: MapPopupSheetSurface = .mapGlass) {
+        self.init(shape: Rectangle(), surface: surface)
     }
 }

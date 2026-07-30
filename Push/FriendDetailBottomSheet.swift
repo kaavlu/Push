@@ -21,13 +21,24 @@ struct FriendDetailBottomSheet: View {
     @State private var dragTranslation: CGFloat = 0
     @State private var isDragging = false
 
-    private var sheetHeight: CGFloat {
+    private var isMultiPerson: Bool {
         switch puck.kind {
-        case .individual:
-            return FriendDetailSheetLayout.individualSheetHeight(layout)
         case .hangout, .cluster, .friendGroup:
-            return FriendDetailSheetLayout.hangoutSheetHeight(layout)
+            return true
+        case .individual:
+            return false
         }
+    }
+
+    private var sheetHeight: CGFloat {
+        if isMultiPerson {
+            return FriendDetailSheetLayout.multiPersonSheetHeight(layout)
+        }
+        return FriendDetailSheetLayout.individualSheetHeight(layout)
+    }
+
+    private var sheetSurface: MapPopupSheetSurface {
+        isMultiPerson ? .solidCream : .mapGlass
     }
 
     private var presentationAnimation: Animation {
@@ -98,7 +109,10 @@ struct FriendDetailBottomSheet: View {
     }
 
     private var sheetBackground: some View {
-        MapPopupSheetBackground(shape: FriendDetailBottomSheetShape())
+        MapPopupSheetBackground(
+            shape: FriendDetailBottomSheetShape(),
+            surface: sheetSurface
+        )
     }
 
     private var dragIndicator: some View {

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4396B548EF27235296484C16 /* FriendDetailGroupContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F8A81D8F0699BE7992D9E49 /* FriendDetailGroupContent.swift */; };
 		8BDF531889A0174E70BA7F0A /* CreatePostViewModel+EditCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0120D5EA9ADD255E73B723 /* CreatePostViewModel+EditCopy.swift */; };
 		F04392169EB42B3B8BC8C05C /* CreatePostEditTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A659FFB2ABEBCFDFA883703 /* CreatePostEditTests.swift */; };
 		F4465299E64AB175C61CC61B /* CreatePostViewModel+Edit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51F31B9A67538BF134DF38A0 /* CreatePostViewModel+Edit.swift */; };
@@ -420,6 +421,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8F8A81D8F0699BE7992D9E49 /* FriendDetailGroupContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FriendDetailGroupContent.swift"; sourceTree = "<group>"; };
 		8B0120D5EA9ADD255E73B723 /* CreatePostViewModel+EditCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostViewModel+EditCopy.swift"; sourceTree = "<group>"; };
 		6A659FFB2ABEBCFDFA883703 /* CreatePostEditTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostEditTests.swift"; sourceTree = "<group>"; };
 		51F31B9A67538BF134DF38A0 /* CreatePostViewModel+Edit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostViewModel+Edit.swift"; sourceTree = "<group>"; };
@@ -870,6 +872,7 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				8F8A81D8F0699BE7992D9E49 /* FriendDetailGroupContent.swift */,
 				8B0120D5EA9ADD255E73B723 /* CreatePostViewModel+EditCopy.swift */,
 				51F31B9A67538BF134DF38A0 /* CreatePostViewModel+Edit.swift */,
 				AAEFAF88E20A454F00B8CCC5 /* AddYoursViewModel+Append.swift */,
@@ -1425,6 +1428,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				4396B548EF27235296484C16 /* FriendDetailGroupContent.swift in Sources */,
 				8BDF531889A0174E70BA7F0A /* CreatePostViewModel+EditCopy.swift in Sources */,
 				F4465299E64AB175C61CC61B /* CreatePostViewModel+Edit.swift in Sources */,
 				4EE20D2A3884949DB191A974 /* AddYoursViewModel+Append.swift in Sources */,

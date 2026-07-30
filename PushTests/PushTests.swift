@@ -500,7 +500,7 @@ final class PushTests: XCTestCase {
         XCTAssertNil(puck.withWhom)
     }
 
-    func testGroupHeadlineForTwoPeopleJoinsWithPlus() throws {
+    func testMultiPersonTitleForTwoPeopleUsesAmpersand() throws {
         let people: [FriendPuckData] = [
             FriendPuckData(
                 name: "Ishan", avatarPlaceholder: "IS", activity: "Lunch",
@@ -514,23 +514,138 @@ final class PushTests: XCTestCase {
             )
         ]
 
-        XCTAssertEqual(FriendDetailSheetContent.groupHeadline(for: people), "Ishan + Viplove")
+        XCTAssertEqual(FriendDetailSheetContent.multiPersonTitle(for: people), "Ishan & Viplove")
+        XCTAssertEqual(FriendDetailSheetContent.groupHeadline(for: people), "Ishan & Viplove")
     }
 
-    func testGroupHeadlineForThreeOrMorePeopleUsesCount() throws {
-        let people: [FriendPuckData] = (0..<4).map { i in
+    func testMultiPersonTitleForThreePeopleListsNames() throws {
+        let people: [FriendPuckData] = [
             FriendPuckData(
-                name: "Person \(i)", avatarPlaceholder: "P\(i)", activity: "Park",
-                activitySymbolName: "leaf.fill", activityDisplayText: "Dolores",
-                availability: .joinable, venueStatusText: "At Dolores"
+                name: "Ishan Patel", avatarPlaceholder: "IS", activity: "Lunch",
+                activitySymbolName: "fork.knife", activityDisplayText: "Souvla",
+                availability: .joinable, venueStatusText: "At Souvla"
+            ),
+            FriendPuckData(
+                name: "Viplove Shah", avatarPlaceholder: "VI", activity: "Lunch",
+                activitySymbolName: "fork.knife", activityDisplayText: "Souvla",
+                availability: .joinable, venueStatusText: "At Souvla"
+            ),
+            FriendPuckData(
+                name: "Rohan Mehta", avatarPlaceholder: "RO", activity: "Lunch",
+                activitySymbolName: "fork.knife", activityDisplayText: "Souvla",
+                availability: .joinable, venueStatusText: "At Souvla"
+            )
+        ]
+
+        XCTAssertEqual(
+            FriendDetailSheetContent.multiPersonTitle(for: people),
+            "Ishan, Viplove & Rohan"
+        )
+    }
+
+    func testMultiPersonTitleForFourPlusUsesOverflowCount() throws {
+        let names = ["Ada", "Ben", "Cara", "Drew", "Eve"]
+        let people: [FriendPuckData] = names.map { name in
+            FriendPuckData(
+                name: name, avatarPlaceholder: String(name.prefix(2)).uppercased(),
+                activity: "Park", activitySymbolName: "leaf.fill",
+                activityDisplayText: "Dolores", availability: .joinable,
+                venueStatusText: "At Dolores"
             )
         }
 
-        XCTAssertEqual(FriendDetailSheetContent.groupHeadline(for: people), "4 people")
+        XCTAssertEqual(
+            FriendDetailSheetContent.multiPersonTitle(for: people),
+            "Ada, Ben + 3"
+        )
     }
 
-    func testGroupHeadlineForEmptyPeopleFallsBack() throws {
+    func testMultiPersonTitleForEmptyPeopleFallsBack() throws {
+        XCTAssertEqual(FriendDetailSheetContent.multiPersonTitle(for: []), "Group")
         XCTAssertEqual(FriendDetailSheetContent.groupHeadline(for: []), "Group")
+    }
+
+    func testMultiPersonActivityAndLocationLines() throws {
+        let people: [FriendPuckData] = [
+            FriendPuckData(
+                name: "Ishan", avatarPlaceholder: "IS", activity: "Lunch",
+                activitySymbolName: "fork.knife", activityDisplayText: "Souvla",
+                availability: .joinable, venueStatusText: "At Souvla",
+                locationLabel: "517 Hayes St", placeName: "Souvla"
+            ),
+            FriendPuckData(
+                name: "Viplove", avatarPlaceholder: "VI", activity: "Lunch",
+                activitySymbolName: "fork.knife", activityDisplayText: "Souvla",
+                availability: .joinable, venueStatusText: "With Ishan",
+                locationLabel: "517 Hayes St", placeName: "Souvla"
+            )
+        ]
+        let puck = MapPuckData(
+            id: "puck-souvla",
+            kind: .hangout,
+            people: people,
+            activity: "Lunch",
+            availability: .joinable,
+            venueStatusText: "At Souvla",
+            coordinate: .init(latitude: 37.776, longitude: -122.424)
+        )
+
+        XCTAssertEqual(
+            FriendDetailSheetContent.multiPersonActivityLine(for: puck),
+            "Lunch at Souvla"
+        )
+        XCTAssertEqual(
+            FriendDetailSheetContent.multiPersonLocationDetail(for: puck),
+            "517 Hayes St"
+        )
+        XCTAssertTrue(FriendDetailSheetContent.showsAskToJoin(for: puck))
+    }
+
+    func testShowsAskToJoinHiddenWhenBusyOrViewerIncluded() throws {
+        let busy = MapPuckData(
+            id: "busy",
+            kind: .hangout,
+            people: [
+                FriendPuckData(
+                    name: "A", avatarPlaceholder: "A", activity: "Work",
+                    activitySymbolName: "briefcase.fill", activityDisplayText: "Office",
+                    availability: .busy, venueStatusText: "At Office"
+                ),
+                FriendPuckData(
+                    name: "B", avatarPlaceholder: "B", activity: "Work",
+                    activitySymbolName: "briefcase.fill", activityDisplayText: "Office",
+                    availability: .busy, venueStatusText: "At Office"
+                )
+            ],
+            activity: "Work",
+            availability: .busy,
+            venueStatusText: "At Office",
+            coordinate: .init(latitude: 37.77, longitude: -122.42)
+        )
+        XCTAssertFalse(FriendDetailSheetContent.showsAskToJoin(for: busy))
+
+        let withSelf = MapPuckData(
+            id: "with-self",
+            kind: .hangout,
+            people: [
+                FriendPuckData(
+                    name: "A", avatarPlaceholder: "A", activity: "Lunch",
+                    activitySymbolName: "fork.knife", activityDisplayText: "Souvla",
+                    availability: .joinable, venueStatusText: "At Souvla"
+                ),
+                FriendPuckData(
+                    name: "You", avatarPlaceholder: "YO", activity: "Lunch",
+                    activitySymbolName: "fork.knife", activityDisplayText: "Souvla",
+                    availability: .joinable, venueStatusText: "At Souvla",
+                    isCurrentUser: true
+                )
+            ],
+            activity: "Lunch",
+            availability: .joinable,
+            venueStatusText: "At Souvla",
+            coordinate: .init(latitude: 37.77, longitude: -122.42)
+        )
+        XCTAssertFalse(FriendDetailSheetContent.showsAskToJoin(for: withSelf))
     }
 
     @MainActor
