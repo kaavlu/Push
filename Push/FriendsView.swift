@@ -13,6 +13,8 @@ import SwiftUI
 struct FriendsView: View {
     @Environment(\.pushLayout) private var layout
     private let onLocateFriend: (Person.ID) -> Bool
+    /// When set (e.g. from map Who’s here), expand that friend row after present.
+    @Binding private var focusFriendID: String?
     @StateObject private var viewModel: FriendsViewModel
     @StateObject private var groupsViewModel: GroupsViewModel
     @State private var mode: FriendsMode = .friends
@@ -23,8 +25,12 @@ struct FriendsView: View {
     @State private var toastMessage: String?
 
     @MainActor
-    init(onLocateFriend: @escaping (Person.ID) -> Bool = { _ in false }) {
+    init(
+        onLocateFriend: @escaping (Person.ID) -> Bool = { _ in false },
+        focusFriendID: Binding<String?> = .constant(nil)
+    ) {
         self.onLocateFriend = onLocateFriend
+        _focusFriendID = focusFriendID
         _viewModel = StateObject(wrappedValue: FriendsViewModel())
         _groupsViewModel = StateObject(wrappedValue: GroupsViewModel())
     }
@@ -32,9 +38,11 @@ struct FriendsView: View {
     init(
         viewModel: FriendsViewModel,
         groupsViewModel: GroupsViewModel,
-        onLocateFriend: @escaping (Person.ID) -> Bool = { _ in false }
+        onLocateFriend: @escaping (Person.ID) -> Bool = { _ in false },
+        focusFriendID: Binding<String?> = .constant(nil)
     ) {
         self.onLocateFriend = onLocateFriend
+        _focusFriendID = focusFriendID
         _viewModel = StateObject(wrappedValue: viewModel)
         _groupsViewModel = StateObject(wrappedValue: groupsViewModel)
     }
@@ -58,6 +66,17 @@ struct FriendsView: View {
                     groupsViewModel.closeDetail()
                 }
             }
+            .onAppear(perform: consumeFocusFriendIfNeeded)
+            .onChange(of: focusFriendID) { _ in
+                consumeFocusFriendIfNeeded()
+            }
+    }
+
+    private func consumeFocusFriendIfNeeded() {
+        guard let id = focusFriendID else { return }
+        mode = .friends
+        viewModel.expandFriend(id: id)
+        focusFriendID = nil
     }
 
     /// Drives profile-style cover presentation for group detail.

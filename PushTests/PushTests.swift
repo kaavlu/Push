@@ -515,6 +515,69 @@ final class PushTests: XCTestCase {
         )
     }
 
+    func testGroupContextTitleUsesCountAndVenue() throws {
+        let people: [FriendPuckData] = [
+            FriendPuckData(
+                name: "Ishan", avatarPlaceholder: "IS", activity: "Lunch",
+                activitySymbolName: "fork.knife", activityDisplayText: "Souvla",
+                availability: .joinable, venueStatusText: "At Souvla",
+                placeName: "Souvla"
+            ),
+            FriendPuckData(
+                name: "Viplove", avatarPlaceholder: "VI", activity: "Lunch",
+                activitySymbolName: "fork.knife", activityDisplayText: "Souvla",
+                availability: .joinable, venueStatusText: "With Ishan",
+                placeName: "Souvla"
+            )
+        ]
+        let puck = MapPuckData(
+            id: "puck-souvla",
+            kind: .hangout,
+            people: people,
+            activity: "Lunch",
+            availability: .joinable,
+            venueStatusText: "At Souvla",
+            coordinate: .init(latitude: 37.776, longitude: -122.424)
+        )
+        XCTAssertEqual(
+            FriendDetailSheetContent.groupContextTitle(for: puck),
+            "2 friends at Souvla"
+        )
+        XCTAssertEqual(
+            FriendDetailSheetContent.summaryTitle(for: puck),
+            "2 friends at Souvla"
+        )
+    }
+
+    func testGroupContextTitleTogetherWithoutVenue() throws {
+        let people: [FriendPuckData] = (0..<3).map { i in
+            FriendPuckData(
+                name: "P\(i)", avatarPlaceholder: "P", activity: "Hang",
+                activitySymbolName: "person.2.fill", activityDisplayText: "Hang",
+                availability: .joinable, venueStatusText: "Together"
+            )
+        }
+        let puck = MapPuckData(
+            id: "puck-together",
+            kind: .cluster,
+            people: people,
+            activity: "Hang",
+            availability: .joinable,
+            venueStatusText: "Together",
+            coordinate: .init(latitude: 37.77, longitude: -122.42)
+        )
+        XCTAssertEqual(
+            FriendDetailSheetContent.groupContextTitle(for: puck),
+            "3 friends together"
+        )
+    }
+
+    func testWhosHereOverflowThreshold() throws {
+        XCTAssertFalse(FriendDetailSheetContent.needsWhosHereOverflow(memberCount: 6))
+        XCTAssertTrue(FriendDetailSheetContent.needsWhosHereOverflow(memberCount: 7))
+        XCTAssertEqual(FriendDetailSheetContent.whosHereOverflowCount(memberCount: 9), 4)
+    }
+
     func testMultiPersonTitleForTwoPeopleUsesAmpersand() throws {
         let people: [FriendPuckData] = [
             FriendPuckData(

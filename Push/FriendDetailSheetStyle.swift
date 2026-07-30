@@ -44,31 +44,35 @@ enum FriendDetailSheetLayout {
 
     static let sheetCornerRadius: CGFloat = 32
 
-    /// Shared height for map puck detail sheets — info row + divider + actions.
-    /// Shrinks by one action row when Ask to join is absent so bottom padding
-    /// under Directions / Start push matches the join-available layout.
+    /// Height for map puck detail sheets.
+    /// Multi-person adds a fixed Who’s here block (2-row grid; overflow scrolls
+    /// inside that block). Join CTA absence still subtracts one action row.
     static func compactSheetHeight(
         _ layout: PushAdaptiveLayout,
-        showsAskToJoin: Bool = true
+        showsAskToJoin: Bool = true,
+        isMultiPerson: Bool = false
     ) -> CGFloat {
-        let withPrimary = layout.value(compact: 246, standard: 238, large: 232)
-        guard showsAskToJoin else {
-            return withPrimary - multiPersonSecondaryHeight - multiPersonActionsSpacing
+        var height = layout.value(compact: 246, standard: 238, large: 232)
+        if isMultiPerson {
+            height += multiPersonSectionSpacing + whosHereBlockHeight
         }
-        return withPrimary
+        if !showsAskToJoin {
+            height -= multiPersonSecondaryHeight + multiPersonActionsSpacing
+        }
+        return height
     }
 
     /// Legacy aliases.
     static func individualSheetHeight(_ layout: PushAdaptiveLayout) -> CGFloat {
-        compactSheetHeight(layout, showsAskToJoin: true)
+        compactSheetHeight(layout, showsAskToJoin: true, isMultiPerson: false)
     }
 
     static func multiPersonSheetHeight(_ layout: PushAdaptiveLayout) -> CGFloat {
-        compactSheetHeight(layout, showsAskToJoin: true)
+        compactSheetHeight(layout, showsAskToJoin: true, isMultiPerson: true)
     }
 
     static func hangoutSheetHeight(_ layout: PushAdaptiveLayout) -> CGFloat {
-        compactSheetHeight(layout, showsAskToJoin: true)
+        compactSheetHeight(layout, showsAskToJoin: true, isMultiPerson: true)
     }
 
     static let multiPersonSectionSpacing: CGFloat = 12
@@ -94,6 +98,34 @@ enum FriendDetailSheetLayout {
     static let multiPersonTopPadding: CGFloat = 26
     /// Avoid squashed subtitle text; truncate cleanly at the trailing edge.
     static let multiPersonSubtitleMinimumScale: CGFloat = 0.92
+
+    // MARK: - Who’s here member grid
+
+    static let whosHereTitle = "Who’s here"
+    static let whosHereColumnCount = 3
+    /// Show everyone when count ≤ this; above it, collapse to 5 + overflow.
+    static let whosHereDirectShowLimit = 6
+    static let whosHereCollapsedMemberSlots = 5
+    static let whosHereGridSpacing: CGFloat = 8
+    static let whosHerePuckHeight: CGFloat = 36
+    static let whosHereAvatarSize: CGFloat = 22
+    static let whosHereAvatarRingWidth: CGFloat = 1.5
+    static let whosHerePuckHorizontalPadding: CGFloat = 8
+    static let whosHereLabelSpacing: CGFloat = 6
+    static let whosHereSectionLabelSpacing: CGFloat = 8
+    static let whosHereExpandDragThreshold: CGFloat = 36
+    static let whosHereGridRowsVisible = 2
+
+    /// Fixed height for the member grid viewport (two rows + one inter-row gap).
+    static var whosHereGridViewportHeight: CGFloat {
+        CGFloat(whosHereGridRowsVisible) * whosHerePuckHeight
+            + CGFloat(whosHereGridRowsVisible - 1) * whosHereGridSpacing
+    }
+
+    /// Label + spacing + two-row grid.
+    static var whosHereBlockHeight: CGFloat {
+        16 + whosHereSectionLabelSpacing + whosHereGridViewportHeight
+    }
 
     // MARK: - Avatar stack (max 3 faces + overflow)
 
@@ -130,8 +162,46 @@ enum FriendDetailSheetContent {
         }
     }
 
-    /// Title for compact puck sheets.
-    /// 1: full display name (Friends row) · 2: `A & B` · 3: `A, B & C` · 4+: `A, B + N`.
+    /// Whether this puck uses the multi-person sheet (Who’s here grid).
+    static func isMultiPerson(_ puck: MapPuckData) -> Bool {
+        switch puck.kind {
+        case .hangout, .cluster, .friendGroup:
+            return true
+        case .individual:
+            return false
+        }
+    }
+
+    /// Summary title for multi-person sheets — group context, not name list.
+    /// Examples: `3 friends together`, `6 friends at Souvla`.
+    static func groupContextTitle(for puck: MapPuckData) -> String {
+        let members = displayMembers(for: puck)
+        let count = members.count
+        guard count > 0 else { return "Friends together" }
+        let noun = count == 1 ? "friend" : "friends"
+        let lead = members.first
+        let venue = compactVenueLabel(
+            venueStatusText: puck.venueStatusText,
+            placeName: lead?.placeName ?? ""
+        )
+        if !venue.isEmpty {
+            return "\(count) \(noun) at \(venue)"
+        }
+        return "\(count) \(noun) together"
+    }
+
+    /// Whether the Who’s here grid needs an overflow cell when collapsed.
+    static func needsWhosHereOverflow(memberCount: Int) -> Bool {
+        memberCount > FriendDetailSheetLayout.whosHereDirectShowLimit
+    }
+
+    /// Overflow remainder after showing `whosHereCollapsedMemberSlots` faces.
+    static func whosHereOverflowCount(memberCount: Int) -> Int {
+        max(0, memberCount - FriendDetailSheetLayout.whosHereCollapsedMemberSlots)
+    }
+
+    /// Title for compact individual sheets (full name) and legacy multi-name tests.
+    /// 1: full display name · 2: `A & B` · 3: `A, B & C` · 4+: `A, B + N`.
     static func multiPersonTitle(for people: [FriendPuckData]) -> String {
         guard !people.isEmpty else { return "Group" }
         if people.count == 1 {
@@ -151,6 +221,14 @@ enum FriendDetailSheetContent {
             let remainder = names.count - 2
             return "\(names[0]), \(names[1]) + \(remainder)"
         }
+    }
+
+    /// Sheet summary title: group context for multi-person, full name for individual.
+    static func summaryTitle(for puck: MapPuckData) -> String {
+        if isMultiPerson(puck) {
+            return groupContextTitle(for: puck)
+        }
+        return multiPersonTitle(for: displayMembers(for: puck))
     }
 
     /// Shared activity + venue line for the multi-person subtitle.

@@ -31,20 +31,23 @@ struct FriendDetailViewData {
 
 // MARK: - Sheet Root
 
-/// Map puck detail content. Individual and multi-person pucks share the same
-/// compact Friends-row layout (`FriendDetailGroupContent`) for a standardized popup.
+/// Map puck detail content. Multi-person sheets add Who’s here; individual stays summary + actions.
 struct FriendDetailSheet: View {
     let puck: MapPuckData
+    @Binding var isMembersExpanded: Bool
     var onStartPush: (StartPushLaunchContext) -> Void = { _ in }
+    var onSelectMember: (String) -> Void = { _ in }
     @State private var toastMessage: String?
 
     var body: some View {
         ZStack(alignment: .top) {
             FriendDetailGroupContent(
                 puck: puck,
+                isMembersExpanded: $isMembersExpanded,
                 onDirections: { triggerToast("Opening in Maps…") },
                 onAskToJoin: { triggerToast("Request sent") },
-                onStartPush: { startPush() }
+                onStartPush: { startPush() },
+                onSelectMember: onSelectMember
             )
 
             if let message = toastMessage {

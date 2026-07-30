@@ -21,6 +21,8 @@ struct ContentView: View {
     @State private var selectedPuck: MapPuckData?
     @State private var selectedRegionalPuck: RegionalPuckModel?
     @State private var startPushContext: StartPushLaunchContext?
+    /// Map Who’s here → expand this friend row when the Friends tab opens.
+    @State private var friendsFocusFriendID: String?
     /// Feed tab center + → create-post hub (fixture UI pass).
     @State private var isCreatePostPresented = false
     @State private var mapSpan = MapDefaults.region.span
@@ -73,10 +75,13 @@ struct ContentView: View {
             // Friends/Feed/Pushes stay under the map bottom nav (not fullScreenCovers)
             // so the floating bar keeps its position; + is contextual per tab.
             if isFriendsPresented {
-                FriendsView(onLocateFriend: locateFriendOnMap)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .transition(.opacity)
-                    .zIndex(TabOverlayLayout.zIndex)
+                FriendsView(
+                    onLocateFriend: locateFriendOnMap,
+                    focusFriendID: $friendsFocusFriendID
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .transition(.opacity)
+                .zIndex(TabOverlayLayout.zIndex)
             }
 
             if isFeedPresented {
@@ -132,7 +137,8 @@ struct ContentView: View {
                 FriendDetailBottomSheet(
                     puck: selectedPuck,
                     onDismiss: dismissSelectedPuck,
-                    onStartPush: launchStartPush
+                    onStartPush: launchStartPush,
+                    onSelectMember: openFriendOnFriendsTab
                 )
             }
 
@@ -320,7 +326,10 @@ struct ContentView: View {
         case .groups:
             // Friends is embedded under the bottom nav; keep a destination for
             // any residual MainMapRoute.groups presentation.
-            FriendsView(onLocateFriend: locateFriendOnMap)
+            FriendsView(
+                onLocateFriend: locateFriendOnMap,
+                focusFriendID: $friendsFocusFriendID
+            )
         case .profile:
             ProfileView {
                 presentedRoute = nil
@@ -429,6 +438,13 @@ struct ContentView: View {
 
     private func dismissSelectedPuck() {
         clearMapSheetSelection()
+    }
+
+    /// Dismiss the map sheet and open Friends with that person expanded.
+    private func openFriendOnFriendsTab(_ personID: String) {
+        clearMapSheetSelection()
+        friendsFocusFriendID = personID
+        selectedNavigationItem = .group
     }
 
     private func launchStartPush(_ context: StartPushLaunchContext) {

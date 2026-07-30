@@ -2,23 +2,29 @@
 //  FriendDetailGroupContent.swift
 //  Push
 //
-//  Issue #139 — compact map puck detail sheet for every exact-place puck kind
-//  (individual, hangout, cluster, friendGroup). Reads as an expanded Friends
-//  row: avatar(s), title, activity, status, actions.
+//  Issue #139 — compact map puck detail sheet.
+//  Multi-person: group summary + Who’s here grid + actions.
+//  Individual: summary + actions (no member grid).
 //
 
 import SwiftUI
 
-// MARK: - Multi-person sheet content
+// MARK: - Sheet content
 
 struct FriendDetailGroupContent: View {
     let puck: MapPuckData
+    @Binding var isMembersExpanded: Bool
     let onDirections: () -> Void
     let onAskToJoin: () -> Void
     let onStartPush: () -> Void
+    let onSelectMember: (String) -> Void
 
     private var members: [FriendPuckData] {
         FriendDetailSheetContent.displayMembers(for: puck)
+    }
+
+    private var isMultiPerson: Bool {
+        FriendDetailSheetContent.isMultiPerson(puck)
     }
 
     private var showsAskToJoin: Bool {
@@ -32,6 +38,9 @@ struct FriendDetailGroupContent: View {
     var body: some View {
         VStack(spacing: FriendDetailSheetLayout.multiPersonSectionSpacing) {
             infoRow
+            if isMultiPerson {
+                whosHereSection
+            }
             divider
             actions
         }
@@ -41,14 +50,14 @@ struct FriendDetailGroupContent: View {
         .frame(maxWidth: .infinity, alignment: .top)
     }
 
-    // MARK: Info row
+    // MARK: Summary
 
     private var infoRow: some View {
         HStack(alignment: .center, spacing: FriendDetailSheetLayout.multiPersonInfoSpacing) {
             MultiPersonAvatarStack(people: members)
 
             VStack(alignment: .leading, spacing: FriendDetailSheetLayout.multiPersonTextSpacing) {
-                Text(FriendDetailSheetContent.multiPersonTitle(for: members))
+                Text(FriendDetailSheetContent.summaryTitle(for: puck))
                     .font(.headline.weight(.semibold))
                     .foregroundStyle(PushControlColors.textEspresso)
                     .lineLimit(1)
@@ -115,6 +124,24 @@ struct FriendDetailGroupContent: View {
         .fixedSize(horizontal: true, vertical: false)
     }
 
+    // MARK: Who’s here
+
+    private var whosHereSection: some View {
+        VStack(alignment: .leading, spacing: FriendDetailSheetLayout.whosHereSectionLabelSpacing) {
+            Text(FriendDetailSheetLayout.whosHereTitle)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(PushControlColors.textEspresso)
+
+            WhosHereMemberGrid(
+                members: members,
+                isExpanded: isMembersExpanded,
+                onSelectMember: onSelectMember,
+                onExpand: { isMembersExpanded = true }
+            )
+            .frame(height: FriendDetailSheetLayout.whosHereGridViewportHeight)
+        }
+    }
+
     private var divider: some View {
         Rectangle()
             .fill(
@@ -130,7 +157,6 @@ struct FriendDetailGroupContent: View {
 
     private var actions: some View {
         VStack(spacing: FriendDetailSheetLayout.multiPersonActionsSpacing) {
-            // Yellow primary is always "Ask to join" — never swap Start push into it.
             if showsAskToJoin {
                 multiPersonActionButton(
                     label: "Ask to join",
@@ -161,8 +187,6 @@ struct FriendDetailGroupContent: View {
         case secondary
     }
 
-    /// Shared sheet action chrome — same height/radius/type for primary + secondary;
-    /// primary is full-width sunbeam yellow, secondary is glass-light.
     private func multiPersonActionButton(
         label: String,
         symbolName: String,
@@ -223,6 +247,147 @@ struct FriendDetailGroupContent: View {
                 FriendDetailSheetLayout.multiPersonSecondaryFillOpacity
             )
         }
+    }
+}
+
+// MARK: - Who’s here grid
+
+private struct WhosHereMemberGrid: View {
+    let members: [FriendPuckData]
+    let isExpanded: Bool
+    let onSelectMember: (String) -> Void
+    let onExpand: () -> Void
+
+    private var needsOverflow: Bool {
+        FriendDetailSheetContent.needsWhosHereOverflow(memberCount: members.count)
+    }
+
+    private var columns: [GridItem] {
+        Array(
+            repeating: GridItem(
+                .flexible(),
+                spacing: FriendDetailSheetLayout.whosHereGridSpacing
+            ),
+            count: FriendDetailSheetLayout.whosHereColumnCount
+        )
+    }
+
+    var body: some View {
+        if isExpanded || !needsOverflow {
+            ScrollView(.vertical, showsIndicators: false) {
+                LazyVGrid(columns: columns, spacing: FriendDetailSheetLayout.whosHereGridSpacing) {
+                    ForEach(members) { person in
+                        WhosHerePersonPuck(person: person) {
+                            onSelectMember(person.id)
+                        }
+                    }
+                }
+            }
+        } else {
+            LazyVGrid(columns: columns, spacing: FriendDetailSheetLayout.whosHereGridSpacing) {
+                ForEach(collapsedMembers) { person in
+                    WhosHerePersonPuck(person: person) {
+                        onSelectMember(person.id)
+                    }
+                }
+                WhosHereOverflowPuck(
+                    overflowCount: FriendDetailSheetContent.whosHereOverflowCount(
+                        memberCount: members.count
+                    ),
+                    action: onExpand
+                )
+            }
+        }
+    }
+
+    private var collapsedMembers: [FriendPuckData] {
+        Array(members.prefix(FriendDetailSheetLayout.whosHereCollapsedMemberSlots))
+    }
+}
+
+private struct WhosHerePersonPuck: View {
+    let person: FriendPuckData
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: FriendDetailSheetLayout.whosHereLabelSpacing) {
+                PushPersonAvatar(
+                    imageAssetName: person.profileImageAssetName,
+                    fallbackInitials: person.avatarPlaceholder,
+                    fallbackStyle: .dark,
+                    size: FriendDetailSheetLayout.whosHereAvatarSize
+                )
+                .overlay {
+                    Circle()
+                        .stroke(
+                            person.availability.accentColor.opacity(PushCreamTokens.ringOpacity),
+                            lineWidth: FriendDetailSheetLayout.whosHereAvatarRingWidth
+                        )
+                }
+
+                Text(FriendDetailSheetContent.firstName(person))
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(PushControlColors.textSecondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(PushOpacityTokens.minimumTextScale)
+            }
+            .padding(.horizontal, FriendDetailSheetLayout.whosHerePuckHorizontalPadding)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(height: FriendDetailSheetLayout.whosHerePuckHeight)
+            .background(Capsule().fill(secondaryFill))
+            .overlay {
+                Capsule()
+                    .stroke(
+                        PushColorPalette.Accent.walnut.opacity(
+                            FriendDetailSheetLayout.multiPersonSecondaryBorderOpacity
+                        ),
+                        lineWidth: FriendDetailSheetLayout.multiPersonSecondaryBorderWidth
+                    )
+            }
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(person.name)
+    }
+
+    private var secondaryFill: Color {
+        Color.white.opacity(FriendDetailSheetLayout.multiPersonSecondaryFillOpacity)
+    }
+}
+
+private struct WhosHereOverflowPuck: View {
+    let overflowCount: Int
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text("+ \(overflowCount) more")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(PushControlColors.textSecondary)
+                .lineLimit(1)
+                .minimumScaleFactor(PushOpacityTokens.minimumTextScale)
+                .padding(.horizontal, FriendDetailSheetLayout.whosHerePuckHorizontalPadding)
+                .frame(maxWidth: .infinity)
+                .frame(height: FriendDetailSheetLayout.whosHerePuckHeight)
+                .background(
+                    Capsule().fill(
+                        Color.white.opacity(
+                            FriendDetailSheetLayout.multiPersonSecondaryFillOpacity
+                        )
+                    )
+                )
+                .overlay {
+                    Capsule()
+                        .stroke(
+                            PushColorPalette.Accent.walnut.opacity(
+                                FriendDetailSheetLayout.multiPersonSecondaryBorderOpacity
+                            ),
+                            lineWidth: FriendDetailSheetLayout.multiPersonSecondaryBorderWidth
+                        )
+                }
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Show \(overflowCount) more people")
     }
 }
 
@@ -329,11 +494,14 @@ struct FriendDetailGroupContent_Previews: PreviewProvider {
                 FriendDetailGroupContent(
                     puck: previewPuck(people: [
                         previewPerson(name: "Ishan", initials: "IS"),
-                        previewPerson(name: "Viplove", initials: "VI")
+                        previewPerson(name: "Viplove", initials: "VI"),
+                        previewPerson(name: "Rohan", initials: "RO")
                     ]),
+                    isMembersExpanded: .constant(false),
                     onDirections: {},
                     onAskToJoin: {},
-                    onStartPush: {}
+                    onStartPush: {},
+                    onSelectMember: { _ in }
                 )
                 .padding(.bottom, 20)
                 .background(PushCreamTokens.solidCard)
