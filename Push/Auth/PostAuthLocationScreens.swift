@@ -7,59 +7,75 @@ import SwiftUI
 struct PostAuthLocationPrimerScreen: View {
     @Environment(\.pushLayout) private var layout
     @ObservedObject var model: PostAuthOnboardingViewModel
+    @State private var isMapReady = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
+            // Title/subtitle paint immediately — map warms underneath.
             OnboardingHeader(
                 title: "Know the move.",
                 subtitle: "A private live map for real friends — not a tracker."
             )
-            teachingMap
+            mapSlot
                 .padding(.top, LocationPrimerLayout.mapTop)
-            Text(LocationPrimerCopy.locationBody)
-                .font(OnboardingLabFont.text(15, .medium))
-                .foregroundStyle(OnboardingLabColor.textSecondary)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.top, LocationPrimerLayout.bodyTop)
-            if let error = model.errorMessage {
-                Text(error)
-                    .font(OnboardingLabFont.text(14, .medium))
-                    .foregroundStyle(.red)
-                    .padding(.top, LocationPrimerLayout.errorTop)
+
+            if isMapReady {
+                bodyAndActions
+                    .transition(.opacity.combined(with: .move(edge: .bottom)))
             }
-            Spacer(minLength: LocationPrimerLayout.ctaSpacerMin)
-            OnboardingCTAButton(title: model.isBusy ? "Enabling…" : "Enable location") {
-                Task { await model.enableLocation() }
-            }
-            .disabled(model.isBusy)
         }
         .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
         .padding(.top, OnboardingLabMetric.contentTopInset(layout))
         .padding(.bottom, LocationPrimerLayout.bottomPadding)
+        .animation(PushMotion.contentCrossfade, value: isMapReady)
         .task {
+            // Fixed SF coords only — never requests location authorization.
             await model.loadSelfPuckPreview()
         }
     }
 
-    private var teachingMap: some View {
-        // iOS 16 Map API — deployment target is 16.4 (not MapCameraPosition / Annotation).
-        Map(
-            coordinateRegion: .constant(teachingRegion),
-            interactionModes: [],
-            showsUserLocation: false,
-            annotationItems: selfPuckAnnotations
-        ) { item in
-            MapAnnotation(coordinate: item.coordinate) {
-                SelfPuckView(data: item.data)
+    /// Reserved-height slot: cream placeholder while MapKit tiles finish loading.
+    private var mapSlot: some View {
+        ZStack {
+            // Always mount so MapKit starts loading as early as possible.
+            PostAuthTeachingMapView(region: teachingRegion) {
+                guard !isMapReady else { return }
+                isMapReady = true
+            }
+            .opacity(isMapReady ? 1 : 0)
+
+            if isMapReady, let puck = model.selfPuck {
+                SelfPuckView(data: puck)
                     .scaleEffect(LocationPrimerLayout.puckScale)
                     .allowsHitTesting(false)
+                    .transition(.opacity)
+            }
+
+            if !isMapReady {
+                RoundedRectangle(
+                    cornerRadius: OnboardingLabMetric.cardCornerRadius,
+                    style: .continuous
+                )
+                .fill(OnboardingLabColor.fieldFill)
+                .accessibilityHidden(true)
             }
         }
         .frame(height: LocationPrimerLayout.mapHeight)
-        .clipShape(RoundedRectangle(cornerRadius: OnboardingLabMetric.cardCornerRadius, style: .continuous))
+        .clipShape(
+            RoundedRectangle(
+                cornerRadius: OnboardingLabMetric.cardCornerRadius,
+                style: .continuous
+            )
+        )
         .overlay(
-            RoundedRectangle(cornerRadius: OnboardingLabMetric.cardCornerRadius, style: .continuous)
-                .stroke(Color.white.opacity(LocationPrimerLayout.mapStrokeOpacity), lineWidth: LocationPrimerLayout.mapStrokeWidth)
+            RoundedRectangle(
+                cornerRadius: OnboardingLabMetric.cardCornerRadius,
+                style: .continuous
+            )
+            .stroke(
+                Color.white.opacity(LocationPrimerLayout.mapStrokeOpacity),
+                lineWidth: LocationPrimerLayout.mapStrokeWidth
+            )
         )
         .shadow(
             color: OnboardingLabColor.warmShadow.opacity(LocationPrimerLayout.mapShadowOpacity),
@@ -71,6 +87,26 @@ struct PostAuthLocationPrimerScreen: View {
         .accessibilityLabel("Map preview of you in San Francisco")
     }
 
+    @ViewBuilder
+    private var bodyAndActions: some View {
+        Text(LocationPrimerCopy.locationBody)
+            .font(OnboardingLabFont.text(15, .medium))
+            .foregroundStyle(OnboardingLabColor.textSecondary)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.top, LocationPrimerLayout.bodyTop)
+        if let error = model.errorMessage {
+            Text(error)
+                .font(OnboardingLabFont.text(14, .medium))
+                .foregroundStyle(.red)
+                .padding(.top, LocationPrimerLayout.errorTop)
+        }
+        Spacer(minLength: LocationPrimerLayout.ctaSpacerMin)
+        OnboardingCTAButton(title: model.isBusy ? "Enabling…" : "Enable location") {
+            Task { await model.enableLocation() }
+        }
+        .disabled(model.isBusy)
+    }
+
     private var teachingRegion: MKCoordinateRegion {
         MKCoordinateRegion(
             center: OnboardingMapDefaults.center,
@@ -80,18 +116,6 @@ struct PostAuthLocationPrimerScreen: View {
             )
         )
     }
-
-    private var selfPuckAnnotations: [LocationPrimerPuckAnnotation] {
-        guard let puck = model.selfPuck else { return [] }
-        return [LocationPrimerPuckAnnotation(data: puck)]
-    }
-}
-
-/// Identifiable wrapper for Map annotationItems (iOS 16 Map API).
-private struct LocationPrimerPuckAnnotation: Identifiable {
-    let data: SelfPuckData
-    var id: String { data.id }
-    var coordinate: CLLocationCoordinate2D { data.coordinate }
 }
 
 // MARK: - Location blocked

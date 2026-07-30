@@ -159,6 +159,55 @@ final class PostAuthOnboardingTests: XCTestCase {
         XCTAssertEqual(vm.selfPuck?.id, user.id)
     }
 
+    /// Primer appear / puck preview must never request OS location authorization.
+    func testPrimerLoadDoesNotStartLocationUntilEnable() async {
+        let session = FakeLocationSession(
+            state: LocationTrackingState(authorization: .notDetermined)
+        )
+        let vm = PostAuthOnboardingViewModel(
+            container: AppDataContainer(seed: .standard()),
+            locationSession: session
+        )
+        XCTAssertEqual(vm.screen, .locationPrimer)
+        XCTAssertEqual(session.startIfEligibleCount, 0)
+
+        await vm.loadSelfPuckPreview()
+        XCTAssertNotNil(vm.selfPuck)
+        XCTAssertEqual(session.startIfEligibleCount, 0)
+
+        // Only the Enable CTA path may request authorization.
+        await vm.enableLocation()
+        XCTAssertEqual(session.startIfEligibleCount, 1)
+    }
+
+    func testSkipNotificationsGoesToContactsWithoutBlocking() async {
+        let vm = makeVM(auth: .whenInUse)
+        await vm.enableLocation()
+        vm.continueFromGhost()
+        vm.continueFromCoordinate()
+        XCTAssertEqual(vm.screen, .notifications)
+        await vm.skipNotifications()
+        XCTAssertEqual(vm.screen, .contacts)
+    }
+
+    func testRetryLocationAccessIncrementsStartIfEligible() async {
+        let session = FakeLocationSession(
+            state: LocationTrackingState(authorization: .denied)
+        )
+        let vm = PostAuthOnboardingViewModel(
+            container: AppDataContainer(seed: .standard()),
+            locationSession: session
+        )
+        await vm.enableLocation()
+        XCTAssertEqual(session.startIfEligibleCount, 1)
+        XCTAssertEqual(vm.screen, .locationBlocked)
+
+        session.setAuthorization(.whenInUse)
+        await vm.retryLocationAccess()
+        XCTAssertEqual(session.startIfEligibleCount, 2)
+        XCTAssertEqual(vm.screen, .ghost)
+    }
+
     func testGoBackStack() async {
         let vm = makeVM(auth: .whenInUse)
         await vm.enableLocation()
