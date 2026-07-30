@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		13315C5D3EAE658F2C948566 /* AddYoursPartialAppendTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 955193270E59D653D8D91481 /* AddYoursPartialAppendTests.swift */; };
+		9CAC3C86D8EB3D01601926A4 /* AddYoursAppendTestDoubles.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9419DD1356FC5CECF609E6F /* AddYoursAppendTestDoubles.swift */; };
+		F97807EE9040D517A9CCD627 /* AddYoursAppendTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16B6FBF0A573316E1B8BD66F /* AddYoursAppendTests.swift */; };
+		4EE20D2A3884949DB191A974 /* AddYoursViewModel+Append.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAEFAF88E20A454F00B8CCC5 /* AddYoursViewModel+Append.swift */; };
+		D44B4270FED417127DD0F48B /* AddYoursViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7983D4756B613312DF585958 /* AddYoursViewModel.swift */; };
 		F765CB0F7835A1A949AC20AE /* CreatePostHubBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FA520CB1AFA89EAA51B5B8D /* CreatePostHubBuilderTests.swift */; };
 		5BC27660E516781C9E9AADC5 /* CreatePostPublishTestDoubles.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5EA99C12398531EC04285FB /* CreatePostPublishTestDoubles.swift */; };
 		460F67C0910A0F0E478EED2B /* CreatePostPublishTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23AF9B70E414DF28ED10F8C7 /* CreatePostPublishTests.swift */; };
@@ -412,6 +417,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		955193270E59D653D8D91481 /* AddYoursPartialAppendTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddYoursPartialAppendTests.swift"; sourceTree = "<group>"; };
+		D9419DD1356FC5CECF609E6F /* AddYoursAppendTestDoubles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddYoursAppendTestDoubles.swift"; sourceTree = "<group>"; };
+		16B6FBF0A573316E1B8BD66F /* AddYoursAppendTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddYoursAppendTests.swift"; sourceTree = "<group>"; };
+		AAEFAF88E20A454F00B8CCC5 /* AddYoursViewModel+Append.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddYoursViewModel+Append.swift"; sourceTree = "<group>"; };
+		7983D4756B613312DF585958 /* AddYoursViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddYoursViewModel.swift"; sourceTree = "<group>"; };
 		9FA520CB1AFA89EAA51B5B8D /* CreatePostHubBuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostHubBuilderTests.swift"; sourceTree = "<group>"; };
 		D5EA99C12398531EC04285FB /* CreatePostPublishTestDoubles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostPublishTestDoubles.swift"; sourceTree = "<group>"; };
 		23AF9B70E414DF28ED10F8C7 /* CreatePostPublishTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostPublishTests.swift"; sourceTree = "<group>"; };
@@ -854,6 +864,8 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				AAEFAF88E20A454F00B8CCC5 /* AddYoursViewModel+Append.swift */,
+				7983D4756B613312DF585958 /* AddYoursViewModel.swift */,
 				BCEB91C2E462468A7DBFEE49 /* CreatePostViewModel+Presentation.swift */,
 				3BF867E46FBABEFB083C9385 /* CreatePostViewModel+Friends.swift */,
 				33126E12A678807BB8DEC6FF /* CreatePostViewModel+Publish.swift */,
@@ -1183,6 +1195,9 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				955193270E59D653D8D91481 /* AddYoursPartialAppendTests.swift */,
+				D9419DD1356FC5CECF609E6F /* AddYoursAppendTestDoubles.swift */,
+				16B6FBF0A573316E1B8BD66F /* AddYoursAppendTests.swift */,
 				9FA520CB1AFA89EAA51B5B8D /* CreatePostHubBuilderTests.swift */,
 				D5EA99C12398531EC04285FB /* CreatePostPublishTestDoubles.swift */,
 				23AF9B70E414DF28ED10F8C7 /* CreatePostPublishTests.swift */,
@@ -1401,6 +1416,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				4EE20D2A3884949DB191A974 /* AddYoursViewModel+Append.swift in Sources */,
+				D44B4270FED417127DD0F48B /* AddYoursViewModel.swift in Sources */,
 				DD932E9AE6DD7863C560CD86 /* CreatePostViewModel+Presentation.swift in Sources */,
 				EDB0DE9829259544727C6EEE /* CreatePostViewModel+Friends.swift in Sources */,
 				A07B668590A03C17532E71BB /* CreatePostViewModel+Publish.swift in Sources */,
@@ -1721,6 +1738,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				13315C5D3EAE658F2C948566 /* AddYoursPartialAppendTests.swift in Sources */,
+				9CAC3C86D8EB3D01601926A4 /* AddYoursAppendTestDoubles.swift in Sources */,
+				F97807EE9040D517A9CCD627 /* AddYoursAppendTests.swift in Sources */,
 				F765CB0F7835A1A949AC20AE /* CreatePostHubBuilderTests.swift in Sources */,
 				5BC27660E516781C9E9AADC5 /* CreatePostPublishTestDoubles.swift in Sources */,
 				460F67C0910A0F0E478EED2B /* CreatePostPublishTests.swift in Sources */,

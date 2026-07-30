@@ -111,12 +111,9 @@ enum FeedMediaBottomStyle {
     static let avatarStrokeWidth: CGFloat = 1.5
     static let avatarStrokeOpacity = 0.92
     static let avatarToTextSpacing: CGFloat = 10
-    static let textStackSpacing: CGFloat = 2
 
     static let namesFont = Font.subheadline.weight(.semibold)
-    static let contributorFont = Font.caption.weight(.medium)
     static let textColor = Color.white
-    static let contributorOpacity = 0.88
     static let textShadowRadius: CGFloat = 2
     static let textShadowY: CGFloat = 1
 

@@ -6,6 +6,9 @@
 //  aligned like Feed/Pushes), form-card media stage, fixed primary CTA.
 //  Thumb strip stays pinned above the button — no scroll to manage selection.
 //
+//  The album, the capacity, and whether the action is offered at all come from
+//  the Moment the view model loads (S8) — never from the Feed card that opened it.
+//
 
 import PhotosUI
 import SwiftUI
@@ -37,8 +40,19 @@ struct AddYoursView: View {
                 if viewModel.phase == .success {
                     successContent
                 } else {
-                    composingContent
+                    loadedContent
                 }
+            }
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if let actionError = viewModel.actionError {
+                ActionErrorBanner(
+                    message: actionError.message,
+                    onRetry: { Task { await viewModel.retrySubmit() } },
+                    onDismiss: { viewModel.dismissActionError() }
+                )
+                .padding(.horizontal, AddYoursLayout.horizontalPadding(layout))
+                .padding(.bottom, AddYoursLayout.bottomPadding(layout))
             }
         }
         .animation(PushMotion.contentCrossfade, value: viewModel.phase)
@@ -60,6 +74,48 @@ struct AddYoursView: View {
             .opacity(viewModel.phase == .submitting ? PushOpacityTokens.disabledControl : 1)
             .disabled(viewModel.phase == .submitting)
         }
+    }
+
+    // MARK: - Load states (DS-070/071)
+
+    @ViewBuilder
+    private var loadedContent: some View {
+        switch viewModel.contentPhase {
+        case .loading, .deferred:
+            EmptySurfaceStateView.loading
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        case .failed:
+            EmptySurfaceStateView.failed(surface: AddYoursCopy.surfaceName) {
+                Task { await viewModel.load() }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        case .empty, .content:
+            if viewModel.isDenied {
+                blockedState(
+                    title: AddYoursCopy.deniedTitle,
+                    message: AddYoursCopy.deniedMessage,
+                    systemImage: "lock"
+                )
+            } else if viewModel.isFull {
+                blockedState(
+                    title: AddYoursCopy.fullTitle,
+                    message: AddYoursCopy.fullMessage,
+                    systemImage: "rectangle.stack"
+                )
+            } else {
+                composingContent
+            }
+        }
+    }
+
+    private func blockedState(
+        title: String,
+        message: String,
+        systemImage: String
+    ) -> some View {
+        EmptySurfaceView(title: title, message: message, systemImage: systemImage)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .padding(.horizontal, AddYoursLayout.horizontalPadding(layout))
     }
 
     // MARK: - Composing (fixed layout — no page scroll)
@@ -153,25 +209,28 @@ struct AddYoursView: View {
 struct AddYoursView_Previews: PreviewProvider {
     static var previews: some View {
         PushPreviewMatrix {
-            AddYoursView(context: AddYoursFixtures.sampleContext)
+            AddYoursView(
+                context: AddYoursFixtures.sampleContext,
+                viewModel: previewViewModel()
+            )
         }
 
         PushPreviewMatrix {
             AddYoursView(
                 context: AddYoursFixtures.sampleContext,
-                viewModel: seededPreviewViewModel()
+                viewModel: previewViewModel(seeded: true)
             )
         }
     }
 
+    /// Preview seam only — no repository, so nothing here can be published.
     @MainActor
-    private static func seededPreviewViewModel() -> AddYoursViewModel {
-        let viewModel = AddYoursViewModel(
-            context: AddYoursFixtures.sampleContext,
+    private static func previewViewModel(seeded: Bool = false) -> AddYoursViewModel {
+        AddYoursViewModel(
+            previewDetail: AddYoursFixtures.previewDetail,
+            items: seeded ? AddYoursFixtures.sampleDraftItems() : [],
             timing: .immediate
         )
-        viewModel.seed(with: AddYoursFixtures.sampleDraftItems())
-        return viewModel
     }
 }
 #endif

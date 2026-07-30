@@ -101,22 +101,36 @@ final class SupabaseMomentRepository: MomentRepository {
     /// Per item, like the RPC: a rejected item leaves the earlier appends
     /// committed (contract §7.7 partial batch keeps successes).
     func appendMedia(momentID: Moment.ID, items: [MomentMediaDraft]) async throws {
-        for item in items {
-            try await run("appendMomentMedia") {
-                try await client
-                    .rpc(
-                        "append_moment_media",
-                        params: AppendMomentMediaParams(
-                            p_moment_id: momentID,
-                            p_kind: item.kind.rawValue,
-                            p_storage_path: item.storagePath,
-                            p_public_url: item.publicURL,
-                            p_poster_path: item.posterPath,
-                            p_poster_url: item.posterURL
-                        )
-                    )
-                    .execute()
+        var appended = false
+        do {
+            for item in items {
+                try await append(item, momentID: momentID)
+                appended = true
             }
+        } catch {
+            // A partial batch still changed the feed — notify for what committed
+            // before the rejection propagates to the caller.
+            if appended { await store?.notifyMomentsChanged() }
+            throw error
+        }
+        if appended { await store?.notifyMomentsChanged() }
+    }
+
+    private func append(_ item: MomentMediaDraft, momentID: Moment.ID) async throws {
+        try await run("appendMomentMedia") {
+            try await client
+                .rpc(
+                    "append_moment_media",
+                    params: AppendMomentMediaParams(
+                        p_moment_id: momentID,
+                        p_kind: item.kind.rawValue,
+                        p_storage_path: item.storagePath,
+                        p_public_url: item.publicURL,
+                        p_poster_path: item.posterPath,
+                        p_poster_url: item.posterURL
+                    )
+                )
+                .execute()
         }
     }
 

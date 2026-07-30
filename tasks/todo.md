@@ -1,46 +1,44 @@
-# Issue #126 — Moments S7: connect Create Post to live Moment publishing
+# Issue #127 — Moments S8: connect Add Yours to Moment media append
 
 ## Status
 
-- [x] Hub reads repositories: `MomentRepository.hubMoments()` → Existing Moments,
-      `PushRepository.historicalPlans` (current + previous month) → Past Pushes,
-      friend catalog from `FriendRepository` (real `Person.ID`s as tag ids)
-- [x] `CreatePostHubBuilder` — `MomentSummary` → chooser row (contributors =
-      distinct visible uploaders; chip from capabilities); `PushPlan` → past-Push
-      row (prefill = `response == .in` minus self and unknown ids)
-- [x] One-Moment-per-Push: rows exclude Push slots the viewer can see consumed;
-      a Moment the viewer can't see leaves the row listed and the RPC rejects the
-      publish (`momentExistsForPush`) — client filtering is a hint, not authorization
-- [x] Media drafts carry `MomentMediaUpload` bytes (`CreatePostMediaLoader`:
-      photos re-encoded to JPEG, videos keep mp4/quicktime, poster deferred)
-- [x] Publish = `MomentMediaPublisher.publishPending` (upload → `createMoment` →
-      orphan rollback) with local pre-flight validation
-- [x] States: hub loading/failed/empty (DS-070), submitting/success, recoverable
-      `ActionErrorBanner` on compose with Retry; duplicate submit blocked
-- [x] Refresh after publish: mock via store revision, live via
-      `LiveDataStore.notifyMomentsChanged()` (Feed + hub reload)
-- [x] `AppDataContainer.momentMedia` seam (mock local files / live bucket / nil
-      for loader-only live containers)
-- [x] ViewModel split by responsibility (`+Hub`, `+Friends`, `+Presentation`,
-      `+Publish`) to stay inside the file-size rule
-- [x] Tests: `CreatePostPublishTests` (16), `CreatePostHubBuilderTests` (5),
-      live-container isolation for `momentMedia` — `scripts/test.sh full` green (799)
+- [x] `AddYoursContext` carries the Moment identity only; the screen loads its
+      album, capabilities, and capacity from `MomentRepository.moment(id:)`
+      (Feed cards are a launch hint, never live state)
+- [x] Affordance shaped by `MomentCapabilities.canAddMedia` (denied surface for a
+      stale card) and by `MomentLimits.maxActiveMedia` minus the viewer-visible
+      album (full surface at capacity)
+- [x] Picker uses `CreatePostMediaLoader`, so drafts carry `MomentMediaUpload`
+      bytes; selection clamps to the remaining slots
+- [x] Append is per item: `MomentMediaPublisher.append(useMomentFolder: true)`
+      (upload under `{moment_id}/…`, migration 0024) → `appendMedia` with a
+      single draft → object rollback only for the item whose RPC failed
+- [x] Partial success: committed drafts leave the composer, the remainder stays
+      for Retry, and the banner states what landed
+- [x] Refresh after success *and* partial success: detail reloads, mock store
+      revision reloads Feed, live `appendMedia` now calls
+      `LiveDataStore.notifyMomentsChanged()` (including after a partial batch)
+- [x] Load states: loading / failed+retry / denied / full (DS-070/071);
+      `ActionErrorBanner` for recoverable append failures
+- [x] ViewModel split (`AddYoursViewModel`, `+Append`) to stay inside the
+      file-size rule; preview seam is a fixture `MomentDetail` with no repository
+- [x] Tests: `AddYoursAppendTests` (11), `AddYoursPartialAppendTests` (7),
+      updated `AddYoursViewModelTests` — `scripts/test.sh full` green (815)
 
-## Out of scope (S8–S9)
+## Out of scope (S9)
 
-Add Yours / media append, existing-Moment metadata + tag editing (that compose
-path deliberately still ends in a local success), reorder, self-removal,
+Metadata/tag editing on an existing Moment, media reorder, media/self-tag/Moment
 deletion, Realtime, notifications, Feed › Now.
 
 ## Notes
 
-- Fixtures survive only behind `CreatePostViewModel(existingMoments:…)`, the
-  preview seam — no app path can reach them.
-- Feed card ids are Moment ids since S6, so `feedMomentID(forCarouselID:)` was
-  dropped rather than double-prefixing edit-from-feed deep links.
+- Per-item `appendMedia` calls (one draft each) are what make partial success
+  work: the RPC commits per item, so batching would blur which object to roll back.
+- Server cap rejection mid-batch is treated as an ordinary recoverable error —
+  the local capacity check is a pre-flight, not authorization.
 - Not visually verified in the simulator this session; build + full suite are
   the evidence.
 
 ## Next
 
-S8 — existing-Moment metadata/tag edit + Add Yours append.
+S9 — existing-Moment metadata/tag edit, reorder, and deletion.
