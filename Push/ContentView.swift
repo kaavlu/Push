@@ -27,9 +27,6 @@ struct ContentView: View {
     @State private var forcedRenderSpan: MKCoordinateSpan?
     /// Skip the first `.active` after launch — bootstrap already warms the live store.
     @State private var hasEnteredBackground = false
-    /// True only while a map puck/regional sheet fully covers the nav.
-    /// Cleared at dismiss *start* so the bar is already present (no pop-in).
-    @State private var hidesBottomNavForMapSheet = false
 
     private var isPlansPresented: Bool {
         selectedNavigationItem == .plans
@@ -46,10 +43,6 @@ struct ContentView: View {
     /// Friends/Feed/Pushes overlays hide map chrome and keep the shared bottom nav.
     private var isTabOverlayPresented: Bool {
         isPlansPresented || isFriendsPresented || isFeedPresented
-    }
-
-    private var showsFloatingBottomNav: Bool {
-        !isTabOverlayPresented && !hidesBottomNavForMapSheet
     }
 
     var body: some View {
@@ -123,9 +116,9 @@ struct ContentView: View {
                 .zIndex(TopDropdownLayout.expandedZIndex)
             }
 
-            // Hide while a map sheet covers the bottom edge. Restored at dismiss
-            // *start* (not end) with no animation so the bar is already present.
-            if showsFloatingBottomNav {
+            // Always present on the map — puck sheets layer above (higher zIndex)
+            // so open/close never moves or remounts the navbar.
+            if !isTabOverlayPresented {
                 BottomNavigationBar(
                     selectedItem: $selectedNavigationItem,
                     action: selectNavigationItem
@@ -133,13 +126,11 @@ struct ContentView: View {
                 .padding(.horizontal, BottomNavigationLayout.horizontalMargin(layout))
                 .padding(.bottom, BottomNavigationLayout.bottomMargin(layout))
                 .zIndex(TabOverlayLayout.bottomNavZIndex)
-                .transaction { $0.animation = nil }
             }
 
             if !isTabOverlayPresented, let selectedPuck {
                 FriendDetailBottomSheet(
                     puck: selectedPuck,
-                    onWillDismiss: revealBottomNavForMapSheet,
                     onDismiss: dismissSelectedPuck,
                     onStartPush: launchStartPush
                 )
@@ -422,41 +413,18 @@ struct ContentView: View {
     private func presentSelectedPuck(_ puck: MapPuckData) {
         // Sheet owns its slide animation (offset), so identity changes stay
         // unanimated — otherwise glass hangout actions paint before the chrome.
-        var transaction = Transaction()
-        transaction.animation = nil
-        withTransaction(transaction) {
-            selectedRegionalPuck = nil
-            selectedPuck = puck
-            hidesBottomNavForMapSheet = true
-        }
+        selectedRegionalPuck = nil
+        selectedPuck = puck
     }
 
     private func presentRegionalPuck(_ regional: RegionalPuckModel) {
-        var transaction = Transaction()
-        transaction.animation = nil
-        withTransaction(transaction) {
-            selectedPuck = nil
-            selectedRegionalPuck = regional
-            hidesBottomNavForMapSheet = true
-        }
-    }
-
-    private func revealBottomNavForMapSheet() {
-        var transaction = Transaction()
-        transaction.animation = nil
-        withTransaction(transaction) {
-            hidesBottomNavForMapSheet = false
-        }
+        selectedPuck = nil
+        selectedRegionalPuck = regional
     }
 
     private func clearMapSheetSelection() {
-        var transaction = Transaction()
-        transaction.animation = nil
-        withTransaction(transaction) {
-            selectedPuck = nil
-            selectedRegionalPuck = nil
-            hidesBottomNavForMapSheet = false
-        }
+        selectedPuck = nil
+        selectedRegionalPuck = nil
     }
 
     private func dismissSelectedPuck() {
