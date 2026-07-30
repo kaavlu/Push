@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		341346A8E70C06343B64E3B6 /* PostAuthOnboardingViewModel+Connect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 611398307E42BAA6B32C6155 /* PostAuthOnboardingViewModel+Connect.swift */; };
+		7FEBB888A12A8B492F6BCE9D /* PostAuthConnectScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CD9FCA63ED8171655B6635A /* PostAuthConnectScreens.swift */; };
+		A9EE892BF2DA2824544374F6 /* DeviceContactsProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D4A24A242FCA4618E18CB9D /* DeviceContactsProvider.swift */; };
+		00D3C188A4ADC3C96E6ADB13 /* ContactsProviding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C73535EC742F6F898AF65D9 /* ContactsProviding.swift */; };
 		E047F792170AB15E2D2AE446 /* PostAuthNotificationsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9E523A01A44B4D87AABBCB8 /* PostAuthNotificationsScreen.swift */; };
 		49EF221B2E0A60C16FF9A607 /* PostAuthTeachingMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = D19E40CB5129A022A52FEA43 /* PostAuthTeachingMap.swift */; };
 		43DC2E974D2D3D8EF7BAD504 /* PostAuthLocationScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4E363C3B0B11F73BE080022 /* PostAuthLocationScreens.swift */; };
@@ -415,6 +419,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		611398307E42BAA6B32C6155 /* PostAuthOnboardingViewModel+Connect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PostAuthOnboardingViewModel+Connect.swift"; path = "Auth/PostAuthOnboardingViewModel+Connect.swift"; sourceTree = "<group>"; };
+		7CD9FCA63ED8171655B6635A /* PostAuthConnectScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PostAuthConnectScreens.swift"; path = "Auth/PostAuthConnectScreens.swift"; sourceTree = "<group>"; };
+		3D4A24A242FCA4618E18CB9D /* DeviceContactsProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "DeviceContactsProvider.swift"; path = "Data/Contacts/DeviceContactsProvider.swift"; sourceTree = "<group>"; };
+		8C73535EC742F6F898AF65D9 /* ContactsProviding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "ContactsProviding.swift"; path = "Data/Domain/ContactsProviding.swift"; sourceTree = "<group>"; };
 		B9E523A01A44B4D87AABBCB8 /* PostAuthNotificationsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PostAuthNotificationsScreen.swift"; path = "Auth/PostAuthNotificationsScreen.swift"; sourceTree = "<group>"; };
 		D19E40CB5129A022A52FEA43 /* PostAuthTeachingMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PostAuthTeachingMap.swift"; path = "Auth/PostAuthTeachingMap.swift"; sourceTree = "<group>"; };
 		C4E363C3B0B11F73BE080022 /* PostAuthLocationScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PostAuthLocationScreens.swift"; path = "Auth/PostAuthLocationScreens.swift"; sourceTree = "<group>"; };
@@ -860,6 +868,10 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				611398307E42BAA6B32C6155 /* PostAuthOnboardingViewModel+Connect.swift */,
+				7CD9FCA63ED8171655B6635A /* PostAuthConnectScreens.swift */,
+				3D4A24A242FCA4618E18CB9D /* DeviceContactsProvider.swift */,
+				8C73535EC742F6F898AF65D9 /* ContactsProviding.swift */,
 				B9E523A01A44B4D87AABBCB8 /* PostAuthNotificationsScreen.swift */,
 				D19E40CB5129A022A52FEA43 /* PostAuthTeachingMap.swift */,
 				C4E363C3B0B11F73BE080022 /* PostAuthLocationScreens.swift */,
@@ -1410,6 +1422,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				341346A8E70C06343B64E3B6 /* PostAuthOnboardingViewModel+Connect.swift in Sources */,
+				7FEBB888A12A8B492F6BCE9D /* PostAuthConnectScreens.swift in Sources */,
+				A9EE892BF2DA2824544374F6 /* DeviceContactsProvider.swift in Sources */,
+				00D3C188A4ADC3C96E6ADB13 /* ContactsProviding.swift in Sources */,
 				E047F792170AB15E2D2AE446 /* PostAuthNotificationsScreen.swift in Sources */,
 				49EF221B2E0A60C16FF9A607 /* PostAuthTeachingMap.swift in Sources */,
 				43DC2E974D2D3D8EF7BAD504 /* PostAuthLocationScreens.swift in Sources */,

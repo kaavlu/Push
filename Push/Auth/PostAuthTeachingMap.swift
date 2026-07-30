@@ -68,12 +68,23 @@ struct PostAuthTeachingMapView: UIViewRepresentable {
         }
 
         func mapViewDidFinishLoadingMap(_ mapView: MKMapView) {
-            notifyReady()
+            // Finish-loading often fires before satellite tiles fully paint.
+            scheduleSettledReady()
         }
 
         func mapViewDidFailLoadingMap(_ mapView: MKMapView, withError error: Error) {
             // Still reveal — better a partial map than an infinite cream placeholder.
             notifyReady()
+        }
+
+        /// Extra beat after MapKit's finish callback so imagery can catch up.
+        private func scheduleSettledReady() {
+            guard !didNotify else { return }
+            fallbackTask?.cancel()
+            fallbackTask = Task { @MainActor [weak self] in
+                try? await Task.sleep(nanoseconds: TeachingMapReady.settleNanoseconds)
+                self?.notifyReady()
+            }
         }
 
         private func notifyReady() {
@@ -95,5 +106,7 @@ struct PostAuthTeachingMapView: UIViewRepresentable {
 
 private enum TeachingMapReady {
     /// Upper bound if MapKit never signals finish (offline / stalled tiles).
-    static let fallbackNanoseconds: UInt64 = 2_500_000_000
+    static let fallbackNanoseconds: UInt64 = 1_800_000_000
+    /// After `mapViewDidFinishLoadingMap`, wait before treating the map as paint-ready.
+    static let settleNanoseconds: UInt64 = 320_000_000
 }

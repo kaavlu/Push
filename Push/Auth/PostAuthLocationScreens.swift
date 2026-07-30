@@ -7,58 +7,108 @@ import SwiftUI
 struct PostAuthLocationPrimerScreen: View {
     @Environment(\.pushLayout) private var layout
     @ObservedObject var model: PostAuthOnboardingViewModel
+    /// How far the top-down cascade has progressed (title → … → CTA).
+    @State private var revealStep: Int = 0
+    /// MapKit finished loading (tiles may still settle briefly before reveal).
     @State private var isMapReady = false
+    /// Prevents double cascade if map ready fires twice.
+    @State private var didContinueAfterMap = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Title/subtitle paint immediately — map warms underneath.
-            OnboardingHeader(
-                title: "Know the move.",
-                subtitle: "A private live map for real friends — not a tracker."
-            )
+            titleBlock
+            subtitleBlock
+                .padding(.top, LocationPrimerLayout.subtitleTop)
             mapSlot
                 .padding(.top, LocationPrimerLayout.mapTop)
-
-            if isMapReady {
-                bodyAndActions
-                    .transition(.opacity.combined(with: .move(edge: .bottom)))
+            bodyCopy
+                .padding(.top, LocationPrimerLayout.bodyTop)
+            if let error = model.errorMessage {
+                Text(error)
+                    .font(OnboardingLabFont.text(14, .medium))
+                    .foregroundStyle(.red)
+                    .padding(.top, LocationPrimerLayout.errorTop)
+                    .opacity(revealStep >= LocationPrimerReveal.cta ? 1 : 0)
             }
+            Spacer(minLength: LocationPrimerLayout.ctaSpacerMin)
+            OnboardingCTAButton(title: model.isBusy ? "Enabling…" : "Enable location") {
+                Task { await model.enableLocation() }
+            }
+            .disabled(model.isBusy || revealStep < LocationPrimerReveal.cta)
+            .opacity(opacity(for: LocationPrimerReveal.cta))
+            .offset(y: offset(for: LocationPrimerReveal.cta))
         }
         .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
         .padding(.top, OnboardingLabMetric.contentTopInset(layout))
         .padding(.bottom, LocationPrimerLayout.bottomPadding)
+        .animation(PushMotion.contentCrossfade, value: revealStep)
         .animation(PushMotion.contentCrossfade, value: isMapReady)
         .task {
-            // Fixed SF coords only — never requests location authorization.
+            // Profile puck + fixed SF only — never requests location authorization.
             await model.loadSelfPuckPreview()
+            await runOpeningCascade()
+        }
+        .onChange(of: isMapReady) { ready in
+            guard ready else { return }
+            Task { await continueCascadeAfterMapReady() }
         }
     }
 
-    /// Reserved-height slot: cream placeholder while MapKit tiles finish loading.
+    private var titleBlock: some View {
+        Text("Know the move.")
+            .font(OnboardingLabFont.rounded(30, .heavy))
+            .foregroundStyle(OnboardingLabColor.espresso)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .opacity(opacity(for: LocationPrimerReveal.title))
+            .offset(y: offset(for: LocationPrimerReveal.title))
+    }
+
+    private var subtitleBlock: some View {
+        Text("A private live map for real friends — not a tracker.")
+            .font(OnboardingLabFont.text(16, .medium))
+            .foregroundStyle(OnboardingLabColor.textSecondary)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .opacity(opacity(for: LocationPrimerReveal.subtitle))
+            .offset(y: offset(for: LocationPrimerReveal.subtitle))
+    }
+
+    private var bodyCopy: some View {
+        Text(LocationPrimerCopy.locationBody)
+            .font(OnboardingLabFont.text(15, .medium))
+            .foregroundStyle(OnboardingLabColor.textSecondary)
+            .fixedSize(horizontal: false, vertical: true)
+            .opacity(opacity(for: LocationPrimerReveal.body))
+            .offset(y: offset(for: LocationPrimerReveal.body))
+    }
+
+    /// Reserved-height card: cream fades in while MapKit warms; map crossfades when paint-ready.
     private var mapSlot: some View {
-        ZStack {
-            // Always mount so MapKit starts loading as early as possible.
+        let showCard = revealStep >= LocationPrimerReveal.mapCard
+        let showMap = revealStep >= LocationPrimerReveal.mapPainted && isMapReady
+        return ZStack {
+            // Always mounted so tiles load during title/subtitle cascade.
             PostAuthTeachingMapView(region: teachingRegion) {
                 guard !isMapReady else { return }
                 isMapReady = true
             }
-            .opacity(isMapReady ? 1 : 0)
+            .opacity(showMap ? 1 : 0)
 
-            if isMapReady, let puck = model.selfPuck {
+            if showMap, let puck = model.selfPuck {
                 SelfPuckView(data: puck)
                     .scaleEffect(LocationPrimerLayout.puckScale)
                     .allowsHitTesting(false)
                     .transition(.opacity)
             }
 
-            if !isMapReady {
-                RoundedRectangle(
-                    cornerRadius: OnboardingLabMetric.cardCornerRadius,
-                    style: .continuous
-                )
-                .fill(OnboardingLabColor.fieldFill)
-                .accessibilityHidden(true)
-            }
+            RoundedRectangle(
+                cornerRadius: OnboardingLabMetric.cardCornerRadius,
+                style: .continuous
+            )
+            .fill(OnboardingLabColor.fieldFill)
+            .opacity(showCard && !showMap ? 1 : 0)
+            .accessibilityHidden(true)
         }
         .frame(height: LocationPrimerLayout.mapHeight)
         .clipShape(
@@ -82,29 +132,53 @@ struct PostAuthLocationPrimerScreen: View {
             radius: LocationPrimerLayout.mapShadowRadius,
             y: LocationPrimerLayout.mapShadowY
         )
+        .opacity(showCard ? 1 : 0)
+        .offset(y: showCard ? 0 : LocationPrimerLayout.revealOffsetY)
         .allowsHitTesting(false)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Map preview of you in San Francisco")
     }
 
-    @ViewBuilder
-    private var bodyAndActions: some View {
-        Text(LocationPrimerCopy.locationBody)
-            .font(OnboardingLabFont.text(15, .medium))
-            .foregroundStyle(OnboardingLabColor.textSecondary)
-            .fixedSize(horizontal: false, vertical: true)
-            .padding(.top, LocationPrimerLayout.bodyTop)
-        if let error = model.errorMessage {
-            Text(error)
-                .font(OnboardingLabFont.text(14, .medium))
-                .foregroundStyle(.red)
-                .padding(.top, LocationPrimerLayout.errorTop)
+    // MARK: Cascade
+
+    /// Title → subtitle → cream map card, then paint map when ready.
+    private func runOpeningCascade() async {
+        await stepTo(LocationPrimerReveal.title)
+        try? await Task.sleep(nanoseconds: LocationPrimerReveal.staggerNanoseconds)
+        await stepTo(LocationPrimerReveal.subtitle)
+        try? await Task.sleep(nanoseconds: LocationPrimerReveal.staggerNanoseconds)
+        // Cream card fades in so the page feels complete while MapKit finishes.
+        await stepTo(LocationPrimerReveal.mapCard)
+        if isMapReady {
+            await continueCascadeAfterMapReady()
         }
-        Spacer(minLength: LocationPrimerLayout.ctaSpacerMin)
-        OnboardingCTAButton(title: model.isBusy ? "Enabling…" : "Enable location") {
-            Task { await model.enableLocation() }
+    }
+
+    private func continueCascadeAfterMapReady() async {
+        guard !didContinueAfterMap else { return }
+        didContinueAfterMap = true
+        // Host-side settle pairs with teaching-map settle so tiles are painted.
+        try? await Task.sleep(nanoseconds: LocationPrimerReveal.mapSettleNanoseconds)
+        await stepTo(LocationPrimerReveal.mapPainted)
+        try? await Task.sleep(nanoseconds: LocationPrimerReveal.staggerNanoseconds)
+        await stepTo(LocationPrimerReveal.body)
+        try? await Task.sleep(nanoseconds: LocationPrimerReveal.staggerNanoseconds)
+        await stepTo(LocationPrimerReveal.cta)
+    }
+
+    @MainActor
+    private func stepTo(_ step: Int) async {
+        withAnimation(PushMotion.contentCrossfade) {
+            revealStep = max(revealStep, step)
         }
-        .disabled(model.isBusy)
+    }
+
+    private func opacity(for step: Int) -> Double {
+        revealStep >= step ? 1 : 0
+    }
+
+    private func offset(for step: Int) -> CGFloat {
+        revealStep >= step ? 0 : LocationPrimerLayout.revealOffsetY
     }
 
     private var teachingRegion: MKCoordinateRegion {
@@ -190,14 +264,32 @@ private enum LocationPrimerCopy {
         "Location is how you know what your real friends are up to — who's free, what's forming — without the group chat."
 }
 
+/// Cascade steps for top-down fade-in (higher = later).
+private enum LocationPrimerReveal {
+    static let title = 1
+    static let subtitle = 2
+    /// Cream card visible; MapKit still warming underneath.
+    static let mapCard = 3
+    /// Satellite map + self puck crossfade over cream.
+    static let mapPainted = 4
+    static let body = 5
+    static let cta = 6
+    /// Delay between cascade steps.
+    static let staggerNanoseconds: UInt64 = 140_000_000
+    /// After MapKit reports ready, wait so tiles finish painting before map fade.
+    static let mapSettleNanoseconds: UInt64 = 200_000_000
+}
+
 private enum LocationPrimerLayout {
     static let mapHeight: CGFloat = 210
     static let puckScale: CGFloat = 0.78
+    static let subtitleTop: CGFloat = 8
     static let mapTop: CGFloat = 20
     static let bodyTop: CGFloat = 16
     static let errorTop: CGFloat = 12
     static let ctaSpacerMin: CGFloat = 22
     static let bottomPadding: CGFloat = 26
+    static let revealOffsetY: CGFloat = 10
     static let mapStrokeOpacity = 0.6
     static let mapStrokeWidth: CGFloat = 0.8
     static let mapShadowOpacity = 0.12

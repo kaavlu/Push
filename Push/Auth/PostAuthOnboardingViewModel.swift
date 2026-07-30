@@ -77,28 +77,32 @@ enum OnboardingMapDefaults {
 
 @MainActor
 final class PostAuthOnboardingViewModel: ObservableObject {
-    @Published private(set) var screen: PostAuthOnboardingScreen = .locationPrimer
-    @Published private(set) var people: [OnboardingDiscoverPerson] = []
-    @Published private(set) var addedIDs: Set<Person.ID> = []
-    @Published private(set) var actingIDs: Set<Person.ID> = []
-    @Published private(set) var isBusy = false
-    @Published private(set) var isLoadingPeople = false
+    // Internal setters so connect/location extensions in sibling files can update state.
+    @Published var screen: PostAuthOnboardingScreen = .locationPrimer
+    @Published var people: [OnboardingDiscoverPerson] = []
+    @Published var addedIDs: Set<Person.ID> = []
+    @Published var actingIDs: Set<Person.ID> = []
+    @Published var isBusy = false
+    @Published var isLoadingPeople = false
     @Published var errorMessage: String?
-    @Published private(set) var isFinished = false
+    @Published var isFinished = false
     /// Teaching map puck for the location primer (fixed SF center; no GPS).
-    @Published private(set) var selfPuck: SelfPuckData?
+    @Published var selfPuck: SelfPuckData?
 
-    private let container: AppDataContainer
-    private let notificationCenter: UNUserNotificationCenter
+    let container: AppDataContainer
+    let notificationCenter: UNUserNotificationCenter
     /// Injected for tests; falls back to the container session (may be nil pre-install).
-    private let locationSession: LocationSessioning?
-    private let settingsOpener: SettingsOpening
+    let locationSession: LocationSessioning?
+    let settingsOpener: SettingsOpening
+    let contacts: ContactsProviding
 
-    private enum Limit {
+    enum Limit {
         static let discoverCount = 20
+        static let contactSearchQueries = 12
+        static let contactHintFetch = 40
     }
 
-    private enum Copy {
+    enum Copy {
         static let defaultsFailed = "Couldn't save sharing defaults. Check your connection and try again."
         static let friendsLoadFailed = "Couldn't load people right now. You can skip and add friends later."
         static let friendRequestFailed = "Couldn't send that request. Try again."
@@ -110,13 +114,15 @@ final class PostAuthOnboardingViewModel: ObservableObject {
         container: AppDataContainer? = nil,
         notificationCenter: UNUserNotificationCenter = .current(),
         locationSession: LocationSessioning? = nil,
-        settingsOpener: SettingsOpening = SystemSettingsOpener()
+        settingsOpener: SettingsOpening = SystemSettingsOpener(),
+        contacts: ContactsProviding? = nil
     ) {
         let resolved = container ?? .shared
         self.container = resolved
         self.notificationCenter = notificationCenter
         self.locationSession = locationSession ?? resolved.locationSession
         self.settingsOpener = settingsOpener
+        self.contacts = contacts ?? DeviceContactsProvider()
     }
 
     var findPeopleCTALabel: String {
@@ -225,67 +231,13 @@ final class PostAuthOnboardingViewModel: ObservableObject {
         screen = .contacts
     }
 
-    // MARK: - Contacts → find people
-
-    /// Contacts matching lands in a later task; advance immediately for now.
-    func skipContacts() async {
-        errorMessage = nil
-        await loadPeopleAndAdvance()
-    }
-
-    func continueFromContacts() async {
-        await skipContacts()
-    }
-
-    // MARK: - Find people
-
-    func toggleFriend(_ id: Person.ID) async {
-        if addedIDs.contains(id) {
-            // Already requested this session — leave pending; no cancel UX on this step.
-            return
-        }
-        guard actingIDs.insert(id).inserted else { return }
-        defer { actingIDs.remove(id) }
-        errorMessage = nil
-        do {
-            _ = try await container.friends.sendFriendRequest(to: id)
-            addedIDs.insert(id)
-            if let index = people.firstIndex(where: { $0.id == id }) {
-                let person = people[index]
-                let requestID = "pending-\(id)"
-                people[index] = OnboardingDiscoverPerson(
-                    result: PersonSearchResult(
-                        person: person.result.person,
-                        handle: person.handle,
-                        relation: .outgoingPending(requestID: requestID)
-                    )
-                )
-            }
-        } catch {
-            errorMessage = Copy.friendRequestFailed
-        }
-    }
-
-    func isAdded(_ id: Person.ID) -> Bool {
-        addedIDs.contains(id) || {
-            if case .outgoingPending = people.first(where: { $0.id == id })?.relation {
-                return true
-            }
-            return false
-        }()
-    }
-
-    func continueFromFindPeople() async {
-        await finishOnboarding()
-    }
-
     func openApp() {
         isFinished = true
     }
 
     // MARK: - Private
 
-    private func applyDefaultsAndAdvanceToGhost() async {
+    func applyDefaultsAndAdvanceToGhost() async {
         do {
             try await applyDefaultSharingAndPublishing()
             screen = .ghost
@@ -298,7 +250,7 @@ final class PostAuthOnboardingViewModel: ObservableObject {
         }
     }
 
-    private func applyDefaultSharingAndPublishing() async throws {
+    func applyDefaultSharingAndPublishing() async throws {
         try await container.sharing.setGlobalDefaults(
             location: .exact,
             activity: .full,
@@ -308,26 +260,12 @@ final class PostAuthOnboardingViewModel: ObservableObject {
         try await mirrorExactActivityPrivacyToggles()
     }
 
-    private func loadPeopleAndAdvance() async {
-        isLoadingPeople = true
-        errorMessage = nil
-        defer { isLoadingPeople = false }
-        do {
-            let hits = try await container.friends.discoverPeople(limit: Limit.discoverCount)
-            people = hits.map { OnboardingDiscoverPerson(result: $0) }
-        } catch {
-            people = []
-            errorMessage = Copy.friendsLoadFailed
-        }
-        screen = .findPeople
-    }
-
     /// Completion requires when-in-use (or always) location authorization — fail closed.
-    private var hasRequiredLocationAuthorization: Bool {
+    var hasRequiredLocationAuthorization: Bool {
         locationSession?.state.authorization.allowsWhenInUseUpdates == true
     }
 
-    private func finishOnboarding() async {
+    func finishOnboarding() async {
         guard !isBusy else { return }
         guard hasRequiredLocationAuthorization else {
             errorMessage = Copy.locationRequired
@@ -345,7 +283,7 @@ final class PostAuthOnboardingViewModel: ObservableObject {
     }
 
     /// Align Profile toggles with exact location + activity (post-allow defaults).
-    private func mirrorExactActivityPrivacyToggles() async throws {
+    func mirrorExactActivityPrivacyToggles() async throws {
         let profile = try await container.profile.userProfile()
         var activity = profile.activityVisibility
         var map = profile.mapPreferences

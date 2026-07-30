@@ -78,6 +78,26 @@ final class PostAuthOnboardingTests: XCTestCase {
         XCTAssertEqual(vm.screen, .done)
     }
 
+    func testSkipContactsAdvancesWithoutRequestingAccess() async {
+        let contacts = FixedContactsProvider(grantAccess: true, hints: [
+            ContactMatchHint(id: "c1", displayName: "Austin", phoneDigits: nil)
+        ])
+        let vm = makeVM(auth: .whenInUse, contacts: contacts)
+        await vm.skipNotifications()
+        await vm.skipContacts()
+        XCTAssertEqual(vm.screen, .findPeople)
+        XCTAssertEqual(contacts.requestAccessCount, 0)
+    }
+
+    func testEnableContactsRequestsAccessThenAdvances() async {
+        let contacts = FixedContactsProvider(grantAccess: false, hints: [])
+        let vm = makeVM(auth: .whenInUse, contacts: contacts)
+        await vm.skipNotifications()
+        await vm.enableContacts()
+        XCTAssertEqual(vm.screen, .findPeople)
+        XCTAssertEqual(contacts.requestAccessCount, 1)
+    }
+
     func testEnableLocationAllowAppliesDefaultsAndAdvances() async throws {
         let container = AppDataContainer(seed: .standard())
         let session = FakeLocationSession(
@@ -265,14 +285,18 @@ final class PostAuthOnboardingTests: XCTestCase {
 
     // MARK: - Helpers
 
-    private func makeVM(auth: LocationAuthorizationState) -> PostAuthOnboardingViewModel {
+    private func makeVM(
+        auth: LocationAuthorizationState,
+        contacts: ContactsProviding? = nil
+    ) -> PostAuthOnboardingViewModel {
         let container = AppDataContainer(seed: .standard())
         let session = FakeLocationSession(
             state: LocationTrackingState(authorization: auth)
         )
         return PostAuthOnboardingViewModel(
             container: container,
-            locationSession: session
+            locationSession: session,
+            contacts: contacts ?? NullContactsProvider()
         )
     }
 }
