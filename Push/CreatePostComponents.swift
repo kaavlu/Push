@@ -128,6 +128,8 @@ struct CreatePostReorderableThumbStrip: View {
     let items: [AddYoursDraftItem]
     let focusedIndex: Int
     let canAddMore: Bool
+    /// When false, drag/drop reorder is disabled (capability-shaped edit).
+    var canReorder: Bool = true
     let remainingSlots: Int
     @Binding var pickerSelection: [PhotosPickerItem]
     let onSelect: (Int) -> Void
@@ -151,9 +153,11 @@ struct CreatePostReorderableThumbStrip: View {
                 .foregroundStyle(PushControlColors.textTertiary)
             }
 
-            Text(CreatePostCopy.mediaReorderHint)
-                .font(.caption2.weight(.medium))
-                .foregroundStyle(PushControlColors.textTertiary)
+            if canReorder {
+                Text(CreatePostCopy.mediaReorderHint)
+                    .font(.caption2.weight(.medium))
+                    .foregroundStyle(PushControlColors.textTertiary)
+            }
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: AddYoursLayout.thumbSpacing) {
@@ -166,17 +170,11 @@ struct CreatePostReorderableThumbStrip: View {
                         ) {
                             onSelect(index)
                         }
-                        .onDrag {
-                            draggingID = item.id
-                            return NSItemProvider(object: item.id.uuidString as NSString)
-                        } preview: {
-                            CreatePostThumbDragPreview(item: item)
-                        }
-                        .onDrop(
-                            of: [UTType.text],
-                            delegate: CreatePostThumbDropDelegate(
-                                targetID: item.id,
+                        .modifier(
+                            CreatePostThumbReorderModifier(
+                                item: item,
                                 items: items,
+                                canReorder: canReorder,
                                 draggingID: $draggingID,
                                 onMove: onMove
                             )
@@ -194,7 +192,39 @@ struct CreatePostReorderableThumbStrip: View {
                 .animation(PushMotion.selection, value: items.map(\.id))
             }
         }
-        .accessibilityHint(CreatePostCopy.mediaReorderHint)
+        .accessibilityHint(canReorder ? CreatePostCopy.mediaReorderHint : "")
+    }
+}
+
+/// Applies drag/drop only when reorder is allowed — keeps the strip readable.
+private struct CreatePostThumbReorderModifier: ViewModifier {
+    let item: AddYoursDraftItem
+    let items: [AddYoursDraftItem]
+    let canReorder: Bool
+    @Binding var draggingID: UUID?
+    let onMove: (Int, Int) -> Void
+
+    func body(content: Content) -> some View {
+        if canReorder {
+            content
+                .onDrag {
+                    draggingID = item.id
+                    return NSItemProvider(object: item.id.uuidString as NSString)
+                } preview: {
+                    CreatePostThumbDragPreview(item: item)
+                }
+                .onDrop(
+                    of: [UTType.text],
+                    delegate: CreatePostThumbDropDelegate(
+                        targetID: item.id,
+                        items: items,
+                        draggingID: $draggingID,
+                        onMove: onMove
+                    )
+                )
+        } else {
+            content
+        }
     }
 }
 

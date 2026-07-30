@@ -5,7 +5,7 @@
 
 import Foundation
 
-/// Recorded fact: a hangout that happened (or almost happened).
+/// Recorded fact: a hangout that happened.
 /// Calendar aggregates derive from these rows.
 struct PastHangout: Identifiable, Codable, Equatable {
     let id: String
@@ -14,5 +14,4 @@ struct PastHangout: Identifiable, Codable, Equatable {
     let note: String
     let timeRange: String
     let cameFromPush: Bool
-    let didHappen: Bool
 }

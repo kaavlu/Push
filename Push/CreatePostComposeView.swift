@@ -2,8 +2,8 @@
 //  CreatePostComposeView.swift
 //  Push
 //
-//  Shared compose shell for past-Push prefill and from-scratch drafts.
-//  Reuses Add Yours media stage / thumb strip patterns.
+//  Shared compose shell for past-Push prefill, from-scratch drafts, and
+//  existing-Moment edit (S9). Reuses Add Yours media stage / thumb strip patterns.
 //
 
 import PhotosUI
@@ -18,11 +18,48 @@ struct CreatePostComposeView: View {
         Group {
             if viewModel.phase == .success {
                 successContent
+            } else if viewModel.isEditingExistingMoment, viewModel.isRepositoryBacked {
+                // Repo path: load surfaces until MomentDetail is ready.
+                editSurface
             } else {
+                // Create paths + fixture/preview edit seam.
                 composingContent
             }
         }
         .animation(PushMotion.contentCrossfade, value: viewModel.phase)
+        .animation(PushMotion.contentCrossfade, value: viewModel.editContentPhase)
+        .onChange(of: viewModel.shouldDismissAfterEdit) { shouldDismiss in
+            guard shouldDismiss else { return }
+            viewModel.acknowledgeEditDismissal()
+            onShared()
+        }
+    }
+
+    // MARK: - Edit load surfaces
+
+    @ViewBuilder
+    private var editSurface: some View {
+        switch viewModel.editContentPhase {
+        case .loading, .deferred:
+            EmptySurfaceStateView.loading
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        case .failed:
+            EmptySurfaceStateView.failed(surface: CreatePostEditCopy.surfaceName) {
+                Task { await viewModel.retryEditLoad() }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        case .empty, .content:
+            if viewModel.isEditSurfaceDenied {
+                EmptySurfaceView(
+                    title: CreatePostEditCopy.deniedTitle,
+                    message: CreatePostEditCopy.deniedMessage,
+                    systemImage: "lock.fill"
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                composingContent
+            }
+        }
     }
 
     // MARK: - Composing
@@ -46,7 +83,7 @@ struct CreatePostComposeView: View {
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             VStack(spacing: CreatePostLayout.fieldStackSpacing) {
-                // Recoverable publish failure — the draft below stays intact.
+                // Recoverable publish / edit failure — the draft below stays intact.
                 if let actionError = viewModel.actionError {
                     ActionErrorBanner(
                         message: actionError.message,
@@ -54,7 +91,9 @@ struct CreatePostComposeView: View {
                         onDismiss: { viewModel.dismissActionError() }
                     )
                 }
-                primaryActionBar
+                if viewModel.showsPrimarySaveAction {
+                    primaryActionBar
+                }
             }
             .padding(.horizontal, CreatePostLayout.horizontalPadding(layout))
             .padding(.bottom, CreatePostLayout.bottomPadding(layout))
@@ -70,7 +109,7 @@ struct CreatePostComposeView: View {
             action: {
                 Task {
                     await viewModel.submit()
-                    if viewModel.phase == .success {
+                    if viewModel.phase == .success, !viewModel.shouldDismissAfterEdit {
                         onShared()
                     }
                 }
@@ -94,7 +133,9 @@ struct CreatePostComposeView: View {
             AddYoursMediaStage(
                 item: viewModel.focusedItem,
                 isLoading: viewModel.isLoadingPicker,
-                showsRemove: viewModel.phase == .composing && viewModel.focusedItem != nil,
+                showsRemove: viewModel.canDeleteFocusedMedia,
+                // Existing-Moment edit never picks new media (Add Yours owns append).
+                showsPicker: !(viewModel.isEditingExistingMoment && viewModel.isRepositoryBacked),
                 pickerSelection: $viewModel.pickerItems,
                 maxSelection: max(viewModel.remainingSlots, 1),
                 onRemove: { viewModel.removeFocusedItem() }
@@ -106,7 +147,8 @@ struct CreatePostComposeView: View {
                 CreatePostReorderableThumbStrip(
                     items: viewModel.items,
                     focusedIndex: viewModel.focusedIndex,
-                    canAddMore: viewModel.canAddMore,
+                    canAddMore: viewModel.canAddMoreOnCompose,
+                    canReorder: viewModel.canReorderEditMedia,
                     remainingSlots: viewModel.remainingSlots,
                     pickerSelection: $viewModel.pickerItems,
                     onSelect: { viewModel.selectItem(at: $0) },
@@ -128,11 +170,13 @@ struct CreatePostComposeView: View {
         VStack(spacing: CreatePostLayout.fieldStackSpacing) {
             CreatePostTextField(
                 text: $viewModel.titleText,
-                placeholder: CreatePostCopy.titlePlaceholder
+                placeholder: CreatePostCopy.titlePlaceholder,
+                isEnabled: viewModel.canEditMetadataFields
             )
             CreatePostTextField(
                 text: $viewModel.locationText,
-                placeholder: CreatePostCopy.locationPlaceholder
+                placeholder: CreatePostCopy.locationPlaceholder,
+                isEnabled: viewModel.canEditMetadataFields
             )
         }
     }
@@ -191,7 +235,13 @@ struct CreatePostComposeView: View {
     // MARK: - Success
 
     private var successContent: some View {
-        VStack(spacing: CreatePostLayout.successStackSpacing) {
+        let title = viewModel.isEditingExistingMoment
+            ? CreatePostEditCopy.editSuccessTitle
+            : CreatePostCopy.successTitle
+        let message = viewModel.isEditingExistingMoment
+            ? CreatePostEditCopy.editSuccessMessage
+            : CreatePostCopy.successMessage
+        return VStack(spacing: CreatePostLayout.successStackSpacing) {
             Spacer(minLength: 0)
             ZStack {
                 Circle()
@@ -210,10 +260,10 @@ struct CreatePostComposeView: View {
                 y: CreatePostLayout.successShadowY
             )
 
-            Text(CreatePostCopy.successTitle)
+            Text(title)
                 .font(.title2.weight(.bold))
                 .foregroundStyle(PushControlColors.textEspresso)
-            Text(CreatePostCopy.successMessage)
+            Text(message)
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(PushControlColors.textSecondary)
                 .multilineTextAlignment(.center)
@@ -222,7 +272,7 @@ struct CreatePostComposeView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(CreatePostCopy.successTitle). \(CreatePostCopy.successMessage)")
+        .accessibilityLabel("\(title). \(message)")
     }
 }
 
@@ -232,12 +282,15 @@ private struct CreatePostTextField: View {
     @Environment(\.pushLayout) private var layout
     @Binding var text: String
     let placeholder: String
+    var isEnabled: Bool = true
 
     var body: some View {
         TextField(placeholder, text: $text)
             .font(.subheadline.weight(.medium))
             .foregroundStyle(PushControlColors.textEspresso)
             .tint(PushControlColors.activeForeground)
+            .disabled(!isEnabled)
+            .opacity(isEnabled ? 1 : PushOpacityTokens.disabledControl)
             .padding(.horizontal, CreatePostLayout.fieldHorizontalPadding)
             .frame(height: CreatePostLayout.fieldHeight)
             .background {

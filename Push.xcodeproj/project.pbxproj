@@ -17,6 +17,14 @@
 		E047F792170AB15E2D2AE446 /* PostAuthNotificationsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9E523A01A44B4D87AABBCB8 /* PostAuthNotificationsScreen.swift */; };
 		49EF221B2E0A60C16FF9A607 /* PostAuthTeachingMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = D19E40CB5129A022A52FEA43 /* PostAuthTeachingMap.swift */; };
 		43DC2E974D2D3D8EF7BAD504 /* PostAuthLocationScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4E363C3B0B11F73BE080022 /* PostAuthLocationScreens.swift */; };
+		8BDF531889A0174E70BA7F0A /* CreatePostViewModel+EditCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0120D5EA9ADD255E73B723 /* CreatePostViewModel+EditCopy.swift */; };
+		F04392169EB42B3B8BC8C05C /* CreatePostEditTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A659FFB2ABEBCFDFA883703 /* CreatePostEditTests.swift */; };
+		F4465299E64AB175C61CC61B /* CreatePostViewModel+Edit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51F31B9A67538BF134DF38A0 /* CreatePostViewModel+Edit.swift */; };
+		13315C5D3EAE658F2C948566 /* AddYoursPartialAppendTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 955193270E59D653D8D91481 /* AddYoursPartialAppendTests.swift */; };
+		9CAC3C86D8EB3D01601926A4 /* AddYoursAppendTestDoubles.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9419DD1356FC5CECF609E6F /* AddYoursAppendTestDoubles.swift */; };
+		F97807EE9040D517A9CCD627 /* AddYoursAppendTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16B6FBF0A573316E1B8BD66F /* AddYoursAppendTests.swift */; };
+		4EE20D2A3884949DB191A974 /* AddYoursViewModel+Append.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAEFAF88E20A454F00B8CCC5 /* AddYoursViewModel+Append.swift */; };
+		D44B4270FED417127DD0F48B /* AddYoursViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7983D4756B613312DF585958 /* AddYoursViewModel.swift */; };
 		F765CB0F7835A1A949AC20AE /* CreatePostHubBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FA520CB1AFA89EAA51B5B8D /* CreatePostHubBuilderTests.swift */; };
 		5BC27660E516781C9E9AADC5 /* CreatePostPublishTestDoubles.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5EA99C12398531EC04285FB /* CreatePostPublishTestDoubles.swift */; };
 		460F67C0910A0F0E478EED2B /* CreatePostPublishTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23AF9B70E414DF28ED10F8C7 /* CreatePostPublishTests.swift */; };
@@ -432,6 +440,14 @@
 		B9E523A01A44B4D87AABBCB8 /* PostAuthNotificationsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PostAuthNotificationsScreen.swift"; path = "Auth/PostAuthNotificationsScreen.swift"; sourceTree = "<group>"; };
 		D19E40CB5129A022A52FEA43 /* PostAuthTeachingMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PostAuthTeachingMap.swift"; path = "Auth/PostAuthTeachingMap.swift"; sourceTree = "<group>"; };
 		C4E363C3B0B11F73BE080022 /* PostAuthLocationScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PostAuthLocationScreens.swift"; path = "Auth/PostAuthLocationScreens.swift"; sourceTree = "<group>"; };
+		8B0120D5EA9ADD255E73B723 /* CreatePostViewModel+EditCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostViewModel+EditCopy.swift"; sourceTree = "<group>"; };
+		6A659FFB2ABEBCFDFA883703 /* CreatePostEditTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostEditTests.swift"; sourceTree = "<group>"; };
+		51F31B9A67538BF134DF38A0 /* CreatePostViewModel+Edit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostViewModel+Edit.swift"; sourceTree = "<group>"; };
+		955193270E59D653D8D91481 /* AddYoursPartialAppendTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddYoursPartialAppendTests.swift"; sourceTree = "<group>"; };
+		D9419DD1356FC5CECF609E6F /* AddYoursAppendTestDoubles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddYoursAppendTestDoubles.swift"; sourceTree = "<group>"; };
+		16B6FBF0A573316E1B8BD66F /* AddYoursAppendTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddYoursAppendTests.swift"; sourceTree = "<group>"; };
+		AAEFAF88E20A454F00B8CCC5 /* AddYoursViewModel+Append.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddYoursViewModel+Append.swift"; sourceTree = "<group>"; };
+		7983D4756B613312DF585958 /* AddYoursViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddYoursViewModel.swift"; sourceTree = "<group>"; };
 		9FA520CB1AFA89EAA51B5B8D /* CreatePostHubBuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostHubBuilderTests.swift"; sourceTree = "<group>"; };
 		D5EA99C12398531EC04285FB /* CreatePostPublishTestDoubles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostPublishTestDoubles.swift"; sourceTree = "<group>"; };
 		23AF9B70E414DF28ED10F8C7 /* CreatePostPublishTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostPublishTests.swift"; sourceTree = "<group>"; };
@@ -884,6 +900,10 @@
 				B9E523A01A44B4D87AABBCB8 /* PostAuthNotificationsScreen.swift */,
 				D19E40CB5129A022A52FEA43 /* PostAuthTeachingMap.swift */,
 				C4E363C3B0B11F73BE080022 /* PostAuthLocationScreens.swift */,
+				8B0120D5EA9ADD255E73B723 /* CreatePostViewModel+EditCopy.swift */,
+				51F31B9A67538BF134DF38A0 /* CreatePostViewModel+Edit.swift */,
+				AAEFAF88E20A454F00B8CCC5 /* AddYoursViewModel+Append.swift */,
+				7983D4756B613312DF585958 /* AddYoursViewModel.swift */,
 				BCEB91C2E462468A7DBFEE49 /* CreatePostViewModel+Presentation.swift */,
 				3BF867E46FBABEFB083C9385 /* CreatePostViewModel+Friends.swift */,
 				33126E12A678807BB8DEC6FF /* CreatePostViewModel+Publish.swift */,
@@ -1213,6 +1233,10 @@
 			isa = PBXGroup;
 			children = (
 				5217A27A2FF1B6DA0011F860 /* PushTests.swift */,
+				6A659FFB2ABEBCFDFA883703 /* CreatePostEditTests.swift */,
+				955193270E59D653D8D91481 /* AddYoursPartialAppendTests.swift */,
+				D9419DD1356FC5CECF609E6F /* AddYoursAppendTestDoubles.swift */,
+				16B6FBF0A573316E1B8BD66F /* AddYoursAppendTests.swift */,
 				9FA520CB1AFA89EAA51B5B8D /* CreatePostHubBuilderTests.swift */,
 				D5EA99C12398531EC04285FB /* CreatePostPublishTestDoubles.swift */,
 				23AF9B70E414DF28ED10F8C7 /* CreatePostPublishTests.swift */,
@@ -1441,6 +1465,10 @@
 				E047F792170AB15E2D2AE446 /* PostAuthNotificationsScreen.swift in Sources */,
 				49EF221B2E0A60C16FF9A607 /* PostAuthTeachingMap.swift in Sources */,
 				43DC2E974D2D3D8EF7BAD504 /* PostAuthLocationScreens.swift in Sources */,
+				8BDF531889A0174E70BA7F0A /* CreatePostViewModel+EditCopy.swift in Sources */,
+				F4465299E64AB175C61CC61B /* CreatePostViewModel+Edit.swift in Sources */,
+				4EE20D2A3884949DB191A974 /* AddYoursViewModel+Append.swift in Sources */,
+				D44B4270FED417127DD0F48B /* AddYoursViewModel.swift in Sources */,
 				DD932E9AE6DD7863C560CD86 /* CreatePostViewModel+Presentation.swift in Sources */,
 				EDB0DE9829259544727C6EEE /* CreatePostViewModel+Friends.swift in Sources */,
 				A07B668590A03C17532E71BB /* CreatePostViewModel+Publish.swift in Sources */,
@@ -1761,6 +1789,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A27B2FF1B6DA0011F860 /* PushTests.swift in Sources */,
+				F04392169EB42B3B8BC8C05C /* CreatePostEditTests.swift in Sources */,
+				13315C5D3EAE658F2C948566 /* AddYoursPartialAppendTests.swift in Sources */,
+				9CAC3C86D8EB3D01601926A4 /* AddYoursAppendTestDoubles.swift in Sources */,
+				F97807EE9040D517A9CCD627 /* AddYoursAppendTests.swift in Sources */,
 				F765CB0F7835A1A949AC20AE /* CreatePostHubBuilderTests.swift in Sources */,
 				5BC27660E516781C9E9AADC5 /* CreatePostPublishTestDoubles.swift in Sources */,
 				460F67C0910A0F0E478EED2B /* CreatePostPublishTests.swift in Sources */,

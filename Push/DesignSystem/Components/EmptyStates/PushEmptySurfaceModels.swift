@@ -48,6 +48,12 @@ enum EmptySurfaceCopy {
 
     static let mapLoading = "Loading map"
     static let friendsLoading = "Loading friends"
+    static let plansLoading = "Loading pushes"
+    static let plansSurfaceName = "pushes"
+    static let groupsLoading = "Loading groups"
+    static let groupsSurfaceName = "groups"
+    static let profileLoading = "Loading profile"
+    static let profileSurfaceName = "your profile"
 
     static let alertsEmptyTitle = "You're all caught up."
     static let alertsLoading = "Checking alerts"

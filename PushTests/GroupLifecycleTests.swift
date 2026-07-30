@@ -374,6 +374,17 @@ final class GroupLifecycleTests: XCTestCase {
         XCTAssertEqual(viewModel.groups.map(\.id), ["g1"])
     }
 
+    func testGroupsLoadFailureUsesFailedSurfacePhase() async {
+        let viewModel = GroupsViewModel(
+            container: AppDataContainer(seed: .standard()),
+            groups: ThrowingGroupRepository()
+        )
+
+        await viewModel.load()
+
+        XCTAssertEqual(viewModel.surfacePhase, .failed)
+    }
+
     func testLeaveGroupSuccessClosesDetail() async throws {
         let container = AppDataContainer(seed: .standard())
         let inviteID = "membership-exec-\(container.currentUserID)"
@@ -425,8 +436,8 @@ final class GroupLifecycleTests: XCTestCase {
 private struct ThrowingGroupRepository: GroupRepository {
     enum Failure: Error { case expected }
 
-    func groups() async throws -> [FriendGroup] { [] }
-    func memberships() async throws -> [GroupMembership] { [] }
+    func groups() async throws -> [FriendGroup] { throw Failure.expected }
+    func memberships() async throws -> [GroupMembership] { throw Failure.expected }
     func createGroup(
         name: String, imageAssetPath: String?, inviteeIDs: [Person.ID]
     ) async throws -> FriendGroup.ID { throw Failure.expected }

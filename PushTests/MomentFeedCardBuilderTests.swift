@@ -40,8 +40,6 @@ final class MomentFeedCardBuilderTests: XCTestCase {
         XCTAssertEqual(card.locationTitle, "Dolores Park")
         XCTAssertEqual(card.participants.map(\.id), ["self", "ram"])
         XCTAssertEqual(card.participants.map(\.displayName), ["You", "Ram"])
-        // Cover uploader drives attribution.
-        XCTAssertEqual(card.contributorName, "You")
     }
 
     /// The album order the repository returned is the carousel order — the
@@ -55,7 +53,6 @@ final class MomentFeedCardBuilderTests: XCTestCase {
         let card = MomentFeedCardBuilder.card(from: summary, people: people, now: publishedAt)
 
         XCTAssertEqual(card.items.map(\.id), ["m1", "m2"])
-        XCTAssertEqual(card.contributorName, "Ram")
     }
 
     func testPhotoUsesPublicURLAndVideoUsesItsPoster() {

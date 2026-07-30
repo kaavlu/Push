@@ -5,14 +5,9 @@ import XCTest
 @MainActor
 final class AddYoursViewModelTests: XCTestCase {
     func testContextSubtitleIsFixedCopyWithoutLocation() {
-        let withPlace = AddYoursContext(
-            id: "p1",
-            locationTitle: "Dolores Park",
-            dateTimeLabel: "Sat · 4:30 PM"
-        )
-        let emptyPlace = AddYoursContext(id: "p2", locationTitle: "  ", dateTimeLabel: "")
-        XCTAssertEqual(withPlace.subtitle, "Share photos and videos")
-        XCTAssertEqual(emptyPlace.subtitle, AddYoursCopy.subtitle)
+        let context = AddYoursContext(momentID: "moment-1")
+        XCTAssertEqual(context.subtitle, "Share photos and videos")
+        XCTAssertEqual(context.subtitle, AddYoursCopy.subtitle)
     }
 
     func testFittedHeroShrinksToAvailableHeight() {
@@ -23,37 +18,35 @@ final class AddYoursViewModelTests: XCTestCase {
         XCTAssertGreaterThan(fitted.width, 0)
     }
 
-    func testContextFromCarouselMapsFields() {
+    func testContextFromCarouselUsesTheMomentID() {
         let carousel = FeedMediaCarouselFixtures.threeBundlePhotos
         let context = AddYoursContext(carousel: carousel)
-        XCTAssertEqual(context.id, carousel.id)
-        XCTAssertEqual(context.locationTitle, carousel.locationTitle)
-        XCTAssertEqual(context.dateTimeLabel, carousel.dateTimeLabel)
+        XCTAssertEqual(context.momentID, carousel.id)
     }
 
-    func testCanSubmitRequiresItemsAndComposingPhase() {
-        let viewModel = makeViewModel()
+    func testCanSubmitRequiresItemsAndComposingPhase() async {
+        let viewModel = await makeLoadedViewModel()
         XCTAssertFalse(viewModel.canSubmit)
 
-        viewModel.seed(with: [draftPhoto()])
+        viewModel.applyLoadedDrafts([draftPhoto()])
         XCTAssertTrue(viewModel.canSubmit)
         XCTAssertEqual(viewModel.phase, .composing)
     }
 
-    func testSeedRespectsMaxSelection() {
-        let viewModel = makeViewModel(maxSelection: 2)
-        viewModel.seed(with: [draftPhoto(), draftPhoto(), draftPhoto()])
+    func testSelectionRespectsMaxSelection() async {
+        let viewModel = await makeLoadedViewModel(maxSelection: 2)
+        viewModel.applyLoadedDrafts([draftPhoto(), draftPhoto(), draftPhoto()])
         XCTAssertEqual(viewModel.items.count, 2)
         XCTAssertFalse(viewModel.canAddMore)
         XCTAssertEqual(viewModel.remainingSlots, 0)
     }
 
-    func testSelectAndRemoveClampFocusedIndex() {
-        let viewModel = makeViewModel()
+    func testSelectAndRemoveClampFocusedIndex() async {
+        let viewModel = await makeLoadedViewModel()
         let a = draftPhoto()
         let b = draftPhoto()
         let c = draftPhoto()
-        viewModel.seed(with: [a, b, c])
+        viewModel.applyLoadedDrafts([a, b, c])
 
         viewModel.selectItem(at: 2)
         XCTAssertEqual(viewModel.focusedIndex, 2)
@@ -74,8 +67,8 @@ final class AddYoursViewModelTests: XCTestCase {
         XCTAssertFalse(viewModel.canSubmit)
     }
 
-    func testApplyLoadedDraftsFocusesFirstUploadedItem() {
-        let viewModel = makeViewModel()
+    func testApplyLoadedDraftsFocusesFirstUploadedItem() async {
+        let viewModel = await makeLoadedViewModel()
         let first = draftPhoto()
         let second = draftPhoto()
         let third = draftVideo()
@@ -94,30 +87,11 @@ final class AddYoursViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.focusedItem?.id, first.id)
     }
 
-    func testSeedFocusesFirstItem() {
-        let first = draftPhoto()
-        let second = draftPhoto()
-        let viewModel = makeViewModel()
-        viewModel.seed(with: [first, second])
-        XCTAssertEqual(viewModel.focusedIndex, 0)
-        XCTAssertEqual(viewModel.focusedItem?.id, first.id)
-    }
-
-    func testSubmitTransitionsToSuccessWithImmediateTiming() async {
-        let viewModel = makeViewModel()
-        viewModel.seed(with: [draftPhoto(), draftVideo()])
-        XCTAssertTrue(viewModel.canSubmit)
-
-        await viewModel.submit()
-        XCTAssertEqual(viewModel.phase, .success)
-        // After success, submit is no longer available.
-        XCTAssertFalse(viewModel.canSubmit)
-    }
-
     func testSubmitNoOpsWhenEmpty() async {
-        let viewModel = makeViewModel()
+        let viewModel = await makeLoadedViewModel()
         await viewModel.submit()
         XCTAssertEqual(viewModel.phase, .composing)
+        XCTAssertNil(viewModel.actionError)
     }
 
     func testSelectionClampHelper() {
@@ -129,12 +103,21 @@ final class AddYoursViewModelTests: XCTestCase {
 
     // MARK: - Helpers
 
-    private func makeViewModel(maxSelection: Int = 8) -> AddYoursViewModel {
-        AddYoursViewModel(
-            context: AddYoursFixtures.sampleContext,
+    /// A Moment the seeded current user is tagged in, loaded from the mock
+    /// repository — the same path the app uses.
+    private func makeLoadedViewModel(
+        maxSelection: Int = AddYoursLayout.maxSelectionCount
+    ) async -> AddYoursViewModel {
+        let container = AppDataContainer(seed: .standard())
+        let viewModel = AddYoursViewModel(
+            context: AddYoursContext(momentID: AddYoursSeedIDs.taggedMoment),
+            container: container,
+            mediaStorage: PublishSpyMediaStorage(),
             timing: .immediate,
             maxSelection: maxSelection
         )
+        await viewModel.initialLoad?.value
+        return viewModel
     }
 
     private func draftPhoto() -> AddYoursDraftItem {

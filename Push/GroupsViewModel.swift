@@ -70,10 +70,12 @@ final class GroupsViewModel: ObservableObject {
 
     func load() async {
         guard let container else { return }
+        let hadLoadedContent = loadState.value != nil
         if loadState.value == nil { loadState = .loading }
         do {
-            let groupList = try await container.groups.groups()
-            let memberships = try await container.groups.memberships()
+            guard let groupRepo else { return }
+            let groupList = try await groupRepo.groups()
+            let memberships = try await groupRepo.memberships()
             let statuses = try await container.friends.presenceStatuses()
             let plans = try await container.pushes.activePlans()
             let friendList = try await container.friends.friends()
@@ -116,7 +118,9 @@ final class GroupsViewModel: ObservableObject {
             loadState = .loaded(cards)
             lastSeenRevision = container.storeRevision
         } catch {
-            loadState = .failed(error)
+            if !hadLoadedContent {
+                loadState = .failed(error)
+            }
         }
     }
 
@@ -126,6 +130,17 @@ final class GroupsViewModel: ObservableObject {
             PushGroupStat(id: "nearby", value: group.nearbyCount, label: "Nearby"),
             PushGroupStat(id: "plans", value: group.planCount, label: "Pushes")
         ]
+    }
+
+    var surfacePhase: SurfaceContentPhase {
+        switch loadState {
+        case .idle, .loading:
+            return .loading
+        case .failed:
+            return .failed
+        case .loaded(let groups):
+            return groups.isEmpty ? .empty : .content
+        }
     }
 
     func isSelected(_ group: PushGroupData) -> Bool {

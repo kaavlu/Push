@@ -20,6 +20,9 @@ struct CreatePostFlowView: View {
     @Environment(\.pushLayout) private var layout
     /// Drives system navigation transitions + interactive edge swipe.
     @State private var path: [CreatePostRoute] = []
+    @State private var showsEditOverflowMenu = false
+    @State private var pendingDeleteMoment = false
+    @State private var pendingLeaveMoment = false
 
     @MainActor
     init(viewModel: CreatePostViewModel? = nil) {
@@ -60,6 +63,61 @@ struct CreatePostFlowView: View {
         .onChange(of: path) { newPath in
             handlePathChange(newPath)
         }
+        .pushActionMenu(
+            isPresented: $showsEditOverflowMenu,
+            items: editOverflowItems,
+            onSelect: { item in
+                switch item.id {
+                case CreatePostEditActionID.delete:
+                    pendingDeleteMoment = true
+                case CreatePostEditActionID.leave:
+                    pendingLeaveMoment = true
+                default:
+                    break
+                }
+            }
+        )
+        .pushConfirmation(
+            isPresented: $pendingDeleteMoment,
+            title: CreatePostEditCopy.deleteTitle,
+            message: CreatePostEditCopy.deleteMessage,
+            confirmTitle: CreatePostEditCopy.deleteConfirm,
+            onConfirm: {
+                Task { await viewModel.deleteMoment() }
+            }
+        )
+        .pushConfirmation(
+            isPresented: $pendingLeaveMoment,
+            title: CreatePostEditCopy.leaveTitle,
+            message: CreatePostEditCopy.leaveMessage,
+            confirmTitle: CreatePostEditCopy.leaveConfirm,
+            onConfirm: {
+                Task { await viewModel.leaveMoment() }
+            }
+        )
+    }
+
+    private var editOverflowItems: [PushActionMenuItem] {
+        var items: [PushActionMenuItem] = []
+        if viewModel.showsLeaveMomentAction {
+            items.append(
+                PushActionMenuItem(
+                    id: CreatePostEditActionID.leave,
+                    title: CreatePostEditCopy.leaveAction,
+                    role: .destructive
+                )
+            )
+        }
+        if viewModel.showsDeleteMomentAction {
+            items.append(
+                PushActionMenuItem(
+                    id: CreatePostEditActionID.delete,
+                    title: CreatePostEditCopy.deleteAction,
+                    role: .destructive
+                )
+            )
+        }
+        return items
     }
 
     // MARK: - Roots
@@ -121,8 +179,22 @@ struct CreatePostFlowView: View {
                 backButton
             }
             Spacer(minLength: 0)
+            if viewModel.screen == .compose, viewModel.showsEditOverflowMenu {
+                editOverflowButton
+            }
             closeButton
         }
+    }
+
+    private var editOverflowButton: some View {
+        PushCircleIconButton(
+            systemImageName: "ellipsis",
+            accessibilityLabel: CreatePostEditCopy.overflowAccessibility
+        ) {
+            showsEditOverflowMenu = true
+        }
+        .opacity(viewModel.phase == .submitting ? PushOpacityTokens.disabledControl : 1)
+        .disabled(viewModel.phase == .submitting)
     }
 
     private var backButton: some View {

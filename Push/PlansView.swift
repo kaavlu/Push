@@ -17,12 +17,7 @@ struct PlansView: View {
     var body: some View {
         ZStack {
             FriendsBackground()
-            ScrollView {
-                pageContent
-            }
-            .refreshable {
-                await viewModel.refresh()
-            }
+            primaryContent
 
             // Full-bleed bottom popup (edge-to-edge width), not a nested system sheet.
             if let day = viewModel.selectedDay {
@@ -62,6 +57,27 @@ struct PlansView: View {
         }
         .fullScreenCover(isPresented: $viewModel.isHistoryPresented) {
             PlansHistoryView(viewModel: viewModel)
+        }
+    }
+
+    @ViewBuilder
+    private var primaryContent: some View {
+        switch viewModel.surfacePhase {
+        case .loading:
+            EmptySurfaceStateView.loading(message: EmptySurfaceCopy.plansLoading)
+        case .failed:
+            EmptySurfaceStateView.failed(surface: EmptySurfaceCopy.plansSurfaceName) {
+                Task { await viewModel.load() }
+            }
+        case .content:
+            ScrollView {
+                pageContent
+            }
+            .refreshable {
+                await viewModel.refresh()
+            }
+        case .empty, .deferred:
+            EmptyView()
         }
     }
 

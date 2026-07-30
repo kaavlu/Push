@@ -19,7 +19,7 @@ extension CreatePostViewModel {
         actionError = nil
     }
 
-    /// Banner Retry — the failed publish is the only retryable action here.
+    /// Banner Retry — resubmits the failed publish or existing-Moment save.
     func retryPublish() async {
         await submit()
     }
@@ -27,9 +27,18 @@ extension CreatePostViewModel {
     func submit() async {
         guard canSubmit else { return }
         actionError = nil
-        // Metadata edits on an existing Moment are S8; this path still ends in a
-        // local success so the approved edit flow keeps working untouched.
-        guard isRepositoryBacked, !isEditingExistingMoment else {
+
+        // Existing-Moment edit (S9) — never createMoment; never simulate on repo paths.
+        if isEditingExistingMoment {
+            if isRepositoryBacked {
+                await saveExistingMomentEdits()
+            } else {
+                await finishLocally()
+            }
+            return
+        }
+
+        guard isRepositoryBacked else {
             await finishLocally()
             return
         }

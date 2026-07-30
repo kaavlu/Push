@@ -50,7 +50,38 @@ extension CreatePostViewModel {
     }
 
     var canSubmit: Bool {
-        !items.isEmpty && phase == .composing && !isLoadingPicker && screen == .compose
+        guard phase == .composing, !isLoadingPicker, screen == .compose else { return false }
+        if isEditingExistingMoment {
+            // Preview seam has no repository — keep the old "any media" gate.
+            guard isRepositoryBacked else { return !items.isEmpty }
+            // Need a loaded detail and at least one permitted change (or pending
+            // media removals). Empty album is allowed — save soft-deletes media.
+            guard editDetail != nil, !isEditSurfaceDenied else { return false }
+            return hasPendingEditChanges
+        }
+        return !items.isEmpty
+    }
+
+    /// Local draft differs from the loaded baseline on a field the viewer may edit.
+    var hasPendingEditChanges: Bool {
+        guard let caps = editDetail?.capabilities else { return false }
+        let title = titleText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let location = locationText.trimmingCharacters(in: .whitespacesAndNewlines)
+        if caps.canEditMetadata,
+           title != baselineTitle || location != baselineLocation {
+            return true
+        }
+        if caps.canEditTags {
+            let desired = Set(memberPersonRows.map(\.id))
+            if desired != Set(baselineTagIDs) { return true }
+        }
+        let currentIDs = items.compactMap(\.existingMediaID)
+        if currentIDs != baselineMediaIDs {
+            // Membership change (delete) or order change.
+            if Set(currentIDs) != Set(baselineMediaIDs) { return true }
+            if caps.canReorderMedia { return true }
+        }
+        return false
     }
 
     var canAddMore: Bool {
@@ -95,7 +126,20 @@ extension CreatePostViewModel {
     }
 
     var canEditPeople: Bool {
-        phase == .composing && screen == .compose
+        guard phase == .composing, screen == .compose else { return false }
+        if isEditingExistingMoment, isRepositoryBacked {
+            return editDetail?.capabilities.canEditTags == true
+        }
+        return true
+    }
+
+    /// Title / location fields — creator only on an existing Moment.
+    var canEditMetadataFields: Bool {
+        guard phase == .composing, screen == .compose else { return false }
+        if isEditingExistingMoment, isRepositoryBacked {
+            return editDetail?.capabilities.canEditMetadata == true
+        }
+        return true
     }
 
     var primaryButtonTitle: String {
@@ -133,5 +177,19 @@ extension CreatePostViewModel {
 
     var showsParticipants: Bool {
         !memberPersonRows.isEmpty
+    }
+
+    /// Hide the primary save CTA when the only remaining actions are overflow
+    /// destructive ones (leave / delete).
+    var showsPrimarySaveAction: Bool {
+        if isEditingExistingMoment, isRepositoryBacked {
+            guard let detail = editDetail else { return false }
+            let caps = detail.capabilities
+            return caps.canEditMetadata
+                || caps.canEditTags
+                || caps.canReorderMedia
+                || detail.media.contains { caps.canDeleteMedia($0) }
+        }
+        return true
     }
 }

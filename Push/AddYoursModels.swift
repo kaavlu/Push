@@ -2,34 +2,31 @@
 //  AddYoursModels.swift
 //  Push
 //
-//  Local-only models + ViewModel for the Add Yours contribution UI pass.
-//  No uploads, repos, or feed mutation.
+//  Launch context, draft media, phase, and copy for Add Yours. The view model
+//  (append path) lives in `AddYoursViewModel` / `AddYoursViewModel+Append`.
 //
 
 import Foundation
-import PhotosUI
 import SwiftUI
-import UniformTypeIdentifiers
 
 // MARK: - Launch context
 
-/// Payload when opening Add Yours from a Push media card.
+/// Payload when opening Add Yours from a Moment card. Only the Moment identity
+/// travels: everything the screen shows is loaded from `MomentRepository`, so a
+/// stale Feed card can never become the source of truth (architecture §6.4).
 struct AddYoursContext: Identifiable, Equatable {
-    /// Stable identity for `fullScreenCover(item:)` — typically the carousel / push id.
-    let id: String
-    let locationTitle: String
-    let dateTimeLabel: String
+    let momentID: Moment.ID
 
-    init(id: String, locationTitle: String, dateTimeLabel: String) {
-        self.id = id
-        self.locationTitle = locationTitle
-        self.dateTimeLabel = dateTimeLabel
+    /// `fullScreenCover(item:)` identity — one sheet per Moment.
+    var id: String { momentID }
+
+    init(momentID: Moment.ID) {
+        self.momentID = momentID
     }
 
+    /// The Feed card id **is** the Moment id (S6 `MomentFeedCardBuilder`).
     init(carousel: FeedMediaCarouselData) {
-        self.id = carousel.id
-        self.locationTitle = carousel.locationTitle
-        self.dateTimeLabel = carousel.dateTimeLabel
+        self.momentID = carousel.id
     }
 
     /// Instructional subtitle — fixed product copy (no location).
@@ -49,17 +46,22 @@ struct AddYoursDraftItem: Identifiable {
     /// Storage (existing-Moment edit) and for preview/test drafts — those items
     /// can be shown but never re-uploaded.
     let upload: MomentMediaUpload?
+    /// When set, this strip cell is already-committed album media (S9 edit).
+    /// Reorder / soft-delete use this id; publish never re-uploads it.
+    let existingMediaID: MomentMedia.ID?
 
     init(
         id: UUID = UUID(),
         kind: FeedMediaKind,
         previewImage: UIImage?,
-        upload: MomentMediaUpload? = nil
+        upload: MomentMediaUpload? = nil,
+        existingMediaID: MomentMedia.ID? = nil
     ) {
         self.id = id
         self.kind = kind
         self.previewImage = previewImage
         self.upload = upload
+        self.existingMediaID = existingMediaID
     }
 }
 
@@ -104,160 +106,17 @@ enum AddYoursCopy {
     static let successMessage = "Your media is ready to share with the group."
     static let videoBadgeAccessibility = "Video"
 
+    /// Repository surface name for the shared failed/loading states.
+    static let surfaceName = "this moment"
+    /// The viewer lost `canAddMedia` (untagged, blocked, or the album is gone).
+    static let deniedTitle = "You can't add to this moment"
+    static let deniedMessage = "Only people tagged in it can add photos and videos."
+    /// Cap already reached before anything was picked.
+    static let fullTitle = "This moment is full"
+    static let fullMessage = "It already has \(MomentLimits.maxActiveMedia) photos and videos."
+
     static func selectedCountLabel(count: Int, max: Int) -> String {
         "\(count) of \(max)"
-    }
-}
-
-// MARK: - ViewModel
-
-@MainActor
-final class AddYoursViewModel: ObservableObject {
-    let context: AddYoursContext
-
-    @Published private(set) var items: [AddYoursDraftItem] = []
-    @Published var focusedIndex: Int = 0
-    @Published var pickerItems: [PhotosPickerItem] = [] {
-        didSet {
-            guard !pickerItems.isEmpty else { return }
-            Task { await consumePickerItems() }
-        }
-    }
-    @Published private(set) var phase: AddYoursPhase = .composing
-    @Published private(set) var isLoadingPicker = false
-
-    private let timing: AddYoursTiming
-    private let maxSelection: Int
-
-    var canSubmit: Bool {
-        !items.isEmpty && phase == .composing && !isLoadingPicker
-    }
-
-    var canAddMore: Bool {
-        items.count < maxSelection && phase == .composing
-    }
-
-    var remainingSlots: Int {
-        max(0, maxSelection - items.count)
-    }
-
-    var focusedItem: AddYoursDraftItem? {
-        guard items.indices.contains(focusedIndex) else { return nil }
-        return items[focusedIndex]
-    }
-
-    var primaryButtonTitle: String {
-        phase == .submitting ? AddYoursCopy.submittingAction : AddYoursCopy.primaryAction
-    }
-
-    var isPrimaryLoading: Bool {
-        phase == .submitting
-    }
-
-    init(
-        context: AddYoursContext,
-        timing: AddYoursTiming = .production,
-        maxSelection: Int = AddYoursLayout.maxSelectionCount
-    ) {
-        self.context = context
-        self.timing = timing
-        self.maxSelection = max(1, maxSelection)
-    }
-
-    /// DEBUG / preview helper — seed without PhotosPicker.
-    func seed(with draftItems: [AddYoursDraftItem]) {
-        guard phase == .composing else { return }
-        let capped = Array(draftItems.prefix(maxSelection))
-        items = capped
-        focusedIndex = AddYoursSelection.clampedIndex(0, itemCount: capped.count)
-    }
-
-    func selectItem(at index: Int) {
-        guard phase == .composing else { return }
-        focusedIndex = AddYoursSelection.clampedIndex(index, itemCount: items.count)
-    }
-
-    func removeFocusedItem() {
-        removeItem(at: focusedIndex)
-    }
-
-    func removeItem(at index: Int) {
-        guard phase == .composing, items.indices.contains(index) else { return }
-        items.remove(at: index)
-        focusedIndex = AddYoursSelection.clampedIndex(
-            min(index, items.count - 1),
-            itemCount: items.count
-        )
-    }
-
-    func submit() async {
-        guard canSubmit else { return }
-        phase = .submitting
-        if timing.submitDelayNanoseconds > 0 {
-            try? await Task.sleep(nanoseconds: timing.submitDelayNanoseconds)
-        }
-        // Local-only: no upload / feed mutation.
-        phase = .success
-        if timing.successHoldNanoseconds > 0 {
-            try? await Task.sleep(nanoseconds: timing.successHoldNanoseconds)
-        }
-    }
-
-    // MARK: - Picker
-
-    private func consumePickerItems() async {
-        let batch = pickerItems
-        pickerItems = []
-        guard phase == .composing, !batch.isEmpty else { return }
-
-        isLoadingPicker = true
-        defer { isLoadingPicker = false }
-
-        var loaded: [AddYoursDraftItem] = []
-        loaded.reserveCapacity(min(batch.count, remainingSlots))
-        for item in batch {
-            guard loaded.count < remainingSlots else { break }
-            if let draft = await Self.loadDraft(from: item) {
-                loaded.append(draft)
-            }
-        }
-        applyLoadedDrafts(loaded)
-    }
-
-    /// Appends drafts and focuses the first uploaded item (index 0).
-    func applyLoadedDrafts(_ drafts: [AddYoursDraftItem]) {
-        guard phase == .composing, !drafts.isEmpty else { return }
-        var next = items
-        for draft in drafts {
-            guard next.count < maxSelection else { break }
-            next.append(draft)
-        }
-        items = next
-        // Always show the first media the user contributed, not the newest.
-        focusedIndex = 0
-    }
-
-    private static func loadDraft(from item: PhotosPickerItem) async -> AddYoursDraftItem? {
-        let isVideo = item.supportedContentTypes.contains { type in
-            type.conforms(to: .movie)
-                || type.conforms(to: .video)
-                || type.identifier.contains("video")
-                || type.identifier.contains("movie")
-        }
-
-        if isVideo {
-            // Avoid loading full movie bytes into memory for this UI pass.
-            // Poster extraction ships with real uploads later.
-            return AddYoursDraftItem(kind: .video, previewImage: nil)
-        }
-
-        guard
-            let data = try? await item.loadTransferable(type: Data.self),
-            let image = UIImage(data: data)
-        else {
-            return nil
-        }
-        return AddYoursDraftItem(kind: .photo, previewImage: image)
     }
 }
 
@@ -273,11 +132,50 @@ enum AddYoursSelection {
 // MARK: - Fixtures (DEBUG / previews)
 
 enum AddYoursFixtures {
-    static let sampleContext = AddYoursContext(
-        id: "fixture-addyours-dolores",
-        locationTitle: "Dolores Park",
-        dateTimeLabel: "Sat · 4:30 PM"
-    )
+    static let sampleMomentID = "fixture-addyours-dolores"
+    static let sampleContext = AddYoursContext(momentID: sampleMomentID)
+    private static let sampleViewerID = "you"
+
+    /// Preview-only stand-in for a loaded `MomentDetail`. The app path always
+    /// gets this from `MomentRepository.moment(id:)`.
+    static var previewDetail: MomentDetail {
+        let publishedAt = Date().addingTimeInterval(-3 * 60 * 60)
+        return MomentDetail(
+            moment: Moment(
+                id: sampleMomentID,
+                creatorID: sampleViewerID,
+                title: "Dolores Park",
+                locationText: "Dolores Park",
+                placeID: nil,
+                pushID: nil,
+                publishedAt: publishedAt,
+                lastActivityAt: publishedAt,
+                deletedAt: nil
+            ),
+            members: [
+                MomentMember(
+                    id: "\(sampleMomentID)-member",
+                    momentID: sampleMomentID,
+                    personID: sampleViewerID,
+                    taggedAt: publishedAt
+                )
+            ],
+            media: [],
+            capabilities: MomentCapabilities(
+                viewerID: sampleViewerID,
+                canView: true,
+                canAddMedia: true,
+                canEditTags: true,
+                canEditMetadata: true,
+                canReorderMedia: true,
+                canDeleteMoment: true,
+                canSelfRemoveTag: false,
+                youContributed: false,
+                showOpenForAddsChip: true,
+                isCreator: true
+            )
+        )
+    }
 
     static func sampleDraftItems() -> [AddYoursDraftItem] {
         let paths = [

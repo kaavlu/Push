@@ -19,6 +19,13 @@ struct ProfileDestinationView: View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: ProfileLayout.sectionSpacing(layout)) {
                     ProfileDestinationHeader(route: route)
+                    if let actionError = viewModel.actionError {
+                        ActionErrorBanner(
+                            message: actionError.message,
+                            onRetry: { viewModel.retryActionError() },
+                            onDismiss: { viewModel.dismissActionError() }
+                        )
+                    }
                     destinationContent
                 }
                 .padding(.horizontal, ProfileLayout.horizontalPadding(layout))
@@ -82,7 +89,6 @@ private struct ProfileEditScreen: View {
                 SectionTitle("Basics")
                 ProfileTextField(title: "Name", text: $viewModel.displayName)
                 ProfileTextField(title: "Handle", text: $viewModel.handle)
-                ProfileTextField(title: "Photo placeholder", text: $viewModel.initials)
                 Button {
                     viewModel.beginPhotoEditing()
                 } label: {
@@ -106,8 +112,7 @@ private struct ProfileEditScreen: View {
         .onDisappear {
             viewModel.setProfileBasics(
                 name: viewModel.displayName,
-                handle: viewModel.handle,
-                initials: viewModel.initials
+                handle: viewModel.handle
             )
         }
     }
