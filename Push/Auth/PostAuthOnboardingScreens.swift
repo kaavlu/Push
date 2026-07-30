@@ -1,59 +1,15 @@
 // Push/Auth/PostAuthOnboardingScreens.swift
 import SwiftUI
 
-// Teach + optional graph screens for post-auth onboarding.
-// Combined location/value primer + blocked live in PostAuthLocationScreens.swift
-
-// MARK: - Ghost
-
-struct PostAuthGhostScreen: View {
-    @Environment(\.pushLayout) private var layout
-    @ObservedObject var model: PostAuthOnboardingViewModel
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            ghostHero
-                .frame(maxWidth: .infinity)
-                .padding(.top, GhostTeachLayout.heroTop)
-            OnboardingHeader(
-                title: "You're visible to friends.",
-                subtitle: "Go invisible anytime with Ghost in Profile. You're on by default so friends can find you.",
-                alignment: .center
-            )
-            .padding(.top, GhostTeachLayout.headerTop)
-            Spacer(minLength: GhostTeachLayout.ctaSpacerMin)
-            OnboardingCTAButton(title: "Continue") {
-                model.continueFromGhost()
-            }
-            .disabled(model.isBusy)
-        }
-        .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
-        .padding(.top, OnboardingLabMetric.contentTopInset(layout))
-        .padding(.bottom, GhostTeachLayout.bottomPadding)
-    }
-
-    private var ghostHero: some View {
-        Image(systemName: "eye.slash.fill")
-            .font(.system(size: GhostTeachLayout.iconSize, weight: .semibold))
-            .foregroundStyle(OnboardingLabColor.espresso)
-            .frame(width: GhostTeachLayout.heroSize, height: GhostTeachLayout.heroSize)
-            .background(
-                Circle()
-                    .fill(OnboardingLabColor.walnut.opacity(GhostTeachLayout.heroFillOpacity))
-            )
-            .overlay(
-                Circle()
-                    .stroke(OnboardingLabColor.walnut.opacity(GhostTeachLayout.heroStrokeOpacity), lineWidth: 1)
-            )
-            .accessibilityHidden(true)
-    }
-}
+// Teach screens for post-auth onboarding.
+// Ghost → PostAuthGhostScreen.swift · location → PostAuthLocationScreens.swift
 
 // MARK: - Coordinate (Pushes + Moments)
 
 struct PostAuthCoordinateScreen: View {
     @Environment(\.pushLayout) private var layout
     @ObservedObject var model: PostAuthOnboardingViewModel
+    @State private var revealStep = 0
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -61,28 +17,34 @@ struct PostAuthCoordinateScreen: View {
                 title: "Make plans. Keep moments.",
                 subtitle: "Coordinate without the group chat thrash; save the hang after."
             )
+            .onboardingCascadeVisible(revealStep >= 1)
             VStack(spacing: CoordinateTeachLayout.cardSpacing) {
                 teachCard(
                     symbol: "paperplane.fill",
                     title: "Push",
                     body: "Start a Push when something's forming"
                 )
+                .onboardingCascadeVisible(revealStep >= 2)
                 teachCard(
                     symbol: "photo.on.rectangle.angled",
                     title: "Moment",
                     body: "Share photos from the hang on Feed"
                 )
+                .onboardingCascadeVisible(revealStep >= 3)
             }
             .padding(.top, CoordinateTeachLayout.cardsTop)
             Spacer(minLength: CoordinateTeachLayout.ctaSpacerMin)
             OnboardingCTAButton(title: "Continue") {
                 model.continueFromCoordinate()
             }
-            .disabled(model.isBusy)
+            .disabled(model.isBusy || revealStep < 4)
+            .onboardingCascadeVisible(revealStep >= 4)
         }
         .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
         .padding(.top, OnboardingLabMetric.contentTopInset(layout))
         .padding(.bottom, CoordinateTeachLayout.bottomPadding)
+        .animation(PushMotion.contentCrossfade, value: revealStep)
+        .task { await runCascade() }
     }
 
     private func teachCard(symbol: String, title: String, body: String) -> some View {
@@ -118,17 +80,13 @@ struct PostAuthCoordinateScreen: View {
             y: CoordinateTeachLayout.cardShadowY
         )
     }
-}
 
-private enum GhostTeachLayout {
-    static let heroTop: CGFloat = 12
-    static let heroSize: CGFloat = 96
-    static let iconSize: CGFloat = 36
-    static let heroFillOpacity = 0.08
-    static let heroStrokeOpacity = 0.12
-    static let headerTop: CGFloat = 20
-    static let ctaSpacerMin: CGFloat = 22
-    static let bottomPadding: CGFloat = 26
+    private func runCascade() async {
+        for step in 1...4 {
+            OnboardingCascadeRunner.step(&revealStep, to: step)
+            await OnboardingCascadeRunner.sleepStagger()
+        }
+    }
 }
 
 private enum CoordinateTeachLayout {

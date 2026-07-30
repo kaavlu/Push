@@ -6,31 +6,38 @@ import SwiftUI
 struct PostAuthContactsScreen: View {
     @Environment(\.pushLayout) private var layout
     @ObservedObject var model: PostAuthOnboardingViewModel
+    @State private var revealStep = 0
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             hero
                 .frame(maxWidth: .infinity)
                 .padding(.top, ContactsScreenLayout.heroTop)
+                .onboardingCascadeVisible(revealStep >= 1)
             OnboardingHeader(
                 title: "Find friends already here.",
                 subtitle: "See who's on Push from your contacts. We don't message them for you.",
                 alignment: .center
             )
             .padding(.top, ContactsScreenLayout.headerTop)
+            .onboardingCascadeVisible(revealStep >= 2)
             Spacer(minLength: ContactsScreenLayout.ctaSpacerMin)
             OnboardingCTAButton(title: model.isBusy ? "Loading…" : "Continue") {
                 Task { await model.enableContacts() }
             }
-            .disabled(model.isBusy)
+            .disabled(model.isBusy || revealStep < 3)
+            .onboardingCascadeVisible(revealStep >= 3)
             OnboardingTextButton(title: "Not now") {
                 Task { await model.skipContacts() }
             }
-            .disabled(model.isBusy)
+            .disabled(model.isBusy || revealStep < 4)
+            .onboardingCascadeVisible(revealStep >= 4)
         }
         .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
         .padding(.top, OnboardingLabMetric.contentTopInset(layout))
         .padding(.bottom, ContactsScreenLayout.bottomPadding)
+        .animation(PushMotion.contentCrossfade, value: revealStep)
+        .task { await runCascade() }
     }
 
     private var hero: some View {
@@ -48,6 +55,13 @@ struct PostAuthContactsScreen: View {
             )
             .accessibilityHidden(true)
     }
+
+    private func runCascade() async {
+        for step in 1...4 {
+            OnboardingCascadeRunner.step(&revealStep, to: step)
+            await OnboardingCascadeRunner.sleepStagger()
+        }
+    }
 }
 
 // MARK: - Find people (soft nudge)
@@ -55,6 +69,7 @@ struct PostAuthContactsScreen: View {
 struct PostAuthFindPeopleScreen: View {
     @Environment(\.pushLayout) private var layout
     @ObservedObject var model: PostAuthOnboardingViewModel
+    @State private var revealStep = 0
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -62,22 +77,29 @@ struct PostAuthFindPeopleScreen: View {
                 title: "Add people on Push.",
                 subtitle: "They're already here. Continue even if you add no one."
             )
-            content.padding(.top, FindPeopleLayout.listTop)
+            .onboardingCascadeVisible(revealStep >= 1)
+            content
+                .padding(.top, FindPeopleLayout.listTop)
+                .onboardingCascadeVisible(revealStep >= 2)
             if let error = model.errorMessage {
                 Text(error)
                     .font(OnboardingLabFont.text(14, .medium))
                     .foregroundStyle(.red)
                     .padding(.top, FindPeopleLayout.errorTop)
+                    .onboardingCascadeVisible(revealStep >= 2)
             }
             Spacer(minLength: FindPeopleLayout.ctaSpacerMin)
             OnboardingCTAButton(title: model.isBusy ? "Finishing…" : model.findPeopleCTALabel) {
                 Task { await model.continueFromFindPeople() }
             }
-            .disabled(model.isBusy)
+            .disabled(model.isBusy || revealStep < 3)
+            .onboardingCascadeVisible(revealStep >= 3)
         }
         .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
         .padding(.top, OnboardingLabMetric.contentTopInset(layout) + layout.value(compact: 2, standard: 3, large: 4))
         .padding(.bottom, FindPeopleLayout.bottomPadding)
+        .animation(PushMotion.contentCrossfade, value: revealStep)
+        .task { await runCascade() }
     }
 
     @ViewBuilder
@@ -155,12 +177,20 @@ struct PostAuthFindPeopleScreen: View {
         .clipShape(Circle())
         .overlay(Circle().stroke(.white.opacity(0.7), lineWidth: 2))
     }
+
+    private func runCascade() async {
+        for step in 1...3 {
+            OnboardingCascadeRunner.step(&revealStep, to: step)
+            await OnboardingCascadeRunner.sleepStagger()
+        }
+    }
 }
 
 // MARK: - Done
 
 struct PostAuthDoneScreen: View {
     @ObservedObject var model: PostAuthOnboardingViewModel
+    @State private var revealStep = 0
 
     var body: some View {
         VStack(spacing: 0) {
@@ -168,18 +198,30 @@ struct PostAuthDoneScreen: View {
             Text("You're in.")
                 .font(OnboardingLabFont.rounded(52, .heavy))
                 .foregroundStyle(OnboardingLabColor.espresso)
+                .onboardingCascadeVisible(revealStep >= 1)
             Text("Push works best with your real friends. They're waiting on the map.")
                 .font(OnboardingLabFont.text(17, .medium))
                 .foregroundStyle(OnboardingLabColor.walnut)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: DoneScreenLayout.subtitleMaxWidth)
                 .padding(.top, DoneScreenLayout.subtitleTop)
+                .onboardingCascadeVisible(revealStep >= 2)
             Spacer(minLength: 0)
             OnboardingCTAButton(title: "Open Push") { model.openApp() }
                 .padding(.horizontal, DoneScreenLayout.ctaHorizontal)
                 .padding(.bottom, DoneScreenLayout.bottomPadding)
+                .onboardingCascadeVisible(revealStep >= 3)
         }
         .padding(.top, DoneScreenLayout.topPadding)
+        .animation(PushMotion.contentCrossfade, value: revealStep)
+        .task { await runCascade() }
+    }
+
+    private func runCascade() async {
+        for step in 1...3 {
+            OnboardingCascadeRunner.step(&revealStep, to: step)
+            await OnboardingCascadeRunner.sleepStagger()
+        }
     }
 }
 

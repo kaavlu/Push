@@ -5,28 +5,34 @@ import SwiftUI
 struct PostAuthNotificationsScreen: View {
     @Environment(\.pushLayout) private var layout
     @ObservedObject var model: PostAuthOnboardingViewModel
+    @State private var revealStep = 0
 
     var body: some View {
         VStack(spacing: 0) {
             bell
                 .padding(.top, NotificationsLayout.heroTop)
+                .onboardingCascadeVisible(revealStep >= 1)
             OnboardingHeader(
                 title: NotificationsCopy.title,
                 subtitle: NotificationsCopy.subtitle,
                 alignment: .center
             )
             .padding(.top, NotificationsLayout.headerTop)
+            .onboardingCascadeVisible(revealStep >= 2)
             samples
                 .padding(.top, NotificationsLayout.samplesTop)
+                .onboardingCascadeVisible(revealStep >= 3)
             Spacer(minLength: NotificationsLayout.ctaSpacerMin)
             OnboardingCTAButton(title: model.isBusy ? "Working…" : "Turn on notifications") {
                 Task { await model.enableNotifications() }
             }
-            .disabled(model.isBusy)
+            .disabled(model.isBusy || revealStep < 4)
+            .onboardingCascadeVisible(revealStep >= 4)
             OnboardingTextButton(title: "Maybe later") {
                 Task { await model.skipNotifications() }
             }
-            .disabled(model.isBusy)
+            .disabled(model.isBusy || revealStep < 5)
+            .onboardingCascadeVisible(revealStep >= 5)
         }
         .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
         .padding(
@@ -35,6 +41,8 @@ struct PostAuthNotificationsScreen: View {
                 + layout.value(compact: 2, standard: 3, large: 4)
         )
         .padding(.bottom, NotificationsLayout.bottomPadding)
+        .animation(PushMotion.contentCrossfade, value: revealStep)
+        .task { await runCascade() }
     }
 
     private var bell: some View {
@@ -114,11 +122,17 @@ struct PostAuthNotificationsScreen: View {
             y: NotificationsLayout.sampleShadowY
         )
     }
+
+    private func runCascade() async {
+        for step in 1...5 {
+            OnboardingCascadeRunner.step(&revealStep, to: step)
+            await OnboardingCascadeRunner.sleepStagger()
+        }
+    }
 }
 
 private enum NotificationsCopy {
     static let title = "Never miss the moment."
-    /// Honest: optional product nudge — not a hard gate; user can change later.
     static let subtitle =
         "Optional — a gentle nudge when something's happening. You can change this anytime in Settings."
 }
