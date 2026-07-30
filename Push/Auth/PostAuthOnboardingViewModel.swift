@@ -3,34 +3,45 @@ import Foundation
 import UserNotifications
 
 /// Screens after a live session is prepared (new accounts only).
+/// Approach 2 spine: value → location → teach → optional graph → done.
 enum PostAuthOnboardingScreen: Equatable {
-    case privacy
-    case location
+    case value
+    case locationPrimer
+    case locationBlocked
+    case ghost
+    case coordinate
     case notifications
-    case friends
+    case contacts
+    case findPeople
     case done
 
     var showsBackButton: Bool {
         switch self {
-        case .privacy, .done: return false
-        case .location, .notifications, .friends: return true
+        case .value, .locationBlocked, .done:
+            return false
+        case .locationPrimer, .ghost, .coordinate, .notifications, .contacts, .findPeople:
+            return true
         }
     }
 
-    /// 1-based progress across setup steps (privacy → friends).
+    /// 1-based progress across happy-path steps (value → findPeople). Blocked reuses location step.
     var progressStep: Int {
         switch self {
-        case .privacy: return 1
-        case .location: return 2
-        case .notifications: return 3
-        case .friends, .done: return 4
+        case .value: return 1
+        case .locationPrimer, .locationBlocked: return 2
+        case .ghost: return 3
+        case .coordinate: return 4
+        case .notifications: return 5
+        case .contacts: return 6
+        case .findPeople: return 7
+        case .done: return 0
         }
     }
 
-    static let progressTotal = 4
+    static let progressTotal = 7
 }
 
-/// One discoverable person on the find-friends step.
+/// One discoverable person on the find-people step.
 struct OnboardingDiscoverPerson: Identifiable, Equatable {
     let result: PersonSearchResult
     var id: Person.ID { result.id }
@@ -42,8 +53,7 @@ struct OnboardingDiscoverPerson: Identifiable, Equatable {
 
 @MainActor
 final class PostAuthOnboardingViewModel: ObservableObject {
-    @Published private(set) var screen: PostAuthOnboardingScreen = .privacy
-    @Published private(set) var privacy: OnboardingPrivacyOption = .exactActivity
+    @Published private(set) var screen: PostAuthOnboardingScreen = .value
     @Published private(set) var people: [OnboardingDiscoverPerson] = []
     @Published private(set) var addedIDs: Set<Person.ID> = []
     @Published private(set) var actingIDs: Set<Person.ID> = []
@@ -62,7 +72,7 @@ final class PostAuthOnboardingViewModel: ObservableObject {
     }
 
     private enum Copy {
-        static let privacyFailed = "Couldn't save privacy. Check your connection and try again."
+        static let defaultsFailed = "Couldn't save sharing defaults. Check your connection and try again."
         static let friendsLoadFailed = "Couldn't load people right now. You can skip and add friends later."
         static let friendRequestFailed = "Couldn't send that request. Try again."
         static let completeFailed = "Couldn't finish setup. Check your connection and try again."
@@ -80,68 +90,86 @@ final class PostAuthOnboardingViewModel: ObservableObject {
         self.locationSession = locationSession ?? resolved.locationSession
     }
 
-    var privacyTitle: String { privacy.title }
-
-    var friendsCTALabel: String {
+    var findPeopleCTALabel: String {
         let count = addedIDs.count
         guard count > 0 else { return "Continue" }
         return "Continue with \(count) friend\(count == 1 ? "" : "s")"
     }
 
-    func select(_ option: OnboardingPrivacyOption) {
-        privacy = option
-    }
+    /// Alias kept for screens still wiring the friends CTA label.
+    var friendsCTALabel: String { findPeopleCTALabel }
 
     func goBack() {
         errorMessage = nil
         switch screen {
-        case .location: screen = .privacy
-        case .notifications: screen = .location
-        case .friends: screen = .notifications
-        case .privacy, .done: break
+        case .locationPrimer:
+            screen = .value
+        case .ghost:
+            screen = .locationPrimer
+        case .coordinate:
+            screen = .ghost
+        case .notifications:
+            screen = .coordinate
+        case .contacts:
+            screen = .notifications
+        case .findPeople:
+            screen = .contacts
+        case .value, .locationBlocked, .done:
+            break
         }
     }
 
-    // MARK: - Privacy → location
+    // MARK: - Value → location primer
 
-    func continueFromPrivacy() async {
-        guard !isBusy else { return }
-        isBusy = true
+    func continueFromValue() {
         errorMessage = nil
-        defer { isBusy = false }
-        do {
-            try await container.sharing.setGlobalDefaults(
-                location: privacy.locationVisibility,
-                activity: privacy.activityVisibility,
-                availability: privacy.availabilityVisibility
-            )
-            await container.locationSession?.setPresencePublishingEnabled(
-                privacy.isPresencePublishingEnabled
-            )
-            try await mirrorPrivacyToggles()
-            screen = .location
-        } catch {
-            errorMessage = Copy.privacyFailed
-        }
+        screen = .locationPrimer
     }
 
-    // MARK: - Location → notifications
+    // MARK: - Location
 
     func enableLocation() async {
         guard !isBusy else { return }
         isBusy = true
         errorMessage = nil
         defer { isBusy = false }
-        await container.locationSession?.startIfEligible()
-        screen = .notifications
+
+        await locationSession?.startIfEligible()
+        guard hasRequiredLocationAuthorization else {
+            screen = .locationBlocked
+            return
+        }
+        await applyDefaultsAndAdvanceToGhost()
     }
 
-    func skipLocation() {
+    /// Re-check after Settings (blocked recovery). Advances only when authorized.
+    func retryLocationAccess() async {
+        guard !isBusy else { return }
+        isBusy = true
+        errorMessage = nil
+        defer { isBusy = false }
+
+        await locationSession?.startIfEligible()
+        guard hasRequiredLocationAuthorization else {
+            screen = .locationBlocked
+            return
+        }
+        await applyDefaultsAndAdvanceToGhost()
+    }
+
+    // MARK: - Teach steps
+
+    func continueFromGhost() {
+        errorMessage = nil
+        screen = .coordinate
+    }
+
+    func continueFromCoordinate() {
         errorMessage = nil
         screen = .notifications
     }
 
-    // MARK: - Notifications → friends
+    // MARK: - Notifications → contacts
 
     func enableNotifications() async {
         guard !isBusy else { return }
@@ -149,15 +177,27 @@ final class PostAuthOnboardingViewModel: ObservableObject {
         errorMessage = nil
         defer { isBusy = false }
         _ = try? await notificationCenter.requestAuthorization(options: [.alert, .badge, .sound])
-        await loadPeopleAndAdvance()
+        screen = .contacts
     }
 
     func skipNotifications() async {
         errorMessage = nil
+        screen = .contacts
+    }
+
+    // MARK: - Contacts → find people
+
+    /// Contacts matching lands in a later task; advance immediately for now.
+    func skipContacts() async {
+        errorMessage = nil
         await loadPeopleAndAdvance()
     }
 
-    // MARK: - Friends
+    func continueFromContacts() async {
+        await skipContacts()
+    }
+
+    // MARK: - Find people
 
     func toggleFriend(_ id: Person.ID) async {
         if addedIDs.contains(id) {
@@ -195,7 +235,7 @@ final class PostAuthOnboardingViewModel: ObservableObject {
         }()
     }
 
-    func continueFromFriends() async {
+    func continueFromFindPeople() async {
         await finishOnboarding()
     }
 
@@ -204,6 +244,29 @@ final class PostAuthOnboardingViewModel: ObservableObject {
     }
 
     // MARK: - Private
+
+    private func applyDefaultsAndAdvanceToGhost() async {
+        do {
+            try await applyDefaultSharingAndPublishing()
+            screen = .ghost
+        } catch {
+            errorMessage = Copy.defaultsFailed
+            // Stay on primer (or blocked if we arrived via retry) so the user can retry the write.
+            if screen != .locationBlocked {
+                screen = .locationPrimer
+            }
+        }
+    }
+
+    private func applyDefaultSharingAndPublishing() async throws {
+        try await container.sharing.setGlobalDefaults(
+            location: .exact,
+            activity: .full,
+            availability: .full
+        )
+        await locationSession?.setPresencePublishingEnabled(true)
+        try await mirrorExactActivityPrivacyToggles()
+    }
 
     private func loadPeopleAndAdvance() async {
         isLoadingPeople = true
@@ -216,7 +279,7 @@ final class PostAuthOnboardingViewModel: ObservableObject {
             people = []
             errorMessage = Copy.friendsLoadFailed
         }
-        screen = .friends
+        screen = .findPeople
     }
 
     /// Completion requires when-in-use (or always) location authorization — fail closed.
@@ -241,8 +304,8 @@ final class PostAuthOnboardingViewModel: ObservableObject {
         }
     }
 
-    /// Keep Profile settings toggles roughly aligned with the chosen mode.
-    private func mirrorPrivacyToggles() async throws {
+    /// Align Profile toggles with exact location + activity (post-allow defaults).
+    private func mirrorExactActivityPrivacyToggles() async throws {
         let profile = try await container.profile.userProfile()
         var activity = profile.activityVisibility
         var map = profile.mapPreferences
@@ -253,24 +316,9 @@ final class PostAuthOnboardingViewModel: ObservableObject {
             items[index].isEnabled = enabled
         }
 
-        switch privacy {
-        case .exactActivity:
-            setToggle(&activity, id: "place", enabled: true)
-            setToggle(&activity, id: "activity", enabled: true)
-            setToggle(&map, id: "soft-place", enabled: false)
-        case .exact:
-            setToggle(&activity, id: "place", enabled: true)
-            setToggle(&activity, id: "activity", enabled: false)
-            setToggle(&map, id: "soft-place", enabled: false)
-        case .vague:
-            setToggle(&activity, id: "place", enabled: true)
-            setToggle(&activity, id: "activity", enabled: true)
-            setToggle(&map, id: "soft-place", enabled: true)
-        case .ghost:
-            setToggle(&activity, id: "place", enabled: false)
-            setToggle(&activity, id: "activity", enabled: false)
-            setToggle(&map, id: "soft-place", enabled: true)
-        }
+        setToggle(&activity, id: "place", enabled: true)
+        setToggle(&activity, id: "activity", enabled: true)
+        setToggle(&map, id: "soft-place", enabled: false)
 
         try await container.profile.updatePrivacy(
             activityVisibility: activity,

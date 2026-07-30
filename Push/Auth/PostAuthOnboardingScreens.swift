@@ -1,108 +1,35 @@
 // Push/Auth/PostAuthOnboardingScreens.swift
 import SwiftUI
 
-// MARK: - Privacy
+// Placeholder screens for Approach 2 spine. Polished UI lands in Tasks 4–7.
 
-struct PostAuthPrivacyScreen: View {
+// MARK: - Value
+
+struct PostAuthValueScreen: View {
     @Environment(\.pushLayout) private var layout
     @ObservedObject var model: PostAuthOnboardingViewModel
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             OnboardingHeader(
-                title: "You're in control.",
-                subtitle: "Pick what friends can see. Change it anytime."
+                title: "Know the move.",
+                subtitle: "A private live map for real friends — not a tracker."
             )
-            options.padding(.top, 20)
-            if let error = model.errorMessage {
-                Text(error)
-                    .font(OnboardingLabFont.text(14, .medium))
-                    .foregroundStyle(.red)
-                    .padding(.top, 12)
-            }
             Spacer(minLength: 22)
-            OnboardingCTAButton(title: model.isBusy ? "Saving…" : "Continue") {
-                Task { await model.continueFromPrivacy() }
+            OnboardingCTAButton(title: "Continue") {
+                model.continueFromValue()
             }
             .disabled(model.isBusy)
-            .opacity(model.isBusy ? 0.5 : 1)
         }
         .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
         .padding(.top, OnboardingLabMetric.contentTopInset(layout))
         .padding(.bottom, 26)
     }
-
-    private var options: some View {
-        VStack(spacing: 11) {
-            ForEach(OnboardingPrivacyOption.allCases) { option in
-                PostAuthPrivacyRow(
-                    option: option,
-                    isSelected: model.privacy == option,
-                    onTap: { model.select(option) }
-                )
-            }
-        }
-    }
 }
 
-private struct PostAuthPrivacyRow: View {
-    let option: OnboardingPrivacyOption
-    let isSelected: Bool
-    let onTap: () -> Void
+// MARK: - Location primer
 
-    var body: some View {
-        Button(action: onTap) {
-            HStack(spacing: 14) {
-                Image(systemName: option.symbolName)
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundStyle(option.iconTint)
-                    .frame(width: 44, height: 44)
-                    .background(
-                        option.iconTint.opacity(0.16),
-                        in: RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    )
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(option.title)
-                        .font(OnboardingLabFont.rounded(16, .bold))
-                        .foregroundStyle(OnboardingLabColor.espresso)
-                    Text(option.subtitle)
-                        .font(OnboardingLabFont.text(13, .regular))
-                        .foregroundStyle(OnboardingLabColor.textSecondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                Spacer(minLength: 0)
-                if isSelected {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 13, weight: .heavy))
-                        .foregroundStyle(.white)
-                        .frame(width: 24, height: 24)
-                        .background(OnboardingLabColor.sage, in: Circle())
-                }
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 15)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .multilineTextAlignment(.leading)
-            .background(
-                OnboardingLabColor.fieldFill,
-                in: RoundedRectangle(cornerRadius: 20, style: .continuous)
-            )
-            .overlay {
-                if isSelected {
-                    RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .stroke(OnboardingLabColor.sunbeam, lineWidth: 2.5)
-                        .shadow(color: OnboardingLabColor.sunbeam.opacity(0.28), radius: 9, y: 8)
-                }
-            }
-        }
-        .buttonStyle(PushPressStyle())
-        .animation(OnboardingLabMotion.standard, value: isSelected)
-    }
-}
-
-// MARK: - Location
-
-struct PostAuthLocationScreen: View {
+struct PostAuthLocationPrimerScreen: View {
     @Environment(\.pushLayout) private var layout
     @ObservedObject var model: PostAuthOnboardingViewModel
 
@@ -114,20 +41,17 @@ struct PostAuthLocationScreen: View {
                 subtitle: "It's how you see who's nearby and who's down to hang. Nothing shares until you say so."
             )
             .padding(.top, 24)
-            OnboardingStatusChip(
-                text: "You chose: \(model.privacyTitle)",
-                systemImage: "lock.fill",
-                fill: OnboardingLabColor.sage.opacity(0.12),
-                textColor: OnboardingLabColor.sage
-            )
-            .padding(.top, 16)
+            if let error = model.errorMessage {
+                Text(error)
+                    .font(OnboardingLabFont.text(14, .medium))
+                    .foregroundStyle(.red)
+                    .padding(.top, 12)
+            }
             OnboardingCTAButton(title: model.isBusy ? "Enabling…" : "Enable location") {
                 Task { await model.enableLocation() }
             }
             .disabled(model.isBusy)
             .padding(.top, 24)
-            OnboardingTextButton(title: "Not now") { model.skipLocation() }
-                .disabled(model.isBusy)
         }
         .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
         .padding(.top, OnboardingLabMetric.contentTopInset(layout))
@@ -148,6 +72,78 @@ struct PostAuthLocationScreen: View {
             .frame(width: 58, height: 58)
         }
         .frame(height: 210)
+    }
+}
+
+// MARK: - Location blocked
+
+struct PostAuthLocationBlockedScreen: View {
+    @Environment(\.pushLayout) private var layout
+    @ObservedObject var model: PostAuthOnboardingViewModel
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            OnboardingHeader(
+                title: "Location is required.",
+                subtitle: "Push needs when-in-use location to work. Enable it in Settings, then try again."
+            )
+            Spacer(minLength: 22)
+            OnboardingCTAButton(title: model.isBusy ? "Checking…" : "Try again") {
+                Task { await model.retryLocationAccess() }
+            }
+            .disabled(model.isBusy)
+        }
+        .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
+        .padding(.top, OnboardingLabMetric.contentTopInset(layout))
+        .padding(.bottom, 26)
+    }
+}
+
+// MARK: - Ghost
+
+struct PostAuthGhostScreen: View {
+    @Environment(\.pushLayout) private var layout
+    @ObservedObject var model: PostAuthOnboardingViewModel
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            OnboardingHeader(
+                title: "Ghost when you need space.",
+                subtitle: "Go invisible anytime in Profile. You're visible by default so friends can find you."
+            )
+            Spacer(minLength: 22)
+            OnboardingCTAButton(title: "Continue") {
+                model.continueFromGhost()
+            }
+            .disabled(model.isBusy)
+        }
+        .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
+        .padding(.top, OnboardingLabMetric.contentTopInset(layout))
+        .padding(.bottom, 26)
+    }
+}
+
+// MARK: - Coordinate (Pushes + Moments)
+
+struct PostAuthCoordinateScreen: View {
+    @Environment(\.pushLayout) private var layout
+    @ObservedObject var model: PostAuthOnboardingViewModel
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            OnboardingHeader(
+                title: "Pushes and Moments.",
+                subtitle: "Start a Push when something's forming. Moments capture the hang after."
+            )
+            Spacer(minLength: 22)
+            OnboardingCTAButton(title: "Continue") {
+                model.continueFromCoordinate()
+            }
+            .disabled(model.isBusy)
+        }
+        .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
+        .padding(.top, OnboardingLabMetric.contentTopInset(layout))
+        .padding(.bottom, 26)
     }
 }
 
@@ -230,9 +226,37 @@ struct PostAuthNotificationsScreen: View {
     }
 }
 
-// MARK: - Friends
+// MARK: - Contacts
 
-struct PostAuthFriendsScreen: View {
+struct PostAuthContactsScreen: View {
+    @Environment(\.pushLayout) private var layout
+    @ObservedObject var model: PostAuthOnboardingViewModel
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            OnboardingHeader(
+                title: "Find friends from contacts.",
+                subtitle: "Optional. We'll never message anyone for you."
+            )
+            Spacer(minLength: 22)
+            OnboardingCTAButton(title: model.isBusy ? "Loading…" : "Continue") {
+                Task { await model.continueFromContacts() }
+            }
+            .disabled(model.isBusy)
+            OnboardingTextButton(title: "Not now") {
+                Task { await model.skipContacts() }
+            }
+            .disabled(model.isBusy)
+        }
+        .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
+        .padding(.top, OnboardingLabMetric.contentTopInset(layout))
+        .padding(.bottom, 26)
+    }
+}
+
+// MARK: - Find people
+
+struct PostAuthFindPeopleScreen: View {
     @Environment(\.pushLayout) private var layout
     @ObservedObject var model: PostAuthOnboardingViewModel
 
@@ -250,8 +274,8 @@ struct PostAuthFriendsScreen: View {
                     .padding(.top, 10)
             }
             Spacer(minLength: 22)
-            OnboardingCTAButton(title: model.isBusy ? "Finishing…" : model.friendsCTALabel) {
-                Task { await model.continueFromFriends() }
+            OnboardingCTAButton(title: model.isBusy ? "Finishing…" : model.findPeopleCTALabel) {
+                Task { await model.continueFromFindPeople() }
             }
             .disabled(model.isBusy)
         }

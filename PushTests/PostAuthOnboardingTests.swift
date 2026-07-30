@@ -45,24 +45,39 @@ final class PostAuthOnboardingTests: XCTestCase {
         XCTAssertFalse(needs)
     }
 
-    func testContinueFromPrivacyAdvancesToLocation() async {
-        let container = AppDataContainer(seed: .standard())
-        let vm = PostAuthOnboardingViewModel(container: container)
-        XCTAssertEqual(vm.screen, .privacy)
-        vm.select(.vague)
-        await vm.continueFromPrivacy()
-        XCTAssertEqual(vm.screen, .location)
-        XCTAssertNil(vm.errorMessage)
+    func testProgressAndBackChrome() {
+        XCTAssertEqual(PostAuthOnboardingScreen.progressTotal, 7)
+        XCTAssertEqual(PostAuthOnboardingScreen.value.progressStep, 1)
+        XCTAssertFalse(PostAuthOnboardingScreen.value.showsBackButton)
+        XCTAssertEqual(PostAuthOnboardingScreen.locationPrimer.progressStep, 2)
+        XCTAssertTrue(PostAuthOnboardingScreen.locationPrimer.showsBackButton)
+        XCTAssertEqual(PostAuthOnboardingScreen.locationBlocked.progressStep, 2)
+        XCTAssertFalse(PostAuthOnboardingScreen.locationBlocked.showsBackButton)
+        XCTAssertEqual(PostAuthOnboardingScreen.findPeople.progressStep, 7)
+        XCTAssertEqual(PostAuthOnboardingScreen.done.progressStep, 0)
+        XCTAssertFalse(PostAuthOnboardingScreen.done.showsBackButton)
     }
 
-    func testSkipLocationAdvancesToNotifications() {
-        let container = AppDataContainer(seed: .standard())
-        let vm = PostAuthOnboardingViewModel(container: container)
-        vm.skipLocation()
+    func testHappyPathOrderWithLocationAllow() async {
+        let vm = makeVM(auth: .whenInUse)
+        XCTAssertEqual(vm.screen, .value)
+        vm.continueFromValue()
+        XCTAssertEqual(vm.screen, .locationPrimer)
+        await vm.enableLocation()
+        XCTAssertEqual(vm.screen, .ghost)
+        vm.continueFromGhost()
+        XCTAssertEqual(vm.screen, .coordinate)
+        vm.continueFromCoordinate()
         XCTAssertEqual(vm.screen, .notifications)
+        await vm.skipNotifications()
+        XCTAssertEqual(vm.screen, .contacts)
+        await vm.skipContacts()
+        XCTAssertEqual(vm.screen, .findPeople)
+        await vm.continueFromFindPeople()
+        XCTAssertEqual(vm.screen, .done)
     }
 
-    func testFinishOnboardingReachesDone() async {
+    func testEnableLocationAllowAppliesDefaultsAndAdvances() async throws {
         let container = AppDataContainer(seed: .standard())
         let session = FakeLocationSession(
             state: LocationTrackingState(authorization: .whenInUse)
@@ -71,14 +86,72 @@ final class PostAuthOnboardingTests: XCTestCase {
             container: container,
             locationSession: session
         )
-        await vm.continueFromPrivacy()
-        vm.skipLocation()
+        vm.continueFromValue()
+        await vm.enableLocation()
+        XCTAssertEqual(vm.screen, .ghost)
+        XCTAssertEqual(session.startIfEligibleCount, 1)
+        XCTAssertTrue(session.state.isPresencePublishingEnabled)
+
+        let policies = try await container.sharing.allPolicies()
+        let global = policies.first {
+            $0.audienceType == .globalDefault && $0.ownerPersonID == container.currentUserID
+        }
+        XCTAssertEqual(global?.locationVisibility, .exact)
+        XCTAssertEqual(global?.activityVisibility, .full)
+        XCTAssertEqual(global?.availabilityVisibility, .full)
+    }
+
+    func testEnableLocationDeniedGoesToBlocked() async {
+        let vm = makeVM(auth: .denied)
+        vm.continueFromValue()
+        await vm.enableLocation()
+        XCTAssertEqual(vm.screen, .locationBlocked)
+        XCTAssertFalse(vm.screen.showsBackButton)
+    }
+
+    func testRetryLocationAccessAfterAllowAdvances() async {
+        let session = FakeLocationSession(
+            state: LocationTrackingState(authorization: .denied)
+        )
+        let container = AppDataContainer(seed: .standard())
+        let vm = PostAuthOnboardingViewModel(
+            container: container,
+            locationSession: session
+        )
+        vm.continueFromValue()
+        await vm.enableLocation()
+        XCTAssertEqual(vm.screen, .locationBlocked)
+
+        session.setAuthorization(.whenInUse)
+        await vm.retryLocationAccess()
+        XCTAssertEqual(vm.screen, .ghost)
+    }
+
+    func testGoBackStack() async {
+        let vm = makeVM(auth: .whenInUse)
+        vm.continueFromValue()
+        await vm.enableLocation()
+        XCTAssertEqual(vm.screen, .ghost)
+        vm.continueFromGhost()
+        vm.continueFromCoordinate()
         await vm.skipNotifications()
-        XCTAssertEqual(vm.screen, .friends)
-        await vm.continueFromFriends()
-        XCTAssertEqual(vm.screen, .done)
-        vm.openApp()
-        XCTAssertTrue(vm.isFinished)
+        await vm.skipContacts()
+        XCTAssertEqual(vm.screen, .findPeople)
+
+        vm.goBack()
+        XCTAssertEqual(vm.screen, .contacts)
+        vm.goBack()
+        XCTAssertEqual(vm.screen, .notifications)
+        vm.goBack()
+        XCTAssertEqual(vm.screen, .coordinate)
+        vm.goBack()
+        XCTAssertEqual(vm.screen, .ghost)
+        vm.goBack()
+        XCTAssertEqual(vm.screen, .locationPrimer)
+        vm.goBack()
+        XCTAssertEqual(vm.screen, .value)
+        vm.goBack()
+        XCTAssertEqual(vm.screen, .value)
     }
 
     func testFinishOnboardingBlockedWithoutLocationAuthorization() async {
@@ -90,7 +163,7 @@ final class PostAuthOnboardingTests: XCTestCase {
             container: container,
             locationSession: deniedSession
         )
-        await vm.continueFromFriends()
+        await vm.continueFromFindPeople()
         XCTAssertNotEqual(vm.screen, .done)
         XCTAssertNotNil(vm.errorMessage)
     }
@@ -104,8 +177,23 @@ final class PostAuthOnboardingTests: XCTestCase {
             container: container,
             locationSession: authorizedSession
         )
-        await vm.continueFromFriends()
+        await vm.continueFromFindPeople()
         XCTAssertEqual(vm.screen, .done)
         XCTAssertNil(vm.errorMessage)
+        vm.openApp()
+        XCTAssertTrue(vm.isFinished)
+    }
+
+    // MARK: - Helpers
+
+    private func makeVM(auth: LocationAuthorizationState) -> PostAuthOnboardingViewModel {
+        let container = AppDataContainer(seed: .standard())
+        let session = FakeLocationSession(
+            state: LocationTrackingState(authorization: auth)
+        )
+        return PostAuthOnboardingViewModel(
+            container: container,
+            locationSession: session
+        )
     }
 }

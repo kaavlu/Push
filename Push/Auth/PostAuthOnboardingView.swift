@@ -1,8 +1,8 @@
 // Push/Auth/PostAuthOnboardingView.swift
 import SwiftUI
 
-/// Live first-run flow after session prepare: privacy → location →
-/// notifications → find friends → done. Shell matches the auth gate / lab.
+/// Live first-run flow after session prepare (Approach 2 spine).
+/// Shell matches the auth gate / lab. Full UI lands in later tasks.
 struct PostAuthOnboardingView: View {
     @StateObject private var model: PostAuthOnboardingViewModel
     var onFinished: () -> Void
@@ -43,14 +43,22 @@ struct PostAuthOnboardingView: View {
     @ViewBuilder
     private var screen: some View {
         switch model.screen {
-        case .privacy:
-            PostAuthPrivacyScreen(model: model)
-        case .location:
-            PostAuthLocationScreen(model: model)
+        case .value:
+            PostAuthValueScreen(model: model)
+        case .locationPrimer:
+            PostAuthLocationPrimerScreen(model: model)
+        case .locationBlocked:
+            PostAuthLocationBlockedScreen(model: model)
+        case .ghost:
+            PostAuthGhostScreen(model: model)
+        case .coordinate:
+            PostAuthCoordinateScreen(model: model)
         case .notifications:
             PostAuthNotificationsScreen(model: model)
-        case .friends:
-            PostAuthFriendsScreen(model: model)
+        case .contacts:
+            PostAuthContactsScreen(model: model)
+        case .findPeople:
+            PostAuthFindPeopleScreen(model: model)
         case .done:
             PostAuthDoneScreen(model: model)
         }
