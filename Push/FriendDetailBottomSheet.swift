@@ -8,6 +8,9 @@ import SwiftUI
 struct FriendDetailBottomSheet: View {
     @Environment(\.pushLayout) private var layout
     let puck: MapPuckData
+    /// Fired at the start of dismiss so the parent can restore chrome (navbar)
+    /// immediately — before the sheet finishes sliding off-screen.
+    var onWillDismiss: () -> Void = {}
     let onDismiss: () -> Void
     let onStartPush: (StartPushLaunchContext) -> Void
 
@@ -21,25 +24,14 @@ struct FriendDetailBottomSheet: View {
     @State private var dragTranslation: CGFloat = 0
     @State private var isDragging = false
 
-    private var isMultiPerson: Bool {
-        switch puck.kind {
-        case .hangout, .cluster, .friendGroup:
-            return true
-        case .individual:
-            return false
-        }
-    }
-
     private var sheetHeight: CGFloat {
-        if isMultiPerson {
-            return FriendDetailSheetLayout.multiPersonSheetHeight(layout)
-        }
-        return FriendDetailSheetLayout.individualSheetHeight(layout)
+        // Individual + multi-person share one compact sheet height.
+        FriendDetailSheetLayout.compactSheetHeight(layout)
     }
 
     private var sheetSurface: MapPopupSheetSurface {
-        // Multi-person uses the same liquid control glass as the bottom navbar.
-        isMultiPerson ? .controlGlass : .mapGlass
+        // Same liquid control glass as the bottom navbar (all map puck sheets).
+        .controlGlass
     }
 
     private var presentationAnimation: Animation {
@@ -169,6 +161,8 @@ struct FriendDetailBottomSheet: View {
         // Keep any in-progress drag offset so close continues downward from the
         // finger position instead of snapping back to fully open first.
         isDragging = false
+        // Restore navbar immediately so it is already present under the sliding sheet.
+        onWillDismiss()
         guard isSettled else {
             completion()
             return

@@ -2,8 +2,9 @@
 //  FriendDetailGroupContent.swift
 //  Push
 //
-//  Issue #139 — compact multi-person map sheet (hangout / cluster / friendGroup).
-//  Reads as an expanded Friends row: avatar stack, title, activity, status, actions.
+//  Issue #139 — compact map puck detail sheet for every exact-place puck kind
+//  (individual, hangout, cluster, friendGroup). Reads as an expanded Friends
+//  row: avatar(s), title, activity, status, actions.
 //
 
 import SwiftUI

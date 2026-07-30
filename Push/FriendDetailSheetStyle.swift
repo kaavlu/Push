@@ -40,34 +40,27 @@ enum FriendDetailSheetLayout {
     static let statusCardAccentStrokeOpacity: CGFloat = 0.20
     static let statusCardStrokeWidth: CGFloat = 0.8
 
-    // MARK: - Individual: Sheet Presentation
+    // MARK: - Compact map puck sheet (individual + multi-person, Issue #139)
 
-    /// Content is top-aligned; extra height falls below the action row.
-    /// Sized tightly to content so single-friend button-to-floor spacing matches
-    /// multi-person (`actionBottomPadding` + safe-area inset).
-    static func individualSheetHeight(_ layout: PushAdaptiveLayout) -> CGFloat {
-        layout.value(compact: 260, standard: 254, large: 252)
-    }
     static let sheetCornerRadius: CGFloat = 32
 
-    // MARK: - Individual: Primary Action Cards
-
-    static let actionCardHeight: CGFloat = 58
-    static let actionCardCornerRadius: CGFloat = 20
-    static let actionCardIconSize: CGFloat = 18
-    static let actionCardLabelSpacing: CGFloat = 5
-
-    // MARK: - Multi-person (compact Friends-row sheet, Issue #139)
-
-    /// Compact: info row + divider + primary + secondary actions.
+    /// Shared height for all map puck detail sheets — info row + divider + actions.
     /// Sized to content — avoid a tall empty band under the action row.
-    static func multiPersonSheetHeight(_ layout: PushAdaptiveLayout) -> CGFloat {
+    static func compactSheetHeight(_ layout: PushAdaptiveLayout) -> CGFloat {
         layout.value(compact: 252, standard: 244, large: 238)
     }
 
-    /// Legacy name — hangout/cluster/friendGroup share the multi-person height.
+    /// Legacy aliases — all puck kinds share `compactSheetHeight`.
+    static func individualSheetHeight(_ layout: PushAdaptiveLayout) -> CGFloat {
+        compactSheetHeight(layout)
+    }
+
+    static func multiPersonSheetHeight(_ layout: PushAdaptiveLayout) -> CGFloat {
+        compactSheetHeight(layout)
+    }
+
     static func hangoutSheetHeight(_ layout: PushAdaptiveLayout) -> CGFloat {
-        multiPersonSheetHeight(layout)
+        compactSheetHeight(layout)
     }
 
     static let multiPersonSectionSpacing: CGFloat = 12
@@ -129,14 +122,19 @@ enum FriendDetailSheetContent {
         }
     }
 
-    /// Title for multi-person sheets — Friends-row style, first names only.
-    /// 2: `A & B` · 3: `A, B & C` · 4+: `A, B + N` (N = remainder).
+    /// Title for compact puck sheets.
+    /// 1: full display name (Friends row) · 2: `A & B` · 3: `A, B & C` · 4+: `A, B + N`.
     static func multiPersonTitle(for people: [FriendPuckData]) -> String {
+        guard !people.isEmpty else { return "Group" }
+        if people.count == 1 {
+            let person = people[0]
+            if person.isCurrentUser { return "You" }
+            let full = person.name.trimmingCharacters(in: .whitespacesAndNewlines)
+            return full.isEmpty ? "Friend" : full
+        }
         let names = people.map(firstName).filter { !$0.isEmpty }
         guard !names.isEmpty else { return "Group" }
         switch names.count {
-        case 1:
-            return names[0]
         case 2:
             return "\(names[0]) & \(names[1])"
         case 3:

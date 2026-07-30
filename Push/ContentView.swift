@@ -27,6 +27,9 @@ struct ContentView: View {
     @State private var forcedRenderSpan: MKCoordinateSpan?
     /// Skip the first `.active` after launch — bootstrap already warms the live store.
     @State private var hasEnteredBackground = false
+    /// True only while a map puck/regional sheet fully covers the nav.
+    /// Cleared at dismiss *start* so the bar is already present (no pop-in).
+    @State private var hidesBottomNavForMapSheet = false
 
     private var isPlansPresented: Bool {
         selectedNavigationItem == .plans
@@ -43,6 +46,10 @@ struct ContentView: View {
     /// Friends/Feed/Pushes overlays hide map chrome and keep the shared bottom nav.
     private var isTabOverlayPresented: Bool {
         isPlansPresented || isFriendsPresented || isFeedPresented
+    }
+
+    private var showsFloatingBottomNav: Bool {
+        !isTabOverlayPresented && !hidesBottomNavForMapSheet
     }
 
     var body: some View {
@@ -116,11 +123,9 @@ struct ContentView: View {
                 .zIndex(TopDropdownLayout.expandedZIndex)
             }
 
-            // Hide the floating navbar while a map puck sheet is open so it
-            // does not render behind the liquid-glass popup.
-            if !isTabOverlayPresented,
-               selectedPuck == nil,
-               selectedRegionalPuck == nil {
+            // Hide while a map sheet covers the bottom edge. Restored at dismiss
+            // *start* (not end) with no animation so the bar is already present.
+            if showsFloatingBottomNav {
                 BottomNavigationBar(
                     selectedItem: $selectedNavigationItem,
                     action: selectNavigationItem
@@ -128,12 +133,13 @@ struct ContentView: View {
                 .padding(.horizontal, BottomNavigationLayout.horizontalMargin(layout))
                 .padding(.bottom, BottomNavigationLayout.bottomMargin(layout))
                 .zIndex(TabOverlayLayout.bottomNavZIndex)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
+                .transaction { $0.animation = nil }
             }
 
             if !isTabOverlayPresented, let selectedPuck {
                 FriendDetailBottomSheet(
                     puck: selectedPuck,
+                    onWillDismiss: revealBottomNavForMapSheet,
                     onDismiss: dismissSelectedPuck,
                     onStartPush: launchStartPush
                 )
@@ -160,7 +166,6 @@ struct ContentView: View {
         )
         .animation(.spring(response: TopDropdownLayout.animationResponse, dampingFraction: TopDropdownLayout.animationDamping), value: isFilterDropdownExpanded)
         .animation(PushMotion.sheet, value: selectedRegionalPuck?.id)
-        .animation(PushMotion.sheet, value: selectedPuck?.id)
         .animation(.easeInOut(duration: TabOverlayLayout.transitionDuration), value: isTabOverlayPresented)
         .fullScreenCover(item: $presentedRoute) { route in
             destination(for: route)
@@ -298,22 +303,19 @@ struct ContentView: View {
         isCreateMenuPresented = false
 
         if item == .group {
-            selectedPuck = nil
-            selectedRegionalPuck = nil
+            clearMapSheetSelection()
             selectedNavigationItem = .group
             return
         }
 
         if item == .feed {
-            selectedPuck = nil
-            selectedRegionalPuck = nil
+            clearMapSheetSelection()
             selectedNavigationItem = .feed
             return
         }
 
         if item == .plans {
-            selectedPuck = nil
-            selectedRegionalPuck = nil
+            clearMapSheetSelection()
             selectedNavigationItem = .plans
             return
         }
@@ -383,18 +385,16 @@ struct ContentView: View {
     private func selectMapPuck(_ puck: MapPuckRenderModel) {
         isFilterDropdownExpanded = false
         if case .regionalCluster(let regional) = puck {
-            selectedPuck = nil
-            selectedRegionalPuck = regional
+            presentRegionalPuck(regional)
             return
         }
-        selectedRegionalPuck = nil
         if let selected = viewModel.select(puck) {
             presentSelectedPuck(selected)
         }
     }
 
     private func zoomIntoRegionalPuck(_ puck: RegionalPuckModel) {
-        selectedRegionalPuck = nil
+        clearMapSheetSelection()
         viewModel.focus(on: puck)
         guard let focusRequest = viewModel.mapFocusRequest else { return }
         forcedRenderSpan = focusRequest.region.span
@@ -402,7 +402,7 @@ struct ContentView: View {
     }
 
     private func dismissMapSelection() {
-        selectedRegionalPuck = nil
+        clearMapSheetSelection()
     }
 
     private func locateFriendOnMap(_ personID: Person.ID) -> Bool {
@@ -422,11 +422,45 @@ struct ContentView: View {
     private func presentSelectedPuck(_ puck: MapPuckData) {
         // Sheet owns its slide animation (offset), so identity changes stay
         // unanimated — otherwise glass hangout actions paint before the chrome.
-        selectedPuck = puck
+        var transaction = Transaction()
+        transaction.animation = nil
+        withTransaction(transaction) {
+            selectedRegionalPuck = nil
+            selectedPuck = puck
+            hidesBottomNavForMapSheet = true
+        }
+    }
+
+    private func presentRegionalPuck(_ regional: RegionalPuckModel) {
+        var transaction = Transaction()
+        transaction.animation = nil
+        withTransaction(transaction) {
+            selectedPuck = nil
+            selectedRegionalPuck = regional
+            hidesBottomNavForMapSheet = true
+        }
+    }
+
+    private func revealBottomNavForMapSheet() {
+        var transaction = Transaction()
+        transaction.animation = nil
+        withTransaction(transaction) {
+            hidesBottomNavForMapSheet = false
+        }
+    }
+
+    private func clearMapSheetSelection() {
+        var transaction = Transaction()
+        transaction.animation = nil
+        withTransaction(transaction) {
+            selectedPuck = nil
+            selectedRegionalPuck = nil
+            hidesBottomNavForMapSheet = false
+        }
     }
 
     private func dismissSelectedPuck() {
-        selectedPuck = nil
+        clearMapSheetSelection()
     }
 
     private func launchStartPush(_ context: StartPushLaunchContext) {

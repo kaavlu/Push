@@ -500,6 +500,21 @@ final class PushTests: XCTestCase {
         XCTAssertNil(puck.withWhom)
     }
 
+    func testCompactSheetTitleForSinglePersonUsesFullName() throws {
+        let people = [
+            FriendPuckData(
+                name: "Chitty Patel", avatarPlaceholder: "CH", activity: "Coffee",
+                activitySymbolName: "cup.and.saucer.fill", activityDisplayText: "Blue Bottle",
+                availability: .freeNow, venueStatusText: "At Blue Bottle",
+                locationLabel: "315 Linden St", placeName: "Blue Bottle"
+            )
+        ]
+        XCTAssertEqual(
+            FriendDetailSheetContent.multiPersonTitle(for: people),
+            "Chitty Patel"
+        )
+    }
+
     func testMultiPersonTitleForTwoPeopleUsesAmpersand() throws {
         let people: [FriendPuckData] = [
             FriendPuckData(

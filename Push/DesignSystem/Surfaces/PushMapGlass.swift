@@ -158,11 +158,12 @@ private extension PushMapControlTreatment {
     }
 }
 
-/// Map popup sheet surface treatment (DS-011 / control glass for multi-person).
+/// Map popup sheet surface treatment (DS-011).
 enum MapPopupSheetSurface {
-    /// Existing cream-glass over satellite (individual friend / day detail).
+    /// Legacy cream-glass over satellite (day-detail calendar sheet).
     case mapGlass
-    /// Same liquid/control glass family as the bottom navbar (`pushControlGlass`).
+    /// Liquid/control glass family matching the bottom navbar (`pushControlGlass`).
+    /// Used by all map friend/group puck detail sheets.
     case controlGlass
 }
 
