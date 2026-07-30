@@ -22,27 +22,23 @@ struct PostAuthNotificationsScreen: View {
             samples
                 .padding(.top, NotificationsLayout.samplesTop)
                 .onboardingCascadeVisible(revealStep >= 3)
+            // Footer matches Coordinate/Ghost: primary CTA on the same bottom baseline.
+            // Secondary sits above primary so "Turn on" shares Continue's Y.
             Spacer(minLength: NotificationsLayout.ctaSpacerMin)
-            VStack(spacing: NotificationsLayout.ctaPairSpacing) {
-                OnboardingCTAButton(title: model.isBusy ? "Working…" : "Turn on notifications") {
-                    Task { await model.enableNotifications() }
-                }
-                .disabled(model.isBusy || revealStep < 4)
-                .onboardingCascadeVisible(revealStep >= 4)
-                OnboardingTextButton(title: "Maybe later") {
-                    Task { await model.skipNotifications() }
-                }
-                .disabled(model.isBusy || revealStep < 5)
-                .onboardingCascadeVisible(revealStep >= 5)
+            OnboardingTextButton(title: "Maybe later") {
+                Task { await model.skipNotifications() }
             }
-            .padding(.bottom, NotificationsLayout.ctaBottomLift)
+            .padding(.bottom, NotificationsLayout.ctaPairSpacing)
+            .disabled(model.isBusy || revealStep < 5)
+            .onboardingCascadeVisible(revealStep >= 5)
+            OnboardingCTAButton(title: model.isBusy ? "Working…" : "Turn on notifications") {
+                Task { await model.enableNotifications() }
+            }
+            .disabled(model.isBusy || revealStep < 4)
+            .onboardingCascadeVisible(revealStep >= 4)
         }
         .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
-        .padding(
-            .top,
-            OnboardingLabMetric.contentTopInset(layout)
-                + layout.value(compact: 2, standard: 3, large: 4)
-        )
+        .padding(.top, OnboardingLabMetric.contentTopInset(layout))
         .padding(.bottom, NotificationsLayout.bottomPadding)
         .animation(OnboardingCascadeTiming.laterCascade, value: revealStep)
         .task { await runCascade() }
@@ -171,11 +167,10 @@ private enum NotificationsLayout {
     static let sampleShadowOpacity = 0.1
     static let sampleShadowRadius: CGFloat = 7
     static let sampleShadowY: CGFloat = 6
-    /// Pushes the CTA pair toward the bottom of the screen.
-    static let ctaSpacerMin: CGFloat = 48
-    /// Extra gap between primary and secondary actions.
-    static let ctaPairSpacing: CGFloat = 18
-    /// Nudges the pair slightly above the home indicator / bottom chrome.
-    static let ctaBottomLift: CGFloat = 8
-    static let bottomPadding: CGFloat = 36
+    /// Matches Coordinate / Ghost `ctaSpacerMin` so the primary CTA sits on the same baseline.
+    static let ctaSpacerMin: CGFloat = 22
+    /// Gap between Turn on and Maybe later (secondary sits just below the shared Continue line).
+    static let ctaPairSpacing: CGFloat = 14
+    /// Matches Coordinate / Ghost footer inset.
+    static let bottomPadding: CGFloat = 26
 }
