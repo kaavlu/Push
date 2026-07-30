@@ -64,7 +64,13 @@ final class PostAuthOnboardingTests: XCTestCase {
 
     func testFinishOnboardingReachesDone() async {
         let container = AppDataContainer(seed: .standard())
-        let vm = PostAuthOnboardingViewModel(container: container)
+        let session = FakeLocationSession(
+            state: LocationTrackingState(authorization: .whenInUse)
+        )
+        let vm = PostAuthOnboardingViewModel(
+            container: container,
+            locationSession: session
+        )
         await vm.continueFromPrivacy()
         vm.skipLocation()
         await vm.skipNotifications()
@@ -73,5 +79,33 @@ final class PostAuthOnboardingTests: XCTestCase {
         XCTAssertEqual(vm.screen, .done)
         vm.openApp()
         XCTAssertTrue(vm.isFinished)
+    }
+
+    func testFinishOnboardingBlockedWithoutLocationAuthorization() async {
+        let container = AppDataContainer(seed: .standard())
+        let deniedSession = FakeLocationSession(
+            state: LocationTrackingState(authorization: .denied)
+        )
+        let vm = PostAuthOnboardingViewModel(
+            container: container,
+            locationSession: deniedSession
+        )
+        await vm.continueFromFriends()
+        XCTAssertNotEqual(vm.screen, .done)
+        XCTAssertNotNil(vm.errorMessage)
+    }
+
+    func testFinishOnboardingSucceedsWhenLocationAuthorized() async {
+        let container = AppDataContainer(seed: .standard())
+        let authorizedSession = FakeLocationSession(
+            state: LocationTrackingState(authorization: .whenInUse)
+        )
+        let vm = PostAuthOnboardingViewModel(
+            container: container,
+            locationSession: authorizedSession
+        )
+        await vm.continueFromFriends()
+        XCTAssertEqual(vm.screen, .done)
+        XCTAssertNil(vm.errorMessage)
     }
 }

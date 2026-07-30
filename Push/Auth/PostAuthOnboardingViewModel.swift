@@ -54,6 +54,8 @@ final class PostAuthOnboardingViewModel: ObservableObject {
 
     private let container: AppDataContainer
     private let notificationCenter: UNUserNotificationCenter
+    /// Injected for tests; falls back to the container session (may be nil pre-install).
+    private let locationSession: LocationSessioning?
 
     private enum Limit {
         static let discoverCount = 20
@@ -64,14 +66,18 @@ final class PostAuthOnboardingViewModel: ObservableObject {
         static let friendsLoadFailed = "Couldn't load people right now. You can skip and add friends later."
         static let friendRequestFailed = "Couldn't send that request. Try again."
         static let completeFailed = "Couldn't finish setup. Check your connection and try again."
+        static let locationRequired = "Location access is required to finish setup. Enable location and try again."
     }
 
     init(
         container: AppDataContainer? = nil,
-        notificationCenter: UNUserNotificationCenter = .current()
+        notificationCenter: UNUserNotificationCenter = .current(),
+        locationSession: LocationSessioning? = nil
     ) {
-        self.container = container ?? .shared
+        let resolved = container ?? .shared
+        self.container = resolved
         self.notificationCenter = notificationCenter
+        self.locationSession = locationSession ?? resolved.locationSession
     }
 
     var privacyTitle: String { privacy.title }
@@ -213,8 +219,17 @@ final class PostAuthOnboardingViewModel: ObservableObject {
         screen = .friends
     }
 
+    /// Completion requires when-in-use (or always) location authorization — fail closed.
+    private var hasRequiredLocationAuthorization: Bool {
+        locationSession?.state.authorization.allowsWhenInUseUpdates == true
+    }
+
     private func finishOnboarding() async {
         guard !isBusy else { return }
+        guard hasRequiredLocationAuthorization else {
+            errorMessage = Copy.locationRequired
+            return
+        }
         isBusy = true
         errorMessage = nil
         defer { isBusy = false }
