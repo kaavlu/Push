@@ -515,7 +515,7 @@ final class PushTests: XCTestCase {
         )
     }
 
-    func testGroupContextTitleUsesCountAndVenue() throws {
+    func testGroupContextTitleAndSubtitleSplitVenue() throws {
         let people: [FriendPuckData] = [
             FriendPuckData(
                 name: "Ishan", avatarPlaceholder: "IS", activity: "Lunch",
@@ -541,11 +541,19 @@ final class PushTests: XCTestCase {
         )
         XCTAssertEqual(
             FriendDetailSheetContent.groupContextTitle(for: puck),
-            "2 friends at Souvla"
+            "2 friends together"
+        )
+        XCTAssertEqual(
+            FriendDetailSheetContent.groupContextSubtitle(for: puck),
+            "At Souvla"
         )
         XCTAssertEqual(
             FriendDetailSheetContent.summaryTitle(for: puck),
-            "2 friends at Souvla"
+            "2 friends together"
+        )
+        XCTAssertEqual(
+            FriendDetailSheetContent.whosHereSectionLabel(memberCount: 2),
+            "WHO’S HERE · 2"
         )
     }
 

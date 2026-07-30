@@ -78,28 +78,30 @@ struct WhosHerePersonPuck: View {
                 .overlay {
                     Circle()
                         .stroke(
-                            person.availability.accentColor.opacity(PushCreamTokens.ringOpacity),
+                            person.availability.accentColor.opacity(
+                                FriendDetailSheetLayout.whosHereAvatarRingOpacity
+                            ),
                             lineWidth: FriendDetailSheetLayout.whosHereAvatarRingWidth
                         )
                 }
 
                 Text(FriendDetailSheetContent.firstName(person))
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(PushControlColors.textSecondary)
+                    .foregroundStyle(PushControlColors.textEspresso)
                     .lineLimit(1)
                     .minimumScaleFactor(PushOpacityTokens.minimumTextScale)
             }
             .padding(.horizontal, FriendDetailSheetLayout.whosHerePuckHorizontalPadding)
             .frame(maxWidth: .infinity, alignment: .leading)
             .frame(height: FriendDetailSheetLayout.whosHerePuckHeight)
-            .background(Capsule().fill(secondaryFill))
+            .background(Capsule().fill(chipFill))
             .overlay {
                 Capsule()
                     .stroke(
                         PushColorPalette.Accent.walnut.opacity(
-                            FriendDetailSheetLayout.multiPersonSecondaryBorderOpacity
+                            FriendDetailSheetLayout.whosHereChipBorderOpacity
                         ),
-                        lineWidth: FriendDetailSheetLayout.multiPersonSecondaryBorderWidth
+                        lineWidth: FriendDetailSheetLayout.whosHereChipBorderWidth
                     )
             }
         }
@@ -107,8 +109,8 @@ struct WhosHerePersonPuck: View {
         .accessibilityLabel(person.name)
     }
 
-    private var secondaryFill: Color {
-        Color.white.opacity(FriendDetailSheetLayout.multiPersonSecondaryFillOpacity)
+    private var chipFill: Color {
+        Color.white.opacity(FriendDetailSheetLayout.whosHereChipFillOpacity)
     }
 }
 
@@ -120,7 +122,7 @@ struct WhosHereOverflowPuck: View {
         Button(action: action) {
             Text("+ \(overflowCount) more")
                 .font(.caption.weight(.semibold))
-                .foregroundStyle(PushControlColors.textSecondary)
+                .foregroundStyle(PushControlColors.textEspresso)
                 .lineLimit(1)
                 .minimumScaleFactor(PushOpacityTokens.minimumTextScale)
                 .padding(.horizontal, FriendDetailSheetLayout.whosHerePuckHorizontalPadding)
@@ -128,18 +130,16 @@ struct WhosHereOverflowPuck: View {
                 .frame(height: FriendDetailSheetLayout.whosHerePuckHeight)
                 .background(
                     Capsule().fill(
-                        Color.white.opacity(
-                            FriendDetailSheetLayout.multiPersonSecondaryFillOpacity
-                        )
+                        Color.white.opacity(FriendDetailSheetLayout.whosHereChipFillOpacity)
                     )
                 )
                 .overlay {
                     Capsule()
                         .stroke(
                             PushColorPalette.Accent.walnut.opacity(
-                                FriendDetailSheetLayout.multiPersonSecondaryBorderOpacity
+                                FriendDetailSheetLayout.whosHereChipBorderOpacity
                             ),
-                            lineWidth: FriendDetailSheetLayout.multiPersonSecondaryBorderWidth
+                            lineWidth: FriendDetailSheetLayout.whosHereChipBorderWidth
                         )
                 }
         }

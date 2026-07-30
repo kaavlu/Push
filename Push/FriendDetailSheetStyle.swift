@@ -45,20 +45,27 @@ enum FriendDetailSheetLayout {
     static let sheetCornerRadius: CGFloat = 32
 
     /// Height for map puck detail sheets.
-    /// Multi-person adds Who’s here sized to actual grid rows (1 or 2), not a
-    /// fixed two-row band. Join CTA absence still subtracts one action row.
+    /// Multi-person adds Who’s here sized to actual grid rows (1 or 2).
+    /// Join CTA uses glass-rim primary height; absence subtracts that row.
     static func compactSheetHeight(
         _ layout: PushAdaptiveLayout,
         showsAskToJoin: Bool = true,
         isMultiPerson: Bool = false,
         memberCount: Int = 0
     ) -> CGFloat {
-        var height = layout.value(compact: 246, standard: 238, large: 232)
+        // Individual: summary + secondary actions only (no join CTA).
+        // Multi: no left avatar stack; Who’s here + optional glass-rim primary.
+        var height = layout.value(compact: 228, standard: 220, large: 214)
         if isMultiPerson {
+            // Drop individual-sized avatar band; add Who’s here block.
+            height -= 18
             height += multiPersonSectionSpacing + whosHereBlockHeight(memberCount: memberCount)
-        }
-        if !showsAskToJoin {
-            height -= multiPersonSecondaryHeight + multiPersonActionsSpacing
+            if showsAskToJoin {
+                // Glass-rim primary is taller than the secondary action row.
+                height += PlansLayout.startPlanButtonHeight + multiPersonActionsSpacing
+            }
+        } else if showsAskToJoin {
+            height += PlansLayout.startPlanButtonHeight + multiPersonActionsSpacing
         }
         return height
     }
@@ -76,11 +83,11 @@ enum FriendDetailSheetLayout {
         compactSheetHeight(layout, showsAskToJoin: true, isMultiPerson: true)
     }
 
-    static let multiPersonSectionSpacing: CGFloat = 12
+    static let multiPersonSectionSpacing: CGFloat = 10
     static let multiPersonInfoSpacing: CGFloat = 10
-    static let multiPersonTextSpacing: CGFloat = 2
+    static let multiPersonTextSpacing: CGFloat = 3
     static let multiPersonTrailingSpacing: CGFloat = 4
-    static let multiPersonDividerOpacity = 0.14
+    static let multiPersonDividerOpacity = 0.12
     static let multiPersonDividerHeight: CGFloat = 1
     static let multiPersonActionsSpacing: CGFloat = 8
     /// Gap under the secondary action row, above the home-indicator inset.
@@ -96,28 +103,36 @@ enum FriendDetailSheetLayout {
     static let multiPersonOverflowBadgeFillOpacity = 0.92
     static let multiPersonActivityIconSize: CGFloat = 12
     static let multiPersonActivityIconSpacing: CGFloat = 5
-    static let multiPersonTopPadding: CGFloat = 26
+    static let multiPersonTopPadding: CGFloat = 24
     /// Avoid squashed subtitle text; truncate cleanly at the trailing edge.
     static let multiPersonSubtitleMinimumScale: CGFloat = 0.92
+    /// Letter spacing for the muted Who’s here eyebrow.
+    static let whosHereLabelTracking: CGFloat = 0.6
 
-    // MARK: - Who’s here member grid
+    // MARK: - Who’s here member grid (identity chips)
 
-    static let whosHereTitle = "Who’s here"
     static let whosHereColumnCount = 3
     /// Show everyone when count ≤ this; above it, collapse to 5 + overflow.
     static let whosHereDirectShowLimit = 6
     static let whosHereCollapsedMemberSlots = 5
-    static let whosHereGridSpacing: CGFloat = 8
-    static let whosHerePuckHeight: CGFloat = 36
-    static let whosHereAvatarSize: CGFloat = 22
-    static let whosHereAvatarRingWidth: CGFloat = 1.5
+    static let whosHereGridSpacing: CGFloat = 6
+    /// Slightly taller identity chips vs. action buttons.
+    static let whosHerePuckHeight: CGFloat = 40
+    static let whosHereAvatarSize: CGFloat = 28
+    static let whosHereAvatarRingWidth: CGFloat = 1.25
+    static let whosHereAvatarRingOpacity = 0.55
     static let whosHerePuckHorizontalPadding: CGFloat = 8
-    static let whosHereLabelSpacing: CGFloat = 6
-    static let whosHereSectionLabelSpacing: CGFloat = 8
+    /// Tight gap between face and name.
+    static let whosHereLabelSpacing: CGFloat = 5
+    static let whosHereSectionLabelSpacing: CGFloat = 6
     static let whosHereExpandDragThreshold: CGFloat = 36
     /// Max rows shown without scrolling (overflow expands inside this cap).
     static let whosHereGridMaxVisibleRows = 2
-    static let whosHereSectionTitleHeight: CGFloat = 18
+    static let whosHereSectionTitleHeight: CGFloat = 14
+    /// Soft fill — chips stay quieter than secondary action chrome.
+    static let whosHereChipFillOpacity = 0.38
+    static let whosHereChipBorderOpacity = 0.16
+    static let whosHereChipBorderWidth: CGFloat = 0.8
 
     /// Rows needed for the collapsed (or ≤6 full) grid — never more than max visible.
     static func whosHereGridRowCount(memberCount: Int) -> Int {
@@ -192,22 +207,35 @@ enum FriendDetailSheetContent {
         }
     }
 
-    /// Summary title for multi-person sheets — group context, not name list.
-    /// Examples: `3 friends together`, `6 friends at Souvla`.
+    /// Summary title for multi-person sheets — count context only.
+    /// Example: `3 friends together`. Venue lives on the subtitle line.
     static func groupContextTitle(for puck: MapPuckData) -> String {
-        let members = displayMembers(for: puck)
-        let count = members.count
+        let count = displayMembers(for: puck).count
         guard count > 0 else { return "Friends together" }
         let noun = count == 1 ? "friend" : "friends"
+        return "\(count) \(noun) together"
+    }
+
+    /// Venue / activity under the group title. Prefers `At {place}`.
+    static func groupContextSubtitle(for puck: MapPuckData) -> String {
+        let members = displayMembers(for: puck)
         let lead = members.first
         let venue = compactVenueLabel(
             venueStatusText: puck.venueStatusText,
             placeName: lead?.placeName ?? ""
         )
         if !venue.isEmpty {
-            return "\(count) \(noun) at \(venue)"
+            if venue.hasPrefix("At ") || venue.hasPrefix("Near ") {
+                return venue
+            }
+            return "At \(venue)"
         }
-        return "\(count) \(noun) together"
+        return multiPersonActivityLine(for: puck)
+    }
+
+    /// Muted section eyebrow: `WHO’S HERE · 3`.
+    static func whosHereSectionLabel(memberCount: Int) -> String {
+        "WHO’S HERE · \(memberCount)"
     }
 
     /// Whether the Who’s here grid needs an overflow cell when collapsed.

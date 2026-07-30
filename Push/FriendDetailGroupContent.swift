@@ -3,8 +3,8 @@
 //  Push
 //
 //  Issue #139 — compact map puck detail sheet.
-//  Multi-person: group summary + Who’s here grid + actions.
-//  Individual: summary + actions (no member grid).
+//  Multi-person: group context + Who’s here chips + actions.
+//  Individual: avatar summary + actions (no member grid).
 //
 
 import SwiftUI
@@ -54,7 +54,10 @@ struct FriendDetailGroupContent: View {
 
     private var infoRow: some View {
         HStack(alignment: .center, spacing: FriendDetailSheetLayout.multiPersonInfoSpacing) {
-            MultiPersonAvatarStack(people: members)
+            // Overlapping stack only for individual — multi-person identity is Who’s here.
+            if !isMultiPerson {
+                MultiPersonAvatarStack(people: members)
+            }
 
             VStack(alignment: .leading, spacing: FriendDetailSheetLayout.multiPersonTextSpacing) {
                 Text(FriendDetailSheetContent.summaryTitle(for: puck))
@@ -63,14 +66,17 @@ struct FriendDetailGroupContent: View {
                     .lineLimit(1)
                     .truncationMode(.tail)
 
-                activitySubtitle
-
-                if let location = FriendDetailSheetContent.multiPersonLocationDetail(for: puck) {
-                    Text(location)
-                        .font(.caption)
-                        .foregroundStyle(PushControlColors.textTertiary)
-                        .lineLimit(1)
-                        .truncationMode(.tail)
+                if isMultiPerson {
+                    multiPersonSubtitle
+                } else {
+                    individualActivitySubtitle
+                    if let location = FriendDetailSheetContent.multiPersonLocationDetail(for: puck) {
+                        Text(location)
+                            .font(.caption)
+                            .foregroundStyle(PushControlColors.textTertiary)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                    }
                 }
             }
             .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
@@ -79,7 +85,33 @@ struct FriendDetailGroupContent: View {
         }
     }
 
-    private var activitySubtitle: some View {
+    /// Venue / activity under group context title (e.g. `At Dolores`).
+    private var multiPersonSubtitle: some View {
+        let line = FriendDetailSheetContent.groupContextSubtitle(for: puck)
+        let symbol = members.first?.activitySymbolName
+            ?? PresenceActivityPresentation.defaultSymbolName
+
+        return HStack(spacing: FriendDetailSheetLayout.multiPersonActivityIconSpacing) {
+            if !symbol.isEmpty {
+                Image(systemName: symbol)
+                    .font(.system(
+                        size: FriendDetailSheetLayout.multiPersonActivityIconSize,
+                        weight: .semibold
+                    ))
+                    .foregroundStyle(accentColor)
+            }
+            Text(line)
+                .font(.subheadline)
+                .foregroundStyle(PushControlColors.textSecondary)
+                .lineLimit(1)
+                .truncationMode(.tail)
+                .minimumScaleFactor(FriendDetailSheetLayout.multiPersonSubtitleMinimumScale)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
+    }
+
+    private var individualActivitySubtitle: some View {
         let line = FriendDetailSheetContent.multiPersonActivityLine(for: puck)
         let symbol = members.first?.activitySymbolName
             ?? PresenceActivityPresentation.defaultSymbolName
@@ -128,9 +160,10 @@ struct FriendDetailGroupContent: View {
 
     private var whosHereSection: some View {
         VStack(alignment: .leading, spacing: FriendDetailSheetLayout.whosHereSectionLabelSpacing) {
-            Text(FriendDetailSheetLayout.whosHereTitle)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(PushControlColors.textEspresso)
+            Text(FriendDetailSheetContent.whosHereSectionLabel(memberCount: members.count))
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(PushControlColors.textTertiary)
+                .tracking(FriendDetailSheetLayout.whosHereLabelTracking)
 
             WhosHereMemberGrid(
                 members: members,
@@ -162,39 +195,32 @@ struct FriendDetailGroupContent: View {
     private var actions: some View {
         VStack(spacing: FriendDetailSheetLayout.multiPersonActionsSpacing) {
             if showsAskToJoin {
-                multiPersonActionButton(
-                    label: "Ask to join",
-                    symbolName: "figure.wave",
-                    style: .primary,
+                // Glass + walnut rim — approved primary (not solid sunbeam).
+                PushGlassRimButton(
+                    title: "Ask to join",
+                    systemImageName: "figure.wave",
                     action: onAskToJoin
                 )
+                .frame(maxWidth: .infinity)
             }
             HStack(spacing: FriendDetailSheetLayout.actionSpacing) {
-                multiPersonActionButton(
+                multiPersonSecondaryButton(
                     label: "Directions",
                     symbolName: "arrow.triangle.turn.up.right.circle.fill",
-                    style: .secondary,
                     action: onDirections
                 )
-                multiPersonActionButton(
+                multiPersonSecondaryButton(
                     label: "Start push",
                     symbolName: "calendar.badge.plus",
-                    style: .secondary,
                     action: onStartPush
                 )
             }
         }
     }
 
-    private enum ActionStyle {
-        case primary
-        case secondary
-    }
-
-    private func multiPersonActionButton(
+    private func multiPersonSecondaryButton(
         label: String,
         symbolName: String,
-        style: ActionStyle,
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
@@ -209,11 +235,7 @@ struct FriendDetailGroupContent: View {
                     .lineLimit(1)
                     .minimumScaleFactor(PushOpacityTokens.minimumTextScale)
             }
-            .foregroundStyle(
-                style == .primary
-                    ? PushControlColors.activeForeground
-                    : PushControlColors.textSecondary
-            )
+            .foregroundStyle(PushControlColors.textSecondary)
             .frame(maxWidth: .infinity)
             .frame(height: FriendDetailSheetLayout.multiPersonSecondaryHeight)
             .background(
@@ -221,36 +243,26 @@ struct FriendDetailGroupContent: View {
                     cornerRadius: FriendDetailSheetLayout.multiPersonSecondaryCornerRadius,
                     style: .continuous
                 )
-                .fill(actionFill(for: style))
+                .fill(
+                    Color.white.opacity(
+                        FriendDetailSheetLayout.multiPersonSecondaryFillOpacity
+                    )
+                )
             )
             .overlay {
-                if style == .secondary {
-                    RoundedRectangle(
-                        cornerRadius: FriendDetailSheetLayout.multiPersonSecondaryCornerRadius,
-                        style: .continuous
-                    )
-                    .stroke(
-                        PushColorPalette.Accent.walnut.opacity(
-                            FriendDetailSheetLayout.multiPersonSecondaryBorderOpacity
-                        ),
-                        lineWidth: FriendDetailSheetLayout.multiPersonSecondaryBorderWidth
-                    )
-                }
+                RoundedRectangle(
+                    cornerRadius: FriendDetailSheetLayout.multiPersonSecondaryCornerRadius,
+                    style: .continuous
+                )
+                .stroke(
+                    PushColorPalette.Accent.walnut.opacity(
+                        FriendDetailSheetLayout.multiPersonSecondaryBorderOpacity
+                    ),
+                    lineWidth: FriendDetailSheetLayout.multiPersonSecondaryBorderWidth
+                )
             }
         }
         .buttonStyle(.plain)
         .accessibilityLabel(label)
     }
-
-    private func actionFill(for style: ActionStyle) -> Color {
-        switch style {
-        case .primary:
-            return PushControlColors.activeFill
-        case .secondary:
-            return Color.white.opacity(
-                FriendDetailSheetLayout.multiPersonSecondaryFillOpacity
-            )
-        }
-    }
 }
-
