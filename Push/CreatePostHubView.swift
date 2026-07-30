@@ -23,10 +23,13 @@ struct CreatePostHubView: View {
             .padding(.horizontal, CreatePostLayout.horizontalPadding(layout))
 
             ScrollView(showsIndicators: false) {
-                chooserList
+                chooserContent
                     .padding(.top, CreatePostLayout.createToListSpacing)
                     .padding(.horizontal, CreatePostLayout.horizontalPadding(layout))
                     .padding(.bottom, CreatePostLayout.bottomPadding(layout))
+            }
+            .refreshable {
+                await viewModel.refresh()
             }
         }
     }
@@ -60,6 +63,25 @@ struct CreatePostHubView: View {
     }
 
     // MARK: - List
+
+    /// Shared surface states (DS-070) around the repository-backed chooser rows.
+    @ViewBuilder
+    private var chooserContent: some View {
+        switch viewModel.hubContentPhase {
+        case .loading, .deferred:
+            EmptySurfaceStateView.loading
+                .frame(minHeight: CreatePostLayout.statePlaceholderMinHeight)
+        case .failed:
+            EmptySurfaceStateView.failed(surface: CreatePostCopy.hubSurfaceName) {
+                Task { await viewModel.load() }
+            }
+            .frame(minHeight: CreatePostLayout.statePlaceholderMinHeight)
+        case .empty:
+            emptyState
+        case .content:
+            chooserList
+        }
+    }
 
     @ViewBuilder
     private var chooserList: some View {

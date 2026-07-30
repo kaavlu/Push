@@ -14,10 +14,14 @@ import Supabase
 final class SupabaseMomentRepository: MomentRepository {
     private let client: SupabaseClient
     private let currentUserID: Person.ID
+    /// Session store, only for the post-write revision bump that reloads Feed and
+    /// the Create Post hub. Nil in tests that exercise the RPC mapping alone.
+    private let store: LiveDataStore?
 
-    init(client: SupabaseClient, currentUserID: Person.ID) {
+    init(client: SupabaseClient, currentUserID: Person.ID, store: LiveDataStore? = nil) {
         self.client = client
         self.currentUserID = currentUserID
+        self.store = store
     }
 
     // MARK: - Reads
@@ -74,7 +78,7 @@ final class SupabaseMomentRepository: MomentRepository {
     // MARK: - Mutations
 
     func createMoment(_ draft: MomentDraft) async throws -> Moment.ID {
-        try await run("createMoment") {
+        let momentID: Moment.ID = try await run("createMoment") {
             try await client
                 .rpc(
                     "create_moment",
@@ -89,6 +93,9 @@ final class SupabaseMomentRepository: MomentRepository {
                 .execute()
                 .value
         }
+        // Only after the RPC committed — a failed publish must not invalidate.
+        await store?.notifyMomentsChanged()
+        return momentID
     }
 
     /// Per item, like the RPC: a rejected item leaves the earlier appends

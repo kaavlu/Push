@@ -575,6 +575,12 @@ final class LiveDataStore {
         revisionSubject.value += 1
     }
 
+    /// Moments are paginated on demand and never cached here, so a publish only
+    /// needs the revision bump that makes Feed/hub view models reload (S7).
+    func notifyMomentsChanged() {
+        revisionSubject.value += 1
+    }
+
     // MARK: - Presence
     //
     // Session-cached like the social graph / pushes. Warm + refresh load

@@ -19,8 +19,10 @@ struct SeedData {
     let places: [Place]
     let statuses: [PresenceStatus]
     let policies: [SharingPolicy]
-    let plans: [PushPlan]
-    let responses: [PushResponse]
+    /// `var` so tests can append lifecycle-specific pushes (historical, cancelled)
+    /// to the standard graph instead of rebuilding every field.
+    var plans: [PushPlan]
+    var responses: [PushResponse]
     let hangouts: [PastHangout]
     let feedEvents: [FeedEvent]
     let friendRequests: [FriendRequest]

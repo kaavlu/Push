@@ -50,6 +50,8 @@ enum CreatePostLayout {
     static let createToListSpacing: CGFloat = 8
     /// Between moment / past-Push rows.
     static let chooserListSpacing: CGFloat = 8
+    /// Keeps loading / failed chooser states from collapsing inside the scroll view.
+    static let statePlaceholderMinHeight: CGFloat = 220
 
     // Media drag reorder feedback
     static let thumbDragScale: CGFloat = 1.08

@@ -2,8 +2,9 @@
 //  CreatePostModels.swift
 //  Push
 //
-//  Local-only models + ViewModel for the Feed create-post flow (hub → compose).
-//  Fixture chooser lists and simulated submit — no repos or feed mutation.
+//  Presentation models + copy for the Feed create-post flow (hub → compose).
+//  Chooser rows and the friend catalog are repository-backed (S7); the fixtures
+//  at the bottom exist only for previews and the design lab.
 //
 
 import Foundation
@@ -92,7 +93,8 @@ enum CreatePostChooserStyle: Equatable {
 
 // MARK: - Chooser row model
 
-/// Fixture presentation for an Existing Moment or Past Push chooser row.
+/// Presentation row for an Existing Moment (`Moment.ID`) or a Past Push
+/// (`PushPlan.ID`) in the hub chooser.
 struct CreatePostHistoryItem: Identifiable, Equatable {
     let id: String
     let title: String
@@ -105,15 +107,11 @@ struct CreatePostHistoryItem: Identifiable, Equatable {
     let mediaItems: [FeedMediaItem]
     let style: CreatePostChooserStyle
 
-    /// Stable id for feed-card → edit-moment deep links.
-    static func feedMomentID(forCarouselID carouselID: String) -> String {
-        "moment-\(carouselID)"
-    }
-
     /// Builds an existing-moment chooser row from a feed carousel (edit-from-feed).
+    /// The card id **is** the `Moment.ID` since Feed reads from the repository (S6).
     static func fromFeedCarousel(_ carousel: FeedMediaCarouselData) -> CreatePostHistoryItem {
         CreatePostHistoryItem(
-            id: feedMomentID(forCarouselID: carousel.id),
+            id: carousel.id,
             title: carousel.title,
             dateLabel: carousel.dateTimeLabel,
             locationTitle: carousel.locationTitle,
@@ -240,6 +238,8 @@ struct CreatePostTiming {
 
 enum CreatePostCopy {
     static let hubTitle = "Share a moment"
+    /// "Couldn't load moments" in the shared failed surface.
+    static let hubSurfaceName = "moments"
     static let hubSubtitle = "Create new or revisit one you've posted"
     static let createFromScratchTitle = "Create from scratch"
     static let createFromScratchSubtitle = "Add photos and write your own."
@@ -290,6 +290,8 @@ enum CreatePostCopy {
 
 // MARK: - Fixtures
 
+/// Preview / design-lab only. The app builds these rows from repositories
+/// (`CreatePostHubBuilder`), so fixtures can never reach a live session.
 enum CreatePostFixtures {
     /// Friends available to tag on create-from-scratch (fixture / local only).
     static let selectableFriends: [PushRecipientItem] = {
@@ -392,7 +394,7 @@ enum CreatePostFixtures {
         let idSet = Set(contributorIDs)
         let contributors = members.filter { idSet.contains($0.id) }
         return CreatePostHistoryItem(
-            id: CreatePostHistoryItem.feedMomentID(forCarouselID: carousel.id),
+            id: carousel.id,
             title: title.isEmpty ? carousel.title : title,
             dateLabel: carousel.dateTimeLabel,
             locationTitle: carousel.locationTitle,

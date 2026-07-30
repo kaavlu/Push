@@ -130,7 +130,9 @@ final class CreatePostViewModelTests: XCTestCase {
 
     func testOpenFeedMomentForEditPrefillsCompose() {
         let carousel = FeedMediaCarouselFixtures.threeBundlePhotos
-        let viewModel = CreatePostViewModel.forEditingFeedMoment(carousel, timing: .immediate)
+        let viewModel = CreatePostViewModel.forEditingFeedMoment(
+            carousel, container: AppDataContainer(seed: .standard()), timing: .immediate
+        )
 
         XCTAssertEqual(viewModel.screen, .compose)
         XCTAssertTrue(viewModel.isEditingExistingMoment)
@@ -138,7 +140,7 @@ final class CreatePostViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.locationText, carousel.locationTitle)
         XCTAssertEqual(
             viewModel.source,
-            .existingMoment(id: CreatePostHistoryItem.feedMomentID(forCarouselID: carousel.id))
+            .existingMoment(id: carousel.id)
         )
         XCTAssertFalse(viewModel.items.isEmpty)
         XCTAssertEqual(viewModel.primaryButtonTitle, CreatePostCopy.editPrimaryAction)
@@ -148,15 +150,19 @@ final class CreatePostViewModelTests: XCTestCase {
         // canAddYours fixture that is not always mirrored in CreatePostFixtures.existingMoments
         let carousel = FeedMediaCarouselFixtures.threeMixedAspectPhotos
         let hubIDs = Set(CreatePostFixtures.existingMoments.map(\.id))
-        let momentID = CreatePostHistoryItem.feedMomentID(forCarouselID: carousel.id)
+        let momentID = carousel.id
         // Prefer a carousel that isn't already an existing-moment fixture.
         if hubIDs.contains(momentID) {
             // Still valid if fixtures grow — open should succeed either path.
-            let viewModel = CreatePostViewModel.forEditingFeedMoment(carousel, timing: .immediate)
+            let viewModel = CreatePostViewModel.forEditingFeedMoment(
+            carousel, container: AppDataContainer(seed: .standard()), timing: .immediate
+        )
             XCTAssertEqual(viewModel.screen, .compose)
             return
         }
-        let viewModel = CreatePostViewModel.forEditingFeedMoment(carousel, timing: .immediate)
+        let viewModel = CreatePostViewModel.forEditingFeedMoment(
+            carousel, container: AppDataContainer(seed: .standard()), timing: .immediate
+        )
         XCTAssertEqual(viewModel.screen, .compose)
         XCTAssertEqual(viewModel.source, .existingMoment(id: momentID))
         XCTAssertEqual(viewModel.titleText, carousel.title)
@@ -383,8 +389,16 @@ final class CreatePostViewModelTests: XCTestCase {
 
     // MARK: - Helpers
 
+    /// Fixture (preview) seam: navigation, media, and copy behavior without
+    /// repositories. Repository-backed hub + publish live in
+    /// `CreatePostPublishTests`.
     private func makeViewModel(maxSelection: Int = 8) -> CreatePostViewModel {
-        CreatePostViewModel(timing: .immediate, maxSelection: maxSelection)
+        CreatePostViewModel(
+            existingMoments: CreatePostFixtures.existingMoments,
+            pastPushes: CreatePostFixtures.pastPushes,
+            timing: .immediate,
+            maxSelection: maxSelection
+        )
     }
 
     private func draftPhoto() -> AddYoursDraftItem {

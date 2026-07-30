@@ -45,11 +45,21 @@ struct AddYoursDraftItem: Identifiable {
     let kind: FeedMediaKind
     /// Decoded still for photos; optional poster for videos (nil → branded placeholder).
     let previewImage: UIImage?
+    /// Processed bytes for publish. Nil for prefilled media that already lives in
+    /// Storage (existing-Moment edit) and for preview/test drafts — those items
+    /// can be shown but never re-uploaded.
+    let upload: MomentMediaUpload?
 
-    init(id: UUID = UUID(), kind: FeedMediaKind, previewImage: UIImage?) {
+    init(
+        id: UUID = UUID(),
+        kind: FeedMediaKind,
+        previewImage: UIImage?,
+        upload: MomentMediaUpload? = nil
+    ) {
         self.id = id
         self.kind = kind
         self.previewImage = previewImage
+        self.upload = upload
     }
 }
 

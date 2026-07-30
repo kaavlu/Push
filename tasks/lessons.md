@@ -87,3 +87,16 @@ Durable, non-obvious learnings. Keep entries short; link code/docs rather than r
 - Fakes for keyset pagination should serve a **cursor-keyed chain**, not a
   consuming queue: the bootstrap load would otherwise shift every page boundary.
   Make the page list a `var` so refresh/filter tests can change what page one returns.
+
+## Splitting a view model across files (Issue #126, Create Post publish)
+
+- `private(set)` restricts the setter to the **file**, so extensions in
+  `Foo+Bar.swift` cannot mutate it. Splitting a ViewModel to stay inside the
+  400-line rule means widening the state the extensions own to
+  `@Published internal(set)` (precedent: `LocationSession.state`).
+- `PhotosPickerItem` needs `import SwiftUI` alongside `import PhotosUI`; with
+  PhotosUI alone the type is not in scope.
+- Publish rollback is only safe if the draft carries its own bytes: media picked
+  from Photos is stored on `AddYoursDraftItem.upload`, and prefilled Storage
+  media has none — so a draft mixing the two is rejected locally instead of
+  publishing a half album.
