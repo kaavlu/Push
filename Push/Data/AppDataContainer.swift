@@ -83,12 +83,20 @@ final class AppDataContainer {
 
     /// Install a prepared live container. Shuts down the previous session first
     /// (no unpublish — mid-session swap of the same user must not clear presence).
-    static func installPreparedLive(_ container: AppDataContainer) {
+    /// - Parameter startLocationIfEligible: When `false`, skips the location
+    ///   pipeline (and authorization prompt) so incomplete post-auth onboarding
+    ///   can request permission on its own step. Presence Realtime still starts.
+    static func installPreparedLive(
+        _ container: AppDataContainer,
+        startLocationIfEligible: Bool = true
+    ) {
         shared.shutdownLocationSession()
         shared.stopPresenceRealtimeBridge()
         shared = container
         Task {
-            await container.locationSession?.startIfEligible()
+            if startLocationIfEligible {
+                await container.locationSession?.startIfEligible()
+            }
             await container.presenceRealtimeBridge?.start()
         }
     }

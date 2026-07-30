@@ -52,6 +52,30 @@ final class LocationSessionContainerTests: XCTestCase {
         XCTAssertTrue(AppDataContainer.shared.locationSession === next)
     }
 
+    /// Incomplete onboarding must not request location during live install
+    /// (Issue #134 Task 1 — avoid racing the system auth prompt before the
+    /// post-auth location step).
+    func testInstallPreparedLiveSkipsLocationWhenFlagFalse() async {
+        let session = FakeLocationSession()
+        let container = AppDataContainer(seed: .standard(), locationSession: session)
+
+        AppDataContainer.installPreparedLive(container, startLocationIfEligible: false)
+        try? await Task.sleep(nanoseconds: 50_000_000)
+
+        XCTAssertEqual(session.startIfEligibleCount, 0)
+        XCTAssertTrue(AppDataContainer.shared.locationSession === session)
+    }
+
+    func testInstallPreparedLiveStartsLocationWhenFlagTrue() async {
+        let session = FakeLocationSession()
+        let container = AppDataContainer(seed: .standard(), locationSession: session)
+
+        AppDataContainer.installPreparedLive(container, startLocationIfEligible: true)
+        try? await Task.sleep(nanoseconds: 50_000_000)
+
+        XCTAssertEqual(session.startIfEligibleCount, 1)
+    }
+
     func testShutdownSharedAndReinstallMockUnpublishesThenShutsDown() async {
         let session = FakeLocationSession(
             state: LocationTrackingState(
