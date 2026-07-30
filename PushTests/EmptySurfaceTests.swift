@@ -22,11 +22,56 @@ final class EmptySurfaceTests: XCTestCase {
 
     @MainActor
     func testMapEmptyPhaseForEmptyGraph() async throws {
-        let viewModel = MapViewModel(container: AppDataContainer(seed: .emptyGraph()))
+        let suite = "EmptySurfaceTests.mapEmpty.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        defaults.removePersistentDomain(forName: suite)
+        defer { defaults.removePersistentDomain(forName: suite) }
+
+        let container = AppDataContainer(seed: .emptyGraph())
+        let viewModel = MapViewModel(
+            friends: container.friends,
+            groups: container.groups,
+            sharing: container.sharing,
+            pushes: container.pushes,
+            userDefaults: defaults
+        )
         await viewModel.load()
         XCTAssertEqual(viewModel.surfacePhase, .empty)
         XCTAssertEqual(viewModel.friendsCount, 0)
         XCTAssertFalse(viewModel.hasFriendMapContent)
+        XCTAssertTrue(viewModel.shouldShowEmptyFriendsOverlay)
+    }
+
+    @MainActor
+    func testDismissEmptyFriendsPromptHidesOverlayAndPersists() async throws {
+        let suite = "EmptySurfaceTests.dismiss.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        defaults.removePersistentDomain(forName: suite)
+        let container = AppDataContainer(seed: .emptyGraph())
+        let first = MapViewModel(
+            friends: container.friends,
+            groups: container.groups,
+            sharing: container.sharing,
+            pushes: container.pushes,
+            userDefaults: defaults
+        )
+        await first.load()
+        XCTAssertTrue(first.shouldShowEmptyFriendsOverlay)
+        first.dismissEmptyFriendsPrompt()
+        XCTAssertFalse(first.shouldShowEmptyFriendsOverlay)
+        XCTAssertTrue(first.hasDismissedEmptyFriendsPrompt)
+
+        let second = MapViewModel(
+            friends: container.friends,
+            groups: container.groups,
+            sharing: container.sharing,
+            pushes: container.pushes,
+            userDefaults: defaults
+        )
+        await second.load()
+        XCTAssertEqual(second.surfacePhase, .empty)
+        XCTAssertFalse(second.shouldShowEmptyFriendsOverlay)
+        defaults.removePersistentDomain(forName: suite)
     }
 
     /// Friends without shared presence: no Add-friends empty CTA (content phase).

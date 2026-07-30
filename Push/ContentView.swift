@@ -66,7 +66,7 @@ struct ContentView: View {
             }
 
             if !isTabOverlayPresented,
-               viewModel.surfacePhase == .empty || viewModel.surfacePhase == .failed {
+               viewModel.surfacePhase == .failed || viewModel.shouldShowEmptyFriendsOverlay {
                 mapSurfaceOverlay
             }
 
@@ -191,8 +191,12 @@ struct ContentView: View {
             MapEmptyOverlay(
                 phase: viewModel.surfacePhase,
                 onAddFriends: {
+                    viewModel.dismissEmptyFriendsPrompt()
                     isFilterDropdownExpanded = false
                     presentedRoute = .addFriend
+                },
+                onDismissEmpty: {
+                    viewModel.dismissEmptyFriendsPrompt()
                 },
                 onRetry: { Task { await viewModel.load() } }
             )
