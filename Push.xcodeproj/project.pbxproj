@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		43DC2E974D2D3D8EF7BAD504 /* PostAuthLocationScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4E363C3B0B11F73BE080022 /* PostAuthLocationScreens.swift */; };
 		F765CB0F7835A1A949AC20AE /* CreatePostHubBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FA520CB1AFA89EAA51B5B8D /* CreatePostHubBuilderTests.swift */; };
 		5BC27660E516781C9E9AADC5 /* CreatePostPublishTestDoubles.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5EA99C12398531EC04285FB /* CreatePostPublishTestDoubles.swift */; };
 		460F67C0910A0F0E478EED2B /* CreatePostPublishTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23AF9B70E414DF28ED10F8C7 /* CreatePostPublishTests.swift */; };
@@ -412,6 +413,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C4E363C3B0B11F73BE080022 /* PostAuthLocationScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PostAuthLocationScreens.swift"; path = "Auth/PostAuthLocationScreens.swift"; sourceTree = "<group>"; };
 		9FA520CB1AFA89EAA51B5B8D /* CreatePostHubBuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostHubBuilderTests.swift"; sourceTree = "<group>"; };
 		D5EA99C12398531EC04285FB /* CreatePostPublishTestDoubles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostPublishTestDoubles.swift"; sourceTree = "<group>"; };
 		23AF9B70E414DF28ED10F8C7 /* CreatePostPublishTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostPublishTests.swift"; sourceTree = "<group>"; };
@@ -854,6 +856,7 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				C4E363C3B0B11F73BE080022 /* PostAuthLocationScreens.swift */,
 				BCEB91C2E462468A7DBFEE49 /* CreatePostViewModel+Presentation.swift */,
 				3BF867E46FBABEFB083C9385 /* CreatePostViewModel+Friends.swift */,
 				33126E12A678807BB8DEC6FF /* CreatePostViewModel+Publish.swift */,
@@ -1401,6 +1404,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				43DC2E974D2D3D8EF7BAD504 /* PostAuthLocationScreens.swift in Sources */,
 				DD932E9AE6DD7863C560CD86 /* CreatePostViewModel+Presentation.swift in Sources */,
 				EDB0DE9829259544727C6EEE /* CreatePostViewModel+Friends.swift in Sources */,
 				A07B668590A03C17532E71BB /* CreatePostViewModel+Publish.swift in Sources */,

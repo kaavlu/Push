@@ -127,6 +127,40 @@ final class PostAuthOnboardingTests: XCTestCase {
         XCTAssertEqual(vm.screen, .ghost)
     }
 
+    func testOpenSystemSettingsDelegatesToOpener() {
+        let opener = FakeSettingsOpener()
+        let vm = PostAuthOnboardingViewModel(
+            container: AppDataContainer(seed: .standard()),
+            locationSession: FakeLocationSession(
+                state: LocationTrackingState(authorization: .denied)
+            ),
+            settingsOpener: opener
+        )
+        vm.openSystemSettings()
+        XCTAssertEqual(opener.openCount, 1)
+    }
+
+    func testLoadSelfPuckPreviewUsesCurrentUserAtSFCenter() async throws {
+        let container = AppDataContainer(seed: .standard())
+        let vm = PostAuthOnboardingViewModel(
+            container: container,
+            locationSession: FakeLocationSession(
+                state: LocationTrackingState(authorization: .whenInUse)
+            )
+        )
+        await vm.loadSelfPuckPreview()
+        let user = try await container.friends.currentUser()
+        let puck = try XCTUnwrap(vm.selfPuck)
+        XCTAssertEqual(puck.id, user.id)
+        XCTAssertEqual(puck.avatarPlaceholder, user.initials)
+        XCTAssertEqual(puck.profileImageAssetName, user.imageAssetPath)
+        XCTAssertEqual(puck.coordinate.latitude, OnboardingMapDefaults.latitude, accuracy: 0.0001)
+        XCTAssertEqual(puck.coordinate.longitude, OnboardingMapDefaults.longitude, accuracy: 0.0001)
+        // Idempotent — second load should not replace.
+        await vm.loadSelfPuckPreview()
+        XCTAssertEqual(vm.selfPuck?.id, user.id)
+    }
+
     func testGoBackStack() async {
         let vm = makeVM(auth: .whenInUse)
         vm.continueFromValue()
@@ -195,5 +229,16 @@ final class PostAuthOnboardingTests: XCTestCase {
             container: container,
             locationSession: session
         )
+    }
+}
+
+// MARK: - Test doubles
+
+@MainActor
+private final class FakeSettingsOpener: SettingsOpening {
+    private(set) var openCount = 0
+
+    func openAppSettings() {
+        openCount += 1
     }
 }

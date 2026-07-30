@@ -27,77 +27,7 @@ struct PostAuthValueScreen: View {
     }
 }
 
-// MARK: - Location primer
-
-struct PostAuthLocationPrimerScreen: View {
-    @Environment(\.pushLayout) private var layout
-    @ObservedObject var model: PostAuthOnboardingViewModel
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            map
-            OnboardingHeader(
-                title: "Push runs on location.",
-                subtitle: "It's how you see who's nearby and who's down to hang. Nothing shares until you say so."
-            )
-            .padding(.top, 24)
-            if let error = model.errorMessage {
-                Text(error)
-                    .font(OnboardingLabFont.text(14, .medium))
-                    .foregroundStyle(.red)
-                    .padding(.top, 12)
-            }
-            OnboardingCTAButton(title: model.isBusy ? "Enabling…" : "Enable location") {
-                Task { await model.enableLocation() }
-            }
-            .disabled(model.isBusy)
-            .padding(.top, 24)
-        }
-        .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
-        .padding(.top, OnboardingLabMetric.contentTopInset(layout))
-        .padding(.bottom, 26)
-    }
-
-    private var map: some View {
-        OnboardingMiniMap {
-            ZStack {
-                OnboardingPulseRing(color: OnboardingLabColor.sunbeam)
-                Text("you")
-                    .font(OnboardingLabFont.rounded(22, .heavy))
-                    .foregroundStyle(OnboardingLabColor.sunbeam)
-                    .frame(width: 58, height: 58)
-                    .background(OnboardingLabColor.ctaBottom, in: Circle())
-                    .overlay(Circle().stroke(OnboardingLabColor.sunbeam, lineWidth: 3))
-            }
-            .frame(width: 58, height: 58)
-        }
-        .frame(height: 210)
-    }
-}
-
-// MARK: - Location blocked
-
-struct PostAuthLocationBlockedScreen: View {
-    @Environment(\.pushLayout) private var layout
-    @ObservedObject var model: PostAuthOnboardingViewModel
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            OnboardingHeader(
-                title: "Location is required.",
-                subtitle: "Push needs when-in-use location to work. Enable it in Settings, then try again."
-            )
-            Spacer(minLength: 22)
-            OnboardingCTAButton(title: model.isBusy ? "Checking…" : "Try again") {
-                Task { await model.retryLocationAccess() }
-            }
-            .disabled(model.isBusy)
-        }
-        .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
-        .padding(.top, OnboardingLabMetric.contentTopInset(layout))
-        .padding(.bottom, 26)
-    }
-}
+// Location primer + blocked live in PostAuthLocationScreens.swift
 
 // MARK: - Ghost
 

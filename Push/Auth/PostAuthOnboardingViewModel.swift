@@ -1,5 +1,7 @@
 // Push/Auth/PostAuthOnboardingViewModel.swift
+import CoreLocation
 import Foundation
+import UIKit
 import UserNotifications
 
 /// Screens after a live session is prepared (new accounts only).
@@ -51,6 +53,30 @@ struct OnboardingDiscoverPerson: Identifiable, Equatable {
     var relation: FriendshipRelation { result.relation }
 }
 
+/// Opens the app's system Settings page (test seam).
+protocol SettingsOpening {
+    func openAppSettings()
+}
+
+struct SystemSettingsOpener: SettingsOpening {
+    func openAppSettings() {
+        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+        UIApplication.shared.open(url)
+    }
+}
+
+/// SF product map fallback — matches `ContentView` `MapDefaults` (private there).
+enum OnboardingMapDefaults {
+    static let latitude = 37.7749
+    static let longitude = -122.4194
+    static let latitudeDelta = 0.08
+    static let longitudeDelta = 0.08
+
+    static var center: CLLocationCoordinate2D {
+        CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+    }
+}
+
 @MainActor
 final class PostAuthOnboardingViewModel: ObservableObject {
     @Published private(set) var screen: PostAuthOnboardingScreen = .value
@@ -61,11 +87,14 @@ final class PostAuthOnboardingViewModel: ObservableObject {
     @Published private(set) var isLoadingPeople = false
     @Published var errorMessage: String?
     @Published private(set) var isFinished = false
+    /// Teaching map puck for the location primer (fixed SF center; no GPS).
+    @Published private(set) var selfPuck: SelfPuckData?
 
     private let container: AppDataContainer
     private let notificationCenter: UNUserNotificationCenter
     /// Injected for tests; falls back to the container session (may be nil pre-install).
     private let locationSession: LocationSessioning?
+    private let settingsOpener: SettingsOpening
 
     private enum Limit {
         static let discoverCount = 20
@@ -82,12 +111,14 @@ final class PostAuthOnboardingViewModel: ObservableObject {
     init(
         container: AppDataContainer? = nil,
         notificationCenter: UNUserNotificationCenter = .current(),
-        locationSession: LocationSessioning? = nil
+        locationSession: LocationSessioning? = nil,
+        settingsOpener: SettingsOpening = SystemSettingsOpener()
     ) {
         let resolved = container ?? .shared
         self.container = resolved
         self.notificationCenter = notificationCenter
         self.locationSession = locationSession ?? resolved.locationSession
+        self.settingsOpener = settingsOpener
     }
 
     var findPeopleCTALabel: String {
@@ -126,6 +157,22 @@ final class PostAuthOnboardingViewModel: ObservableObject {
         screen = .locationPrimer
     }
 
+    /// Loads the signed-in user into a self puck at the SF teaching center.
+    func loadSelfPuckPreview() async {
+        guard selfPuck == nil else { return }
+        do {
+            let person = try await container.friends.currentUser()
+            selfPuck = SelfPuckData(
+                id: person.id,
+                avatarPlaceholder: person.initials,
+                profileImageAssetName: person.imageAssetPath,
+                coordinate: OnboardingMapDefaults.center
+            )
+        } catch {
+            // Map still shows; annotation omitted until load succeeds.
+        }
+    }
+
     // MARK: - Location
 
     func enableLocation() async {
@@ -155,6 +202,10 @@ final class PostAuthOnboardingViewModel: ObservableObject {
             return
         }
         await applyDefaultsAndAdvanceToGhost()
+    }
+
+    func openSystemSettings() {
+        settingsOpener.openAppSettings()
     }
 
     // MARK: - Teach steps
@@ -211,7 +262,7 @@ final class PostAuthOnboardingViewModel: ObservableObject {
             _ = try await container.friends.sendFriendRequest(to: id)
             addedIDs.insert(id)
             if let index = people.firstIndex(where: { $0.id == id }) {
-                var person = people[index]
+                let person = people[index]
                 let requestID = "pending-\(id)"
                 people[index] = OnboardingDiscoverPerson(
                     result: PersonSearchResult(
