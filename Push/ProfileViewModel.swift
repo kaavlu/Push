@@ -36,6 +36,7 @@ final class ProfileViewModel: ObservableObject {
     @Published private(set) var actionError: ActionErrorState?
 
     private let container: AppDataContainer?
+    private let profileOverride: ProfileRepository?
     // Holds the active store-change subscription; nil when container is absent.
     private var storeChangeSub: AnyCancellable?
     // Tracks the last revision we loaded so the subscription skips redundant reloads.
@@ -43,14 +44,52 @@ final class ProfileViewModel: ObservableObject {
     private var pendingAvailability: FriendAvailabilityState?
     private var pendingPublishEnabled: Bool?
     private var statusRollback: (availability: FriendAvailabilityState, statusID: String, ghost: Bool)?
+    private var pendingProfileEdit: PendingProfileEdit?
+    private var profileEditGeneration = 0
+
+    private struct ProfileBasicsState {
+        let name: String
+        let handle: String
+    }
+
+    private struct ProfilePrivacyState {
+        let activityVisibility: [ProfileToggleItem]
+        let mapPreferences: [ProfileToggleItem]
+        let closeFriends: [ProfileToggleItem]
+    }
+
+    private enum PendingProfileEdit {
+        case basics(
+            desired: ProfileBasicsState,
+            rollback: ProfileBasicsState,
+            generation: Int
+        )
+        case privacy(
+            desired: ProfilePrivacyState,
+            rollback: ProfilePrivacyState,
+            generation: Int
+        )
+
+        var generation: Int {
+            switch self {
+            case .basics(_, _, let generation), .privacy(_, _, let generation):
+                return generation
+            }
+        }
+    }
+
+    private var profileRepo: ProfileRepository? {
+        profileOverride ?? container?.profile
+    }
 
     // `container` defaults via `?? .shared` (not `= .shared`) because default-argument
     // expressions are checked in a nonisolated context even inside a @MainActor
     // initializer; `.shared` is a MainActor-isolated mutable static, so the fallback
     // must live in the (MainActor) initializer body instead.
-    init(container: AppDataContainer? = nil) {
+    init(container: AppDataContainer? = nil, profile: ProfileRepository? = nil) {
         let container = container ?? .shared
         self.container = container
+        self.profileOverride = profile
         Task { await load() }
         // Subscribe after the initial load task so each real mutation triggers a reload.
         storeChangeSub = container.onStoreChange { [weak self] revision in
@@ -61,9 +100,11 @@ final class ProfileViewModel: ObservableObject {
 
     func load() async {
         guard let container else { return }
+        let hadLoadedContent = loadState.value != nil
         if loadState.value == nil { loadState = .loading }
         do {
-            let userProfile = try await container.profile.userProfile()
+            guard let profileRepo else { return }
+            let userProfile = try await profileRepo.userProfile()
             let user = try await container.friends.currentUser()
             let statuses = try await container.friends.presenceStatuses()
             let places = try await container.pushes.allPlaces()
@@ -94,7 +135,9 @@ final class ProfileViewModel: ObservableObject {
             // Stamp the revision so the subscription guard can detect duplicates.
             lastSeenRevision = container.storeRevision
         } catch {
-            loadState = .failed(error)
+            if !hadLoadedContent {
+                loadState = .failed(error)
+            }
         }
     }
 
@@ -139,6 +182,17 @@ final class ProfileViewModel: ObservableObject {
 
     var legalDestinations: [LegalDestination] {
         LegalDestinations.all
+    }
+
+    var surfacePhase: SurfaceContentPhase {
+        switch loadState {
+        case .idle, .loading:
+            return .loading
+        case .failed:
+            return .failed
+        case .loaded:
+            return .content
+        }
     }
 
     var visibilitySummary: String {
@@ -203,9 +257,14 @@ final class ProfileViewModel: ObservableObject {
         pendingAvailability = nil
         pendingPublishEnabled = nil
         statusRollback = nil
+        pendingProfileEdit = nil
     }
 
     func retryActionError() {
+        if let pendingProfileEdit {
+            retry(pendingProfileEdit)
+            return
+        }
         if let pendingAvailability {
             Task { await persistAvailability(pendingAvailability) }
             return
@@ -217,6 +276,7 @@ final class ProfileViewModel: ObservableObject {
 
     private func commitAvailability(_ availability: FriendAvailabilityState) {
         let social = availability == .ghost ? FriendAvailabilityState.maybeDown : availability
+        pendingProfileEdit = nil
         statusRollback = (selectedAvailability, selectedStatusID, isGhostModeEnabled)
         selectedAvailability = social
         if !isGhostModeEnabled {
@@ -229,6 +289,7 @@ final class ProfileViewModel: ObservableObject {
     }
 
     private func commitGhostEnabled(_ ghostOn: Bool) {
+        pendingProfileEdit = nil
         statusRollback = (selectedAvailability, selectedStatusID, isGhostModeEnabled)
         isGhostModeEnabled = ghostOn
         selectedStatusID = ghostOn
@@ -274,13 +335,13 @@ final class ProfileViewModel: ObservableObject {
         isGhostModeEnabled = statusRollback.ghost
     }
 
-    func setProfileBasics(name: String, handle: String, initials: String) {
-        displayName = name
-        self.handle = handle
-        self.initials = initials
-        guard let container else { return }
-        // initials derive from firstName, so only name + handle need to persist.
-        Task { try? await container.profile.updateBasics(displayName: name, handle: handle) }
+    func setProfileBasics(name: String, handle: String) {
+        let desired = ProfileBasicsState(name: name, handle: handle)
+        let rollback = ProfileBasicsState(
+            name: profile.name,
+            handle: profile.handle
+        )
+        commitBasics(desired, rollback: rollback)
     }
 
     var hasProfilePhoto: Bool {
@@ -348,30 +409,139 @@ final class ProfileViewModel: ObservableObject {
     }
 
     func toggleActivityVisibility(id: String) {
+        let rollback = currentPrivacyState
         activityVisibility.toggleItem(id: id)
-        persistPrivacy()
+        commitPrivacy(currentPrivacyState, rollback: rollback)
     }
 
     func toggleMapPreference(id: String) {
+        let rollback = currentPrivacyState
         mapPreferences.toggleItem(id: id)
-        persistPrivacy()
+        commitPrivacy(currentPrivacyState, rollback: rollback)
     }
 
     func toggleCloseFriend(id: String) {
+        let rollback = currentPrivacyState
         closeFriends.toggleItem(id: id)
-        persistPrivacy()
+        commitPrivacy(currentPrivacyState, rollback: rollback)
     }
 
-    /// Shared writer — fires the current toggle arrays to the store after any toggle mutation.
-    private func persistPrivacy() {
-        guard let container else { return }
-        Task {
-            try? await container.profile.updatePrivacy(
-                activityVisibility: activityVisibility,
-                mapPreferences: mapPreferences,
-                closeFriends: closeFriends
+    private var currentPrivacyState: ProfilePrivacyState {
+        ProfilePrivacyState(
+            activityVisibility: activityVisibility,
+            mapPreferences: mapPreferences,
+            closeFriends: closeFriends
+        )
+    }
+
+    private func retry(_ edit: PendingProfileEdit) {
+        switch edit {
+        case .basics(let desired, _, _):
+            let rollback = ProfileBasicsState(
+                name: displayName,
+                handle: handle
             )
+            commitBasics(desired, rollback: rollback)
+        case .privacy(let desired, _, _):
+            commitPrivacy(desired, rollback: currentPrivacyState)
         }
+    }
+
+    private func commitBasics(
+        _ desired: ProfileBasicsState,
+        rollback: ProfileBasicsState
+    ) {
+        displayName = desired.name
+        handle = desired.handle
+        actionError = nil
+        pendingAvailability = nil
+        pendingPublishEnabled = nil
+        statusRollback = nil
+        profileEditGeneration += 1
+        let generation = profileEditGeneration
+        pendingProfileEdit = .basics(
+            desired: desired,
+            rollback: rollback,
+            generation: generation
+        )
+        Task { await persistBasics(desired, generation: generation) }
+    }
+
+    private func persistBasics(
+        _ desired: ProfileBasicsState,
+        generation: Int
+    ) async {
+        guard let profileRepo else { return }
+        do {
+            // Initials derive from firstName, so only name + handle persist.
+            try await profileRepo.updateBasics(
+                displayName: desired.name,
+                handle: desired.handle
+            )
+            finishProfileEdit(generation: generation)
+        } catch {
+            guard let pendingProfileEdit,
+                  pendingProfileEdit.generation == generation,
+                  case .basics(_, let rollback, _) = pendingProfileEdit else { return }
+            displayName = rollback.name
+            handle = rollback.handle
+            actionError = ActionErrorState(message: ProfileMutationCopy.basicsFailed)
+        }
+    }
+
+    private func commitPrivacy(
+        _ desired: ProfilePrivacyState,
+        rollback: ProfilePrivacyState
+    ) {
+        applyPrivacy(desired)
+        actionError = nil
+        pendingAvailability = nil
+        pendingPublishEnabled = nil
+        statusRollback = nil
+        profileEditGeneration += 1
+        let generation = profileEditGeneration
+        pendingProfileEdit = .privacy(
+            desired: desired,
+            rollback: rollback,
+            generation: generation
+        )
+        Task { await persistPrivacy(desired, generation: generation) }
+    }
+
+    private func persistPrivacy(
+        _ desired: ProfilePrivacyState,
+        generation: Int
+    ) async {
+        guard let profileRepo else { return }
+        do {
+            try await profileRepo.updatePrivacy(
+                activityVisibility: desired.activityVisibility,
+                mapPreferences: desired.mapPreferences,
+                closeFriends: desired.closeFriends
+            )
+            finishProfileEdit(generation: generation)
+        } catch {
+            guard let pendingProfileEdit,
+                  pendingProfileEdit.generation == generation,
+                  case .privacy(_, let rollback, _) = pendingProfileEdit else { return }
+            applyPrivacy(rollback)
+            actionError = ActionErrorState(message: ProfileMutationCopy.privacyFailed)
+        }
+    }
+
+    private func finishProfileEdit(generation: Int) {
+        guard pendingProfileEdit?.generation == generation else { return }
+        pendingProfileEdit = nil
+        actionError = nil
+        if let container {
+            lastSeenRevision = container.storeRevision
+        }
+    }
+
+    private func applyPrivacy(_ state: ProfilePrivacyState) {
+        activityVisibility = state.activityVisibility
+        mapPreferences = state.mapPreferences
+        closeFriends = state.closeFriends
     }
 
     func connect(_ connector: ProfileConnector) {
@@ -395,4 +565,6 @@ private extension Array where Element == ProfileToggleItem {
 
 enum ProfileMutationCopy {
     static let availabilityFailed = "Couldn't update your status. Check your connection and try again."
+    static let basicsFailed = "Couldn't save your profile. Check your connection and try again."
+    static let privacyFailed = "Couldn't save your privacy settings. Check your connection and try again."
 }

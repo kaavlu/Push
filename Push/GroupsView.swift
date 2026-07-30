@@ -51,7 +51,31 @@ struct GroupsView: View {
     private var groupsList: some View {
         ZStack {
             PushModalBackground()
+            primaryContent
+        }
+        .overlay(alignment: .top) {
+            PushModalCloseButtonBar(accessibilityLabel: "Close groups") {
+                dismiss()
+            }
+        }
+    }
 
+    @ViewBuilder
+    private var primaryContent: some View {
+        switch viewModel.surfacePhase {
+        case .loading:
+            EmptySurfaceStateView.loading(message: EmptySurfaceCopy.groupsLoading)
+        case .failed:
+            EmptySurfaceStateView.failed(surface: EmptySurfaceCopy.groupsSurfaceName) {
+                Task { await viewModel.load() }
+            }
+        case .empty:
+            EmptySurfaceView(
+                title: EmptySurfaceCopy.groupsEmptyTitle,
+                message: EmptySurfaceCopy.groupsEmptyMessage,
+                systemImage: "person.3"
+            )
+        case .content:
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: GroupsLayout.sectionSpacing) {
                     GroupsHeader()
@@ -72,11 +96,8 @@ struct GroupsView: View {
                 .padding(.top, GroupsLayout.topPadding)
                 .padding(.bottom, GroupsLayout.bottomPadding)
             }
-        }
-        .overlay(alignment: .top) {
-            PushModalCloseButtonBar(accessibilityLabel: "Close groups") {
-                dismiss()
-            }
+        case .deferred:
+            EmptyView()
         }
     }
 }

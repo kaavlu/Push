@@ -43,10 +43,14 @@ final class PlansViewModel: ObservableObject {
     // expressions are checked in a nonisolated context even inside a @MainActor
     // initializer; `.shared` is a MainActor-isolated mutable static, so the fallback
     // must live in the (MainActor) initializer body instead.
-    init(container: AppDataContainer? = nil, referenceDate: Date = Date()) {
+    init(
+        container: AppDataContainer? = nil,
+        referenceDate: Date = Date(),
+        pushes: PushRepository? = nil
+    ) {
         let container = container ?? .shared
         self.container = container
-        self.pushesOverride = nil
+        self.pushesOverride = pushes
         self.referenceDate = referenceDate
         let summary = PlansWeekSummary.make(from: [], for: referenceDate)
         weekDays = summary.days
@@ -101,16 +105,18 @@ final class PlansViewModel: ObservableObject {
 
     func load() async {
         guard let container else { return }
+        let hadLoadedContent = loadState.value != nil
         if loadState.value == nil { loadState = .loading }
         do {
+            guard let pushRepo else { return }
             let now = Date()
-            let planList = try await container.pushes.activePlans()
-            let historicalPlans = try await container.pushes.historicalPlans(
+            let planList = try await pushRepo.activePlans()
+            let historicalPlans = try await pushRepo.historicalPlans(
                 forMonthContaining: referenceDate
             )
-            let responses = try await container.pushes.responses()
-            let hangouts = try await container.pushes.pastHangouts(forMonthContaining: referenceDate)
-            let places = try await container.pushes.allPlaces()
+            let responses = try await pushRepo.responses()
+            let hangouts = try await pushRepo.pastHangouts(forMonthContaining: referenceDate)
+            let places = try await pushRepo.allPlaces()
             let groupList = try await container.groups.groups()
             let memberships = try await container.groups.memberships()
             let friendList = try await container.friends.friends()
@@ -161,12 +167,25 @@ final class PlansViewModel: ObservableObject {
             // Stamp the revision so the subscription guard can detect duplicates.
             lastSeenRevision = container.storeRevision
         } catch {
-            loadState = .failed(error)
+            if !hadLoadedContent {
+                loadState = .failed(error)
+            }
         }
     }
 
     var yourPushes: [PlanData] {
         plans.filter { $0.isOwner }
+    }
+
+    var surfacePhase: SurfaceContentPhase {
+        switch loadState {
+        case .idle, .loading:
+            return .loading
+        case .failed:
+            return .failed
+        case .loaded:
+            return .content
+        }
     }
 
     var activePushes: [PlanData] {

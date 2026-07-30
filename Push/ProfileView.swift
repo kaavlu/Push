@@ -38,7 +38,7 @@ struct ProfileView: View {
         NavigationStack(path: $navigationPath) {
             ZStack {
                 PushModalBackground()
-                profileContent
+                primaryContent
                 if viewModel.isPhotoBusy {
                     ProgressView()
                         .controlSize(.large)
@@ -111,6 +111,22 @@ struct ProfileView: View {
         // would leave the modal close bar up, so present as a cover instead.
         .fullScreenCover(isPresented: $isBlockedListPresented) {
             BlockedUsersView()
+        }
+    }
+
+    @ViewBuilder
+    private var primaryContent: some View {
+        switch viewModel.surfacePhase {
+        case .loading:
+            EmptySurfaceStateView.loading(message: EmptySurfaceCopy.profileLoading)
+        case .failed:
+            EmptySurfaceStateView.failed(surface: EmptySurfaceCopy.profileSurfaceName) {
+                Task { await viewModel.load() }
+            }
+        case .content:
+            profileContent
+        case .empty, .deferred:
+            EmptyView()
         }
     }
 

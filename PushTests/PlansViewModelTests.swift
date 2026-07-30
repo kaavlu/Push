@@ -199,6 +199,19 @@ final class PlansViewModelTests: XCTestCase {
         XCTAssertFalse(invitedOnly.showsActivePushesEmptyState)
     }
 
+    func testLoadFailureUsesFailedSurfacePhase() async {
+        let repository = ControllablePushRepository()
+        repository.shouldFailRead = true
+        let viewModel = PlansViewModel(
+            container: AppDataContainer(seed: .standard()),
+            pushes: repository
+        )
+
+        await viewModel.load()
+
+        XCTAssertEqual(viewModel.surfacePhase, .failed)
+    }
+
     // MARK: - Seeded content through repositories
 
     private func julyDate(day: Int) throws -> Date {
@@ -339,14 +352,30 @@ private enum PlansTestFailure: Error { case expected }
 /// Minimal PushRepository that can fail writes for mutation rollback tests.
 @MainActor
 final class ControllablePushRepository: PushRepository {
+    var shouldFailRead = false
     var shouldFailWrite = false
     var setResponseCalls: [(PushPlan.ID, PushResponse.Response)] = []
 
-    func activePlans() async throws -> [PushPlan] { [] }
-    func historicalPlans(forMonthContaining date: Date) async throws -> [PushPlan] { [] }
-    func responses() async throws -> [PushResponse] { [] }
-    func pastHangouts(forMonthContaining date: Date) async throws -> [PastHangout] { [] }
-    func allPlaces() async throws -> [Place] { [] }
+    func activePlans() async throws -> [PushPlan] {
+        if shouldFailRead { throw PlansTestFailure.expected }
+        return []
+    }
+    func historicalPlans(forMonthContaining date: Date) async throws -> [PushPlan] {
+        if shouldFailRead { throw PlansTestFailure.expected }
+        return []
+    }
+    func responses() async throws -> [PushResponse] {
+        if shouldFailRead { throw PlansTestFailure.expected }
+        return []
+    }
+    func pastHangouts(forMonthContaining date: Date) async throws -> [PastHangout] {
+        if shouldFailRead { throw PlansTestFailure.expected }
+        return []
+    }
+    func allPlaces() async throws -> [Place] {
+        if shouldFailRead { throw PlansTestFailure.expected }
+        return []
+    }
     func createPush(_ draft: PushDraft) async throws -> PushPlan.ID { "new" }
     func updatePush(planID: PushPlan.ID, with draft: PushDraft) async throws {}
 

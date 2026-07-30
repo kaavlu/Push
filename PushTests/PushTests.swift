@@ -393,11 +393,11 @@ final class PushTests: XCTestCase {
     func testProfileViewModelEditsProfileBasicsLocally() async throws {
         let viewModel = await loadedProfileViewModel()
 
-        viewModel.setProfileBasics(name: "Manny", handle: "@manny", initials: "MN")
+        viewModel.setProfileBasics(name: "Manny", handle: "@manny")
 
         XCTAssertEqual(viewModel.displayName, "Manny")
         XCTAssertEqual(viewModel.handle, "@manny")
-        XCTAssertEqual(viewModel.initials, "MN")
+        XCTAssertEqual(viewModel.initials, "MA")
     }
 
     @MainActor
@@ -533,4 +533,147 @@ final class PushTests: XCTestCase {
         XCTAssertEqual(FriendDetailSheetContent.groupHeadline(for: []), "Group")
     }
 
+    @MainActor
+    func testProfileBasicsFailureRollsBackAndRetries() async throws {
+        let container = AppDataContainer(seed: .standard())
+        let repository = ControllableProfileRepository(base: container.profile)
+        let viewModel = ProfileViewModel(container: container, profile: repository)
+        await viewModel.load()
+        let originalName = viewModel.displayName
+        let originalHandle = viewModel.handle
+        let originalInitials = viewModel.initials
+        repository.shouldFailWrites = true
+
+        viewModel.setProfileBasics(name: "Manny", handle: "@manny")
+        await waitUntil { viewModel.actionError != nil }
+
+        XCTAssertEqual(viewModel.displayName, originalName)
+        XCTAssertEqual(viewModel.handle, originalHandle)
+        XCTAssertEqual(viewModel.initials, originalInitials)
+        XCTAssertEqual(viewModel.actionError?.message, ProfileMutationCopy.basicsFailed)
+
+        repository.shouldFailWrites = false
+        viewModel.retryActionError()
+        await waitUntil { repository.basicsWriteCount == 2 && viewModel.actionError == nil }
+
+        XCTAssertEqual(viewModel.displayName, "Manny")
+        XCTAssertEqual(viewModel.handle, "@manny")
+        XCTAssertEqual(viewModel.initials, "MA")
+    }
+
+    @MainActor
+    func testProfilePrivacyFailureRollsBackAndRetries() async throws {
+        let container = AppDataContainer(seed: .standard())
+        let repository = ControllableProfileRepository(base: container.profile)
+        let viewModel = ProfileViewModel(container: container, profile: repository)
+        await viewModel.load()
+        let original = try XCTUnwrap(
+            viewModel.activityVisibility.first { $0.id == "place" }
+        ).isEnabled
+        repository.shouldFailWrites = true
+
+        viewModel.toggleActivityVisibility(id: "place")
+        await waitUntil { viewModel.actionError != nil }
+
+        XCTAssertEqual(
+            try XCTUnwrap(viewModel.activityVisibility.first { $0.id == "place" }).isEnabled,
+            original
+        )
+        XCTAssertEqual(viewModel.actionError?.message, ProfileMutationCopy.privacyFailed)
+
+        repository.shouldFailWrites = false
+        viewModel.retryActionError()
+        await waitUntil { repository.privacyWriteCount == 2 && viewModel.actionError == nil }
+
+        XCTAssertEqual(
+            try XCTUnwrap(viewModel.activityVisibility.first { $0.id == "place" }).isEnabled,
+            !original
+        )
+    }
+
+    @MainActor
+    func testProfileLoadFailureUsesFailedSurfacePhase() async {
+        let container = AppDataContainer(seed: .standard())
+        let repository = ControllableProfileRepository(base: container.profile)
+        repository.shouldFailReads = true
+        let viewModel = ProfileViewModel(container: container, profile: repository)
+
+        await viewModel.load()
+
+        XCTAssertEqual(viewModel.surfacePhase, .failed)
+    }
+
+    @MainActor
+    private func waitUntil(
+        timeout: TimeInterval = 1,
+        file: StaticString = #filePath,
+        line: UInt = #line,
+        predicate: @escaping () -> Bool
+    ) async {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            if predicate() { return }
+            try? await Task.sleep(nanoseconds: 5_000_000)
+        }
+        XCTFail("Condition not met within \(timeout)s", file: file, line: line)
+    }
+
+}
+
+private enum ProfileTestFailure: Error {
+    case expected
+}
+
+@MainActor
+final class ControllableProfileRepository: ProfileRepository {
+    let base: ProfileRepository
+    var shouldFailReads = false
+    var shouldFailWrites = false
+    private(set) var basicsWriteCount = 0
+    private(set) var privacyWriteCount = 0
+
+    init(base: ProfileRepository) {
+        self.base = base
+    }
+
+    func userProfile() async throws -> UserProfile {
+        if shouldFailReads { throw ProfileTestFailure.expected }
+        return try await base.userProfile()
+    }
+
+    func updateBasics(displayName: String, handle: String) async throws {
+        basicsWriteCount += 1
+        if shouldFailWrites { throw ProfileTestFailure.expected }
+        try await base.updateBasics(displayName: displayName, handle: handle)
+    }
+
+    func updatePrivacy(
+        activityVisibility: [ProfileToggleItem],
+        mapPreferences: [ProfileToggleItem],
+        closeFriends: [ProfileToggleItem]
+    ) async throws {
+        privacyWriteCount += 1
+        if shouldFailWrites { throw ProfileTestFailure.expected }
+        try await base.updatePrivacy(
+            activityVisibility: activityVisibility,
+            mapPreferences: mapPreferences,
+            closeFriends: closeFriends
+        )
+    }
+
+    func updateProfilePhoto(jpegData: Data) async throws {
+        try await base.updateProfilePhoto(jpegData: jpegData)
+    }
+
+    func removeProfilePhoto() async throws {
+        try await base.removeProfilePhoto()
+    }
+
+    func needsPostAuthOnboarding() async throws -> Bool {
+        try await base.needsPostAuthOnboarding()
+    }
+
+    func completeOnboarding() async throws {
+        try await base.completeOnboarding()
+    }
 }
