@@ -38,7 +38,8 @@ struct FriendDetailBottomSheet: View {
     }
 
     private var sheetSurface: MapPopupSheetSurface {
-        isMultiPerson ? .solidCream : .mapGlass
+        // Multi-person uses the same liquid control glass as the bottom navbar.
+        isMultiPerson ? .controlGlass : .mapGlass
     }
 
     private var presentationAnimation: Animation {

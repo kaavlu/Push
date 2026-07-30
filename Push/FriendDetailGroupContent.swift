@@ -36,7 +36,7 @@ struct FriendDetailGroupContent: View {
         }
         .padding(.horizontal, FriendDetailSheetLayout.contentHorizontalPadding)
         .padding(.top, FriendDetailSheetLayout.multiPersonTopPadding)
-        .padding(.bottom, FriendDetailSheetLayout.actionBottomPadding)
+        .padding(.bottom, FriendDetailSheetLayout.multiPersonActionBottomPadding)
         .frame(maxWidth: .infinity, alignment: .top)
     }
 
@@ -45,17 +45,13 @@ struct FriendDetailGroupContent: View {
     private var infoRow: some View {
         HStack(alignment: .center, spacing: FriendDetailSheetLayout.multiPersonInfoSpacing) {
             MultiPersonAvatarStack(people: members)
-                .frame(
-                    width: FriendDetailSheetLayout.multiPersonAvatarStackWidth,
-                    alignment: .leading
-                )
 
             VStack(alignment: .leading, spacing: FriendDetailSheetLayout.multiPersonTextSpacing) {
                 Text(FriendDetailSheetContent.multiPersonTitle(for: members))
                     .font(.headline.weight(.semibold))
                     .foregroundStyle(PushControlColors.textEspresso)
                     .lineLimit(1)
-                    .minimumScaleFactor(PushOpacityTokens.minimumTextScale)
+                    .truncationMode(.tail)
 
                 activitySubtitle
 
@@ -64,10 +60,10 @@ struct FriendDetailGroupContent: View {
                         .font(.caption)
                         .foregroundStyle(PushControlColors.textTertiary)
                         .lineLimit(1)
+                        .truncationMode(.tail)
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .layoutPriority(1)
+            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
 
             trailingStatus
         }
@@ -91,8 +87,10 @@ struct FriendDetailGroupContent: View {
                 .font(.subheadline)
                 .foregroundStyle(PushControlColors.textSecondary)
                 .lineLimit(1)
-                .minimumScaleFactor(PushOpacityTokens.minimumTextScale)
+                .truncationMode(.tail)
+                .minimumScaleFactor(FriendDetailSheetLayout.multiPersonSubtitleMinimumScale)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
     }
 
@@ -189,7 +187,11 @@ struct FriendDetailGroupContent: View {
                     cornerRadius: FriendDetailSheetLayout.multiPersonSecondaryCornerRadius,
                     style: .continuous
                 )
-                .fill(PushCreamTokens.pageIvory)
+                .fill(
+                    Color.white.opacity(
+                        FriendDetailSheetLayout.multiPersonSecondaryFillOpacity
+                    )
+                )
             )
             .overlay {
                 RoundedRectangle(
@@ -222,6 +224,10 @@ private struct MultiPersonAvatarStack: View {
         max(0, people.count - FriendDetailSheetLayout.multiPersonVisibleAvatarLimit)
     }
 
+    private var stackWidth: CGFloat {
+        FriendDetailSheetLayout.multiPersonAvatarStackWidth(visibleCount: visiblePeople.count)
+    }
+
     var body: some View {
         ZStack(alignment: .leading) {
             ForEach(Array(visiblePeople.enumerated()), id: \.element.id) { index, person in
@@ -237,7 +243,7 @@ private struct MultiPersonAvatarStack: View {
             }
         }
         .frame(
-            width: FriendDetailSheetLayout.multiPersonAvatarStackWidth,
+            width: stackWidth,
             height: FriendDetailSheetLayout.multiPersonAvatarSize,
             alignment: .leading
         )
@@ -278,14 +284,18 @@ private struct MultiPersonAvatarStack: View {
                 width: FriendDetailSheetLayout.multiPersonOverflowBadgeSize,
                 height: FriendDetailSheetLayout.multiPersonOverflowBadgeSize
             )
-            .background(Circle().fill(PushCreamTokens.solidCard))
+            .background(
+                Circle().fill(
+                    Color.white.opacity(
+                        FriendDetailSheetLayout.multiPersonOverflowBadgeFillOpacity
+                    )
+                )
+            )
             .overlay {
                 Circle()
                     .stroke(
-                        PushColorPalette.Accent.walnut.opacity(
-                            PushCreamTokens.solidCardStrokeOpacity
-                        ),
-                        lineWidth: PushCreamTokens.solidCardStrokeWidth
+                        Color.white.opacity(PushControlGlassTokens.strokeOpacity),
+                        lineWidth: PushControlGlassTokens.strokeWidth
                     )
             }
     }

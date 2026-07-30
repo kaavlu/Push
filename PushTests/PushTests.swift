@@ -601,6 +601,47 @@ final class PushTests: XCTestCase {
         XCTAssertTrue(FriendDetailSheetContent.showsAskToJoin(for: puck))
     }
 
+    func testMultiPersonActivityAvoidsRedundantParkAtDoloresParkLawn() throws {
+        let people: [FriendPuckData] = [
+            FriendPuckData(
+                name: "Rohan", avatarPlaceholder: "RO", activity: "Park",
+                activitySymbolName: "leaf.fill", activityDisplayText: "Dolores",
+                availability: .joinable, venueStatusText: "Walking over",
+                locationLabel: "Dolores Park, 19th St", placeName: "Dolores Park Lawn"
+            ),
+            FriendPuckData(
+                name: "Ryan", avatarPlaceholder: "RY", activity: "Park",
+                activitySymbolName: "leaf.fill", activityDisplayText: "Dolores",
+                availability: .joinable, venueStatusText: "Free in 20",
+                locationLabel: "Dolores Park, 19th St", placeName: "Dolores Park Lawn"
+            ),
+            FriendPuckData(
+                name: "Pranay", avatarPlaceholder: "PR", activity: "Park",
+                activitySymbolName: "leaf.fill", activityDisplayText: "Dolores",
+                availability: .joinable, venueStatusText: "Maybe pulling up",
+                locationLabel: "Dolores Park, 19th St", placeName: "Dolores Park Lawn"
+            )
+        ]
+        let puck = MapPuckData(
+            id: "puck-dolores",
+            kind: .cluster,
+            people: people,
+            activity: "Park",
+            availability: .joinable,
+            venueStatusText: "At Dolores",
+            coordinate: .init(latitude: 37.76, longitude: -122.43)
+        )
+
+        XCTAssertEqual(
+            FriendDetailSheetContent.multiPersonActivityLine(for: puck),
+            "At Dolores"
+        )
+        XCTAssertNil(
+            FriendDetailSheetContent.multiPersonLocationDetail(for: puck),
+            "Place-name addresses that echo the venue should stay hidden"
+        )
+    }
+
     func testShowsAskToJoinHiddenWhenBusyOrViewerIncluded() throws {
         let busy = MapPuckData(
             id: "busy",

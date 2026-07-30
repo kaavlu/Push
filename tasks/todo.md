@@ -14,8 +14,9 @@
 
 - Scope: all multi-person map sheets (hangout, cluster, friendGroup)
 - Join unavailable → hide Ask to join; Start push becomes primary; Directions secondary only
-- Avatar stack: max 3 faces + `+N` overflow; fixed stack width
-- Surface: solid cream (`MapPopupSheetSurface.solidCream`) over map for multi-person
+- Avatar stack: max 3 faces + `+N` overflow; width follows visible face count
+- Surface: liquid control glass (`MapPopupSheetSurface.controlGlass`) matching bottom navbar; hide navbar while sheet open
+- Activity copy: compact venue (`At Dolores`) — never `Park at Dolores Park Lawn`
 
 ## Out of scope
 

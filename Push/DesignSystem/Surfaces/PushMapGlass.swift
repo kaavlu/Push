@@ -158,12 +158,12 @@ private extension PushMapControlTreatment {
     }
 }
 
-/// Map popup sheet surface treatment (DS-011).
+/// Map popup sheet surface treatment (DS-011 / control glass for multi-person).
 enum MapPopupSheetSurface {
     /// Existing cream-glass over satellite (individual friend / day detail).
     case mapGlass
-    /// Warmer solid cream for multi-person Friends-row sheets (Issue #139).
-    case solidCream
+    /// Same liquid/control glass family as the bottom navbar (`pushControlGlass`).
+    case controlGlass
 }
 
 /// Shared map popup surface for friend detail and calendar day sheets.
@@ -175,8 +175,8 @@ struct MapPopupSheetBackground<S: Shape>: View {
         switch surface {
         case .mapGlass:
             mapGlassBody
-        case .solidCream:
-            solidCreamBody
+        case .controlGlass:
+            controlGlassBody
         }
     }
 
@@ -198,18 +198,50 @@ struct MapPopupSheetBackground<S: Shape>: View {
         }
     }
 
-    private var solidCreamBody: some View {
+    /// Mirrors `pushControlGlass` tokens against an arbitrary sheet shape so the
+    /// multi-person popup matches bottom-nav liquid glass (including iOS 26).
+    @ViewBuilder
+    private var controlGlassBody: some View {
+        #if compiler(>=6.2)
+        if #available(iOS 26.0, *) {
+            shape
+                .fill(PushControlGlassTokens.warmTint.opacity(PushControlGlassTokens.tintOpacity))
+                .glassEffect(.regular, in: shape)
+                .overlay {
+                    shape.stroke(
+                        .white.opacity(PushControlGlassTokens.strokeOpacity),
+                        lineWidth: PushControlGlassTokens.strokeWidth
+                    )
+                }
+                .shadow(
+                    color: PushControlGlassTokens.shadowColor.opacity(
+                        PushControlGlassTokens.shadowOpacity
+                    ),
+                    radius: PushControlGlassTokens.shadowRadius,
+                    y: PushControlGlassTokens.shadowYOffset
+                )
+        } else {
+            controlGlassMaterialBody
+        }
+        #else
+        controlGlassMaterialBody
+        #endif
+    }
+
+    private var controlGlassMaterialBody: some View {
         ZStack {
-            shape.fill(PushCreamTokens.solidCard)
+            shape.fill(.ultraThinMaterial)
+            shape.fill(.regularMaterial.opacity(PushControlGlassTokens.materialPresenceOpacity))
+            shape.fill(PushControlGlassTokens.warmTint.opacity(PushControlGlassTokens.tintOpacity))
             shape.stroke(
-                PushColorPalette.Accent.walnut.opacity(PushCreamTokens.solidCardStrokeOpacity),
-                lineWidth: PushCreamTokens.solidCardStrokeWidth
+                .white.opacity(PushControlGlassTokens.strokeOpacity),
+                lineWidth: PushControlGlassTokens.strokeWidth
             )
         }
         .shadow(
-            color: PushMapGlassTokens.shadow,
-            radius: PushMapGlassTokens.shadowRadius,
-            y: PushMapGlassTokens.shadowYOffset
+            color: PushControlGlassTokens.shadowColor.opacity(PushControlGlassTokens.shadowOpacity),
+            radius: PushControlGlassTokens.shadowRadius,
+            y: PushControlGlassTokens.shadowYOffset
         )
     }
 

@@ -60,9 +60,9 @@ enum FriendDetailSheetLayout {
     // MARK: - Multi-person (compact Friends-row sheet, Issue #139)
 
     /// Compact: info row + divider + primary + secondary actions.
-    /// Extra height sits under actions so map context stays visible above.
+    /// Sized to content — avoid a tall empty band under the action row.
     static func multiPersonSheetHeight(_ layout: PushAdaptiveLayout) -> CGFloat {
-        layout.value(compact: 292, standard: 280, large: 272)
+        layout.value(compact: 252, standard: 244, large: 238)
     }
 
     /// Legacy name — hangout/cluster/friendGroup share the multi-person height.
@@ -70,22 +70,29 @@ enum FriendDetailSheetLayout {
         multiPersonSheetHeight(layout)
     }
 
-    static let multiPersonSectionSpacing: CGFloat = 14
-    static let multiPersonInfoSpacing: CGFloat = 12
-    static let multiPersonTextSpacing: CGFloat = 3
+    static let multiPersonSectionSpacing: CGFloat = 12
+    static let multiPersonInfoSpacing: CGFloat = 10
+    static let multiPersonTextSpacing: CGFloat = 2
     static let multiPersonTrailingSpacing: CGFloat = 4
     static let multiPersonDividerOpacity = 0.14
     static let multiPersonDividerHeight: CGFloat = 1
-    static let multiPersonActionsSpacing: CGFloat = 10
-    static let multiPersonSecondaryHeight: CGFloat = 46
+    static let multiPersonActionsSpacing: CGFloat = 8
+    /// Gap under the secondary action row, above the home-indicator inset.
+    static let multiPersonActionBottomPadding: CGFloat = 4
+    static let multiPersonSecondaryHeight: CGFloat = 44
     static let multiPersonSecondaryCornerRadius: CGFloat = 14
     static let multiPersonSecondaryIconSize: CGFloat = 14
     static let multiPersonSecondaryLabelSpacing: CGFloat = 5
     static let multiPersonSecondaryBorderOpacity = 0.40
     static let multiPersonSecondaryBorderWidth: CGFloat = 1.5
+    /// Light fill for secondary actions over liquid-glass sheet.
+    static let multiPersonSecondaryFillOpacity = 0.55
+    static let multiPersonOverflowBadgeFillOpacity = 0.92
     static let multiPersonActivityIconSize: CGFloat = 12
     static let multiPersonActivityIconSpacing: CGFloat = 5
-    static let multiPersonTopPadding: CGFloat = 28
+    static let multiPersonTopPadding: CGFloat = 26
+    /// Avoid squashed subtitle text; truncate cleanly at the trailing edge.
+    static let multiPersonSubtitleMinimumScale: CGFloat = 0.92
 
     // MARK: - Avatar stack (max 3 faces + overflow)
 
@@ -95,11 +102,12 @@ enum FriendDetailSheetLayout {
     static let multiPersonVisibleAvatarLimit = 3
     static let multiPersonOverflowBadgeSize: CGFloat = 28
     static let multiPersonOverflowFontSize: CGFloat = 11
-    /// Fixed width for 3 faces so the text column stays aligned across group sizes.
-    static var multiPersonAvatarStackWidth: CGFloat {
-        let limit = multiPersonVisibleAvatarLimit
+
+    /// Width for the visible faces (not always 3) so the text column gets more room.
+    static func multiPersonAvatarStackWidth(visibleCount: Int) -> CGFloat {
+        let count = max(1, min(visibleCount, multiPersonVisibleAvatarLimit))
         return multiPersonAvatarSize
-            + CGFloat(limit - 1) * (multiPersonAvatarSize - multiPersonAvatarOverlap)
+            + CGFloat(count - 1) * (multiPersonAvatarSize - multiPersonAvatarOverlap)
     }
 
     // MARK: - Toast
@@ -140,26 +148,53 @@ enum FriendDetailSheetContent {
     }
 
     /// Shared activity + venue line for the multi-person subtitle.
+    ///
+    /// Prefer compact venue labels (`At Dolores`) over redundant long forms
+    /// like `Park at Dolores Park Lawn`, which overflow the Friends-row column.
     static func multiPersonActivityLine(for puck: MapPuckData) -> String {
         let members = displayMembers(for: puck)
         let lead = members.first
         let activity = trimmed(lead?.activity ?? puck.activity)
-        let place = trimmed(lead?.placeName)
+        let placeFull = trimmed(lead?.placeName)
+        let venueStatus = trimmed(puck.venueStatusText)
+        let venueShort = compactVenueLabel(
+            venueStatusText: venueStatus,
+            placeName: placeFull
+        )
 
-        if !activity.isEmpty, !place.isEmpty {
-            if activity.localizedCaseInsensitiveContains(place) {
-                return activity
-            }
-            if activity.hasPrefix("At ") || activity.hasPrefix("Near ") {
-                return activity
-            }
-            return "\(activity) at \(place)"
+        if activity.isEmpty {
+            return hangoutActivityLine(
+                activity: puck.activity,
+                venueStatusText: puck.venueStatusText
+            )
         }
 
-        return hangoutActivityLine(
-            activity: puck.activity,
-            venueStatusText: puck.venueStatusText
-        )
+        if activity.hasPrefix("At ") || activity.hasPrefix("Near ") {
+            return activity
+        }
+
+        // Activity already names the full place ("At Dolores Park Lawn").
+        if !placeFull.isEmpty, activity.localizedCaseInsensitiveContains(placeFull) {
+            return activity
+        }
+
+        // Generic activity that is already part of the place name ("Park" ⊂
+        // "Dolores Park Lawn") — use the compact venue, not "Park at … Lawn".
+        if !placeFull.isEmpty,
+           placeFull.range(of: activity, options: [.caseInsensitive, .diacriticInsensitive]) != nil {
+            if !venueShort.isEmpty {
+                return venueStatus.hasPrefix("At ") || venueStatus.hasPrefix("Near ")
+                    ? venueStatus
+                    : "At \(venueShort)"
+            }
+            return activity
+        }
+
+        if !venueShort.isEmpty {
+            return "\(activity) at \(venueShort)"
+        }
+
+        return activity
     }
 
     /// Address / location detail under activity. Nil when empty or duplicates venue.
@@ -178,7 +213,50 @@ enum FriendDetailSheetContent {
         if activityLine.localizedCaseInsensitiveContains(address) {
             return nil
         }
+
+        // "Dolores Park, 19th St" under "At Dolores" is place-name noise, not a street pin.
+        // Keep real street labels like "517 Hayes St" or "19th St & Dolores St".
+        let addressPrimary = address
+            .split(separator: ",", maxSplits: 1)
+            .first
+            .map { trimmed(String($0)) } ?? address
+        if !place.isEmpty {
+            if place.localizedCaseInsensitiveContains(addressPrimary)
+                || addressPrimary.localizedCaseInsensitiveContains(place) {
+                return nil
+            }
+            let compactPlace = compactVenueLabel(venueStatusText: "", placeName: place)
+            if !compactPlace.isEmpty,
+               addressPrimary.caseInsensitiveCompare(compactPlace) == .orderedSame {
+                return nil
+            }
+        }
+        if activityLine.localizedCaseInsensitiveContains(addressPrimary) {
+            return nil
+        }
+
         return address
+    }
+
+    /// Prefer puck venue short label (`At Dolores` → `Dolores`) over full place names.
+    static func compactVenueLabel(venueStatusText: String, placeName: String) -> String {
+        let venue = trimmed(venueStatusText)
+        for prefix in ["At the ", "At ", "Near ", "Group forming near "] {
+            if venue.hasPrefix(prefix) {
+                let rest = trimmed(String(venue.dropFirst(prefix.count)))
+                if !rest.isEmpty { return rest }
+            }
+        }
+        let place = trimmed(placeName)
+        guard !place.isEmpty else { return "" }
+        // Drop verbose suffixes so "Dolores Park Lawn" / "Dolores Park" → "Dolores".
+        for suffix in [" Park Lawn", " Park", " Fitness", " Lawn"] {
+            if place.hasSuffix(suffix) {
+                let base = trimmed(String(place.dropLast(suffix.count)))
+                if !base.isEmpty { return base }
+            }
+        }
+        return place
     }
 
     /// Freshness label for the trailing column.

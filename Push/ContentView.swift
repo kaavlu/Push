@@ -116,13 +116,20 @@ struct ContentView: View {
                 .zIndex(TopDropdownLayout.expandedZIndex)
             }
 
-            BottomNavigationBar(
-                selectedItem: $selectedNavigationItem,
-                action: selectNavigationItem
-            )
+            // Hide the floating navbar while a map puck sheet is open so it
+            // does not render behind the liquid-glass popup.
+            if !isTabOverlayPresented,
+               selectedPuck == nil,
+               selectedRegionalPuck == nil {
+                BottomNavigationBar(
+                    selectedItem: $selectedNavigationItem,
+                    action: selectNavigationItem
+                )
                 .padding(.horizontal, BottomNavigationLayout.horizontalMargin(layout))
                 .padding(.bottom, BottomNavigationLayout.bottomMargin(layout))
                 .zIndex(TabOverlayLayout.bottomNavZIndex)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
 
             if !isTabOverlayPresented, let selectedPuck {
                 FriendDetailBottomSheet(
@@ -153,6 +160,7 @@ struct ContentView: View {
         )
         .animation(.spring(response: TopDropdownLayout.animationResponse, dampingFraction: TopDropdownLayout.animationDamping), value: isFilterDropdownExpanded)
         .animation(PushMotion.sheet, value: selectedRegionalPuck?.id)
+        .animation(PushMotion.sheet, value: selectedPuck?.id)
         .animation(.easeInOut(duration: TabOverlayLayout.transitionDuration), value: isTabOverlayPresented)
         .fullScreenCover(item: $presentedRoute) { route in
             destination(for: route)
