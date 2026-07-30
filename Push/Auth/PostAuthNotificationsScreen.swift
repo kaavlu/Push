@@ -41,7 +41,7 @@ struct PostAuthNotificationsScreen: View {
                 + layout.value(compact: 2, standard: 3, large: 4)
         )
         .padding(.bottom, NotificationsLayout.bottomPadding)
-        .animation(PushMotion.contentCrossfade, value: revealStep)
+        .animation(OnboardingCascadeTiming.cascade, value: revealStep)
         .task { await runCascade() }
     }
 

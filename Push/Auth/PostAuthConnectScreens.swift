@@ -36,7 +36,7 @@ struct PostAuthContactsScreen: View {
         .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
         .padding(.top, OnboardingLabMetric.contentTopInset(layout))
         .padding(.bottom, ContactsScreenLayout.bottomPadding)
-        .animation(PushMotion.contentCrossfade, value: revealStep)
+        .animation(OnboardingCascadeTiming.cascade, value: revealStep)
         .task { await runCascade() }
     }
 
@@ -98,7 +98,7 @@ struct PostAuthFindPeopleScreen: View {
         .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
         .padding(.top, OnboardingLabMetric.contentTopInset(layout) + layout.value(compact: 2, standard: 3, large: 4))
         .padding(.bottom, FindPeopleLayout.bottomPadding)
-        .animation(PushMotion.contentCrossfade, value: revealStep)
+        .animation(OnboardingCascadeTiming.cascade, value: revealStep)
         .task { await runCascade() }
     }
 
@@ -213,7 +213,7 @@ struct PostAuthDoneScreen: View {
                 .onboardingCascadeVisible(revealStep >= 3)
         }
         .padding(.top, DoneScreenLayout.topPadding)
-        .animation(PushMotion.contentCrossfade, value: revealStep)
+        .animation(OnboardingCascadeTiming.cascade, value: revealStep)
         .task { await runCascade() }
     }
 

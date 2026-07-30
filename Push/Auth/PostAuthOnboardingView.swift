@@ -21,7 +21,7 @@ struct PostAuthOnboardingView: View {
                 .transition(.opacity.combined(with: .move(edge: .bottom)))
             topChrome
         }
-        .animation(OnboardingLabMotion.screenIn, value: model.screen)
+        .animation(OnboardingCascadeTiming.screenChange, value: model.screen)
         .onChange(of: model.isFinished) { finished in
             if finished { onFinished() }
         }

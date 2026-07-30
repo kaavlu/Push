@@ -43,7 +43,7 @@ struct PostAuthCoordinateScreen: View {
         .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
         .padding(.top, OnboardingLabMetric.contentTopInset(layout))
         .padding(.bottom, CoordinateTeachLayout.bottomPadding)
-        .animation(PushMotion.contentCrossfade, value: revealStep)
+        .animation(OnboardingCascadeTiming.cascade, value: revealStep)
         .task { await runCascade() }
     }
 

@@ -106,7 +106,7 @@ struct PostAuthTeachingMapView: UIViewRepresentable {
 
 private enum TeachingMapReady {
     /// Upper bound if MapKit never signals finish (offline / stalled tiles).
-    static let fallbackNanoseconds: UInt64 = 1_800_000_000
+    static let fallbackNanoseconds: UInt64 = 2_400_000_000
     /// After `mapViewDidFinishLoadingMap`, wait before treating the map as paint-ready.
-    static let settleNanoseconds: UInt64 = 320_000_000
+    static let settleNanoseconds: UInt64 = 480_000_000
 }

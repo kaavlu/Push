@@ -32,10 +32,10 @@ struct PostAuthGhostScreen: View {
         .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
         .padding(.top, OnboardingLabMetric.contentTopInset(layout))
         .padding(.bottom, GhostScreenLayout.bottomPadding)
-        .animation(PushMotion.contentCrossfade, value: revealStep)
-        .animation(PushMotion.contentCrossfade, value: showSelfPuck)
-        .animation(PushMotion.contentCrossfade, value: showGhostIcon)
-        .animation(PushMotion.contentCrossfade, value: mapBlur)
+        .animation(OnboardingCascadeTiming.cascade, value: revealStep)
+        .animation(OnboardingCascadeTiming.cascade, value: showSelfPuck)
+        .animation(OnboardingCascadeTiming.cascade, value: showGhostIcon)
+        .animation(OnboardingCascadeTiming.cascade, value: mapBlur)
         .task {
             await model.loadSelfPuckPreview()
             await runSequence()
@@ -129,7 +129,7 @@ struct PostAuthGhostScreen: View {
         await OnboardingCascadeRunner.sleepBeat()
         await OnboardingCascadeRunner.sleepBeat()
         // Vanish self + blur map + center eye + subtitle together.
-        withAnimation(PushMotion.contentCrossfade) {
+        withAnimation(OnboardingCascadeTiming.cascade) {
             showSelfPuck = false
             mapBlur = GhostScreenLayout.mapBlurRadius
             showGhostIcon = true
@@ -164,7 +164,7 @@ private enum GhostReveal {
     static let mapPainted = 3
     static let ghostMoment = 4
     static let cta = 5
-    static let mapSettleNanoseconds: UInt64 = 200_000_000
+    static let mapSettleNanoseconds: UInt64 = 400_000_000
 }
 
 private enum GhostScreenLayout {

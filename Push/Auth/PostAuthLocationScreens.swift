@@ -40,9 +40,9 @@ struct PostAuthLocationPrimerScreen: View {
         .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
         .padding(.top, OnboardingLabMetric.contentTopInset(layout))
         .padding(.bottom, LocationPrimerLayout.bottomPadding)
-        .animation(PushMotion.contentCrossfade, value: revealStep)
-        .animation(PushMotion.selectionSnappy, value: friendPopCount)
-        .animation(PushMotion.contentCrossfade, value: isMapReady)
+        .animation(OnboardingCascadeTiming.cascade, value: revealStep)
+        .animation(OnboardingCascadeTiming.friendPop, value: friendPopCount)
+        .animation(OnboardingCascadeTiming.cascade, value: isMapReady)
         .task {
             await model.loadSelfPuckPreview()
             await runOpeningCascade()
@@ -135,7 +135,7 @@ struct PostAuthLocationPrimerScreen: View {
         await OnboardingCascadeRunner.sleepBeat()
         // Friend pucks pop 1-by-1 around self after body copy lands.
         for count in 1...PostAuthTeachFriendFixture.all.count {
-            withAnimation(PushMotion.selectionSnappy) {
+            withAnimation(OnboardingCascadeTiming.friendPop) {
                 friendPopCount = count
             }
             await OnboardingCascadeRunner.sleepFriendPop()
@@ -212,7 +212,7 @@ struct PostAuthLocationBlockedScreen: View {
         .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
         .padding(.top, OnboardingLabMetric.contentTopInset(layout))
         .padding(.bottom, LocationBlockedLayout.bottomPadding)
-        .animation(PushMotion.contentCrossfade, value: revealStep)
+        .animation(OnboardingCascadeTiming.cascade, value: revealStep)
         .task { await runCascade() }
     }
 
@@ -254,7 +254,7 @@ private enum LocationPrimerReveal {
     static let mapPainted = 4
     static let body = 5
     static let cta = 6
-    static let mapSettleNanoseconds: UInt64 = 200_000_000
+    static let mapSettleNanoseconds: UInt64 = 400_000_000
 }
 
 private enum LocationPrimerLayout {
