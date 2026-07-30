@@ -45,16 +45,17 @@ enum FriendDetailSheetLayout {
     static let sheetCornerRadius: CGFloat = 32
 
     /// Height for map puck detail sheets.
-    /// Multi-person adds a fixed Who’s here block (2-row grid; overflow scrolls
-    /// inside that block). Join CTA absence still subtracts one action row.
+    /// Multi-person adds Who’s here sized to actual grid rows (1 or 2), not a
+    /// fixed two-row band. Join CTA absence still subtracts one action row.
     static func compactSheetHeight(
         _ layout: PushAdaptiveLayout,
         showsAskToJoin: Bool = true,
-        isMultiPerson: Bool = false
+        isMultiPerson: Bool = false,
+        memberCount: Int = 0
     ) -> CGFloat {
         var height = layout.value(compact: 246, standard: 238, large: 232)
         if isMultiPerson {
-            height += multiPersonSectionSpacing + whosHereBlockHeight
+            height += multiPersonSectionSpacing + whosHereBlockHeight(memberCount: memberCount)
         }
         if !showsAskToJoin {
             height -= multiPersonSecondaryHeight + multiPersonActionsSpacing
@@ -114,17 +115,36 @@ enum FriendDetailSheetLayout {
     static let whosHereLabelSpacing: CGFloat = 6
     static let whosHereSectionLabelSpacing: CGFloat = 8
     static let whosHereExpandDragThreshold: CGFloat = 36
-    static let whosHereGridRowsVisible = 2
+    /// Max rows shown without scrolling (overflow expands inside this cap).
+    static let whosHereGridMaxVisibleRows = 2
+    static let whosHereSectionTitleHeight: CGFloat = 18
 
-    /// Fixed height for the member grid viewport (two rows + one inter-row gap).
-    static var whosHereGridViewportHeight: CGFloat {
-        CGFloat(whosHereGridRowsVisible) * whosHerePuckHeight
-            + CGFloat(whosHereGridRowsVisible - 1) * whosHereGridSpacing
+    /// Rows needed for the collapsed (or ≤6 full) grid — never more than max visible.
+    static func whosHereGridRowCount(memberCount: Int) -> Int {
+        guard memberCount > 0 else { return 1 }
+        let cells = needsWhosHereOverflowCells(memberCount: memberCount)
+            ? whosHereDirectShowLimit
+            : memberCount
+        let rows = Int(ceil(Double(cells) / Double(whosHereColumnCount)))
+        return min(whosHereGridMaxVisibleRows, max(1, rows))
     }
 
-    /// Label + spacing + two-row grid.
-    static var whosHereBlockHeight: CGFloat {
-        16 + whosHereSectionLabelSpacing + whosHereGridViewportHeight
+    private static func needsWhosHereOverflowCells(memberCount: Int) -> Bool {
+        memberCount > whosHereDirectShowLimit
+    }
+
+    /// Height for the member grid viewport for the given membership size.
+    static func whosHereGridViewportHeight(memberCount: Int) -> CGFloat {
+        let rows = whosHereGridRowCount(memberCount: memberCount)
+        return CGFloat(rows) * whosHerePuckHeight
+            + CGFloat(max(0, rows - 1)) * whosHereGridSpacing
+    }
+
+    /// Label + spacing + grid for this membership size.
+    static func whosHereBlockHeight(memberCount: Int) -> CGFloat {
+        whosHereSectionTitleHeight
+            + whosHereSectionLabelSpacing
+            + whosHereGridViewportHeight(memberCount: memberCount)
     }
 
     // MARK: - Avatar stack (max 3 faces + overflow)

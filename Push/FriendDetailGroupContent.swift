@@ -138,7 +138,11 @@ struct FriendDetailGroupContent: View {
                 onSelectMember: onSelectMember,
                 onExpand: { isMembersExpanded = true }
             )
-            .frame(height: FriendDetailSheetLayout.whosHereGridViewportHeight)
+            .frame(
+                height: FriendDetailSheetLayout.whosHereGridViewportHeight(
+                    memberCount: members.count
+                )
+            )
         }
     }
 

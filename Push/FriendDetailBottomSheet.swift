@@ -34,10 +34,12 @@ struct FriendDetailBottomSheet: View {
     }
 
     private var sheetHeight: CGFloat {
-        FriendDetailSheetLayout.compactSheetHeight(
+        let memberCount = FriendDetailSheetContent.displayMembers(for: puck).count
+        return FriendDetailSheetLayout.compactSheetHeight(
             layout,
             showsAskToJoin: FriendDetailSheetContent.showsAskToJoin(for: puck),
-            isMultiPerson: isMultiPerson
+            isMultiPerson: isMultiPerson,
+            memberCount: memberCount
         )
     }
 

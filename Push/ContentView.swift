@@ -121,17 +121,15 @@ struct ContentView: View {
                 .zIndex(TopDropdownLayout.expandedZIndex)
             }
 
-            // Always present on the map — puck sheets layer above (higher zIndex)
-            // so open/close never moves or remounts the navbar.
-            if !isTabOverlayPresented {
-                BottomNavigationBar(
-                    selectedItem: $selectedNavigationItem,
-                    action: selectNavigationItem
-                )
-                .padding(.horizontal, BottomNavigationLayout.horizontalMargin(layout))
-                .padding(.bottom, BottomNavigationLayout.bottomMargin(layout))
-                .zIndex(TabOverlayLayout.bottomNavZIndex)
-            }
+            // Always mounted: map puck sheets layer above it; Friends/Feed/Pushes
+            // keep it so users can leave those tabs (never hide with tab overlays).
+            BottomNavigationBar(
+                selectedItem: $selectedNavigationItem,
+                action: selectNavigationItem
+            )
+            .padding(.horizontal, BottomNavigationLayout.horizontalMargin(layout))
+            .padding(.bottom, BottomNavigationLayout.bottomMargin(layout))
+            .zIndex(TabOverlayLayout.bottomNavZIndex)
 
             if !isTabOverlayPresented, let selectedPuck {
                 FriendDetailBottomSheet(
