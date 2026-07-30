@@ -1,25 +1,20 @@
-# Issue #128 — Moments S9: connect Moment editing and deletion
+# Issue #137 — Almost Happened Removal
 
 ## Status
 
-- [x] Existing-Moment edit loads `MomentDetail` (hub + Feed …); carousel/hub rows are launch hints only
-- [x] UI shaped by server `MomentCapabilities` (metadata / tags / reorder / media delete / leave / delete)
-- [x] Save diffs call `updateMetadata`, `addTags` / `removeTag`, `reorderMedia`, `softDeleteMedia`
-- [x] Creator delete + non-creator leave use `.pushActionMenu` + `.pushConfirmation` (DS-090)
-- [x] Recoverable errors keep the draft; conflict reloads detail without dropping the banner
-- [x] Live mutations notify via `LiveDataStore.notifyMomentsChanged()` so Feed/hub refresh
-- [x] Tests: `CreatePostEditTests` (13) + existing Create Post suites green
+- [x] Remove `almostHappened` from `CalendarDayData` and all calendar UI
+- [x] Remove `didHappen` from `PastHangout` / `HistoryItemData` (domain only existed for this surface)
+- [x] Strip "Almost happened" copy from day detail sheet + history rows
+- [x] Remove seed almost-hangouts (days 14/25) and builder branching
+- [x] Update derivation / lifecycle tests
 
 ## Out of scope
 
-Realtime, notifications, append-on-edit (Add Yours), schema/RPC redesign, Feed › Now, visual redesign.
+- Historical design snapshots under `Design/CoreDesignFiles/` (read-only)
+- Historical specs/plans under `docs/superpowers/`
 
 ## Notes
 
-- Append stays on Add Yours; edit compose never picks new media on the repository path.
-- Media soft-delete is staged locally and committed on Save (with reorder after deletes).
-- Last-media delete may soft-delete the Moment; the flow dismisses cleanly.
-
-## Next
-
-Close #128 / open PR when ready.
+- Hangouts are recorded facts that happened; no partial/failed hangout state.
+- Calendar day detail opens only when `pushCount > 0`.
+- History link still keys off real hangouts / week push totals.

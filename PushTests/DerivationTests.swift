@@ -403,7 +403,6 @@ final class DerivationTests: XCTestCase {
 
         let day14 = days[13]
         XCTAssertEqual(day14.pushCount, 0)
-        XCTAssertEqual(day14.almostHappened, true)
         XCTAssertEqual(day14.hangouts.count, 0)
 
         let day18 = days[17]

@@ -49,8 +49,6 @@ struct WeeklyRecapDayTile: View {
 
             if day.pushCount > 0 {
                 activityHeat
-            } else if day.almostHappened {
-                almostHappenedMarker
             }
         }
         .frame(height: WeeklyRecapTileLayout.tileHeight)
@@ -116,19 +114,6 @@ struct WeeklyRecapDayTile: View {
                 x: 0,
                 y: WeeklyRecapTileLayout.heatBarShadowYOffset
             )
-    }
-
-    private var almostHappenedMarker: some View {
-        Capsule()
-            .stroke(
-                PushColorPalette.Accent.walnut.opacity(0.34),
-                style: StrokeStyle(lineWidth: WeeklyRecapTileLayout.strokeWidth, dash: [2, 2])
-            )
-            .frame(
-                width: WeeklyRecapTileLayout.almostMarkerWidth,
-                height: WeeklyRecapTileLayout.heatBarHeight
-            )
-            .padding(.bottom, WeeklyRecapTileLayout.heatBarBottomPadding)
     }
 
     private var weekdayLabel: String {
@@ -282,7 +267,6 @@ private enum WeeklyRecapTileLayout {
     static let heatBarBottomPadding: CGFloat = 8
     static let heatBarShadowRadius: CGFloat = 5
     static let heatBarShadowYOffset: CGFloat = 1
-    static let almostMarkerWidth: CGFloat = 18
     static let maxPushCount = 5
     static let maxHeatBarCount = 5
     static let activityBaseHeight: CGFloat = 7

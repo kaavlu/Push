@@ -181,10 +181,9 @@ final class PlansViewModel: ObservableObject {
         loadState.value != nil && activePushes.isEmpty
     }
 
-    /// True when the visible week has hangouts, almost-happened days, or a push total.
+    /// True when the visible week has hangouts or a push total.
     var hasWeekHangoutSummary: Bool {
-        totalPushesThisWeek > 0
-            || weekDays.contains { !$0.hangouts.isEmpty || $0.almostHappened }
+        totalPushesThisWeek > 0 || weekDays.contains { !$0.hangouts.isEmpty }
     }
 
     /// Hide the dead History control when the week has no hangout story.

@@ -27,11 +27,6 @@ struct PushHistoryRow: View {
                     .font(.caption)
                     .foregroundStyle(PushControlColors.textSecondary)
                     .lineLimit(1)
-                if !item.didHappen {
-                    Text("Almost happened")
-                        .font(.caption2.weight(.medium))
-                        .foregroundStyle(PushControlColors.textTertiary)
-                }
             }
             .layoutPriority(1)
             Spacer(minLength: 0)

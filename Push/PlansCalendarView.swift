@@ -83,7 +83,7 @@ struct PlansCalendarView: View {
     }
 
     private func opensDetail(for day: CalendarDayData) -> Bool {
-        day.pushCount > 0 || day.almostHappened
+        day.pushCount > 0
     }
 
     private var calendarFooter: some View {

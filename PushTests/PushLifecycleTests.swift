@@ -83,7 +83,6 @@ final class PushLifecycleTests: XCTestCase {
         XCTAssertEqual(hangouts[0].note, "Dinner")
         XCTAssertEqual(hangouts[0].participantIDs, ["a"])
         XCTAssertTrue(hangouts[0].cameFromPush)
-        XCTAssertTrue(hangouts[0].didHappen)
         XCTAssertEqual(hangouts[0].timeRange, "7:00 PM")
     }
 

@@ -70,8 +70,7 @@ enum HistoryContentBuilder {
             locationHint: locationHint,
             groupName: plan.groupID.flatMap { groupsByID[$0]?.name } ?? "",
             participants: participants,
-            cameFromPush: true,
-            didHappen: true
+            cameFromPush: true
         )
     }
 
@@ -89,8 +88,7 @@ enum HistoryContentBuilder {
             participants: hangout.participantIDs
                 .compactMap { peopleByID[$0] }
                 .map(hangoutPerson),
-            cameFromPush: hangout.cameFromPush,
-            didHappen: hangout.didHappen
+            cameFromPush: hangout.cameFromPush
         )
     }
 
