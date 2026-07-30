@@ -45,8 +45,8 @@ enum FriendDetailSheetLayout {
     static let sheetCornerRadius: CGFloat = 32
 
     /// Shared height for all map puck detail sheets — info row + divider + actions.
-    /// Sized to content — avoid a tall empty band under the action row.
-    /// Primary actions match secondary control height (not tall flow CTAs).
+    /// Sized for the taller case (Ask to join + secondary row). When join is
+    /// unavailable only the secondary row shows; extra height sits under actions.
     static func compactSheetHeight(_ layout: PushAdaptiveLayout) -> CGFloat {
         layout.value(compact: 246, standard: 238, large: 232)
     }

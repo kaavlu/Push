@@ -130,6 +130,7 @@ struct FriendDetailGroupContent: View {
 
     private var actions: some View {
         VStack(spacing: FriendDetailSheetLayout.multiPersonActionsSpacing) {
+            // Yellow primary is always "Ask to join" — never swap Start push into it.
             if showsAskToJoin {
                 multiPersonActionButton(
                     label: "Ask to join",
@@ -137,32 +138,19 @@ struct FriendDetailGroupContent: View {
                     style: .primary,
                     action: onAskToJoin
                 )
-                HStack(spacing: FriendDetailSheetLayout.actionSpacing) {
-                    multiPersonActionButton(
-                        label: "Directions",
-                        symbolName: "arrow.triangle.turn.up.right.circle.fill",
-                        style: .secondary,
-                        action: onDirections
-                    )
-                    multiPersonActionButton(
-                        label: "Start push",
-                        symbolName: "calendar.badge.plus",
-                        style: .secondary,
-                        action: onStartPush
-                    )
-                }
-            } else {
-                multiPersonActionButton(
-                    label: "Start push",
-                    symbolName: "calendar.badge.plus",
-                    style: .primary,
-                    action: onStartPush
-                )
+            }
+            HStack(spacing: FriendDetailSheetLayout.actionSpacing) {
                 multiPersonActionButton(
                     label: "Directions",
                     symbolName: "arrow.triangle.turn.up.right.circle.fill",
                     style: .secondary,
                     action: onDirections
+                )
+                multiPersonActionButton(
+                    label: "Start push",
+                    symbolName: "calendar.badge.plus",
+                    style: .secondary,
+                    action: onStartPush
                 )
             }
         }
