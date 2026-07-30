@@ -100,3 +100,12 @@ Durable, non-obvious learnings. Keep entries short; link code/docs rather than r
   from Photos is stored on `AddYoursDraftItem.upload`, and prefilled Storage
   media has none — so a draft mixing the two is rejected locally instead of
   publishing a half album.
+
+## Per-item mutations and partial success (Issue #127, Add Yours append)
+
+- `append_moment_media` commits **one item per call**, so a batched
+  `appendMedia(items:)` cannot tell which object to roll back. The Add Yours
+  view model loops one draft per call and removes each committed draft from the
+  composer — that alone gives "keep successes, retry the remainder" for free.
+- A live write that can partially succeed must notify the store on the failure
+  path too, or the Feed keeps showing pre-append state after a partial batch.
