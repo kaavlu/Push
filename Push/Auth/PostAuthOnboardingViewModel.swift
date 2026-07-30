@@ -5,9 +5,8 @@ import UIKit
 import UserNotifications
 
 /// Screens after a live session is prepared (new accounts only).
-/// Approach 2 spine: value → location → teach → optional graph → done.
+/// Approach 2 spine: combined location/value → teach → optional graph → done.
 enum PostAuthOnboardingScreen: Equatable {
-    case value
     case locationPrimer
     case locationBlocked
     case ghost
@@ -19,28 +18,27 @@ enum PostAuthOnboardingScreen: Equatable {
 
     var showsBackButton: Bool {
         switch self {
-        case .value, .locationBlocked, .done:
+        case .locationPrimer, .locationBlocked, .done:
             return false
-        case .locationPrimer, .ghost, .coordinate, .notifications, .contacts, .findPeople:
+        case .ghost, .coordinate, .notifications, .contacts, .findPeople:
             return true
         }
     }
 
-    /// 1-based progress across happy-path steps (value → findPeople). Blocked reuses location step.
+    /// 1-based progress across happy-path steps (location → findPeople). Blocked reuses location step.
     var progressStep: Int {
         switch self {
-        case .value: return 1
-        case .locationPrimer, .locationBlocked: return 2
-        case .ghost: return 3
-        case .coordinate: return 4
-        case .notifications: return 5
-        case .contacts: return 6
-        case .findPeople: return 7
+        case .locationPrimer, .locationBlocked: return 1
+        case .ghost: return 2
+        case .coordinate: return 3
+        case .notifications: return 4
+        case .contacts: return 5
+        case .findPeople: return 6
         case .done: return 0
         }
     }
 
-    static let progressTotal = 7
+    static let progressTotal = 6
 }
 
 /// One discoverable person on the find-people step.
@@ -79,7 +77,7 @@ enum OnboardingMapDefaults {
 
 @MainActor
 final class PostAuthOnboardingViewModel: ObservableObject {
-    @Published private(set) var screen: PostAuthOnboardingScreen = .value
+    @Published private(set) var screen: PostAuthOnboardingScreen = .locationPrimer
     @Published private(set) var people: [OnboardingDiscoverPerson] = []
     @Published private(set) var addedIDs: Set<Person.ID> = []
     @Published private(set) var actingIDs: Set<Person.ID> = []
@@ -133,8 +131,6 @@ final class PostAuthOnboardingViewModel: ObservableObject {
     func goBack() {
         errorMessage = nil
         switch screen {
-        case .locationPrimer:
-            screen = .value
         case .ghost:
             screen = .locationPrimer
         case .coordinate:
@@ -145,16 +141,9 @@ final class PostAuthOnboardingViewModel: ObservableObject {
             screen = .notifications
         case .findPeople:
             screen = .contacts
-        case .value, .locationBlocked, .done:
+        case .locationPrimer, .locationBlocked, .done:
             break
         }
-    }
-
-    // MARK: - Value → location primer
-
-    func continueFromValue() {
-        errorMessage = nil
-        screen = .locationPrimer
     }
 
     /// Loads the signed-in user into a self puck at the SF teaching center.

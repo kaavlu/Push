@@ -43,8 +43,6 @@ struct PostAuthOnboardingView: View {
     @ViewBuilder
     private var screen: some View {
         switch model.screen {
-        case .value:
-            PostAuthValueScreen(model: model)
         case .locationPrimer:
             PostAuthLocationPrimerScreen(model: model)
         case .locationBlocked:

@@ -46,22 +46,23 @@ final class PostAuthOnboardingTests: XCTestCase {
     }
 
     func testProgressAndBackChrome() {
-        XCTAssertEqual(PostAuthOnboardingScreen.progressTotal, 7)
-        XCTAssertEqual(PostAuthOnboardingScreen.value.progressStep, 1)
-        XCTAssertFalse(PostAuthOnboardingScreen.value.showsBackButton)
-        XCTAssertEqual(PostAuthOnboardingScreen.locationPrimer.progressStep, 2)
-        XCTAssertTrue(PostAuthOnboardingScreen.locationPrimer.showsBackButton)
-        XCTAssertEqual(PostAuthOnboardingScreen.locationBlocked.progressStep, 2)
+        XCTAssertEqual(PostAuthOnboardingScreen.progressTotal, 6)
+        XCTAssertEqual(PostAuthOnboardingScreen.locationPrimer.progressStep, 1)
+        XCTAssertFalse(PostAuthOnboardingScreen.locationPrimer.showsBackButton)
+        XCTAssertEqual(PostAuthOnboardingScreen.locationBlocked.progressStep, 1)
         XCTAssertFalse(PostAuthOnboardingScreen.locationBlocked.showsBackButton)
-        XCTAssertEqual(PostAuthOnboardingScreen.findPeople.progressStep, 7)
+        XCTAssertEqual(PostAuthOnboardingScreen.ghost.progressStep, 2)
+        XCTAssertTrue(PostAuthOnboardingScreen.ghost.showsBackButton)
+        XCTAssertEqual(PostAuthOnboardingScreen.coordinate.progressStep, 3)
+        XCTAssertEqual(PostAuthOnboardingScreen.notifications.progressStep, 4)
+        XCTAssertEqual(PostAuthOnboardingScreen.contacts.progressStep, 5)
+        XCTAssertEqual(PostAuthOnboardingScreen.findPeople.progressStep, 6)
         XCTAssertEqual(PostAuthOnboardingScreen.done.progressStep, 0)
         XCTAssertFalse(PostAuthOnboardingScreen.done.showsBackButton)
     }
 
     func testHappyPathOrderWithLocationAllow() async {
         let vm = makeVM(auth: .whenInUse)
-        XCTAssertEqual(vm.screen, .value)
-        vm.continueFromValue()
         XCTAssertEqual(vm.screen, .locationPrimer)
         await vm.enableLocation()
         XCTAssertEqual(vm.screen, .ghost)
@@ -86,7 +87,6 @@ final class PostAuthOnboardingTests: XCTestCase {
             container: container,
             locationSession: session
         )
-        vm.continueFromValue()
         await vm.enableLocation()
         XCTAssertEqual(vm.screen, .ghost)
         XCTAssertEqual(session.startIfEligibleCount, 1)
@@ -103,7 +103,6 @@ final class PostAuthOnboardingTests: XCTestCase {
 
     func testEnableLocationDeniedGoesToBlocked() async {
         let vm = makeVM(auth: .denied)
-        vm.continueFromValue()
         await vm.enableLocation()
         XCTAssertEqual(vm.screen, .locationBlocked)
         XCTAssertFalse(vm.screen.showsBackButton)
@@ -118,7 +117,6 @@ final class PostAuthOnboardingTests: XCTestCase {
             container: container,
             locationSession: session
         )
-        vm.continueFromValue()
         await vm.enableLocation()
         XCTAssertEqual(vm.screen, .locationBlocked)
 
@@ -163,7 +161,6 @@ final class PostAuthOnboardingTests: XCTestCase {
 
     func testGoBackStack() async {
         let vm = makeVM(auth: .whenInUse)
-        vm.continueFromValue()
         await vm.enableLocation()
         XCTAssertEqual(vm.screen, .ghost)
         vm.continueFromGhost()
@@ -182,10 +179,9 @@ final class PostAuthOnboardingTests: XCTestCase {
         XCTAssertEqual(vm.screen, .ghost)
         vm.goBack()
         XCTAssertEqual(vm.screen, .locationPrimer)
+        // First screen — no further back.
         vm.goBack()
-        XCTAssertEqual(vm.screen, .value)
-        vm.goBack()
-        XCTAssertEqual(vm.screen, .value)
+        XCTAssertEqual(vm.screen, .locationPrimer)
     }
 
     func testFinishOnboardingBlockedWithoutLocationAuthorization() async {

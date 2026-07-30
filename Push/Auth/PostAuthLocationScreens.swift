@@ -10,12 +10,17 @@ struct PostAuthLocationPrimerScreen: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            teachingMap
             OnboardingHeader(
-                title: "Push runs on location.",
-                subtitle: "It's how you see what your real friends are up to — who's free, what's forming — without the group chat."
+                title: "Know the move.",
+                subtitle: "A private live map for real friends — not a tracker."
             )
-            .padding(.top, LocationPrimerLayout.headerTop)
+            teachingMap
+                .padding(.top, LocationPrimerLayout.mapTop)
+            Text(LocationPrimerCopy.locationBody)
+                .font(OnboardingLabFont.text(15, .medium))
+                .foregroundStyle(OnboardingLabColor.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, LocationPrimerLayout.bodyTop)
             if let error = model.errorMessage {
                 Text(error)
                     .font(OnboardingLabFont.text(14, .medium))
@@ -155,10 +160,17 @@ struct PostAuthLocationBlockedScreen: View {
 
 // MARK: - Layout
 
+private enum LocationPrimerCopy {
+    /// Body under the teaching map — location value without a second header stack.
+    static let locationBody =
+        "Location is how you know what your real friends are up to — who's free, what's forming — without the group chat."
+}
+
 private enum LocationPrimerLayout {
     static let mapHeight: CGFloat = 210
     static let puckScale: CGFloat = 0.78
-    static let headerTop: CGFloat = 24
+    static let mapTop: CGFloat = 20
+    static let bodyTop: CGFloat = 16
     static let errorTop: CGFloat = 12
     static let ctaSpacerMin: CGFloat = 22
     static let bottomPadding: CGFloat = 26
