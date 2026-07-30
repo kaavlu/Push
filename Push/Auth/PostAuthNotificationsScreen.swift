@@ -22,20 +22,19 @@ struct PostAuthNotificationsScreen: View {
             samples
                 .padding(.top, NotificationsLayout.samplesTop)
                 .onboardingCascadeVisible(revealStep >= 3)
-            // Footer matches Coordinate/Ghost: primary CTA on the same bottom baseline.
-            // Secondary sits above primary so "Turn on" shares Continue's Y.
+            // Same page footer inset as Coordinate/Ghost; primary then secondary below.
             Spacer(minLength: NotificationsLayout.ctaSpacerMin)
-            OnboardingTextButton(title: "Maybe later") {
-                Task { await model.skipNotifications() }
-            }
-            .padding(.bottom, NotificationsLayout.ctaPairSpacing)
-            .disabled(model.isBusy || revealStep < 5)
-            .onboardingCascadeVisible(revealStep >= 5)
             OnboardingCTAButton(title: model.isBusy ? "Working…" : "Turn on notifications") {
                 Task { await model.enableNotifications() }
             }
             .disabled(model.isBusy || revealStep < 4)
             .onboardingCascadeVisible(revealStep >= 4)
+            OnboardingTextButton(title: "Maybe later") {
+                Task { await model.skipNotifications() }
+            }
+            .padding(.top, NotificationsLayout.ctaPairSpacing)
+            .disabled(model.isBusy || revealStep < 5)
+            .onboardingCascadeVisible(revealStep >= 5)
         }
         .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
         .padding(.top, OnboardingLabMetric.contentTopInset(layout))
@@ -167,9 +166,9 @@ private enum NotificationsLayout {
     static let sampleShadowOpacity = 0.1
     static let sampleShadowRadius: CGFloat = 7
     static let sampleShadowY: CGFloat = 6
-    /// Matches Coordinate / Ghost `ctaSpacerMin` so the primary CTA sits on the same baseline.
+    /// Matches Coordinate / Ghost `ctaSpacerMin`.
     static let ctaSpacerMin: CGFloat = 22
-    /// Gap between Turn on and Maybe later (secondary sits just below the shared Continue line).
+    /// Gap between Turn on (primary) and Maybe later (below).
     static let ctaPairSpacing: CGFloat = 14
     /// Matches Coordinate / Ghost footer inset.
     static let bottomPadding: CGFloat = 26
