@@ -45,10 +45,14 @@ struct PostAuthLocationPrimerScreen: View {
         .animation(OnboardingCascadeTiming.cascade, value: isMapReady)
         .task {
             await model.loadSelfPuckPreview()
+            if model.hasFullyRevealed(.locationPrimer) {
+                applyInstantCompleteState()
+                return
+            }
             await runOpeningCascade()
         }
         .onChange(of: isMapReady) { ready in
-            guard ready else { return }
+            guard ready, !model.hasFullyRevealed(.locationPrimer) else { return }
             Task { await continueCascadeAfterMapReady() }
         }
     }
@@ -142,6 +146,19 @@ struct PostAuthLocationPrimerScreen: View {
         }
         await OnboardingCascadeRunner.sleepStagger()
         await stepTo(LocationPrimerReveal.cta)
+        model.markFullyRevealed(.locationPrimer)
+    }
+
+    /// Back navigation: full layout, no cascade.
+    private func applyInstantCompleteState() {
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
+            isMapReady = true
+            didContinueAfterMap = true
+            revealStep = LocationPrimerReveal.cta
+            friendPopCount = PostAuthTeachFriendFixture.all.count
+        }
     }
 
     @MainActor
@@ -233,10 +250,15 @@ struct PostAuthLocationBlockedScreen: View {
     }
 
     private func runCascade() async {
+        if model.hasFullyRevealed(.locationBlocked) {
+            OnboardingCascadeRunner.revealInstantly(&revealStep, to: 5)
+            return
+        }
         for step in 1...5 {
             OnboardingCascadeRunner.step(&revealStep, to: step, laterScreen: true)
             await OnboardingCascadeRunner.sleepStagger(laterScreen: true)
         }
+        model.markFullyRevealed(.locationBlocked)
     }
 }
 

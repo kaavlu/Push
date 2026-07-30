@@ -88,6 +88,8 @@ final class PostAuthOnboardingViewModel: ObservableObject {
     @Published var selfPuck: SelfPuckData?
     /// Find-people directory load runs once when that screen appears.
     var didLoadFindPeopleDirectory = false
+    /// Screens that already finished their entrance cascade — back shows them fully revealed.
+    private(set) var fullyRevealedScreens: Set<PostAuthOnboardingScreen> = []
 
     let container: AppDataContainer
     let notificationCenter: UNUserNotificationCenter
@@ -136,18 +138,42 @@ final class PostAuthOnboardingViewModel: ObservableObject {
 
     func goBack() {
         errorMessage = nil
+        let previous: PostAuthOnboardingScreen?
         switch screen {
         case .ghost:
-            screen = .locationPrimer
+            previous = .locationPrimer
         case .coordinate:
-            screen = .ghost
+            previous = .ghost
         case .notifications:
-            screen = .coordinate
+            previous = .coordinate
         case .findPeople:
-            screen = .notifications
+            previous = .notifications
         case .locationPrimer, .locationBlocked, .done:
-            break
+            previous = nil
         }
+        guard let previous else { return }
+        // Destination was already shown — full layout, no entrance cascade.
+        fullyRevealedScreens.insert(previous)
+        // Skip the shell screen-change animation on back.
+        suppressScreenChangeAnimation = true
+        screen = previous
+    }
+
+    /// One-shot flag consumed by `PostAuthOnboardingView` on the next screen change.
+    var suppressScreenChangeAnimation = false
+
+    func consumeScreenChangeAnimationSuppression() -> Bool {
+        let value = suppressScreenChangeAnimation
+        suppressScreenChangeAnimation = false
+        return value
+    }
+
+    func hasFullyRevealed(_ screen: PostAuthOnboardingScreen) -> Bool {
+        fullyRevealedScreens.contains(screen)
+    }
+
+    func markFullyRevealed(_ screen: PostAuthOnboardingScreen) {
+        fullyRevealedScreens.insert(screen)
     }
 
     /// Loads the signed-in user into a self puck at the SF teaching center.

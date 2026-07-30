@@ -23,16 +23,19 @@ struct PostAuthNotificationsScreen: View {
                 .padding(.top, NotificationsLayout.samplesTop)
                 .onboardingCascadeVisible(revealStep >= 3)
             Spacer(minLength: NotificationsLayout.ctaSpacerMin)
-            OnboardingCTAButton(title: model.isBusy ? "Working…" : "Turn on notifications") {
-                Task { await model.enableNotifications() }
+            VStack(spacing: NotificationsLayout.ctaPairSpacing) {
+                OnboardingCTAButton(title: model.isBusy ? "Working…" : "Turn on notifications") {
+                    Task { await model.enableNotifications() }
+                }
+                .disabled(model.isBusy || revealStep < 4)
+                .onboardingCascadeVisible(revealStep >= 4)
+                OnboardingTextButton(title: "Maybe later") {
+                    Task { await model.skipNotifications() }
+                }
+                .disabled(model.isBusy || revealStep < 5)
+                .onboardingCascadeVisible(revealStep >= 5)
             }
-            .disabled(model.isBusy || revealStep < 4)
-            .onboardingCascadeVisible(revealStep >= 4)
-            OnboardingTextButton(title: "Maybe later") {
-                Task { await model.skipNotifications() }
-            }
-            .disabled(model.isBusy || revealStep < 5)
-            .onboardingCascadeVisible(revealStep >= 5)
+            .padding(.bottom, NotificationsLayout.ctaBottomLift)
         }
         .padding(.horizontal, OnboardingLabMetric.screenHorizontalPadding(layout))
         .padding(
@@ -124,10 +127,15 @@ struct PostAuthNotificationsScreen: View {
     }
 
     private func runCascade() async {
+        if model.hasFullyRevealed(.notifications) {
+            OnboardingCascadeRunner.revealInstantly(&revealStep, to: 5)
+            return
+        }
         for step in 1...5 {
             OnboardingCascadeRunner.step(&revealStep, to: step, laterScreen: true)
             await OnboardingCascadeRunner.sleepStagger(laterScreen: true)
         }
+        model.markFullyRevealed(.notifications)
     }
 }
 
@@ -163,6 +171,11 @@ private enum NotificationsLayout {
     static let sampleShadowOpacity = 0.1
     static let sampleShadowRadius: CGFloat = 7
     static let sampleShadowY: CGFloat = 6
-    static let ctaSpacerMin: CGFloat = 22
-    static let bottomPadding: CGFloat = 26
+    /// Pushes the CTA pair toward the bottom of the screen.
+    static let ctaSpacerMin: CGFloat = 48
+    /// Extra gap between primary and secondary actions.
+    static let ctaPairSpacing: CGFloat = 18
+    /// Nudges the pair slightly above the home indicator / bottom chrome.
+    static let ctaBottomLift: CGFloat = 8
+    static let bottomPadding: CGFloat = 36
 }

@@ -82,10 +82,15 @@ struct PostAuthCoordinateScreen: View {
     }
 
     private func runCascade() async {
+        if model.hasFullyRevealed(.coordinate) {
+            OnboardingCascadeRunner.revealInstantly(&revealStep, to: 4)
+            return
+        }
         for step in 1...4 {
             OnboardingCascadeRunner.step(&revealStep, to: step, laterScreen: true)
             await OnboardingCascadeRunner.sleepStagger(laterScreen: true)
         }
+        model.markFullyRevealed(.coordinate)
     }
 }
 

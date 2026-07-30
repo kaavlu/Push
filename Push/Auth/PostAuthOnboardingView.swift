@@ -21,7 +21,14 @@ struct PostAuthOnboardingView: View {
                 .transition(.opacity.combined(with: .move(edge: .bottom)))
             topChrome
         }
-        .animation(OnboardingCascadeTiming.screenChange, value: model.screen)
+        .animation(
+            model.suppressScreenChangeAnimation ? nil : OnboardingCascadeTiming.screenChange,
+            value: model.screen
+        )
+        .onChange(of: model.screen) { _ in
+            // Clear one-shot back suppression after the change applies.
+            _ = model.consumeScreenChangeAnimationSuppression()
+        }
         .onChange(of: model.isFinished) { finished in
             if finished { onFinished() }
         }

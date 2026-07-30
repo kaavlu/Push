@@ -38,10 +38,14 @@ struct PostAuthGhostScreen: View {
         .animation(OnboardingCascadeTiming.laterCascade, value: mapBlur)
         .task {
             await model.loadSelfPuckPreview()
+            if model.hasFullyRevealed(.ghost) {
+                applyInstantCompleteState()
+                return
+            }
             await runSequence()
         }
         .onChange(of: isMapReady) { ready in
-            guard ready else { return }
+            guard ready, !model.hasFullyRevealed(.ghost) else { return }
             Task { await continueAfterMapReady() }
         }
     }
@@ -138,6 +142,21 @@ struct PostAuthGhostScreen: View {
         await OnboardingCascadeRunner.sleepStagger(laterScreen: true)
         await OnboardingCascadeRunner.sleepBeat(laterScreen: true)
         OnboardingCascadeRunner.step(&revealStep, to: GhostReveal.cta, laterScreen: true)
+        model.markFullyRevealed(.ghost)
+    }
+
+    /// Back navigation: end-state map (blurred + ghost icon), no sequence.
+    private func applyInstantCompleteState() {
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
+            isMapReady = true
+            didRunSequence = true
+            showSelfPuck = false
+            mapBlur = GhostScreenLayout.mapBlurRadius
+            showGhostIcon = true
+            revealStep = GhostReveal.cta
+        }
     }
 
     private var teachingRegion: MKCoordinateRegion {

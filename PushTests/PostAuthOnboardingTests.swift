@@ -228,15 +228,30 @@ final class PostAuthOnboardingTests: XCTestCase {
 
         vm.goBack()
         XCTAssertEqual(vm.screen, .notifications)
+        XCTAssertTrue(vm.hasFullyRevealed(.notifications))
         vm.goBack()
         XCTAssertEqual(vm.screen, .coordinate)
+        XCTAssertTrue(vm.hasFullyRevealed(.coordinate))
         vm.goBack()
         XCTAssertEqual(vm.screen, .ghost)
+        XCTAssertTrue(vm.hasFullyRevealed(.ghost))
         vm.goBack()
         XCTAssertEqual(vm.screen, .locationPrimer)
+        XCTAssertTrue(vm.hasFullyRevealed(.locationPrimer))
         // First screen — no further back.
         vm.goBack()
         XCTAssertEqual(vm.screen, .locationPrimer)
+    }
+
+    func testGoBackMarksDestinationFullyRevealed() async {
+        let vm = makeVM(auth: .whenInUse)
+        await vm.enableLocation()
+        // First visit to ghost has not finished cascade yet in unit test.
+        XCTAssertFalse(vm.hasFullyRevealed(.locationPrimer))
+        vm.goBack()
+        // Back from ghost → primer is marked fully revealed for instant layout.
+        XCTAssertEqual(vm.screen, .locationPrimer)
+        XCTAssertTrue(vm.hasFullyRevealed(.locationPrimer))
     }
 
     func testFinishOnboardingBlockedWithoutLocationAuthorization() async {

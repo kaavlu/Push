@@ -119,10 +119,15 @@ struct PostAuthFindPeopleScreen: View {
     }
 
     private func runCascade() async {
+        if model.hasFullyRevealed(.findPeople) {
+            OnboardingCascadeRunner.revealInstantly(&revealStep, to: 3)
+            return
+        }
         for step in 1...3 {
             OnboardingCascadeRunner.step(&revealStep, to: step, laterScreen: true)
             await OnboardingCascadeRunner.sleepStagger(laterScreen: true)
         }
+        model.markFullyRevealed(.findPeople)
     }
 }
 
@@ -158,10 +163,15 @@ struct PostAuthDoneScreen: View {
     }
 
     private func runCascade() async {
+        if model.hasFullyRevealed(.done) {
+            OnboardingCascadeRunner.revealInstantly(&revealStep, to: 3)
+            return
+        }
         for step in 1...3 {
             OnboardingCascadeRunner.step(&revealStep, to: step, laterScreen: true)
             await OnboardingCascadeRunner.sleepStagger(laterScreen: true)
         }
+        model.markFullyRevealed(.done)
     }
 }
 

@@ -38,6 +38,15 @@ extension View {
 
 @MainActor
 enum OnboardingCascadeRunner {
+    /// Jump to a completed reveal step with no animation (used after Back).
+    static func revealInstantly(_ current: inout Int, to target: Int) {
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
+            current = target
+        }
+    }
+
     static func step(
         _ current: inout Int,
         to target: Int,
