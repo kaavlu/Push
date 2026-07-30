@@ -190,11 +190,7 @@ struct ContentView: View {
                 .allowsHitTesting(false)
             MapEmptyOverlay(
                 phase: viewModel.surfacePhase,
-                onAddFriends: {
-                    viewModel.dismissEmptyFriendsPrompt()
-                    isFilterDropdownExpanded = false
-                    presentedRoute = .addFriend
-                },
+                onAddFriends: openFriendsFromEmptyOverlay,
                 onDismissEmpty: {
                     viewModel.dismissEmptyFriendsPrompt()
                 },
@@ -208,6 +204,20 @@ struct ContentView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .allowsHitTesting(true)
+    }
+
+    /// Dismiss the empty card instantly (no fade) and open the Friends tab.
+    private func openFriendsFromEmptyOverlay() {
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
+            viewModel.dismissEmptyFriendsPrompt()
+            isFilterDropdownExpanded = false
+            isCreateMenuPresented = false
+            selectedPuck = nil
+            selectedRegionalPuck = nil
+            selectedNavigationItem = .group
+        }
     }
 
     private var topControlsLayer: some View {
