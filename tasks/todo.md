@@ -1,44 +1,25 @@
-# Issue #127 — Moments S8: connect Add Yours to Moment media append
+# Issue #128 — Moments S9: connect Moment editing and deletion
 
 ## Status
 
-- [x] `AddYoursContext` carries the Moment identity only; the screen loads its
-      album, capabilities, and capacity from `MomentRepository.moment(id:)`
-      (Feed cards are a launch hint, never live state)
-- [x] Affordance shaped by `MomentCapabilities.canAddMedia` (denied surface for a
-      stale card) and by `MomentLimits.maxActiveMedia` minus the viewer-visible
-      album (full surface at capacity)
-- [x] Picker uses `CreatePostMediaLoader`, so drafts carry `MomentMediaUpload`
-      bytes; selection clamps to the remaining slots
-- [x] Append is per item: `MomentMediaPublisher.append(useMomentFolder: true)`
-      (upload under `{moment_id}/…`, migration 0024) → `appendMedia` with a
-      single draft → object rollback only for the item whose RPC failed
-- [x] Partial success: committed drafts leave the composer, the remainder stays
-      for Retry, and the banner states what landed
-- [x] Refresh after success *and* partial success: detail reloads, mock store
-      revision reloads Feed, live `appendMedia` now calls
-      `LiveDataStore.notifyMomentsChanged()` (including after a partial batch)
-- [x] Load states: loading / failed+retry / denied / full (DS-070/071);
-      `ActionErrorBanner` for recoverable append failures
-- [x] ViewModel split (`AddYoursViewModel`, `+Append`) to stay inside the
-      file-size rule; preview seam is a fixture `MomentDetail` with no repository
-- [x] Tests: `AddYoursAppendTests` (11), `AddYoursPartialAppendTests` (7),
-      updated `AddYoursViewModelTests` — `scripts/test.sh full` green (815)
+- [x] Existing-Moment edit loads `MomentDetail` (hub + Feed …); carousel/hub rows are launch hints only
+- [x] UI shaped by server `MomentCapabilities` (metadata / tags / reorder / media delete / leave / delete)
+- [x] Save diffs call `updateMetadata`, `addTags` / `removeTag`, `reorderMedia`, `softDeleteMedia`
+- [x] Creator delete + non-creator leave use `.pushActionMenu` + `.pushConfirmation` (DS-090)
+- [x] Recoverable errors keep the draft; conflict reloads detail without dropping the banner
+- [x] Live mutations notify via `LiveDataStore.notifyMomentsChanged()` so Feed/hub refresh
+- [x] Tests: `CreatePostEditTests` (13) + existing Create Post suites green
 
-## Out of scope (S9)
+## Out of scope
 
-Metadata/tag editing on an existing Moment, media reorder, media/self-tag/Moment
-deletion, Realtime, notifications, Feed › Now.
+Realtime, notifications, append-on-edit (Add Yours), schema/RPC redesign, Feed › Now, visual redesign.
 
 ## Notes
 
-- Per-item `appendMedia` calls (one draft each) are what make partial success
-  work: the RPC commits per item, so batching would blur which object to roll back.
-- Server cap rejection mid-batch is treated as an ordinary recoverable error —
-  the local capacity check is a pre-flight, not authorization.
-- Not visually verified in the simulator this session; build + full suite are
-  the evidence.
+- Append stays on Add Yours; edit compose never picks new media on the repository path.
+- Media soft-delete is staged locally and committed on Save (with reorder after deletes).
+- Last-media delete may soft-delete the Moment; the flow dismisses cleanly.
 
 ## Next
 
-S9 — existing-Moment metadata/tag edit, reorder, and deletion.
+Close #128 / open PR when ready.

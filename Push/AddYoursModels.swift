@@ -46,17 +46,22 @@ struct AddYoursDraftItem: Identifiable {
     /// Storage (existing-Moment edit) and for preview/test drafts — those items
     /// can be shown but never re-uploaded.
     let upload: MomentMediaUpload?
+    /// When set, this strip cell is already-committed album media (S9 edit).
+    /// Reorder / soft-delete use this id; publish never re-uploads it.
+    let existingMediaID: MomentMedia.ID?
 
     init(
         id: UUID = UUID(),
         kind: FeedMediaKind,
         previewImage: UIImage?,
-        upload: MomentMediaUpload? = nil
+        upload: MomentMediaUpload? = nil,
+        existingMediaID: MomentMedia.ID? = nil
     ) {
         self.id = id
         self.kind = kind
         self.previewImage = previewImage
         self.upload = upload
+        self.existingMediaID = existingMediaID
     }
 }
 
