@@ -53,6 +53,9 @@ final class MapViewModel: ObservableObject {
     private var lastSeenRevision = 0
     /// One-shot open: center on GPS (preferred) or self presence, then leave pan to the user.
     private var initialUserFocusSource: InitialUserFocusSource = .none
+    /// After Add friends or dismiss X, never show the zero-friends map card again.
+    @Published private(set) var hasDismissedEmptyFriendsPrompt: Bool
+    private let userDefaults: UserDefaults
 
     private enum InitialUserFocusSource {
         case none
@@ -60,16 +63,25 @@ final class MapViewModel: ObservableObject {
         case location
     }
 
+    private enum EmptyFriendsPromptStorage {
+        static let dismissedKey = "map.emptyFriendsPrompt.dismissed"
+    }
+
     init(
         friends: FriendRepository,
         groups: GroupRepository,
         sharing: SharingRepository,
-        pushes: PushRepository
+        pushes: PushRepository,
+        userDefaults: UserDefaults = .standard
     ) {
         self.friends = friends
         self.groups = groups
         self.sharing = sharing
         self.pushes = pushes
+        self.userDefaults = userDefaults
+        self.hasDismissedEmptyFriendsPrompt = userDefaults.bool(
+            forKey: EmptyFriendsPromptStorage.dismissedKey
+        )
         Task { await load() }
     }
 
@@ -227,6 +239,18 @@ final class MapViewModel: ObservableObject {
         case .loaded:
             return phaseForLoadedContent()
         }
+    }
+
+    /// Zero-friends card only until the user taps Add friends or dismisses once.
+    var shouldShowEmptyFriendsOverlay: Bool {
+        surfacePhase == .empty && !hasDismissedEmptyFriendsPrompt
+    }
+
+    /// Persist dismissal so the empty-friends map card never returns this install.
+    func dismissEmptyFriendsPrompt() {
+        guard !hasDismissedEmptyFriendsPrompt else { return }
+        hasDismissedEmptyFriendsPrompt = true
+        userDefaults.set(true, forKey: EmptyFriendsPromptStorage.dismissedKey)
     }
 
     /// Add-friends empty CTA only when there are no friends. Friends who exist but

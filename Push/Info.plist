@@ -29,6 +29,8 @@
 	     Polished marketing copy / denial recovery UX is Issue #80 (PR8). -->
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Push uses your location to share your presence with friends on the map.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Push uses your contacts to show which friends are already on Push. We don’t message them for you.</string>
 	<!-- Light-only UI for now — no dark theme; materials/chrome must not flip with system Dark Mode. -->
 	<key>UIUserInterfaceStyle</key>
 	<string>Light</string>

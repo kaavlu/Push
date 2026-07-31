@@ -9,6 +9,16 @@
 /* Begin PBXBuildFile section */
 		7FF5ED4215BC74A5ACBF4902 /* FriendDetailWhosHere.swift in Sources */ = {isa = PBXBuildFile; fileRef = 642E688D69070AF2DFB0CE64 /* FriendDetailWhosHere.swift */; };
 		4396B548EF27235296484C16 /* FriendDetailGroupContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F8A81D8F0699BE7992D9E49 /* FriendDetailGroupContent.swift */; };
+		84FCC6745A1D5C05C6F24035 /* PostAuthGhostScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDD9851C0EF09EECFAAFA9D9 /* PostAuthGhostScreen.swift */; };
+		81A13BBA6D83A06497F05D91 /* PostAuthTeachingMapCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ABEEEFF5A6F9DC0949EB160 /* PostAuthTeachingMapCard.swift */; };
+		A6FCDB84FF27603381B83AD1 /* PostAuthOnboardingCascade.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F81F3735983DDF6C002FC32 /* PostAuthOnboardingCascade.swift */; };
+		341346A8E70C06343B64E3B6 /* PostAuthOnboardingViewModel+Connect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 611398307E42BAA6B32C6155 /* PostAuthOnboardingViewModel+Connect.swift */; };
+		7FEBB888A12A8B492F6BCE9D /* PostAuthConnectScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CD9FCA63ED8171655B6635A /* PostAuthConnectScreens.swift */; };
+		A9EE892BF2DA2824544374F6 /* DeviceContactsProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D4A24A242FCA4618E18CB9D /* DeviceContactsProvider.swift */; };
+		00D3C188A4ADC3C96E6ADB13 /* ContactsProviding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C73535EC742F6F898AF65D9 /* ContactsProviding.swift */; };
+		E047F792170AB15E2D2AE446 /* PostAuthNotificationsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9E523A01A44B4D87AABBCB8 /* PostAuthNotificationsScreen.swift */; };
+		49EF221B2E0A60C16FF9A607 /* PostAuthTeachingMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = D19E40CB5129A022A52FEA43 /* PostAuthTeachingMap.swift */; };
+		43DC2E974D2D3D8EF7BAD504 /* PostAuthLocationScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4E363C3B0B11F73BE080022 /* PostAuthLocationScreens.swift */; };
 		8BDF531889A0174E70BA7F0A /* CreatePostViewModel+EditCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0120D5EA9ADD255E73B723 /* CreatePostViewModel+EditCopy.swift */; };
 		F04392169EB42B3B8BC8C05C /* CreatePostEditTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A659FFB2ABEBCFDFA883703 /* CreatePostEditTests.swift */; };
 		F4465299E64AB175C61CC61B /* CreatePostViewModel+Edit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51F31B9A67538BF134DF38A0 /* CreatePostViewModel+Edit.swift */; };
@@ -424,6 +434,16 @@
 /* Begin PBXFileReference section */
 		642E688D69070AF2DFB0CE64 /* FriendDetailWhosHere.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FriendDetailWhosHere.swift"; sourceTree = "<group>"; };
 		8F8A81D8F0699BE7992D9E49 /* FriendDetailGroupContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FriendDetailGroupContent.swift"; sourceTree = "<group>"; };
+		FDD9851C0EF09EECFAAFA9D9 /* PostAuthGhostScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PostAuthGhostScreen.swift"; path = "Auth/PostAuthGhostScreen.swift"; sourceTree = "<group>"; };
+		9ABEEEFF5A6F9DC0949EB160 /* PostAuthTeachingMapCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PostAuthTeachingMapCard.swift"; path = "Auth/PostAuthTeachingMapCard.swift"; sourceTree = "<group>"; };
+		5F81F3735983DDF6C002FC32 /* PostAuthOnboardingCascade.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PostAuthOnboardingCascade.swift"; path = "Auth/PostAuthOnboardingCascade.swift"; sourceTree = "<group>"; };
+		611398307E42BAA6B32C6155 /* PostAuthOnboardingViewModel+Connect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PostAuthOnboardingViewModel+Connect.swift"; path = "Auth/PostAuthOnboardingViewModel+Connect.swift"; sourceTree = "<group>"; };
+		7CD9FCA63ED8171655B6635A /* PostAuthConnectScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PostAuthConnectScreens.swift"; path = "Auth/PostAuthConnectScreens.swift"; sourceTree = "<group>"; };
+		3D4A24A242FCA4618E18CB9D /* DeviceContactsProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "DeviceContactsProvider.swift"; path = "Data/Contacts/DeviceContactsProvider.swift"; sourceTree = "<group>"; };
+		8C73535EC742F6F898AF65D9 /* ContactsProviding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "ContactsProviding.swift"; path = "Data/Domain/ContactsProviding.swift"; sourceTree = "<group>"; };
+		B9E523A01A44B4D87AABBCB8 /* PostAuthNotificationsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PostAuthNotificationsScreen.swift"; path = "Auth/PostAuthNotificationsScreen.swift"; sourceTree = "<group>"; };
+		D19E40CB5129A022A52FEA43 /* PostAuthTeachingMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PostAuthTeachingMap.swift"; path = "Auth/PostAuthTeachingMap.swift"; sourceTree = "<group>"; };
+		C4E363C3B0B11F73BE080022 /* PostAuthLocationScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PostAuthLocationScreens.swift"; path = "Auth/PostAuthLocationScreens.swift"; sourceTree = "<group>"; };
 		8B0120D5EA9ADD255E73B723 /* CreatePostViewModel+EditCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostViewModel+EditCopy.swift"; sourceTree = "<group>"; };
 		6A659FFB2ABEBCFDFA883703 /* CreatePostEditTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostEditTests.swift"; sourceTree = "<group>"; };
 		51F31B9A67538BF134DF38A0 /* CreatePostViewModel+Edit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatePostViewModel+Edit.swift"; sourceTree = "<group>"; };
@@ -876,6 +896,16 @@
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
 				642E688D69070AF2DFB0CE64 /* FriendDetailWhosHere.swift */,
 				8F8A81D8F0699BE7992D9E49 /* FriendDetailGroupContent.swift */,
+				FDD9851C0EF09EECFAAFA9D9 /* PostAuthGhostScreen.swift */,
+				9ABEEEFF5A6F9DC0949EB160 /* PostAuthTeachingMapCard.swift */,
+				5F81F3735983DDF6C002FC32 /* PostAuthOnboardingCascade.swift */,
+				611398307E42BAA6B32C6155 /* PostAuthOnboardingViewModel+Connect.swift */,
+				7CD9FCA63ED8171655B6635A /* PostAuthConnectScreens.swift */,
+				3D4A24A242FCA4618E18CB9D /* DeviceContactsProvider.swift */,
+				8C73535EC742F6F898AF65D9 /* ContactsProviding.swift */,
+				B9E523A01A44B4D87AABBCB8 /* PostAuthNotificationsScreen.swift */,
+				D19E40CB5129A022A52FEA43 /* PostAuthTeachingMap.swift */,
+				C4E363C3B0B11F73BE080022 /* PostAuthLocationScreens.swift */,
 				8B0120D5EA9ADD255E73B723 /* CreatePostViewModel+EditCopy.swift */,
 				51F31B9A67538BF134DF38A0 /* CreatePostViewModel+Edit.swift */,
 				AAEFAF88E20A454F00B8CCC5 /* AddYoursViewModel+Append.swift */,
@@ -1433,6 +1463,16 @@
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
 				7FF5ED4215BC74A5ACBF4902 /* FriendDetailWhosHere.swift in Sources */,
 				4396B548EF27235296484C16 /* FriendDetailGroupContent.swift in Sources */,
+				84FCC6745A1D5C05C6F24035 /* PostAuthGhostScreen.swift in Sources */,
+				81A13BBA6D83A06497F05D91 /* PostAuthTeachingMapCard.swift in Sources */,
+				A6FCDB84FF27603381B83AD1 /* PostAuthOnboardingCascade.swift in Sources */,
+				341346A8E70C06343B64E3B6 /* PostAuthOnboardingViewModel+Connect.swift in Sources */,
+				7FEBB888A12A8B492F6BCE9D /* PostAuthConnectScreens.swift in Sources */,
+				A9EE892BF2DA2824544374F6 /* DeviceContactsProvider.swift in Sources */,
+				00D3C188A4ADC3C96E6ADB13 /* ContactsProviding.swift in Sources */,
+				E047F792170AB15E2D2AE446 /* PostAuthNotificationsScreen.swift in Sources */,
+				49EF221B2E0A60C16FF9A607 /* PostAuthTeachingMap.swift in Sources */,
+				43DC2E974D2D3D8EF7BAD504 /* PostAuthLocationScreens.swift in Sources */,
 				8BDF531889A0174E70BA7F0A /* CreatePostViewModel+EditCopy.swift in Sources */,
 				F4465299E64AB175C61CC61B /* CreatePostViewModel+Edit.swift in Sources */,
 				4EE20D2A3884949DB191A974 /* AddYoursViewModel+Append.swift in Sources */,
