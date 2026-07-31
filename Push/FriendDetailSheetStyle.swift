@@ -57,7 +57,8 @@ enum FriendDetailSheetLayout {
 
         // Mirrors FriendDetailGroupContent VStack children + spacing.
         var height = multiPersonTopPadding
-        height += isMultiPerson ? multiPersonHeaderHeight : multiPersonAvatarSize
+        // Individual: avatar + activity/location can exceed avatar diameter.
+        height += isMultiPerson ? multiPersonHeaderHeight : individualHeaderHeight
 
         if isMultiPerson {
             // gap: header → member grid
@@ -105,7 +106,8 @@ enum FriendDetailSheetLayout {
     static let multiPersonDividerHeight: CGFloat = 1
     static let multiPersonActionsSpacing: CGFloat = 8
     /// Padding under the action row, still above the home-indicator band.
-    static let multiPersonActionBottomPadding: CGFloat = 12
+    /// Slightly roomy so secondary buttons aren’t tight against the home indicator.
+    static let multiPersonActionBottomPadding: CGFloat = 16
     static let multiPersonSecondaryHeight: CGFloat = 44
     static let multiPersonSecondaryCornerRadius: CGFloat = 14
     static let multiPersonSecondaryIconSize: CGFloat = 14
@@ -121,6 +123,8 @@ enum FriendDetailSheetLayout {
     static let multiPersonTopPadding: CGFloat = 28
     /// Multi-person title + subtitle column (no avatar).
     static let multiPersonHeaderHeight: CGFloat = 48
+    /// Single-friend header: avatar stack + name/activity/location column.
+    static let individualHeaderHeight: CGFloat = 58
     /// Avoid squashed subtitle text; truncate cleanly at the trailing edge.
     static let multiPersonSubtitleMinimumScale: CGFloat = 0.92
 
