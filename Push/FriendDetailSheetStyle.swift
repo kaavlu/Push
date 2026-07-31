@@ -107,7 +107,7 @@ enum FriendDetailSheetLayout {
     static let multiPersonActionsSpacing: CGFloat = 8
     /// Padding under the action row, still above the home-indicator band.
     /// Slightly roomy so secondary buttons aren’t tight against the home indicator.
-    static let multiPersonActionBottomPadding: CGFloat = 16
+    static let multiPersonActionBottomPadding: CGFloat = 22
     static let multiPersonSecondaryHeight: CGFloat = 44
     static let multiPersonSecondaryCornerRadius: CGFloat = 14
     static let multiPersonSecondaryIconSize: CGFloat = 14
