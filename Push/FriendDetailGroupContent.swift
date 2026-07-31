@@ -156,27 +156,20 @@ struct FriendDetailGroupContent: View {
         .fixedSize(horizontal: true, vertical: false)
     }
 
-    // MARK: Who’s here
+    // MARK: Member grid
 
     private var whosHereSection: some View {
-        VStack(alignment: .leading, spacing: FriendDetailSheetLayout.whosHereSectionLabelSpacing) {
-            Text(FriendDetailSheetContent.whosHereSectionLabel(memberCount: members.count))
-                .font(.caption2.weight(.semibold))
-                .foregroundStyle(PushControlColors.textTertiary)
-                .tracking(FriendDetailSheetLayout.whosHereLabelTracking)
-
-            WhosHereMemberGrid(
-                members: members,
-                isExpanded: isMembersExpanded,
-                onSelectMember: onSelectMember,
-                onExpand: { isMembersExpanded = true }
+        WhosHereMemberGrid(
+            members: members,
+            isExpanded: isMembersExpanded,
+            onSelectMember: onSelectMember,
+            onExpand: { isMembersExpanded = true }
+        )
+        .frame(
+            height: FriendDetailSheetLayout.whosHereGridViewportHeight(
+                memberCount: members.count
             )
-            .frame(
-                height: FriendDetailSheetLayout.whosHereGridViewportHeight(
-                    memberCount: members.count
-                )
-            )
-        }
+        )
     }
 
     private var divider: some View {
@@ -194,33 +187,41 @@ struct FriendDetailGroupContent: View {
 
     private var actions: some View {
         VStack(spacing: FriendDetailSheetLayout.multiPersonActionsSpacing) {
+            // Yellow primary is always "Ask to join" — never promote Start push.
             if showsAskToJoin {
-                // Glass + walnut rim — approved primary (not solid sunbeam).
-                PushGlassRimButton(
-                    title: "Ask to join",
-                    systemImageName: "figure.wave",
+                multiPersonActionButton(
+                    label: "Ask to join",
+                    symbolName: "figure.wave",
+                    style: .primary,
                     action: onAskToJoin
                 )
-                .frame(maxWidth: .infinity)
             }
             HStack(spacing: FriendDetailSheetLayout.actionSpacing) {
-                multiPersonSecondaryButton(
+                multiPersonActionButton(
                     label: "Directions",
                     symbolName: "arrow.triangle.turn.up.right.circle.fill",
+                    style: .secondary,
                     action: onDirections
                 )
-                multiPersonSecondaryButton(
+                multiPersonActionButton(
                     label: "Start push",
                     symbolName: "calendar.badge.plus",
+                    style: .secondary,
                     action: onStartPush
                 )
             }
         }
     }
 
-    private func multiPersonSecondaryButton(
+    private enum ActionStyle {
+        case primary
+        case secondary
+    }
+
+    private func multiPersonActionButton(
         label: String,
         symbolName: String,
+        style: ActionStyle,
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
@@ -235,7 +236,11 @@ struct FriendDetailGroupContent: View {
                     .lineLimit(1)
                     .minimumScaleFactor(PushOpacityTokens.minimumTextScale)
             }
-            .foregroundStyle(PushControlColors.textSecondary)
+            .foregroundStyle(
+                style == .primary
+                    ? PushControlColors.activeForeground
+                    : PushControlColors.textSecondary
+            )
             .frame(maxWidth: .infinity)
             .frame(height: FriendDetailSheetLayout.multiPersonSecondaryHeight)
             .background(
@@ -243,26 +248,35 @@ struct FriendDetailGroupContent: View {
                     cornerRadius: FriendDetailSheetLayout.multiPersonSecondaryCornerRadius,
                     style: .continuous
                 )
-                .fill(
-                    Color.white.opacity(
-                        FriendDetailSheetLayout.multiPersonSecondaryFillOpacity
-                    )
-                )
+                .fill(actionFill(for: style))
             )
             .overlay {
-                RoundedRectangle(
-                    cornerRadius: FriendDetailSheetLayout.multiPersonSecondaryCornerRadius,
-                    style: .continuous
-                )
-                .stroke(
-                    PushColorPalette.Accent.walnut.opacity(
-                        FriendDetailSheetLayout.multiPersonSecondaryBorderOpacity
-                    ),
-                    lineWidth: FriendDetailSheetLayout.multiPersonSecondaryBorderWidth
-                )
+                if style == .secondary {
+                    RoundedRectangle(
+                        cornerRadius: FriendDetailSheetLayout.multiPersonSecondaryCornerRadius,
+                        style: .continuous
+                    )
+                    .stroke(
+                        PushColorPalette.Accent.walnut.opacity(
+                            FriendDetailSheetLayout.multiPersonSecondaryBorderOpacity
+                        ),
+                        lineWidth: FriendDetailSheetLayout.multiPersonSecondaryBorderWidth
+                    )
+                }
             }
         }
         .buttonStyle(.plain)
         .accessibilityLabel(label)
+    }
+
+    private func actionFill(for style: ActionStyle) -> Color {
+        switch style {
+        case .primary:
+            return PushControlColors.activeFill
+        case .secondary:
+            return Color.white.opacity(
+                FriendDetailSheetLayout.multiPersonSecondaryFillOpacity
+            )
+        }
     }
 }

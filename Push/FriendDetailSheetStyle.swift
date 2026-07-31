@@ -45,27 +45,26 @@ enum FriendDetailSheetLayout {
     static let sheetCornerRadius: CGFloat = 32
 
     /// Height for map puck detail sheets.
-    /// Multi-person adds Who’s here sized to actual grid rows (1 or 2).
-    /// Join CTA uses glass-rim primary height; absence subtracts that row.
+    /// Multi-person adds member grid sized to actual rows (1 or 2).
+    /// Join CTA is a secondary-height sunbeam row; absence drops that row.
     static func compactSheetHeight(
         _ layout: PushAdaptiveLayout,
         showsAskToJoin: Bool = true,
         isMultiPerson: Bool = false,
         memberCount: Int = 0
     ) -> CGFloat {
-        // Individual: summary + secondary actions only (no join CTA).
-        // Multi: no left avatar stack; Who’s here + optional glass-rim primary.
-        var height = layout.value(compact: 228, standard: 220, large: 214)
+        // Individual: summary + secondary actions (no join).
+        // Multi: context header + member grid + optional Ask to join + secondaries.
+        var height = layout.value(compact: 220, standard: 212, large: 206)
         if isMultiPerson {
-            // Drop individual-sized avatar band; add Who’s here block.
+            // Drop individual avatar band; add member grid only (no section label).
             height -= 18
             height += multiPersonSectionSpacing + whosHereBlockHeight(memberCount: memberCount)
             if showsAskToJoin {
-                // Glass-rim primary is taller than the secondary action row.
-                height += PlansLayout.startPlanButtonHeight + multiPersonActionsSpacing
+                height += multiPersonSecondaryHeight + multiPersonActionsSpacing
             }
         } else if showsAskToJoin {
-            height += PlansLayout.startPlanButtonHeight + multiPersonActionsSpacing
+            height += multiPersonSecondaryHeight + multiPersonActionsSpacing
         }
         return height
     }
@@ -90,8 +89,11 @@ enum FriendDetailSheetLayout {
     static let multiPersonDividerOpacity = 0.12
     static let multiPersonDividerHeight: CGFloat = 1
     static let multiPersonActionsSpacing: CGFloat = 8
-    /// Gap under the secondary action row, above the home-indicator inset.
-    static let multiPersonActionBottomPadding: CGFloat = 4
+    /// Content gap under the action row before the home-indicator zone.
+    /// Kept tight so all puck popups sit closer to the bottom edge.
+    static let multiPersonActionBottomPadding: CGFloat = 0
+    /// Extra inset inside the home-indicator band (all puck sheets).
+    static let sheetHomeIndicatorPadding: CGFloat = 2
     static let multiPersonSecondaryHeight: CGFloat = 44
     static let multiPersonSecondaryCornerRadius: CGFloat = 14
     static let multiPersonSecondaryIconSize: CGFloat = 14
@@ -106,10 +108,8 @@ enum FriendDetailSheetLayout {
     static let multiPersonTopPadding: CGFloat = 24
     /// Avoid squashed subtitle text; truncate cleanly at the trailing edge.
     static let multiPersonSubtitleMinimumScale: CGFloat = 0.92
-    /// Letter spacing for the muted Who’s here eyebrow.
-    static let whosHereLabelTracking: CGFloat = 0.6
 
-    // MARK: - Who’s here member grid (identity chips)
+    // MARK: - Member identity chips
 
     static let whosHereColumnCount = 3
     /// Show everyone when count ≤ this; above it, collapse to 5 + overflow.
@@ -124,15 +124,9 @@ enum FriendDetailSheetLayout {
     static let whosHerePuckHorizontalPadding: CGFloat = 8
     /// Tight gap between face and name.
     static let whosHereLabelSpacing: CGFloat = 5
-    static let whosHereSectionLabelSpacing: CGFloat = 6
     static let whosHereExpandDragThreshold: CGFloat = 36
     /// Max rows shown without scrolling (overflow expands inside this cap).
     static let whosHereGridMaxVisibleRows = 2
-    static let whosHereSectionTitleHeight: CGFloat = 14
-    /// Soft fill — chips stay quieter than secondary action chrome.
-    static let whosHereChipFillOpacity = 0.38
-    static let whosHereChipBorderOpacity = 0.16
-    static let whosHereChipBorderWidth: CGFloat = 0.8
 
     /// Rows needed for the collapsed (or ≤6 full) grid — never more than max visible.
     static func whosHereGridRowCount(memberCount: Int) -> Int {
@@ -155,11 +149,9 @@ enum FriendDetailSheetLayout {
             + CGFloat(max(0, rows - 1)) * whosHereGridSpacing
     }
 
-    /// Label + spacing + grid for this membership size.
+    /// Member grid only (section label removed).
     static func whosHereBlockHeight(memberCount: Int) -> CGFloat {
-        whosHereSectionTitleHeight
-            + whosHereSectionLabelSpacing
-            + whosHereGridViewportHeight(memberCount: memberCount)
+        whosHereGridViewportHeight(memberCount: memberCount)
     }
 
     // MARK: - Avatar stack (max 3 faces + overflow)

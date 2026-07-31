@@ -54,13 +54,14 @@ struct FriendDetailBottomSheet: View {
     var body: some View {
         GeometryReader { proxy in
             let bottomInset = proxy.safeAreaInsets.bottom
-            let totalHeight = sheetHeight + bottomInset
+            let bottomPadding = FriendDetailSheetLayout.sheetHomeIndicatorPadding + bottomInset
+            let totalHeight = sheetHeight + bottomPadding
             let closedOffset = totalHeight + FriendDetailBottomSheetLayout.presentationOvershoot
 
             ZStack(alignment: .bottom) {
                 dismissLayer
 
-                sheetContainer(bottomInset: bottomInset)
+                sheetContainer(bottomPadding: bottomPadding, totalHeight: totalHeight)
                     .compositingGroup()
                     .scaleEffect(
                         presentationScale,
@@ -93,9 +94,10 @@ struct FriendDetailBottomSheet: View {
             .onTapGesture(perform: animateDismiss)
     }
 
-    private func sheetContainer(bottomInset: CGFloat) -> some View {
-        let totalHeight = sheetHeight + bottomInset
-        return ZStack(alignment: .top) {
+    private func sheetContainer(bottomPadding: CGFloat, totalHeight: CGFloat) -> some View {
+        // Bottom-align content with a tight home-indicator pad so secondary
+        // actions sit close to the screen edge on every puck popup.
+        ZStack(alignment: .top) {
             sheetBackground
             FriendDetailSheet(
                 puck: puck,
@@ -103,7 +105,9 @@ struct FriendDetailBottomSheet: View {
                 onStartPush: handleStartPush,
                 onSelectMember: handleSelectMember
             )
-            .frame(maxWidth: .infinity, maxHeight: sheetHeight, alignment: .top)
+            .frame(maxWidth: .infinity, alignment: .top)
+            .padding(.bottom, bottomPadding)
+            .frame(maxWidth: .infinity, maxHeight: totalHeight, alignment: .bottom)
             dragIndicator
         }
         .frame(maxWidth: .infinity)

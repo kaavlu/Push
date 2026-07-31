@@ -99,9 +99,9 @@ struct WhosHerePersonPuck: View {
                 Capsule()
                     .stroke(
                         PushColorPalette.Accent.walnut.opacity(
-                            FriendDetailSheetLayout.whosHereChipBorderOpacity
+                            FriendDetailSheetLayout.multiPersonSecondaryBorderOpacity
                         ),
-                        lineWidth: FriendDetailSheetLayout.whosHereChipBorderWidth
+                        lineWidth: FriendDetailSheetLayout.multiPersonSecondaryBorderWidth
                     )
             }
         }
@@ -110,7 +110,7 @@ struct WhosHerePersonPuck: View {
     }
 
     private var chipFill: Color {
-        Color.white.opacity(FriendDetailSheetLayout.whosHereChipFillOpacity)
+        Color.white.opacity(FriendDetailSheetLayout.multiPersonSecondaryFillOpacity)
     }
 }
 
@@ -130,16 +130,18 @@ struct WhosHereOverflowPuck: View {
                 .frame(height: FriendDetailSheetLayout.whosHerePuckHeight)
                 .background(
                     Capsule().fill(
-                        Color.white.opacity(FriendDetailSheetLayout.whosHereChipFillOpacity)
+                        Color.white.opacity(
+                            FriendDetailSheetLayout.multiPersonSecondaryFillOpacity
+                        )
                     )
                 )
                 .overlay {
                     Capsule()
                         .stroke(
                             PushColorPalette.Accent.walnut.opacity(
-                                FriendDetailSheetLayout.whosHereChipBorderOpacity
+                                FriendDetailSheetLayout.multiPersonSecondaryBorderOpacity
                             ),
-                            lineWidth: FriendDetailSheetLayout.whosHereChipBorderWidth
+                            lineWidth: FriendDetailSheetLayout.multiPersonSecondaryBorderWidth
                         )
                 }
         }

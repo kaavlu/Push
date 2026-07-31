@@ -551,10 +551,6 @@ final class PushTests: XCTestCase {
             FriendDetailSheetContent.summaryTitle(for: puck),
             "2 friends together"
         )
-        XCTAssertEqual(
-            FriendDetailSheetContent.whosHereSectionLabel(memberCount: 2),
-            "WHO’S HERE · 2"
-        )
     }
 
     func testGroupContextTitleTogetherWithoutVenue() throws {
