@@ -47,7 +47,7 @@ struct FriendDetailGroupContent: View {
         .padding(.horizontal, FriendDetailSheetLayout.contentHorizontalPadding)
         .padding(.top, FriendDetailSheetLayout.multiPersonTopPadding)
         .padding(.bottom, FriendDetailSheetLayout.multiPersonActionBottomPadding)
-        .frame(maxWidth: .infinity, alignment: .top)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
 
     // MARK: Summary

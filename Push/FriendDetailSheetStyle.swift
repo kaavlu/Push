@@ -44,34 +44,49 @@ enum FriendDetailSheetLayout {
 
     static let sheetCornerRadius: CGFloat = 32
 
-    /// Height for map puck detail sheets.
-    /// Multi-person adds member grid sized to actual rows (1 or 2).
-    /// Join CTA is a secondary-height sunbeam row; absence drops that row.
+    /// Content-height for the sheet body (above the home-indicator band).
+    /// Built from the same spacing tokens the view uses — not a magic base height.
     static func compactSheetHeight(
         _ layout: PushAdaptiveLayout,
         showsAskToJoin: Bool = true,
         isMultiPerson: Bool = false,
         memberCount: Int = 0
     ) -> CGFloat {
-        // Individual: summary + secondary actions (no join).
-        // Multi: context header + member grid + optional Ask to join + secondaries.
-        var height = layout.value(compact: 220, standard: 212, large: 206)
+        // layout is reserved for future adaptive header metrics.
+        _ = layout
+
+        // Mirrors FriendDetailGroupContent VStack children + spacing.
+        var height = multiPersonTopPadding
+        height += isMultiPerson ? multiPersonHeaderHeight : multiPersonAvatarSize
+
         if isMultiPerson {
-            // Drop individual avatar band; add member grid only (no section label).
-            height -= 18
-            height += multiPersonSectionSpacing + whosHereBlockHeight(memberCount: memberCount)
-            if showsAskToJoin {
-                height += multiPersonSecondaryHeight + multiPersonActionsSpacing
-            }
-        } else if showsAskToJoin {
-            height += multiPersonSecondaryHeight + multiPersonActionsSpacing
+            // gap: header → member grid
+            height += multiPersonSectionSpacing
+            height += whosHereGridViewportHeight(memberCount: memberCount)
+            // gap: grid → divider
+            height += multiPersonSectionSpacing
+        } else {
+            // gap: header → divider
+            height += multiPersonSectionSpacing
         }
+
+        height += multiPersonDividerHeight
+        // gap: divider → actions
+        height += multiPersonSectionSpacing
+
+        if showsAskToJoin {
+            height += multiPersonSecondaryHeight
+            height += multiPersonActionsSpacing
+        }
+        // Directions | Start push row
+        height += multiPersonSecondaryHeight
+        height += multiPersonActionBottomPadding
         return height
     }
 
     /// Legacy aliases.
     static func individualSheetHeight(_ layout: PushAdaptiveLayout) -> CGFloat {
-        compactSheetHeight(layout, showsAskToJoin: true, isMultiPerson: false)
+        compactSheetHeight(layout, showsAskToJoin: false, isMultiPerson: false)
     }
 
     static func multiPersonSheetHeight(_ layout: PushAdaptiveLayout) -> CGFloat {
@@ -82,18 +97,15 @@ enum FriendDetailSheetLayout {
         compactSheetHeight(layout, showsAskToJoin: true, isMultiPerson: true)
     }
 
-    static let multiPersonSectionSpacing: CGFloat = 10
+    static let multiPersonSectionSpacing: CGFloat = 12
     static let multiPersonInfoSpacing: CGFloat = 10
     static let multiPersonTextSpacing: CGFloat = 3
     static let multiPersonTrailingSpacing: CGFloat = 4
     static let multiPersonDividerOpacity = 0.12
     static let multiPersonDividerHeight: CGFloat = 1
     static let multiPersonActionsSpacing: CGFloat = 8
-    /// Content gap under the action row before the home-indicator zone.
-    /// Kept tight so all puck popups sit closer to the bottom edge.
-    static let multiPersonActionBottomPadding: CGFloat = 0
-    /// Extra inset inside the home-indicator band (all puck sheets).
-    static let sheetHomeIndicatorPadding: CGFloat = 2
+    /// Padding under the action row, still above the home-indicator band.
+    static let multiPersonActionBottomPadding: CGFloat = 12
     static let multiPersonSecondaryHeight: CGFloat = 44
     static let multiPersonSecondaryCornerRadius: CGFloat = 14
     static let multiPersonSecondaryIconSize: CGFloat = 14
@@ -105,7 +117,10 @@ enum FriendDetailSheetLayout {
     static let multiPersonOverflowBadgeFillOpacity = 0.92
     static let multiPersonActivityIconSize: CGFloat = 12
     static let multiPersonActivityIconSpacing: CGFloat = 5
-    static let multiPersonTopPadding: CGFloat = 24
+    /// Clears the drag indicator; content starts below it.
+    static let multiPersonTopPadding: CGFloat = 28
+    /// Multi-person title + subtitle column (no avatar).
+    static let multiPersonHeaderHeight: CGFloat = 48
     /// Avoid squashed subtitle text; truncate cleanly at the trailing edge.
     static let multiPersonSubtitleMinimumScale: CGFloat = 0.92
 
@@ -147,11 +162,6 @@ enum FriendDetailSheetLayout {
         let rows = whosHereGridRowCount(memberCount: memberCount)
         return CGFloat(rows) * whosHerePuckHeight
             + CGFloat(max(0, rows - 1)) * whosHereGridSpacing
-    }
-
-    /// Member grid only (section label removed).
-    static func whosHereBlockHeight(memberCount: Int) -> CGFloat {
-        whosHereGridViewportHeight(memberCount: memberCount)
     }
 
     // MARK: - Avatar stack (max 3 faces + overflow)

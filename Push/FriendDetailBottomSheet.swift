@@ -19,7 +19,7 @@ struct FriendDetailBottomSheet: View {
     /// only when released back open.
     @State private var dragTranslation: CGFloat = 0
     @State private var isDragging = false
-    /// Who’s here overflow: show all members (scroll inside fixed grid height).
+    /// Member overflow: show all members (scroll inside fixed grid height).
     @State private var isMembersExpanded = false
 
     private var isMultiPerson: Bool {
@@ -33,7 +33,8 @@ struct FriendDetailBottomSheet: View {
             && !isMembersExpanded
     }
 
-    private var sheetHeight: CGFloat {
+    /// Content band height (drag indicator + body), excluding home-indicator glass.
+    private var contentHeight: CGFloat {
         let memberCount = FriendDetailSheetContent.displayMembers(for: puck).count
         return FriendDetailSheetLayout.compactSheetHeight(
             layout,
@@ -54,14 +55,14 @@ struct FriendDetailBottomSheet: View {
     var body: some View {
         GeometryReader { proxy in
             let bottomInset = proxy.safeAreaInsets.bottom
-            let bottomPadding = FriendDetailSheetLayout.sheetHomeIndicatorPadding + bottomInset
-            let totalHeight = sheetHeight + bottomPadding
+            // Content hugs its measured height; home-indicator band is pure chrome.
+            let totalHeight = contentHeight + bottomInset
             let closedOffset = totalHeight + FriendDetailBottomSheetLayout.presentationOvershoot
 
             ZStack(alignment: .bottom) {
                 dismissLayer
 
-                sheetContainer(bottomPadding: bottomPadding, totalHeight: totalHeight)
+                sheetContainer(totalHeight: totalHeight, contentHeight: contentHeight)
                     .compositingGroup()
                     .scaleEffect(
                         presentationScale,
@@ -94,9 +95,10 @@ struct FriendDetailBottomSheet: View {
             .onTapGesture(perform: animateDismiss)
     }
 
-    private func sheetContainer(bottomPadding: CGFloat, totalHeight: CGFloat) -> some View {
-        // Bottom-align content with a tight home-indicator pad so secondary
-        // actions sit close to the screen edge on every puck popup.
+    private func sheetContainer(totalHeight: CGFloat, contentHeight: CGFloat) -> some View {
+        // Top-align content in the content band; leave bottomInset as empty
+        // glass under the actions so the home indicator sits in chrome, not
+        // under buttons, without double-padding hacks.
         ZStack(alignment: .top) {
             sheetBackground
             FriendDetailSheet(
@@ -105,9 +107,7 @@ struct FriendDetailBottomSheet: View {
                 onStartPush: handleStartPush,
                 onSelectMember: handleSelectMember
             )
-            .frame(maxWidth: .infinity, alignment: .top)
-            .padding(.bottom, bottomPadding)
-            .frame(maxWidth: .infinity, maxHeight: totalHeight, alignment: .bottom)
+            .frame(maxWidth: .infinity, maxHeight: contentHeight, alignment: .top)
             dragIndicator
         }
         .frame(maxWidth: .infinity)
@@ -134,7 +134,7 @@ struct FriendDetailBottomSheet: View {
             .onChanged { value in
                 guard !isDismissing else { return }
                 isDragging = true
-                // Upward drag expands Who’s here when overflow is collapsed.
+                // Upward drag expands member overflow when collapsed.
                 if canExpandMembers, value.translation.height < 0 {
                     dragTranslation = 0
                     return
