@@ -10,24 +10,42 @@ struct FriendDetailBottomSheet: View {
     let puck: MapPuckData
     let onDismiss: () -> Void
     let onStartPush: (StartPushLaunchContext) -> Void
+    var onSelectMember: (String) -> Void = { _ in }
 
     /// `false` → sheet sits just below the screen; `true` → settled open.
-    /// Animating this value (not a full-screen transition) keeps glass hangout
-    /// actions glued to the chrome while still giving a springy slide.
     @State private var isSettled = false
     @State private var isDismissing = false
     /// Interactive drag-to-dismiss translation (down only). Tracks 1:1; springs
     /// only when released back open.
     @State private var dragTranslation: CGFloat = 0
     @State private var isDragging = false
+    /// Member overflow: show all members (scroll inside fixed grid height).
+    @State private var isMembersExpanded = false
 
-    private var sheetHeight: CGFloat {
-        switch puck.kind {
-        case .individual:
-            return FriendDetailSheetLayout.individualSheetHeight(layout)
-        case .hangout, .cluster, .friendGroup:
-            return FriendDetailSheetLayout.hangoutSheetHeight(layout)
-        }
+    private var isMultiPerson: Bool {
+        FriendDetailSheetContent.isMultiPerson(puck)
+    }
+
+    private var canExpandMembers: Bool {
+        guard isMultiPerson else { return false }
+        let count = FriendDetailSheetContent.displayMembers(for: puck).count
+        return FriendDetailSheetContent.needsWhosHereOverflow(memberCount: count)
+            && !isMembersExpanded
+    }
+
+    /// Content band height (drag indicator + body), excluding home-indicator glass.
+    private var contentHeight: CGFloat {
+        let memberCount = FriendDetailSheetContent.displayMembers(for: puck).count
+        return FriendDetailSheetLayout.compactSheetHeight(
+            layout,
+            showsAskToJoin: FriendDetailSheetContent.showsAskToJoin(for: puck),
+            isMultiPerson: isMultiPerson,
+            memberCount: memberCount
+        )
+    }
+
+    private var sheetSurface: MapPopupSheetSurface {
+        .controlGlass
     }
 
     private var presentationAnimation: Animation {
@@ -37,21 +55,20 @@ struct FriendDetailBottomSheet: View {
     var body: some View {
         GeometryReader { proxy in
             let bottomInset = proxy.safeAreaInsets.bottom
-            let totalHeight = sheetHeight + bottomInset
+            // Content hugs its measured height; home-indicator band is pure chrome.
+            let totalHeight = contentHeight + bottomInset
             let closedOffset = totalHeight + FriendDetailBottomSheetLayout.presentationOvershoot
 
             ZStack(alignment: .bottom) {
                 dismissLayer
 
-                sheetContainer(bottomInset: bottomInset)
+                sheetContainer(totalHeight: totalHeight, contentHeight: contentHeight)
                     .compositingGroup()
                     .scaleEffect(
                         presentationScale,
                         anchor: .bottom
                     )
                     .offset(y: sheetOffset(closedOffset: closedOffset))
-                    // Spring open/close + snap-back. Drag updates skip this path
-                    // via `isDragging` so the card follows the finger directly.
                     .animation(isDragging ? nil : presentationAnimation, value: isSettled)
                     .animation(isDragging ? nil : presentationAnimation, value: dragTranslation)
             }
@@ -78,46 +95,71 @@ struct FriendDetailBottomSheet: View {
             .onTapGesture(perform: animateDismiss)
     }
 
-    private func sheetContainer(bottomInset: CGFloat) -> some View {
-        let totalHeight = sheetHeight + bottomInset
-        return ZStack(alignment: .top) {
+    private func sheetContainer(totalHeight: CGFloat, contentHeight: CGFloat) -> some View {
+        // Top-align content in the content band; leave bottomInset as empty
+        // glass under the actions so the home indicator sits in chrome, not
+        // under buttons, without double-padding hacks.
+        ZStack(alignment: .top) {
             sheetBackground
-            // Top-align so any extra sheet height sits under the action row
-            // (not above content near the drag handle). Bottom padding is shared
-            // via `FriendDetailSheetLayout.actionBottomPadding`.
-            FriendDetailSheet(puck: puck, onStartPush: handleStartPush)
-                .frame(maxWidth: .infinity, maxHeight: sheetHeight, alignment: .top)
+            FriendDetailSheet(
+                puck: puck,
+                isMembersExpanded: $isMembersExpanded,
+                onStartPush: handleStartPush,
+                onSelectMember: handleSelectMember
+            )
+            .frame(maxWidth: .infinity, maxHeight: contentHeight, alignment: .top)
             dragIndicator
         }
         .frame(maxWidth: .infinity)
         .frame(height: totalHeight, alignment: .top)
         .clipShape(FriendDetailBottomSheetShape())
         .contentShape(Rectangle())
-        .gesture(dismissDrag)
+        .gesture(sheetDrag)
         .accessibilityAddTraits(.isModal)
     }
 
     private var sheetBackground: some View {
-        MapPopupSheetBackground(shape: FriendDetailBottomSheetShape())
+        MapPopupSheetBackground(
+            shape: FriendDetailBottomSheetShape(),
+            surface: sheetSurface
+        )
     }
 
     private var dragIndicator: some View {
         PushMapBottomSheetDragIndicator()
     }
 
-    private var dismissDrag: some Gesture {
+    private var sheetDrag: some Gesture {
         DragGesture(minimumDistance: FriendDetailBottomSheetLayout.dragMinimumDistance)
             .onChanged { value in
                 guard !isDismissing else { return }
                 isDragging = true
+                // Upward drag expands member overflow when collapsed.
+                if canExpandMembers, value.translation.height < 0 {
+                    dragTranslation = 0
+                    return
+                }
                 dragTranslation = max(0, value.translation.height)
             }
             .onEnded { value in
                 guard !isDismissing else { return }
                 isDragging = false
+
+                if canExpandMembers,
+                   value.translation.height < -FriendDetailSheetLayout.whosHereExpandDragThreshold
+                    || value.predictedEndTranslation.height
+                        < -FriendDetailSheetLayout.whosHereExpandDragThreshold {
+                    withAnimation(PushMotion.sheet) {
+                        isMembersExpanded = true
+                    }
+                    dragTranslation = 0
+                    return
+                }
+
                 let shouldDismiss =
                     value.translation.height > FriendDetailBottomSheetLayout.dismissTranslation
-                    || value.predictedEndTranslation.height > FriendDetailBottomSheetLayout.dismissPredictedTranslation
+                    || value.predictedEndTranslation.height
+                        > FriendDetailBottomSheetLayout.dismissPredictedTranslation
                 if shouldDismiss {
                     animateDismiss()
                 } else {
@@ -128,8 +170,6 @@ struct FriendDetailBottomSheet: View {
 
     private func presentSheet() {
         guard !isSettled else { return }
-        // One laid-out off-screen frame, then spring open — same idea as the
-        // create menu: slide + soft scale from the bottom edge.
         DispatchQueue.main.async {
             isSettled = true
         }
@@ -148,11 +188,16 @@ struct FriendDetailBottomSheet: View {
         }
     }
 
+    private func handleSelectMember(_ personID: String) {
+        beginDismiss {
+            onDismiss()
+            onSelectMember(personID)
+        }
+    }
+
     private func beginDismiss(completion: @escaping () -> Void) {
         guard !isDismissing else { return }
         isDismissing = true
-        // Keep any in-progress drag offset so close continues downward from the
-        // finger position instead of snapping back to fully open first.
         isDragging = false
         guard isSettled else {
             completion()
@@ -220,5 +265,3 @@ enum FriendDetailBottomSheetColor {
     static let highlightTopOpacity = PushMapGlassTokens.sheetHighlightTopOpacity
     static let highlightSideOpacity = PushMapGlassTokens.sheetHighlightSideOpacity
 }
-
-// MapPopupSheetBackground lives in DesignSystem/Surfaces/PushMapGlass.swift.

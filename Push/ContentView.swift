@@ -21,6 +21,8 @@ struct ContentView: View {
     @State private var selectedPuck: MapPuckData?
     @State private var selectedRegionalPuck: RegionalPuckModel?
     @State private var startPushContext: StartPushLaunchContext?
+    /// Map Who’s here → expand this friend row when the Friends tab opens.
+    @State private var friendsFocusFriendID: String?
     /// Feed tab center + → create-post hub (fixture UI pass).
     @State private var isCreatePostPresented = false
     @State private var mapSpan = MapDefaults.region.span
@@ -73,10 +75,13 @@ struct ContentView: View {
             // Friends/Feed/Pushes stay under the map bottom nav (not fullScreenCovers)
             // so the floating bar keeps its position; + is contextual per tab.
             if isFriendsPresented {
-                FriendsView(onLocateFriend: locateFriendOnMap)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .transition(.opacity)
-                    .zIndex(TabOverlayLayout.zIndex)
+                FriendsView(
+                    onLocateFriend: locateFriendOnMap,
+                    focusFriendID: $friendsFocusFriendID
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .transition(.opacity)
+                .zIndex(TabOverlayLayout.zIndex)
             }
 
             if isFeedPresented {
@@ -116,19 +121,22 @@ struct ContentView: View {
                 .zIndex(TopDropdownLayout.expandedZIndex)
             }
 
+            // Always mounted: map puck sheets layer above it; Friends/Feed/Pushes
+            // keep it so users can leave those tabs (never hide with tab overlays).
             BottomNavigationBar(
                 selectedItem: $selectedNavigationItem,
                 action: selectNavigationItem
             )
-                .padding(.horizontal, BottomNavigationLayout.horizontalMargin(layout))
-                .padding(.bottom, BottomNavigationLayout.bottomMargin(layout))
-                .zIndex(TabOverlayLayout.bottomNavZIndex)
+            .padding(.horizontal, BottomNavigationLayout.horizontalMargin(layout))
+            .padding(.bottom, BottomNavigationLayout.bottomMargin(layout))
+            .zIndex(TabOverlayLayout.bottomNavZIndex)
 
             if !isTabOverlayPresented, let selectedPuck {
                 FriendDetailBottomSheet(
                     puck: selectedPuck,
                     onDismiss: dismissSelectedPuck,
-                    onStartPush: launchStartPush
+                    onStartPush: launchStartPush,
+                    onSelectMember: openFriendOnFriendsTab
                 )
             }
 
@@ -304,22 +312,19 @@ struct ContentView: View {
         isCreateMenuPresented = false
 
         if item == .group {
-            selectedPuck = nil
-            selectedRegionalPuck = nil
+            clearMapSheetSelection()
             selectedNavigationItem = .group
             return
         }
 
         if item == .feed {
-            selectedPuck = nil
-            selectedRegionalPuck = nil
+            clearMapSheetSelection()
             selectedNavigationItem = .feed
             return
         }
 
         if item == .plans {
-            selectedPuck = nil
-            selectedRegionalPuck = nil
+            clearMapSheetSelection()
             selectedNavigationItem = .plans
             return
         }
@@ -333,7 +338,10 @@ struct ContentView: View {
         case .groups:
             // Friends is embedded under the bottom nav; keep a destination for
             // any residual MainMapRoute.groups presentation.
-            FriendsView(onLocateFriend: locateFriendOnMap)
+            FriendsView(
+                onLocateFriend: locateFriendOnMap,
+                focusFriendID: $friendsFocusFriendID
+            )
         case .profile:
             ProfileView {
                 presentedRoute = nil
@@ -389,18 +397,16 @@ struct ContentView: View {
     private func selectMapPuck(_ puck: MapPuckRenderModel) {
         isFilterDropdownExpanded = false
         if case .regionalCluster(let regional) = puck {
-            selectedPuck = nil
-            selectedRegionalPuck = regional
+            presentRegionalPuck(regional)
             return
         }
-        selectedRegionalPuck = nil
         if let selected = viewModel.select(puck) {
             presentSelectedPuck(selected)
         }
     }
 
     private func zoomIntoRegionalPuck(_ puck: RegionalPuckModel) {
-        selectedRegionalPuck = nil
+        clearMapSheetSelection()
         viewModel.focus(on: puck)
         guard let focusRequest = viewModel.mapFocusRequest else { return }
         forcedRenderSpan = focusRequest.region.span
@@ -408,7 +414,7 @@ struct ContentView: View {
     }
 
     private func dismissMapSelection() {
-        selectedRegionalPuck = nil
+        clearMapSheetSelection()
     }
 
     private func locateFriendOnMap(_ personID: Person.ID) -> Bool {
@@ -428,11 +434,29 @@ struct ContentView: View {
     private func presentSelectedPuck(_ puck: MapPuckData) {
         // Sheet owns its slide animation (offset), so identity changes stay
         // unanimated — otherwise glass hangout actions paint before the chrome.
+        selectedRegionalPuck = nil
         selectedPuck = puck
     }
 
-    private func dismissSelectedPuck() {
+    private func presentRegionalPuck(_ regional: RegionalPuckModel) {
         selectedPuck = nil
+        selectedRegionalPuck = regional
+    }
+
+    private func clearMapSheetSelection() {
+        selectedPuck = nil
+        selectedRegionalPuck = nil
+    }
+
+    private func dismissSelectedPuck() {
+        clearMapSheetSelection()
+    }
+
+    /// Dismiss the map sheet and open Friends with that person expanded.
+    private func openFriendOnFriendsTab(_ personID: String) {
+        clearMapSheetSelection()
+        friendsFocusFriendID = personID
+        selectedNavigationItem = .group
     }
 
     private func launchStartPush(_ context: StartPushLaunchContext) {

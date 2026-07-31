@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7FF5ED4215BC74A5ACBF4902 /* FriendDetailWhosHere.swift in Sources */ = {isa = PBXBuildFile; fileRef = 642E688D69070AF2DFB0CE64 /* FriendDetailWhosHere.swift */; };
+		4396B548EF27235296484C16 /* FriendDetailGroupContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F8A81D8F0699BE7992D9E49 /* FriendDetailGroupContent.swift */; };
 		84FCC6745A1D5C05C6F24035 /* PostAuthGhostScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDD9851C0EF09EECFAAFA9D9 /* PostAuthGhostScreen.swift */; };
 		81A13BBA6D83A06497F05D91 /* PostAuthTeachingMapCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ABEEEFF5A6F9DC0949EB160 /* PostAuthTeachingMapCard.swift */; };
 		A6FCDB84FF27603381B83AD1 /* PostAuthOnboardingCascade.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F81F3735983DDF6C002FC32 /* PostAuthOnboardingCascade.swift */; };
@@ -430,6 +432,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		642E688D69070AF2DFB0CE64 /* FriendDetailWhosHere.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FriendDetailWhosHere.swift"; sourceTree = "<group>"; };
+		8F8A81D8F0699BE7992D9E49 /* FriendDetailGroupContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FriendDetailGroupContent.swift"; sourceTree = "<group>"; };
 		FDD9851C0EF09EECFAAFA9D9 /* PostAuthGhostScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PostAuthGhostScreen.swift"; path = "Auth/PostAuthGhostScreen.swift"; sourceTree = "<group>"; };
 		9ABEEEFF5A6F9DC0949EB160 /* PostAuthTeachingMapCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PostAuthTeachingMapCard.swift"; path = "Auth/PostAuthTeachingMapCard.swift"; sourceTree = "<group>"; };
 		5F81F3735983DDF6C002FC32 /* PostAuthOnboardingCascade.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PostAuthOnboardingCascade.swift"; path = "Auth/PostAuthOnboardingCascade.swift"; sourceTree = "<group>"; };
@@ -890,6 +894,8 @@
 			children = (
 				5217A2692FF1B6D90011F860 /* PushApp.swift */,
 				5217A26B2FF1B6D90011F860 /* ContentView.swift */,
+				642E688D69070AF2DFB0CE64 /* FriendDetailWhosHere.swift */,
+				8F8A81D8F0699BE7992D9E49 /* FriendDetailGroupContent.swift */,
 				FDD9851C0EF09EECFAAFA9D9 /* PostAuthGhostScreen.swift */,
 				9ABEEEFF5A6F9DC0949EB160 /* PostAuthTeachingMapCard.swift */,
 				5F81F3735983DDF6C002FC32 /* PostAuthOnboardingCascade.swift */,
@@ -1455,6 +1461,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				5217A26C2FF1B6D90011F860 /* ContentView.swift in Sources */,
+				7FF5ED4215BC74A5ACBF4902 /* FriendDetailWhosHere.swift in Sources */,
+				4396B548EF27235296484C16 /* FriendDetailGroupContent.swift in Sources */,
 				84FCC6745A1D5C05C6F24035 /* PostAuthGhostScreen.swift in Sources */,
 				81A13BBA6D83A06497F05D91 /* PostAuthTeachingMapCard.swift in Sources */,
 				A6FCDB84FF27603381B83AD1 /* PostAuthOnboardingCascade.swift in Sources */,

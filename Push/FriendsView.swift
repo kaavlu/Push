@@ -13,6 +13,8 @@ import SwiftUI
 struct FriendsView: View {
     @Environment(\.pushLayout) private var layout
     private let onLocateFriend: (Person.ID) -> Bool
+    /// When set (e.g. from map Who’s here), expand that friend row after present.
+    @Binding private var focusFriendID: String?
     @StateObject private var viewModel: FriendsViewModel
     @StateObject private var groupsViewModel: GroupsViewModel
     @State private var mode: FriendsMode = .friends
@@ -21,10 +23,16 @@ struct FriendsView: View {
     @State private var startPushContext: StartPushLaunchContext?
     @State private var groupSearchText = ""
     @State private var toastMessage: String?
+    /// Ensures we re-scroll once the list has laid out the expanded row.
+    @State private var pendingScrollFriendID: String?
 
     @MainActor
-    init(onLocateFriend: @escaping (Person.ID) -> Bool = { _ in false }) {
+    init(
+        onLocateFriend: @escaping (Person.ID) -> Bool = { _ in false },
+        focusFriendID: Binding<String?> = .constant(nil)
+    ) {
         self.onLocateFriend = onLocateFriend
+        _focusFriendID = focusFriendID
         _viewModel = StateObject(wrappedValue: FriendsViewModel())
         _groupsViewModel = StateObject(wrappedValue: GroupsViewModel())
     }
@@ -32,9 +40,11 @@ struct FriendsView: View {
     init(
         viewModel: FriendsViewModel,
         groupsViewModel: GroupsViewModel,
-        onLocateFriend: @escaping (Person.ID) -> Bool = { _ in false }
+        onLocateFriend: @escaping (Person.ID) -> Bool = { _ in false },
+        focusFriendID: Binding<String?> = .constant(nil)
     ) {
         self.onLocateFriend = onLocateFriend
+        _focusFriendID = focusFriendID
         _viewModel = StateObject(wrappedValue: viewModel)
         _groupsViewModel = StateObject(wrappedValue: groupsViewModel)
     }
@@ -58,6 +68,20 @@ struct FriendsView: View {
                     groupsViewModel.closeDetail()
                 }
             }
+            .onAppear(perform: consumeFocusFriendIfNeeded)
+            .onChange(of: focusFriendID) { _ in
+                consumeFocusFriendIfNeeded()
+            }
+    }
+
+    private func consumeFocusFriendIfNeeded() {
+        guard let id = focusFriendID else { return }
+        mode = .friends
+        viewModel.searchText = ""
+        viewModel.selectedFilter = .all
+        viewModel.expandFriend(id: id)
+        pendingScrollFriendID = id
+        focusFriendID = nil
     }
 
     /// Drives profile-style cover presentation for group detail.
@@ -164,11 +188,36 @@ struct FriendsView: View {
                 await viewModel.refresh()
                 await groupsViewModel.load()
             }
-            .onChange(of: viewModel.expandedFriendID) { expandedID in
-                guard let expandedID else { return }
-                withAnimation(.easeInOut(duration: 0.25)) {
-                    proxy.scrollTo(expandedID, anchor: .center)
-                }
+            .onChange(of: viewModel.expandedFriendID) { _ in
+                scrollToFocusedFriend(using: proxy)
+            }
+            .onChange(of: viewModel.filteredRows.map(\.id)) { _ in
+                scrollToFocusedFriend(using: proxy)
+            }
+            .onAppear {
+                scrollToFocusedFriend(using: proxy)
+            }
+        }
+    }
+
+    /// Scroll the expanded / pending friend into view once the row exists.
+    private func scrollToFocusedFriend(using proxy: ScrollViewProxy) {
+        let targetID = pendingScrollFriendID ?? viewModel.expandedFriendID
+        guard let targetID else { return }
+        guard viewModel.filteredRows.contains(where: { $0.id == targetID }) else { return }
+
+        // Immediate + delayed passes: LazyVStack often lacks geometry on first expand.
+        DispatchQueue.main.async {
+            withAnimation(.easeInOut(duration: 0.25)) {
+                proxy.scrollTo(targetID, anchor: .center)
+            }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                proxy.scrollTo(targetID, anchor: .center)
+            }
+            if pendingScrollFriendID == targetID {
+                pendingScrollFriendID = nil
             }
         }
     }

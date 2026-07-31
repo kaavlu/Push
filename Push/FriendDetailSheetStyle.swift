@@ -10,34 +10,11 @@ enum FriendDetailSheetLayout {
     // MARK: - Shared
 
     static let heroTopPadding: CGFloat = 25
-    static let heroBottomPadding: CGFloat = 20
-    static let heroGroupSize: CGFloat = 80
-    static let heroNameSpacing: CGFloat = 8
-    static let heroInnerSpacing: CGFloat = 4
-    static let dividerVerticalPadding: CGFloat = 20
-    static let actionHorizontalPadding: CGFloat = 20
     /// Shared gap from the bottom of the action row to the content floor
     /// (above the home-indicator inset). Kept identical for individual and
-    /// hangout/group sheets so map popups feel standardized.
+    /// multi-person sheets so map popups feel standardized.
     static let actionBottomPadding: CGFloat = 14
     static let actionSpacing: CGFloat = 10
-
-    // MARK: - Group Info Rows
-
-    static let infoHorizontalPadding: CGFloat = 24
-    static let infoRowVerticalPadding: CGFloat = 10
-    static let infoIconSize: CGFloat = 14
-    static let infoIconFrameWidth: CGFloat = 20
-    static let infoIconSpacing: CGFloat = 10
-
-    // MARK: - Group Action Buttons
-
-    static let actionHeight: CGFloat = 56
-    static let actionCornerRadius: CGFloat = 16
-    static let actionIconSize: CGFloat = 16
-    static let actionLabelSpacing: CGFloat = 4
-    static let actionMinimumScaleFactor: CGFloat = 0.8
-    static let primaryTintOpacity: CGFloat = 0.35
 
     // MARK: - Individual: Section
 
@@ -59,58 +36,153 @@ enum FriendDetailSheetLayout {
     static let statusCardIconSize: CGFloat = 18
     static let statusCardIconCircleSize: CGFloat = 44
     static let statusCardIconCircleOpacity: CGFloat = 0.18
-    static let statusCardTextSpacing: CGFloat = 6
     static let statusCardAccentTintOpacity: CGFloat = 0.08
     static let statusCardAccentStrokeOpacity: CGFloat = 0.20
     static let statusCardStrokeWidth: CGFloat = 0.8
 
-    // MARK: - Individual: Status Chip
+    // MARK: - Compact map puck sheet (individual + multi-person, Issue #139)
 
-    static let statusChipHorizontalPadding: CGFloat = 8
-    static let statusChipVerticalPadding: CGFloat = 3
-    static let statusChipBackgroundOpacity: CGFloat = 0.18
-    static let statusChipStrokeOpacity: CGFloat = 0.28
-
-    // MARK: - Individual: Header Chip
-
-    static let headerChipHorizontalPadding: CGFloat = 10
-    static let headerChipVerticalPadding: CGFloat = 3
-
-    // MARK: - Individual: Sheet Presentation
-
-    /// Content is top-aligned; extra height falls below the action row.
-    /// Sized tightly to content so single-friend button-to-floor spacing matches
-    /// hangout/group (`actionBottomPadding` + safe-area inset).
-    static func individualSheetHeight(_ layout: PushAdaptiveLayout) -> CGFloat {
-        layout.value(compact: 260, standard: 254, large: 252)
-    }
     static let sheetCornerRadius: CGFloat = 32
 
-    // MARK: - Individual: Primary Action Cards
+    /// Content-height for the sheet body (above the home-indicator band).
+    /// Built from the same spacing tokens the view uses — not a magic base height.
+    static func compactSheetHeight(
+        _ layout: PushAdaptiveLayout,
+        showsAskToJoin: Bool = true,
+        isMultiPerson: Bool = false,
+        memberCount: Int = 0
+    ) -> CGFloat {
+        // layout is reserved for future adaptive header metrics.
+        _ = layout
 
-    static let actionCardHeight: CGFloat = 58
-    static let actionCardCornerRadius: CGFloat = 20
-    static let actionCardIconSize: CGFloat = 18
-    static let actionCardLabelSpacing: CGFloat = 5
+        // Mirrors FriendDetailGroupContent VStack children + spacing.
+        var height = multiPersonTopPadding
+        // Individual: avatar + activity/location can exceed avatar diameter.
+        height += isMultiPerson ? multiPersonHeaderHeight : individualHeaderHeight
 
-    // MARK: - Hangout (pair + small group)
+        if isMultiPerson {
+            // gap: header → member grid
+            height += multiPersonSectionSpacing
+            height += whosHereGridViewportHeight(memberCount: memberCount)
+            // gap: grid → divider
+            height += multiPersonSectionSpacing
+        } else {
+            // gap: header → divider
+            height += multiPersonSectionSpacing
+        }
 
-    /// Tall enough for pair/small-group/friend-group stacks. Content is
-    /// top-aligned so extra height sits under the action row.
-    static func hangoutSheetHeight(_ layout: PushAdaptiveLayout) -> CGFloat {
-        layout.value(compact: 390, standard: 356, large: 336)
+        height += multiPersonDividerHeight
+        // gap: divider → actions
+        height += multiPersonSectionSpacing
+
+        if showsAskToJoin {
+            height += multiPersonSecondaryHeight
+            height += multiPersonActionsSpacing
+        }
+        // Directions | Start push row
+        height += multiPersonSecondaryHeight
+        height += multiPersonActionBottomPadding
+        return height
     }
-    static let hangoutMomentHeaderSpacing: CGFloat = 4
-    static let pairMemberTileAvatarSize: CGFloat = 72
-    static let pairMemberTileSpacing: CGFloat = 20
-    static let groupMemberTileAvatarSize: CGFloat = 56
-    static let groupMemberTileSpacing: CGFloat = 16
-    static let hangoutMemberTileNameSpacing: CGFloat = 6
 
-    // MARK: - Small Group Hangout
+    /// Legacy aliases.
+    static func individualSheetHeight(_ layout: PushAdaptiveLayout) -> CGFloat {
+        compactSheetHeight(layout, showsAskToJoin: false, isMultiPerson: false)
+    }
 
-    static let memberRowAvatarSize: CGFloat = 36
-    static let memberRowVerticalPadding: CGFloat = 9
+    static func multiPersonSheetHeight(_ layout: PushAdaptiveLayout) -> CGFloat {
+        compactSheetHeight(layout, showsAskToJoin: true, isMultiPerson: true)
+    }
+
+    static func hangoutSheetHeight(_ layout: PushAdaptiveLayout) -> CGFloat {
+        compactSheetHeight(layout, showsAskToJoin: true, isMultiPerson: true)
+    }
+
+    static let multiPersonSectionSpacing: CGFloat = 12
+    static let multiPersonInfoSpacing: CGFloat = 10
+    static let multiPersonTextSpacing: CGFloat = 3
+    static let multiPersonTrailingSpacing: CGFloat = 4
+    static let multiPersonDividerOpacity = 0.12
+    static let multiPersonDividerHeight: CGFloat = 1
+    static let multiPersonActionsSpacing: CGFloat = 8
+    /// Padding under the action row, still above the home-indicator band.
+    /// Slightly roomy so secondary buttons aren’t tight against the home indicator.
+    static let multiPersonActionBottomPadding: CGFloat = 22
+    static let multiPersonSecondaryHeight: CGFloat = 44
+    static let multiPersonSecondaryCornerRadius: CGFloat = 14
+    static let multiPersonSecondaryIconSize: CGFloat = 14
+    static let multiPersonSecondaryLabelSpacing: CGFloat = 5
+    static let multiPersonSecondaryBorderOpacity = 0.40
+    static let multiPersonSecondaryBorderWidth: CGFloat = 1.5
+    /// Light fill for secondary actions over liquid-glass sheet.
+    static let multiPersonSecondaryFillOpacity = 0.55
+    static let multiPersonOverflowBadgeFillOpacity = 0.92
+    static let multiPersonActivityIconSize: CGFloat = 12
+    static let multiPersonActivityIconSpacing: CGFloat = 5
+    /// Clears the drag indicator; content starts below it.
+    static let multiPersonTopPadding: CGFloat = 28
+    /// Multi-person title + subtitle column (no avatar).
+    static let multiPersonHeaderHeight: CGFloat = 48
+    /// Single-friend header: avatar stack + name/activity/location column.
+    static let individualHeaderHeight: CGFloat = 58
+    /// Avoid squashed subtitle text; truncate cleanly at the trailing edge.
+    static let multiPersonSubtitleMinimumScale: CGFloat = 0.92
+
+    // MARK: - Member identity chips
+
+    static let whosHereColumnCount = 3
+    /// Show everyone when count ≤ this; above it, collapse to 5 + overflow.
+    static let whosHereDirectShowLimit = 6
+    static let whosHereCollapsedMemberSlots = 5
+    static let whosHereGridSpacing: CGFloat = 6
+    /// Slightly taller identity chips vs. action buttons.
+    static let whosHerePuckHeight: CGFloat = 40
+    static let whosHereAvatarSize: CGFloat = 28
+    static let whosHereAvatarRingWidth: CGFloat = 1.25
+    static let whosHereAvatarRingOpacity = 0.55
+    static let whosHerePuckHorizontalPadding: CGFloat = 8
+    /// Tight gap between face and name.
+    static let whosHereLabelSpacing: CGFloat = 5
+    static let whosHereExpandDragThreshold: CGFloat = 36
+    /// Max rows shown without scrolling (overflow expands inside this cap).
+    static let whosHereGridMaxVisibleRows = 2
+
+    /// Rows needed for the collapsed (or ≤6 full) grid — never more than max visible.
+    static func whosHereGridRowCount(memberCount: Int) -> Int {
+        guard memberCount > 0 else { return 1 }
+        let cells = needsWhosHereOverflowCells(memberCount: memberCount)
+            ? whosHereDirectShowLimit
+            : memberCount
+        let rows = Int(ceil(Double(cells) / Double(whosHereColumnCount)))
+        return min(whosHereGridMaxVisibleRows, max(1, rows))
+    }
+
+    private static func needsWhosHereOverflowCells(memberCount: Int) -> Bool {
+        memberCount > whosHereDirectShowLimit
+    }
+
+    /// Height for the member grid viewport for the given membership size.
+    static func whosHereGridViewportHeight(memberCount: Int) -> CGFloat {
+        let rows = whosHereGridRowCount(memberCount: memberCount)
+        return CGFloat(rows) * whosHerePuckHeight
+            + CGFloat(max(0, rows - 1)) * whosHereGridSpacing
+    }
+
+    // MARK: - Avatar stack (max 3 faces + overflow)
+
+    static let multiPersonAvatarSize: CGFloat = 44
+    static let multiPersonAvatarOverlap: CGFloat = 14
+    static let multiPersonAvatarRingWidth: CGFloat = 2
+    static let multiPersonVisibleAvatarLimit = 3
+    static let multiPersonOverflowBadgeSize: CGFloat = 28
+    static let multiPersonOverflowFontSize: CGFloat = 11
+
+    /// Width for the visible faces (not always 3) so the text column gets more room.
+    static func multiPersonAvatarStackWidth(visibleCount: Int) -> CGFloat {
+        let count = max(1, min(visibleCount, multiPersonVisibleAvatarLimit))
+        return multiPersonAvatarSize
+            + CGFloat(count - 1) * (multiPersonAvatarSize - multiPersonAvatarOverlap)
+    }
 
     // MARK: - Toast
 
@@ -121,26 +193,237 @@ enum FriendDetailSheetLayout {
 }
 
 enum FriendDetailSheetContent {
-    static func groupHeadline(for people: [FriendPuckData]) -> String {
-        guard !people.isEmpty else { return "Group" }
-        if people.count == 2 {
-            return "\(people[0].name) + \(people[1].name)"
+    /// Members shown in multi-person identity (drops synthetic friend-group avatar).
+    static func displayMembers(for puck: MapPuckData) -> [FriendPuckData] {
+        switch puck.kind {
+        case .friendGroup:
+            return Array(puck.people.dropFirst())
+        case .hangout, .cluster, .individual:
+            return puck.people
         }
-        return "\(people.count) people"
+    }
+
+    /// Whether this puck uses the multi-person sheet (Who’s here grid).
+    static func isMultiPerson(_ puck: MapPuckData) -> Bool {
+        switch puck.kind {
+        case .hangout, .cluster, .friendGroup:
+            return true
+        case .individual:
+            return false
+        }
+    }
+
+    /// Summary title for multi-person sheets — count context only.
+    /// Example: `3 friends together`. Venue lives on the subtitle line.
+    static func groupContextTitle(for puck: MapPuckData) -> String {
+        let count = displayMembers(for: puck).count
+        guard count > 0 else { return "Friends together" }
+        let noun = count == 1 ? "friend" : "friends"
+        return "\(count) \(noun) together"
+    }
+
+    /// Venue / activity under the group title. Prefers `At {place}`.
+    static func groupContextSubtitle(for puck: MapPuckData) -> String {
+        let members = displayMembers(for: puck)
+        let lead = members.first
+        let venue = compactVenueLabel(
+            venueStatusText: puck.venueStatusText,
+            placeName: lead?.placeName ?? ""
+        )
+        if !venue.isEmpty {
+            if venue.hasPrefix("At ") || venue.hasPrefix("Near ") {
+                return venue
+            }
+            return "At \(venue)"
+        }
+        return multiPersonActivityLine(for: puck)
+    }
+
+    /// Muted section eyebrow: `WHO’S HERE · 3`.
+    static func whosHereSectionLabel(memberCount: Int) -> String {
+        "WHO’S HERE · \(memberCount)"
+    }
+
+    /// Whether the Who’s here grid needs an overflow cell when collapsed.
+    static func needsWhosHereOverflow(memberCount: Int) -> Bool {
+        memberCount > FriendDetailSheetLayout.whosHereDirectShowLimit
+    }
+
+    /// Overflow remainder after showing `whosHereCollapsedMemberSlots` faces.
+    static func whosHereOverflowCount(memberCount: Int) -> Int {
+        max(0, memberCount - FriendDetailSheetLayout.whosHereCollapsedMemberSlots)
+    }
+
+    /// Title for compact individual sheets (full name) and legacy multi-name tests.
+    /// 1: full display name · 2: `A & B` · 3: `A, B & C` · 4+: `A, B + N`.
+    static func multiPersonTitle(for people: [FriendPuckData]) -> String {
+        guard !people.isEmpty else { return "Group" }
+        if people.count == 1 {
+            let person = people[0]
+            if person.isCurrentUser { return "You" }
+            let full = person.name.trimmingCharacters(in: .whitespacesAndNewlines)
+            return full.isEmpty ? "Friend" : full
+        }
+        let names = people.map(firstName).filter { !$0.isEmpty }
+        guard !names.isEmpty else { return "Group" }
+        switch names.count {
+        case 2:
+            return "\(names[0]) & \(names[1])"
+        case 3:
+            return "\(names[0]), \(names[1]) & \(names[2])"
+        default:
+            let remainder = names.count - 2
+            return "\(names[0]), \(names[1]) + \(remainder)"
+        }
+    }
+
+    /// Sheet summary title: group context for multi-person, full name for individual.
+    static func summaryTitle(for puck: MapPuckData) -> String {
+        if isMultiPerson(puck) {
+            return groupContextTitle(for: puck)
+        }
+        return multiPersonTitle(for: displayMembers(for: puck))
+    }
+
+    /// Shared activity + venue line for the multi-person subtitle.
+    ///
+    /// Prefer compact venue labels (`At Dolores`) over redundant long forms
+    /// like `Park at Dolores Park Lawn`, which overflow the Friends-row column.
+    static func multiPersonActivityLine(for puck: MapPuckData) -> String {
+        let members = displayMembers(for: puck)
+        let lead = members.first
+        let activity = trimmed(lead?.activity ?? puck.activity)
+        let placeFull = trimmed(lead?.placeName)
+        let venueStatus = trimmed(puck.venueStatusText)
+        let venueShort = compactVenueLabel(
+            venueStatusText: venueStatus,
+            placeName: placeFull
+        )
+
+        if activity.isEmpty {
+            return hangoutActivityLine(
+                activity: puck.activity,
+                venueStatusText: puck.venueStatusText
+            )
+        }
+
+        if activity.hasPrefix("At ") || activity.hasPrefix("Near ") {
+            return activity
+        }
+
+        // Activity already names the full place ("At Dolores Park Lawn").
+        if !placeFull.isEmpty, activity.localizedCaseInsensitiveContains(placeFull) {
+            return activity
+        }
+
+        // Generic activity that is already part of the place name ("Park" ⊂
+        // "Dolores Park Lawn") — use the compact venue, not "Park at … Lawn".
+        if !placeFull.isEmpty,
+           placeFull.range(of: activity, options: [.caseInsensitive, .diacriticInsensitive]) != nil {
+            if !venueShort.isEmpty {
+                return venueStatus.hasPrefix("At ") || venueStatus.hasPrefix("Near ")
+                    ? venueStatus
+                    : "At \(venueShort)"
+            }
+            return activity
+        }
+
+        if !venueShort.isEmpty {
+            return "\(activity) at \(venueShort)"
+        }
+
+        return activity
+    }
+
+    /// Address / location detail under activity. Nil when empty or duplicates venue.
+    static func multiPersonLocationDetail(for puck: MapPuckData) -> String? {
+        let members = displayMembers(for: puck)
+        let lead = members.first
+        let address = trimmed(lead?.locationLabel)
+        guard !address.isEmpty else { return nil }
+
+        let place = trimmed(lead?.placeName)
+        if !place.isEmpty, address.caseInsensitiveCompare(place) == .orderedSame {
+            return nil
+        }
+
+        let activityLine = multiPersonActivityLine(for: puck)
+        if activityLine.localizedCaseInsensitiveContains(address) {
+            return nil
+        }
+
+        // "Dolores Park, 19th St" under "At Dolores" is place-name noise, not a street pin.
+        // Keep real street labels like "517 Hayes St" or "19th St & Dolores St".
+        let addressPrimary = address
+            .split(separator: ",", maxSplits: 1)
+            .first
+            .map { trimmed(String($0)) } ?? address
+        if !place.isEmpty {
+            if place.localizedCaseInsensitiveContains(addressPrimary)
+                || addressPrimary.localizedCaseInsensitiveContains(place) {
+                return nil
+            }
+            let compactPlace = compactVenueLabel(venueStatusText: "", placeName: place)
+            if !compactPlace.isEmpty,
+               addressPrimary.caseInsensitiveCompare(compactPlace) == .orderedSame {
+                return nil
+            }
+        }
+        if activityLine.localizedCaseInsensitiveContains(addressPrimary) {
+            return nil
+        }
+
+        return address
+    }
+
+    /// Prefer puck venue short label (`At Dolores` → `Dolores`) over full place names.
+    static func compactVenueLabel(venueStatusText: String, placeName: String) -> String {
+        let venue = trimmed(venueStatusText)
+        for prefix in ["At the ", "At ", "Near ", "Group forming near "] {
+            if venue.hasPrefix(prefix) {
+                let rest = trimmed(String(venue.dropFirst(prefix.count)))
+                if !rest.isEmpty { return rest }
+            }
+        }
+        let place = trimmed(placeName)
+        guard !place.isEmpty else { return "" }
+        // Drop verbose suffixes so "Dolores Park Lawn" / "Dolores Park" → "Dolores".
+        for suffix in [" Park Lawn", " Park", " Fitness", " Lawn"] {
+            if place.hasSuffix(suffix) {
+                let base = trimmed(String(place.dropLast(suffix.count)))
+                if !base.isEmpty { return base }
+            }
+        }
+        return place
+    }
+
+    /// Freshness label for the trailing column.
+    static func multiPersonFreshness(for puck: MapPuckData) -> String {
+        let members = displayMembers(for: puck)
+        let label = members.first?.lastUpdated
+            ?? puck.people.first?.lastUpdated
+            ?? ""
+        let trimmedLabel = trimmed(label)
+        return trimmedLabel.isEmpty ? "Just now" : trimmedLabel
+    }
+
+    /// Join CTA only when the shared state is joinable and viewer is not already in the puck.
+    static func showsAskToJoin(for puck: MapPuckData) -> Bool {
+        puck.availability == .joinable && !puck.includesCurrentUser
+    }
+
+    // MARK: - Legacy helpers (tests / older call sites)
+
+    static func groupHeadline(for people: [FriendPuckData]) -> String {
+        multiPersonTitle(for: people)
     }
 
     static func hangoutHeadline(for people: [FriendPuckData]) -> String {
-        guard !people.isEmpty else { return "Group" }
-        let first = firstName(people[0])
-        if people.count == 3 {
-            return "\(first), \(firstName(people[1])) & \(firstName(people[2]))"
-        }
-        return "\(first) + \(people.count - 1) others"
+        multiPersonTitle(for: people)
     }
 
     static func pairTitle(for people: [FriendPuckData]) -> String {
-        guard people.count >= 2 else { return "Together" }
-        return "\(firstName(people[0])) and \(firstName(people[1]))"
+        multiPersonTitle(for: people)
     }
 
     static func pairMetadata(for people: [FriendPuckData]) -> String {
@@ -158,6 +441,11 @@ enum FriendDetailSheetContent {
     }
 
     static func firstName(_ person: FriendPuckData) -> String {
-        person.name.components(separatedBy: " ").first ?? person.name
+        if person.isCurrentUser { return "You" }
+        return person.name.components(separatedBy: " ").first ?? person.name
+    }
+
+    private static func trimmed(_ value: String?) -> String {
+        value?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
     }
 }

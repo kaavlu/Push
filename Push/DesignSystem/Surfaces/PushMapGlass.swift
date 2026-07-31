@@ -158,11 +158,30 @@ private extension PushMapControlTreatment {
     }
 }
 
-/// Shared cream-glass surface for map friend popup and calendar day sheet.
+/// Map popup sheet surface treatment (DS-011).
+enum MapPopupSheetSurface {
+    /// Legacy cream-glass over satellite (day-detail calendar sheet).
+    case mapGlass
+    /// Liquid/control glass family matching the bottom navbar (`pushControlGlass`).
+    /// Used by all map friend/group puck detail sheets.
+    case controlGlass
+}
+
+/// Shared map popup surface for friend detail and calendar day sheets.
 struct MapPopupSheetBackground<S: Shape>: View {
     let shape: S
+    var surface: MapPopupSheetSurface = .mapGlass
 
     var body: some View {
+        switch surface {
+        case .mapGlass:
+            mapGlassBody
+        case .controlGlass:
+            controlGlassBody
+        }
+    }
+
+    private var mapGlassBody: some View {
         ZStack {
             shape.fill(.ultraThinMaterial)
             shape.fill(PushMapGlassTokens.sheetCreamFill)
@@ -178,6 +197,53 @@ struct MapPopupSheetBackground<S: Shape>: View {
                 )
                 .padding(PushMapGlassTokens.sheetHighlightInset)
         }
+    }
+
+    /// Mirrors `pushControlGlass` tokens against an arbitrary sheet shape so the
+    /// multi-person popup matches bottom-nav liquid glass (including iOS 26).
+    @ViewBuilder
+    private var controlGlassBody: some View {
+        #if compiler(>=6.2)
+        if #available(iOS 26.0, *) {
+            shape
+                .fill(PushControlGlassTokens.warmTint.opacity(PushControlGlassTokens.tintOpacity))
+                .glassEffect(.regular, in: shape)
+                .overlay {
+                    shape.stroke(
+                        .white.opacity(PushControlGlassTokens.strokeOpacity),
+                        lineWidth: PushControlGlassTokens.strokeWidth
+                    )
+                }
+                .shadow(
+                    color: PushControlGlassTokens.shadowColor.opacity(
+                        PushControlGlassTokens.shadowOpacity
+                    ),
+                    radius: PushControlGlassTokens.shadowRadius,
+                    y: PushControlGlassTokens.shadowYOffset
+                )
+        } else {
+            controlGlassMaterialBody
+        }
+        #else
+        controlGlassMaterialBody
+        #endif
+    }
+
+    private var controlGlassMaterialBody: some View {
+        ZStack {
+            shape.fill(.ultraThinMaterial)
+            shape.fill(.regularMaterial.opacity(PushControlGlassTokens.materialPresenceOpacity))
+            shape.fill(PushControlGlassTokens.warmTint.opacity(PushControlGlassTokens.tintOpacity))
+            shape.stroke(
+                .white.opacity(PushControlGlassTokens.strokeOpacity),
+                lineWidth: PushControlGlassTokens.strokeWidth
+            )
+        }
+        .shadow(
+            color: PushControlGlassTokens.shadowColor.opacity(PushControlGlassTokens.shadowOpacity),
+            radius: PushControlGlassTokens.shadowRadius,
+            y: PushControlGlassTokens.shadowYOffset
+        )
     }
 
     private var sunbeamAccent: RadialGradient {
@@ -207,7 +273,7 @@ struct MapPopupSheetBackground<S: Shape>: View {
 }
 
 extension MapPopupSheetBackground where S == Rectangle {
-    init() {
-        self.init(shape: Rectangle())
+    init(surface: MapPopupSheetSurface = .mapGlass) {
+        self.init(shape: Rectangle(), surface: surface)
     }
 }

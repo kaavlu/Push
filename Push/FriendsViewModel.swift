@@ -224,6 +224,11 @@ final class FriendsViewModel: ObservableObject {
         expandedFriendID = (expandedFriendID == row.id) ? nil : row.id
     }
 
+    /// Expand a friend row by person id (map Who’s here → Friends rail).
+    func expandFriend(id: String) {
+        expandedFriendID = id
+    }
+
     func collapse() {
         expandedFriendID = nil
     }
